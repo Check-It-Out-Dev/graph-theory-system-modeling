@@ -3,6 +3,15 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Neo4j Community](https://img.shields.io/badge/Neo4j-Community%20Edition-008CC1?logo=neo4j)](https://neo4j.com/download-center/#community)
 [![Papers](https://img.shields.io/badge/Research-8%20Papers%20%2B%20Appendix-green)](./GraphTheoryInSystemModeling)
+[![Free Research](https://img.shields.io/badge/Cost-FREE%20Educational%20Content-brightgreen)](./LICENSE)
+
+## 📢 Important Notice: Free Educational Content
+
+**This research and implementation methodology is provided completely FREE as educational content.** The author, Norbert Marchewka, shares this work as a contribution to the developer community under the MIT License.
+
+**Consulting Services**: Please note that the author cannot provide paid consulting services for this methodology due to employment obligations with an IT services company. However, all knowledge needed for implementation is freely available in this repository, including complete theoretical foundations, working implementation code, step-by-step guides, and real-world examples.
+
+**Questions & Support**: For questions, please use public forums (GitHub Issues, Stack Overflow, social media) where answers can benefit the entire community.
 
 ## Overview
 
@@ -255,12 +264,33 @@ This project's research, documentation, and implementation code are licensed und
 
 Note: Neo4j Community Edition itself is licensed under GPLv3. Our usage as an internal tool complies with GPLv3 terms.
 
-## Contact
+## Contact & Support
 
 **Author**: Norbert Marchewka  
-**Email**: [your-email]  
-**LinkedIn**: [your-linkedin]  
+**Email**: norbert_marchewka@checkitout.app  
+**LinkedIn**: https://www.linkedin.com/in/norbert-marchewka-292377129/  
+
+### Getting Help
+
+- **GitHub Issues**: Best place for technical questions (public benefit)
+- **Social Media**: Tag me for discussions and success stories  
+- **Educational Requests**: Happy to create additional public content
+- **Commercial Support**: Not available from the author (employment restrictions)
+  - Community resources and independent consultants can provide paid support
+  - Everything needed for implementation is freely available in this repository
+
+### Contributing to the Community
+
+This is a community project! Contributions are welcome:
+- Bug fixes and improvements
+- Additional language support  
+- Success stories and case studies
+- Educational content and tutorials
+
+All contributions remain under MIT license for community benefit.
 
 ---
 
 *Transforming code into living, queryable knowledge graphs through mathematical discovery.*
+
+**🎁 This educational content is and will always remain FREE. Knowledge should be accessible to all.**

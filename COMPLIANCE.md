@@ -1,5 +1,19 @@
 # Legal Compliance and Tool Usage
 
+## 🎁 Free Educational Content Notice
+
+**This entire project is provided as FREE educational content under the MIT License.** The author, Norbert Marchewka, shares this research and methodology as a public contribution to the developer community.
+
+**Important Limitations**:
+- ✅ **FREE FOREVER**: All research, code, and documentation will always remain free
+- ✅ **PUBLIC QUESTIONS**: Happy to answer questions in public forums (GitHub, Stack Overflow, etc.)
+- ✅ **EDUCATIONAL CONTENT**: Can create additional tutorials, videos, blog posts
+- ❌ **NO CONSULTING**: Cannot provide paid consulting services (employment restrictions)
+- ❌ **NO PRIVATE SUPPORT**: Cannot provide private implementation assistance
+- ❌ **NO COMMERCIAL CONTRACTS**: Cannot enter into support agreements
+
+The author's employment with an IT services company prohibits providing consulting services on this topic. However, everything needed for successful implementation is included in this repository.
+
 ## Executive Summary
 
 This project is **100% legally compliant** for internal team use. We use open-source tools within their license terms and clearly separate our methodology (MIT licensed) from the tools themselves.
@@ -117,6 +131,30 @@ If you have specific legal concerns about implementing this methodology in your 
 2. Review Neo4j's official licensing FAQ: https://neo4j.com/licensing/
 3. For embedding models, check each model's specific license
 4. This document provides information, not legal advice
+
+## Community Support Options
+
+While the author cannot provide consulting, you have several options:
+
+### Self-Implementation (Recommended)
+Everything you need is in this repository:
+- 9 comprehensive research papers
+- Complete implementation code
+- Real-world examples from CheckItOut
+- Step-by-step setup guides
+- Common pitfalls and solutions
+
+### Community Help
+- **GitHub Issues**: Ask questions publicly, get community answers
+- **Stack Overflow**: Tag with `neo4j`, `graph-theory`, `living-documentation`
+- **Social Media**: Share experiences, find others implementing this
+- **User Groups**: Neo4j community, local developer meetups
+
+### Professional Services (Third-Party)
+- Independent consultants familiar with graph databases
+- Companies specializing in Neo4j implementations
+- IT services firms (not the author's employer)
+- Freelance developers with graph theory experience
 
 ## Summary
 
