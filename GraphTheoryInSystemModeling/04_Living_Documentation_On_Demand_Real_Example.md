@@ -12,7 +12,7 @@ With 2 backend developers managing 426 Java files, we discovered that traditiona
 
 ### 1.1 Our Situation
 
-CheckItOut connects Instagram influencers with businesses for partnerships. The backend spans authentication, opportunity management, active cooperations, social integration, and payment processing across 426 Java files.
+CheckItOut connects Instagram influencers with businesses for partnerships. The backend spans authentication, opportunity management, active cooperations, social integration, and payment processing across 426 Java files, indexed through 30 context windows with Claude Sonnet 4 and organized with 3-4 context windows using Claude Opus 4.1.
 
 We have 2 backend developers. 
 
@@ -35,7 +35,7 @@ We were spending 8 hours weekly maintaining docs that nobody trusted. That's 20%
 Instead of writing about our code, we made our code queryable. The Neo4j graph contains:
 - 24,030 nodes (every class, method, interface, enum)
 - 87,453 relationships (extends, implements, calls, depends_on)
-- 5 major subsystems discovered through community detection
+- 7 major business/technical modules discovered through community detection (security, partnership, configuration, rate limiting, company, integration, infrastructure)
 - Complete dependency chains traceable in milliseconds
 
 ### 2.2 Living Architecture Discovery
@@ -51,7 +51,7 @@ The response comes in 47ms—not from stale documentation but from analyzing act
 - Partnership opportunity management at its core
 - Triple authentication (JWT + Firebase + Instagram)
 - Redis caching with InMemory fallback pattern
-- BusinessLogic subsystem with PageRank centrality 0.3
+- Company module with PageRank centrality 0.3
 
 No human could maintain this level of accuracy. The code maintains it automatically.
 
@@ -200,7 +200,7 @@ Result: CompanyService already orchestrates user management, perfect for seat li
 ### 7.1 The Investment
 
 - Neo4j Community Edition: Free
-- Initial graph setup: 2 days
+- Initial graph setup: 2 days (with 10-20 files/minute for reading, 5-10 files/minute for semantic processing of 426 files, requiring ~30 context windows with Claude Sonnet 4 + 3-4 with Claude Opus 4.1)
 - Learning Cypher basics: 4 hours per developer
 - Maintaining graph accuracy: ~5 minutes per feature
 
@@ -209,6 +209,10 @@ Total setup cost: Less than one sprint's documentation effort.
 ### 7.2 The Return
 
 - Documentation time saved: 8 hours/week
+- Initial file reading: ~30-45 minutes for 426 files (at 10-20 files/minute)
+- Semantic processing: Additional 45-90 minutes (at 5-10 files/minute)
+- AI context windows: 30 for batch indexing (Sonnet 4) + 3-4 for organization (Opus 4.1)
+- Total actual effort: ~35 AI invocations across 2 days
 - Senior developer interruption reduction: ~80%
 - New developer onboarding: 2-3 days vs 2-3 weeks  
 - AI-assisted development accuracy: 3x improvement

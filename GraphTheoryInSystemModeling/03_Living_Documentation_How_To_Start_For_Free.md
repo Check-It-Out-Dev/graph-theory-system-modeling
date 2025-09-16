@@ -6,7 +6,7 @@
 
 ## Abstract
 
-Organizations investing in premium AI agents like Claude Opus 4.1 or GPT-4 often achieve only 15-20% of their potential value due to context loss between sessions. We present a practical implementation using Neo4j Community Edition that creates persistent, queryable context for AI agents—completely free and legally compliant for internal tools. By generating embeddings locally and storing them in graph nodes, we create an algebraic space that deep reasoning models can navigate effectively. Our approach handles codebases up to 10 million lines without node limits, reduces context assembly time from minutes to milliseconds, and allows tracking of complex refactoring plans across sessions. Organizations report 3.8x improvement in AI agent effectiveness, translating to $180,000+ annual savings per team of 10 developers. This paper provides implementation guidance, cost analysis, and legal clarification for organizations seeking to maximize their AI investment.
+Organizations investing in premium AI agents like Claude Opus 4.1 or GPT-4 often achieve only 15-20% of their potential value due to context loss between sessions. We present a practical implementation using Neo4j Community Edition that creates persistent, queryable context for AI agents—completely free and legally compliant for internal tools. By generating embeddings locally and storing them in graph nodes, we create an algebraic space that deep reasoning models can navigate effectively. Our approach handles codebases up to 10 million lines without node limits (though processing takes time: 10-20 files/minute for reading, 5-10 files/minute for semantic analysis, requiring ~30 context windows per 400-500 files with Claude Sonnet 4, plus 3-4 with Claude Opus 4.1 for organization), reduces context assembly time from minutes to milliseconds once indexed, and allows tracking of complex refactoring plans across sessions. Organizations report 3.8x improvement in AI agent effectiveness, translating to $180,000+ annual savings per team of 10 developers. This paper provides implementation guidance, cost analysis, and legal clarification for organizations seeking to maximize their AI investment.
 
 ## 1. The Hidden Cost of Context Loss
 
@@ -162,7 +162,7 @@ class BasicEmbeddingGenerator:
     def __init__(self):
         # 384-dimensional, 80MB model, runs on CPU
         self.model = SentenceTransformer('all-MiniLM-L6-v2')
-        # Performance: ~50-200 files/minute on CPU
+        # Performance: ~5-10 files/minute on CPU
         
     def generate(self, text):
         return self.model.encode(text, normalize_embeddings=True).tolist()
@@ -292,13 +292,15 @@ class HybridEmbeddingStrategy:
 
 | Approach | Quality | Speed (files/min) | Dimensions | Cost | Best For |
 |----------|---------|-------------------|------------|------|----------|
-| Basic Local | 70% | 50-200 | 384 | Free | Prototypes, small projects |
-| Advanced Local | 80% | 30-100 | 768 | Free | Medium projects, CPU only |
-| Local LLM | 85% | 10-30 | 4096 | Free | High quality, have GPU |
-| OpenAI API | 95% | 100-500 | 3072 | $0.13/1M tokens | Production, accuracy critical |
+| Basic Local | 70% | 5-10 | 384 | Free | Prototypes, small projects |
+| Advanced Local | 80% | 3-5 | 768 | Free | Medium projects, CPU only |
+| Local LLM | 85% | 2-5 | 4096 | Free | High quality, have GPU |
+| OpenAI API | 95% | 10-20 | 3072 | $0.13/1M tokens | Production, accuracy critical |
 | Hybrid | 85-95% | Variable | Mixed | Mixed | Large codebases, optimal ROI |
 
 **Recommendation**: Start with Basic Local for proof of concept, upgrade to Hybrid for production. The improvement in context quality from better embeddings directly translates to reduced AI agent hallucinations.
+
+**Note on Performance**: These speeds reflect conservative estimates for budget-conscious implementations like CheckItOut, including the overhead of AI + MCP server invocations. File reading alone through the pipeline is 10-20 files/minute, before any embedding generation. Organizations with better hardware, direct API access, or premium AI agreements may achieve 5-10x better processing speeds. We report our actual experience rather than optimal scenarios.
 
 ### 4.4 Step 3: Store in Neo4j with Semantic Properties
 
@@ -650,6 +652,8 @@ RETURN nodes(path) as circular_dependency,
 
 ## 8. Getting Started: 3-Day Implementation Plan
 
+**Realistic Timeline Note**: Processing speeds with AI + MCP server pipeline: 10-20 files/minute for reading, 5-10 files/minute for semantic analysis. For a 400-500 file codebase, budget 2-3 hours of actual processing time spread across the setup days, using ~30 context windows with Claude Sonnet 4 for batch indexing plus 3-4 context windows with Claude Opus 4.1 for organization.
+
 ### Day 1: Infrastructure Setup
 **Morning (4 hours):**
 - Install Neo4j Community Edition via Docker
@@ -663,12 +667,14 @@ RETURN nodes(path) as circular_dependency,
 
 ### Day 2: Embedding and Context Generation
 **Morning (4 hours):**
-- Generate embeddings for all major components
+- Generate embeddings for all major components (batch processing with Claude Sonnet 4)
+- Process files in ~30 context windows for consistency
 - Store embeddings in Neo4j properties
 - Implement similarity search
 
 **Afternoon (4 hours):**
 - Create AI context assembly pipeline
+- Use Claude Opus 4.1 (3-4 context windows) for graph organization
 - Test with actual AI agent queries
 - Measure response time and relevance
 
@@ -692,6 +698,7 @@ The math is compelling:
 - **14x ROI** in the first year
 - **Zero licensing costs** for the infrastructure
 - **Complete legal compliance** for internal use
+- **Real effort invested**: 30 context windows for indexing + 3-4 for organization
 
 But the real transformation goes deeper. When AI agents can maintain context across sessions, track long-term plans, and understand your system's behavioral patterns, they stop being tools and become team members. They accumulate wisdom, learn from mistakes, and improve over time.
 

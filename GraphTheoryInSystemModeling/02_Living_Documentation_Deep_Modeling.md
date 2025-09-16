@@ -6,7 +6,7 @@
 
 ## Abstract
 
-We present a behavioral modeling approach that transforms code repositories into queryable knowledge graphs optimized for AI agent consumption. Building on the repository indexing framework introduced in our first paper, we demonstrate how deep subsystem modeling in separate namespaces reveals a consistent 6-entity pattern with 20+ behavioral relationships. Through application of the Friendship Theorem, we introduce the NavigationMaster architecture—a three-level hierarchical structure that provides O(1) access for AI agents to any system component. Our implementation on production systems shows a 73% reduction in AI hallucination rates, 4.2x improvement in context retrieval speed, and 89% accuracy in architectural understanding queries. This paper focuses on the mathematical foundations and practical implementation of behavioral modeling that makes documentation truly "living"—evolving automatically with the code while maintaining semantic richness for both human developers and AI agents.
+We present a behavioral modeling approach that transforms code repositories into queryable knowledge graphs optimized for AI agent consumption. Building on the repository indexing framework introduced in our first paper—where HoTT and vector embeddings identified 20 initial candidates merged into 7 architectural modules—we now demonstrate how the 6-entity pattern with 20+ behavioral relationships provides a universal framework for understanding file relationships within any subsystem. This distinction is crucial: the 7 subsystems are actual business/technical modules (security, partnership, configuration, rate limiting, etc.), while the 6-entity pattern (Controller, Configuration, Security, Implementation, Diagnostics, Lifecycle) is a lens through which we understand how files relate to each other within each module. Through application of the Friendship Theorem, we introduce the NavigationMaster architecture—a three-level hierarchical structure that provides O(1) access for AI agents to any system component. Our implementation on production systems shows a 73% reduction in AI hallucination rates, 4.2x improvement in context retrieval speed, and 89% accuracy in architectural understanding queries. The behavioral modeling process required 30 AI context windows using Claude Sonnet 4 for initial file indexing, followed by 3-4 context windows using Claude Opus 4.1 for subsystem discovery and graph organization.
 
 ## 1. Introduction: The AI Agent Knowledge Crisis
 
@@ -27,33 +27,43 @@ Our first paper addressed rapid file discovery and basic semantic indexing. But 
 
 This paper presents a mathematical framework for capturing these behavioral patterns in a graph structure that AI agents can efficiently query and reason about.
 
-## 2. The 6-Entity Pattern: A Universal Software Topology
+## 2. The 6-Entity Pattern: A Framework for Understanding File Relationships
 
 ### 2.1 Discovery Through Graph Analysis
 
-After analyzing 47 enterprise systems across different industries, we consistently discovered that subsystem architectures converge on six fundamental entity types. This isn't imposed design—it's emergent structure revealed through community detection algorithms and centrality analysis.
+After consolidating 20 HoTT-generated candidates into 7 actual business modules (security module, partnership module, configuration module, rate limiting module, etc.), we needed a way to understand the complex relationships between files within each module. Through deep graph analysis, we discovered that file relationships within any subsystem consistently organize around six functional roles. This 6-entity pattern is not about dividing the subsystem into parts, but about understanding the behavioral roles that files play and how they relate to each other.
 
-**The Six Universal Entities:**
+**The Six Behavioral Roles (Not Subsystems):**
 
-1. **Controller (C)**: Orchestration and external interface management
-2. **Configuration (F)**: Settings, parameters, and environmental adaptation  
-3. **Security (S)**: Authentication, authorization, and access boundaries
-4. **Implementation (I)**: Core business logic and algorithms
-5. **Diagnostics (D)**: Monitoring, logging, and observability
-6. **Lifecycle (L)**: State management and temporal coordination
+1. **Controller (C)**: Files that orchestrate and manage external interfaces
+2. **Configuration (F)**: Files handling settings, parameters, and environmental adaptation  
+3. **Security (S)**: Files managing authentication, authorization, and access boundaries
+4. **Implementation (I)**: Files containing core business logic and algorithms
+5. **Diagnostics (D)**: Files for monitoring, logging, and observability
+6. **Lifecycle (L)**: Files managing state and temporal coordination
 
-### 2.2 Mathematical Foundation
+For example, within the Partnership Module, we have files playing Controller roles (API endpoints), Configuration roles (partnership settings), Security roles (partner authentication), etc. These aren't separate subsystems—they're behavioral categories that help us understand how files within the Partnership Module relate to each other.
 
-The prevalence of six entities isn't arbitrary—it's rooted in Ramsey theory. The Ramsey number R(3,3) = 6 tells us that in any group of 6 vertices, we're guaranteed to find either a triangle (complete subgraph) or an independent set. This ensures that our 6-entity pattern always contains meaningful clusters of functionality.
+### 2.2 Mathematical Foundation: Why 6 Behavioral Roles
+
+The architecture exhibits two distinct organizational levels:
+
+**Repository Level (7 Business Modules):**
+Driven by business domain boundaries and technical concerns. The number 7 emerges from the specific problem domain—security module, partnership module, configuration module, rate limiting module, company module, integration module, infrastructure module. This number varies by system based on business needs.
+
+**Behavioral Pattern Level (6 Functional Roles):**
+Driven by Ramsey theory and universal software patterns. The Ramsey number R(3,3) = 6 tells us that in any group of 6 vertices, we're guaranteed to find either a triangle (complete subgraph) or an independent set. When we analyze file relationships within any module, they consistently cluster into these 6 behavioral roles. This is a universal pattern for understanding how files relate, not how to divide modules.
 
 **Theorem 2.1 (Behavioral Completeness):**  
 *Any software subsystem with ≥6 distinct behavioral concerns will naturally cluster into exactly 6 categories when optimizing for minimum edge cuts while maintaining functional cohesion.*
 
 **Proof Sketch:**
-- Start with n behavioral concerns as vertices
+- Start with n behavioral concerns as vertices within a subsystem
 - Apply spectral clustering to minimize conductance
 - The eigengap analysis consistently shows maximum separation at k=6
 - Further subdivision increases intra-cluster edges without proportional benefit ∎
+
+This explains why CheckItOut has 7 business-driven subsystems, each internally organized with 6 functionally-driven entities.
 
 ### 2.3 The 20+ Relationship Requirement
 
@@ -387,7 +397,7 @@ High productivity enables developers to deliver high-quality features swiftly, t
 - 10,000+ nodes, 50,000+ edges: <50ms query time
 - NavigationMaster lookup: O(1), ~2ms
 - 3-hop traversal: O(k³), ~35ms average
-- Full reindexing: 8 minutes for 100K LOC
+- Full reindexing: 2-3 hours for 100K LOC (10-20 files/minute reading + 5-10 files/minute semantic)
 
 ### 6.3 Comparison with Traditional Approaches
 
@@ -413,12 +423,16 @@ A major e-commerce platform with 2.3M LOC needed to:
 ### 7.2 Implementation
 
 **Phase 1: Behavioral Discovery (Week 1)**
-- Analyzed 3,847 Java classes
-- Discovered 7 major subsystems
-- Each subsystem showed clear 6-entity pattern
-- Identified 2,341 behavioral relationships
+- Analyzed 3,847 Java classes across 30 context windows (Claude Sonnet 4 for batch processing)
+- Used HoTT/embeddings to identify 20 initial module candidates
+- Manually consolidated into 7 business/technical modules (security, partnership, configuration, rate limiting, etc.)
+- Applied 6-entity pattern framework to understand file relationships within each module
+- Identified 2,341 behavioral relationships showing how files interact based on their roles
 
 **Phase 2: NavigationMaster Construction (Week 2)**
+- 3-4 context windows with Claude Opus 4.1 for high-level organization
+- Created hierarchical navigation structure
+- Established cross-subsystem relationships
 ```cypher
 // Create master hub for each subsystem
 FOREACH (subsystem IN ['Checkout', 'Inventory', 'Payment', 
@@ -558,8 +572,8 @@ class AIContextAssembler:
 ### 9.1 Current Limitations
 
 **Technical Constraints:**
-- Initial setup requires 3-4 days of computation
-- Large codebases (>5M LOC) need distributed processing
+- Initial setup requires 3-4 days of computation (10-20 files/minute reading, 5-10 files/minute semantic analysis)
+- Large codebases (>5M LOC) need distributed processing or better resources
 - Dynamic languages harder to analyze statically
 - Behavioral patterns less clear in functional programming paradigms
 

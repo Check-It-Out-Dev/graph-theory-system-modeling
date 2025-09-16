@@ -6,7 +6,7 @@
 
 ## Abstract
 
-We document a practical breakthrough in software architecture: an AI system, given 24,030 graph nodes representing 426 Java files, designed a complete multi-tenant seat licensing system in a single context window. The AI executed 10 sequential reasoning steps, discovered existing architectural patterns (Redis caching with InMemory fallback), identified CompanyService as the central orchestrator through graph analysis, and generated 12 implementation files maintaining perfect pattern consistency. What traditionally requires 45-60 days of architecture and design, the AI completed in one session, enabling implementation in 15 days. This is not code generation—this is architectural reasoning with comprehensive system understanding.
+We document a practical breakthrough in software architecture: an AI system, given 24,030 graph nodes representing 426 Java files organized into 7 business modules (processed over ~2 hours: 30-45 minutes reading, 45-90 minutes semantic analysis across 30 context windows with Claude Sonnet 4, then organized in 3-4 context windows with Claude Opus 4.1), designed a complete multi-tenant seat licensing system in a single context window. The AI executed 10 sequential reasoning steps, discovered existing architectural patterns (Redis caching with InMemory fallback), identified CompanyService as the central orchestrator through graph analysis, and generated 12 implementation files maintaining perfect pattern consistency. What traditionally requires 45-60 days of architecture and design, the AI completed in one session, enabling implementation in 15 days. This is not code generation—this is architectural reasoning with comprehensive system understanding.
 
 ## 1. Introduction: The Seat Licensing Challenge
 
@@ -23,7 +23,9 @@ Traditional architectural process involves:
 
 ### 1.2 The Graph Context Approach
 
-Instead of traditional design sessions, we provided the AI with the complete system graph—24,030 nodes representing every class, method, and relationship. The instruction was simple: "Design a seat licensing model for companies."
+Instead of traditional design sessions, we provided the AI with the complete system graph—24,030 nodes representing every class, method, and relationship. This graph was built through significant effort: 30 AI context windows for initial indexing using Claude Sonnet 4 (cost-effective for batch processing), followed by 3-4 context windows using Claude Opus 4.1 for subsystem discovery and organization.
+
+The instruction was simple: "Design a seat licensing model for companies."
 
 What followed was architectural reasoning, not template application.
 
@@ -39,7 +41,7 @@ MATCH (nav)-[:CONTAINS]->(subsystem)
 RETURN subsystem.name, subsystem.betweenness_centrality
 ```
 
-**AI's Discovery:** CompanyService has betweenness centrality of 1.0—it's the natural orchestration point for seat management.
+**AI's Discovery:** CompanyService within the Company Module has betweenness centrality of 1.0—it's the natural orchestration point for seat management across the 7 modules.
 
 ### 2.2 Pattern Discovery
 
@@ -161,7 +163,7 @@ The AI provided a complete 15-day implementation plan:
 - API documentation
 - Deployment preparation
 
-This represents approximately 3-4x faster delivery than traditional approaches.
+This represents approximately 3-4x faster delivery than traditional approaches, even with our conservative processing rates (10-20 files/minute for reading through AI + MCP, 5-10 files/minute for semantic analysis). Organizations with better resources could potentially deliver even faster.
 
 ## 5. Key Observations
 
