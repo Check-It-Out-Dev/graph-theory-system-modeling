@@ -237,7 +237,7 @@ If you use this methodology in your research, please cite:
 
 - Neo4j team for the excellent Community Edition
 - Anthropic for Claude AI assistance during research
-- The CheckItOut team for being the test platform
+- The CheckItOut team for being the best team
 
 ## Disclaimer
 
