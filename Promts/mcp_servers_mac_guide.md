@@ -72,15 +72,16 @@ nano ~/.claude.json
       "type": "stdio"
     },
     "neo4j-cypher": {
-      "command": "npx",
-      "args": ["-y", "mcp-neo4j-cypher"],
-      "type": "stdio",
+      "command": "mcp-neo4j-cypher",
+      "args": ["--transport", "stdio"],
       "env": {
         "NEO4J_URI": "bolt://localhost:7687",
         "NEO4J_USERNAME": "neo4j",
-        "NEO4J_PASSWORD": "your-neo4j-password"
+        "NEO4J_PASSWORD": "your-password",
+        "NEO4J_DATABASE": "neo4j"
       }
-    },
+    }
+  },
     "filesystem": {
       "command": "npx",
       "args": [
