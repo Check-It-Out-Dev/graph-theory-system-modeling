@@ -26,7 +26,7 @@ brew install node
 claude mcp add sequential-thinking --scope user -- npx -y @modelcontextprotocol/server-sequential-thinking
 
 # Install Neo4j server
-claude mcp add neo4j-cypher --scope user -- npx -y mcp-neo4j-cypher
+claude mcp add neo4j-cypher --scope user -- mcp-neo4j-cypher
 
 # Install Filesystem server
 claude mcp add filesystem --scope user -- npx -y @modelcontextprotocol/server-filesystem ~/Documents ~/Projects
