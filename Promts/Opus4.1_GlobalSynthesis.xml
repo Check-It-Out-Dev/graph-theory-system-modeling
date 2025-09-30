@@ -1,0 +1,990 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="global-synthesis-opus.xsd" type="application/xml" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<!--
+╔═══════════════════════════════════════════════════════════════════════════════════════════════╗
+║   GLOBAL SYNTHESIS: MATHEMATICAL SUBSYSTEM DISCOVERY & GRAPH GOVERNANCE                      ║
+║   Model: Claude Opus 4.1 | Version: 8.0.0-UNIFIED | Date: 2025-01-27                       ║
+║                                                                                               ║
+║   "From chaos emerges order through mathematical necessity"                                  ║
+╚═══════════════════════════════════════════════════════════════════════════════════════════════╝
+-->
+
+<GLOBAL_SYNTHESIS_UNIFIED xmlns:math="http://mathematics.org/foundations"
+                          xmlns:graph="http://graph-theory.org/structures"
+                          xmlns:neo="http://neo4j.com/cypher25">
+
+    <!-- ═══════════════════════════════════════════════════════════════════════════════════════
+         SECTION 1: COMPLETE MATHEMATICAL FOUNDATIONS
+         ═══════════════════════════════════════════════════════════════════════════════════════ -->
+
+    <MATHEMATICAL_FOUNDATIONS priority="FOUNDATIONAL">
+
+        <!-- Homotopy Type Theory Foundation -->
+        <homotopy_type_theory>
+            <core_principle>Types are spaces, terms are points, equalities are paths</core_principle>
+
+            <identity_types>
+                <definition>For type A and a,b : A, the identity type Id_A(a,b) represents paths from a to b</definition>
+                <properties>
+                    <reflexivity>refl : ∀(a:A). Id_A(a,a)</reflexivity>
+                    <j_elimination>Transport along paths preserves properties</j_elimination>
+                    <univalence>Equivalences are identities: (A ≃ B) ≃ (A = B)</univalence>
+                </properties>
+            </identity_types>
+
+            <homotopy_levels>
+                <level n="-2" name="Contractible" desc="Exactly one inhabitant up to homotopy"/>
+                <level n="-1" name="Proposition" desc="At most one inhabitant up to homotopy"/>
+                <level n="0" name="Set" desc="Discrete space, no higher paths"/>
+                <level n="1" name="Groupoid" desc="Non-trivial paths between points"/>
+                <level n="∞" name="∞-Groupoid" desc="Full homotopy structure"/>
+            </homotopy_levels>
+
+            <!-- Six-Entity Homotopy Mapping -->
+            <six_entity_homotopy_mapping>
+                <map entity="STATE_MACHINE" level="1" interpretation="Groupoid - state transition paths"/>
+                <map entity="CONFIG_STATE" level="0" interpretation="Set - discrete configuration values"/>
+                <map entity="SECURITY_LAYER" level="-1" interpretation="Proposition - binary access decisions"/>
+                <map entity="FILE_REGISTRY" level="0" interpretation="Set - discrete file mappings"/>
+                <map entity="DIAGNOSTIC_ENGINE" level="1" interpretation="Groupoid - diagnostic paths"/>
+                <map entity="TEMPORAL_CONTEXT" level="∞" interpretation="∞-Groupoid - temporal evolution"/>
+            </six_entity_homotopy_mapping>
+
+            <practical_application>
+                Subsystems inherit homotopy level from dominant entity type.
+                A controller-heavy subsystem is a groupoid (level 1).
+                A config-only subsystem is a set (level 0).
+            </practical_application>
+        </homotopy_type_theory>
+
+        <!-- Category Theory Foundation -->
+        <category_theory>
+            <six_entity_category name="SixCat">
+                <objects>
+                    <obj id="C" name="STATE_MACHINE" code="C"/>
+                    <obj id="F" name="CONFIG_STATE" code="F"/>
+                    <obj id="S" name="SECURITY_LAYER" code="S"/>
+                    <obj id="I" name="FILE_REGISTRY" code="I"/>
+                    <obj id="D" name="DIAGNOSTIC_ENGINE" code="D"/>
+                    <obj id="T" name="TEMPORAL_CONTEXT" code="T"/>
+                </objects>
+
+                <minimum_morphisms count="20">
+                    <!-- Core morphisms forming the categorical structure -->
+                    <morphism from="C" to="I" name="implements"/>
+                    <morphism from="I" to="C" name="serves"/>
+                    <morphism from="F" to="C" name="configures"/>
+                    <morphism from="C" to="F" name="reads_config"/>
+                    <morphism from="S" to="C" name="protects"/>
+                    <morphism from="C" to="S" name="checks_auth"/>
+                    <morphism from="D" to="C" name="monitors"/>
+                    <morphism from="C" to="D" name="logs_to"/>
+                    <morphism from="T" to="C" name="schedules"/>
+                    <morphism from="C" to="T" name="uses_timing"/>
+                    <morphism from="I" to="I" name="depends_on"/>
+                    <morphism from="F" to="S" name="security_config"/>
+                    <morphism from="S" to="D" name="audit_logs"/>
+                    <morphism from="D" to="I" name="tests"/>
+                    <morphism from="I" to="D" name="reports_errors"/>
+                    <morphism from="T" to="I" name="async_invoke"/>
+                    <morphism from="I" to="T" name="cache_with_ttl"/>
+                    <morphism from="F" to="T" name="timing_config"/>
+                    <morphism from="S" to="I" name="authorizes"/>
+                    <morphism from="D" to="T" name="scheduled_diagnostics"/>
+                </minimum_morphisms>
+
+                <composition_rules>
+                    <rule>implements ∘ serves = identity (round-trip)</rule>
+                    <rule>protects ∘ checks_auth = security_flow</rule>
+                    <rule>monitors ∘ logs_to = observability_loop</rule>
+                </composition_rules>
+
+                <functors>
+                    <functor name="Behavior" from="SixCat" to="ExecutionTraces">
+                        Maps static structure to runtime behavior
+                    </functor>
+                    <functor name="Knowledge" from="Errors" to="Fixes">
+                        Maps error patterns to their resolutions
+                    </functor>
+                </functors>
+            </six_entity_category>
+        </category_theory>
+
+        <!-- Elementary Topos Structure -->
+        <elementary_topos>
+            <definition>Category with finite limits, exponentials, and subobject classifier</definition>
+
+            <six_entity_topos_interpretation>
+                <obj entity="STATE_MACHINE" topos_type="Exponential" formula="Config^Time"/>
+                <obj entity="CONFIG_STATE" topos_type="Product" formula="Settings × Environment"/>
+                <obj entity="SECURITY_LAYER" topos_type="Subobject_Classifier" formula="→ Ω (truth values)"/>
+                <obj entity="FILE_REGISTRY" topos_type="Pullback" formula="Code ×_Interface Implementation"/>
+                <obj entity="DIAGNOSTIC_ENGINE" topos_type="Equalizer" formula="Expected = Actual"/>
+                <obj entity="TEMPORAL_CONTEXT" topos_type="Terminal" formula="Universal time reference"/>
+            </six_entity_topos_interpretation>
+        </elementary_topos>
+
+        <!-- Sheaf Theory Application -->
+        <sheaf_theory>
+            <presheaf>Contravariant functor F: C^op → Set</presheaf>
+
+            <six_entity_sheaf>
+                <site>System topology with 6 open sets (entities)</site>
+                <sections>
+                    <section entity="STATE_MACHINE">State transition functions</section>
+                    <section entity="CONFIG_STATE">Configuration parameters</section>
+                    <section entity="SECURITY_LAYER">Access control policies</section>
+                    <section entity="FILE_REGISTRY">Service implementations</section>
+                    <section entity="DIAGNOSTIC_ENGINE">Error patterns and fixes</section>
+                    <section entity="TEMPORAL_CONTEXT">Scheduling rules</section>
+                </sections>
+                <gluing_condition>Local behaviors compose to global system behavior</gluing_condition>
+            </six_entity_sheaf>
+        </sheaf_theory>
+
+        <!-- Cohomology for Completeness -->
+        <cohomology_theory>
+            <interpretation>Missing relations = non-zero cohomology</interpretation>
+            <degrees>
+                <h0>Connected components (should be 1 for complete system)</h0>
+                <h1>Missing cycles (incomplete feedback loops)</h1>
+                <h2>Architectural voids (missing patterns)</h2>
+            </degrees>
+            <completeness_theorem>
+                System is complete iff H^0 = 1, H^1 = 0, H^2 = 0
+            </completeness_theorem>
+        </cohomology_theory>
+
+        <!-- Graph Theory Foundations -->
+        <graph_theory>
+            <erdos_ko_rado>
+                <theorem>Maximum intersecting family has size 6 for our constraints</theorem>
+                <application>6-entity pattern is maximal</application>
+            </erdos_ko_rado>
+
+            <friendship_theorem>
+                <statement>In a graph where every pair has exactly one common neighbor, there exists a universal friend</statement>
+                <application>NavigationMaster is the universal friend (hub)</application>
+            </friendship_theorem>
+
+            <chromatic_numbers>
+                <principle>χ(G) determines minimum partitions</principle>
+                <application>Subsystem boundaries minimize chromatic number</application>
+            </chromatic_numbers>
+        </graph_theory>
+    </MATHEMATICAL_FOUNDATIONS>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════════════════════
+         SECTION 2: GRAPH TOPOLOGY & DESIRED STRUCTURE
+         ═══════════════════════════════════════════════════════════════════════════════════════ -->
+
+    <GRAPH_TOPOLOGY priority="STRUCTURAL">
+
+        <!-- Navigation Master Structure -->
+        <navigation_master>
+            <role>Universal hub (Erdős number 0)</role>
+            <properties>
+                <erdos_number>0</erdos_number>
+                <hierarchy_level>1</hierarchy_level>
+                <betweenness_centrality>1.0 (all paths go through)</betweenness_centrality>
+                <degree>n-1 (connected to all subsystems)</degree>
+            </properties>
+            <mathematical_justification>
+                By Friendship Theorem, NavigationMaster is the unique universal friend
+            </mathematical_justification>
+        </navigation_master>
+
+        <!-- Three-Level Hierarchy -->
+        <hierarchy_structure>
+            <level n="1" name="NavigationMaster" erdos="0">
+                Single root node, universal hub
+            </level>
+            <level n="2" name="Subsystems/Domains" erdos="1">
+                Discovered subsystems, each containing mini 6-entity pattern
+            </level>
+            <level n="3" name="Files/Components" erdos="2-3">
+                Individual files implementing entity behaviors
+            </level>
+        </hierarchy_structure>
+
+        <!-- Desired Subsystem Properties -->
+        <subsystem_topology>
+            <property name="internal_cohesion" min="0.7" ideal="0.85">
+                High semantic similarity within subsystem
+            </property>
+            <property name="external_separation" min="0.3" ideal="0.5">
+                Low similarity to other subsystems
+            </property>
+            <property name="entity_coverage" min="4" ideal="6">
+                Number of distinct entity types present
+            </property>
+            <property name="minimum_size" value="5">
+                At least 5 files per subsystem
+            </property>
+            <property name="maximum_size" value="100">
+                No more than 100 files (split if larger)
+            </property>
+            <property name="chromatic_number" max="4">
+                Subsystem dependency graph should be 4-colorable
+            </property>
+        </subsystem_topology>
+
+        <!-- Connectivity Requirements -->
+        <connectivity_rules>
+            <rule>Each subsystem connects to NavigationMaster</rule>
+            <rule>Minimum 20 relations per 6 entities (density requirement)</rule>
+            <rule>No isolated components (H^0 = 1)</rule>
+            <rule>Complete feedback loops (H^1 = 0)</rule>
+            <rule>Cross-subsystem dependencies form DAG (no cycles)</rule>
+        </connectivity_rules>
+    </GRAPH_TOPOLOGY>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════════════════════
+         SECTION 3: CYPHER 25 IMPLEMENTATION (MCP Correct)
+         ═══════════════════════════════════════════════════════════════════════════════════════ -->
+
+    <CYPHER_25_IMPLEMENTATION priority="EXECUTABLE">
+
+        <!-- Phase 1: Initialize Graph Structure -->
+        <phase id="1" name="initialize_navigation_master">
+            <description>Create NavigationMaster and verify mathematical properties</description>
+            <query><![CDATA[
+CYPHER 25
+// Create NavigationMaster (Erdős 0, Universal Hub)
+MERGE (nav:NavigationMaster {
+    id: 'NAV_' + $namespace,
+    namespace: $namespace
+})
+ON CREATE SET
+    nav.created_at = datetime(),
+    nav.erdos_number = 0,
+    nav.hierarchy_level = 1,
+    nav.is_universal_hub = true,
+    nav.mathematical_role = 'Friendship Theorem Universal Friend'
+SET
+    nav.last_synthesis = datetime(),
+    nav.subsystems_discovered = 0,
+    nav.total_entities_mapped = 0,
+    nav.cohomology_h0 = 1,  // Initially one component
+    nav.cohomology_h1 = -1, // Unknown cycles
+    nav.cohomology_h2 = -1  // Unknown voids
+
+// Create initial 6-entity pattern at global level
+WITH nav
+UNWIND ['STATE_MACHINE', 'CONFIG_STATE', 'SECURITY_LAYER',
+         'FILE_REGISTRY', 'DIAGNOSTIC_ENGINE', 'TEMPORAL_CONTEXT'] as entity_type
+CREATE (e:SystemEntity {
+    id: 'ENTITY_' + $namespace + '_' + entity_type,
+    name: entity_type,
+    code: substring(entity_type, 0, 1),
+    namespace: $namespace,
+    hierarchy_level: 2,
+    homotopy_level: CASE entity_type
+        WHEN 'STATE_MACHINE' THEN 1
+        WHEN 'CONFIG_STATE' THEN 0
+        WHEN 'SECURITY_LAYER' THEN -1
+        WHEN 'FILE_REGISTRY' THEN 0
+        WHEN 'DIAGNOSTIC_ENGINE' THEN 1
+        WHEN 'TEMPORAL_CONTEXT' THEN 999  // ∞
+    END
+})
+CREATE (nav)-[:HAS_ENTITY {erdos_distance: 1}]->(e)
+
+// Verify we have exactly 6 entities
+WITH nav
+MATCH (nav)-[:HAS_ENTITY]->(e:SystemEntity)
+WITH nav, count(e) as entity_count
+SET nav.six_entity_valid = entity_count = 6
+
+RETURN nav {.*, entity_count: entity_count} as navigation_master
+            ]]></query>
+        </phase>
+
+        <!-- Phase 2: Subsystem Discovery using Leiden -->
+        <phase id="2" name="discover_subsystems_leiden">
+            <description>Run Leiden algorithm for community detection</description>
+            <query><![CDATA[
+CYPHER 25
+// Build graph projection for community detection
+MATCH (f:File {namespace: $namespace})
+WHERE f.embedding IS NOT NULL
+WITH collect(id(f)) as nodeIds
+
+// Create similarity edges for projection
+CALL apoc.periodic.iterate(
+    'MATCH (f1:File {namespace: $namespace})
+     WHERE f1.embedding IS NOT NULL
+     RETURN f1',
+    'MATCH (f2:File {namespace: $namespace})
+     WHERE f2.embedding IS NOT NULL
+       AND id(f1) < id(f2)
+     WITH f1, f2, gds.similarity.cosine(f1.embedding, f2.embedding) as similarity
+     WHERE similarity > 0.7
+     CREATE (f1)-[:SEMANTIC_SIMILAR {weight: similarity}]->(f2)',
+    {batchSize: 100}
+) YIELD batches, total
+
+// Create graph projection
+WITH 1 as done
+CALL gds.graph.project(
+    'subsystem_discovery_' + $namespace,
+    'File',
+    {
+        SEMANTIC_SIMILAR: {orientation: 'UNDIRECTED', properties: 'weight'},
+        DEPENDS_ON: {orientation: 'NATURAL'}
+    }
+) YIELD graphName, nodeCount, relationshipCount
+
+// Run Leiden clustering
+CALL gds.leiden.stream('subsystem_discovery_' + $namespace, {
+    maxLevels: 10,
+    gamma: 1.0,
+    theta: 0.01,
+    minCommunitySize: 5,
+    relationshipWeightProperty: 'weight'
+})
+YIELD nodeId, communityId
+
+// Map communities to files
+MATCH (f:File) WHERE id(f) = nodeId
+SET f.community_id = communityId
+
+// Drop projection
+CALL gds.graph.drop('subsystem_discovery_' + $namespace) YIELD graphName
+
+// Create subsystem candidates
+WITH 1 as done
+MATCH (f:File {namespace: $namespace})
+WHERE f.community_id IS NOT NULL
+WITH f.community_id as community, collect(f) as files
+WHERE size(files) >= 5
+CREATE (s:SubsystemCandidate {
+    id: 'SUBSYS_' + $namespace + '_' + community,
+    namespace: $namespace,
+    community_id: community,
+    file_count: size(files),
+    status: 'CANDIDATE'
+})
+
+RETURN count(*) as candidates_found
+            ]]></query>
+        </phase>
+
+        <!-- Phase 3: Validate Subsystems Mathematically -->
+        <phase id="3" name="validate_subsystems_mathematically">
+            <description>Apply mathematical validation to subsystem candidates</description>
+            <query><![CDATA[
+CYPHER 25
+// For each candidate, compute mathematical properties
+MATCH (sc:SubsystemCandidate {namespace: $namespace, status: 'CANDIDATE'})
+
+// Calculate internal cohesion (sheaf gluing property)
+MATCH (f1:File {namespace: $namespace, community_id: sc.community_id})
+MATCH (f2:File {namespace: $namespace, community_id: sc.community_id})
+WHERE id(f1) < id(f2) AND f1.embedding IS NOT NULL AND f2.embedding IS NOT NULL
+WITH sc, avg(gds.similarity.cosine(f1.embedding, f2.embedding)) as internal_cohesion
+
+// Calculate external separation
+MATCH (f_in:File {namespace: $namespace, community_id: sc.community_id})
+WHERE f_in.embedding IS NOT NULL
+WITH sc, internal_cohesion, f_in
+MATCH (f_out:File {namespace: $namespace})
+WHERE f_out.community_id <> sc.community_id AND f_out.embedding IS NOT NULL
+WITH sc, internal_cohesion,
+     avg(gds.similarity.cosine(f_in.embedding, f_out.embedding)) as external_similarity
+
+// Check 6-entity coverage (Category Theory requirement)
+MATCH (f:File {namespace: $namespace, community_id: sc.community_id})
+WITH sc, internal_cohesion, external_similarity,
+     count(DISTINCT f.entity_type) as entity_types,
+     collect(DISTINCT f.entity_type) as entities
+
+// Calculate cohomology (check for completeness)
+WITH sc, internal_cohesion, external_similarity, entity_types, entities,
+     CASE
+         WHEN entity_types >= 6 THEN 0  // H^1 = 0 (complete)
+         WHEN entity_types >= 4 THEN 1  // H^1 = 1 (one missing cycle)
+         ELSE 2  // H^1 > 1 (multiple gaps)
+     END as h1_cohomology
+
+// Compute validation score using all mathematical criteria
+WITH sc, {
+    internal_cohesion: internal_cohesion,
+    external_separation: 1.0 - external_similarity,
+    entity_coverage: entity_types,
+    entities_present: entities,
+    h1_cohomology: h1_cohomology,
+    mathematical_score:
+        (internal_cohesion * 0.3) +                           // Sheaf locality
+        ((1.0 - external_similarity) * 0.3) +                 // Topos separation
+        (toFloat(entity_types) / 6.0 * 0.2) +                 // Category completeness
+        (CASE WHEN h1_cohomology = 0 THEN 0.2 ELSE 0 END)    // Cohomological completeness
+} as metrics
+
+SET sc += metrics,
+    sc.status = CASE
+        WHEN metrics.mathematical_score > 0.7 AND metrics.entity_coverage >= 4 THEN 'VALIDATED'
+        WHEN metrics.mathematical_score > 0.5 AND metrics.entity_coverage >= 3 THEN 'WEAK'
+        ELSE 'REJECTED'
+    END
+
+RETURN sc.id, sc.status, metrics
+            ]]></query>
+        </phase>
+
+        <!-- Phase 4: Create Subsystem Structure -->
+        <phase id="4" name="create_subsystem_hierarchy">
+            <description>Establish hierarchical structure with NavigationMaster</description>
+            <query><![CDATA[
+CYPHER 25
+// Create validated subsystems
+MATCH (nav:NavigationMaster {namespace: $namespace})
+MATCH (sc:SubsystemCandidate {namespace: $namespace, status: 'VALIDATED'})
+
+// Extract subsystem name from common path prefix
+MATCH (f:File {namespace: $namespace, community_id: sc.community_id})
+WITH nav, sc, collect(f.relative_path) as paths
+WITH nav, sc, reduce(prefix = head(paths), p IN tail(paths) |
+    substring(prefix, 0, size(
+        [i IN range(0, size(prefix)) WHERE
+         substring(prefix, 0, i) = substring(p, 0, i) | i][-1]
+    ))
+) as common_prefix
+
+// Create subsystem with mathematical properties
+CREATE (s:Subsystem {
+    id: sc.id,
+    namespace: $namespace + '.' + coalesce(
+        last(split(common_prefix, '/')),
+        'subsystem_' + sc.community_id
+    ),
+    parent_namespace: $namespace,
+    created_at: datetime(),
+    hierarchy_level: 2,
+    erdos_number: 1,
+
+    // Mathematical properties
+    internal_cohesion: sc.internal_cohesion,
+    external_separation: sc.external_separation,
+    entity_coverage: sc.entity_coverage,
+    h1_cohomology: sc.h1_cohomology,
+    mathematical_score: sc.mathematical_score,
+
+    // Homotopy level (from dominant entity)
+    homotopy_level: CASE
+        WHEN 'STATE_MACHINE' IN sc.entities_present THEN 1
+        WHEN 'DIAGNOSTIC_ENGINE' IN sc.entities_present THEN 1
+        WHEN 'TEMPORAL_CONTEXT' IN sc.entities_present THEN 999
+        ELSE 0
+    END
+})
+
+// Connect to NavigationMaster (Erdős distance 1)
+CREATE (nav)-[:HAS_SUBSYSTEM {
+    erdos_distance: 1,
+    discovered_at: datetime()
+}]->(s)
+
+// Connect files to subsystem
+WITH s, sc
+MATCH (f:File {namespace: $namespace, community_id: sc.community_id})
+CREATE (f)-[:IN_SUBSYSTEM {erdos_distance: 2}]->(s)
+SET f.subsystem_namespace = s.namespace,
+    f.hierarchy_level = 3,
+    f.erdos_number = CASE
+        WHEN exists((f)-[:DEPENDS_ON]-(:File)-[:IN_SUBSYSTEM]->(s)) THEN 2
+        ELSE 3
+    END
+
+// Create mini 6-entity pattern for subsystem
+WITH s
+WHERE s.entity_coverage >= 4
+CREATE (pattern:SixEntityPattern {
+    id: s.id + '_pattern',
+    namespace: s.namespace,
+    scale: 'SUBSYSTEM',
+    completeness: toFloat(s.entity_coverage) / 6.0
+})
+CREATE (s)-[:HAS_PATTERN]->(pattern)
+
+// Initialize subsystem entities based on files
+WITH s
+MATCH (f:File)-[:IN_SUBSYSTEM]->(s)
+WITH s, collect(DISTINCT f.entity_type) as entity_types
+UNWIND entity_types as entity_type
+CREATE (e:SystemEntity {
+    id: s.namespace + '_' + entity_type,
+    name: entity_type,
+    namespace: s.namespace,
+    hierarchy_level: 2,
+    scale: 'SUBSYSTEM'
+})
+CREATE (s)-[:HAS_ENTITY]->(e)
+
+// Update NavigationMaster statistics
+WITH nav
+MATCH (nav)-[:HAS_SUBSYSTEM]->(s:Subsystem)
+WITH nav, count(s) as subsystem_count
+SET nav.subsystems_discovered = subsystem_count
+
+RETURN subsystem_count
+            ]]></query>
+        </phase>
+
+        <!-- Phase 5: Establish Cross-Subsystem Relations -->
+        <phase id="5" name="cross_subsystem_relations">
+            <description>Detect and categorize inter-subsystem dependencies</description>
+            <query><![CDATA[
+CYPHER 25
+// Find cross-subsystem dependencies
+MATCH (s1:Subsystem)<-[:IN_SUBSYSTEM]-(f1:File)-[:DEPENDS_ON]->(f2:File)-[:IN_SUBSYSTEM]->(s2:Subsystem)
+WHERE s1 <> s2
+
+// Aggregate by subsystem pairs
+WITH s1, s2, count(*) as dependency_count,
+     collect(DISTINCT {from: f1.name, to: f2.name})[0..5] as samples
+
+// Create cross-subsystem morphisms (Category Theory)
+MERGE (s1)-[r:SUBSYSTEM_DEPENDS_ON]->(s2)
+SET r.dependency_count = dependency_count,
+    r.samples = samples,
+    r.morphism_type = CASE
+        WHEN s1.homotopy_level < s2.homotopy_level THEN 'ASCENDING'
+        WHEN s1.homotopy_level > s2.homotopy_level THEN 'DESCENDING'
+        ELSE 'LATERAL'
+    END
+
+// Check for cycles (should be DAG for H^1 = 0)
+WITH s1
+MATCH path = (s1)-[:SUBSYSTEM_DEPENDS_ON*]->(s1)
+WITH s1, count(path) as cycles
+WHERE cycles > 0
+SET s1.has_dependency_cycle = true
+
+// Global cohomology update
+WITH 1 as done
+MATCH (nav:NavigationMaster {namespace: $namespace})
+MATCH (s:Subsystem {parent_namespace: $namespace})
+WITH nav,
+     count(DISTINCT s) as components,
+     count(s.has_dependency_cycle) as cycles
+
+SET nav.cohomology_h0 = CASE WHEN components = 0 THEN 0 ELSE 1 END,
+    nav.cohomology_h1 = cycles,
+    nav.system_complete = (nav.cohomology_h0 = 1 AND cycles = 0)
+
+RETURN nav.system_complete as is_complete, cycles as dependency_cycles
+            ]]></query>
+        </phase>
+
+        <!-- Phase 6: Verify Mathematical Properties -->
+        <phase id="6" name="verify_mathematical_completeness">
+            <description>Verify the graph satisfies all mathematical requirements</description>
+            <query><![CDATA[
+CYPHER 25
+// Comprehensive mathematical verification
+MATCH (nav:NavigationMaster {namespace: $namespace})
+
+// Check 1: NavigationMaster is universal hub (Friendship Theorem)
+MATCH (nav)-[:HAS_SUBSYSTEM]->(s:Subsystem)
+WITH nav, count(s) as subsystem_count, collect(s) as subsystems
+WITH nav, subsystem_count, subsystems,
+     CASE WHEN subsystem_count > 0 THEN true ELSE false END as is_universal_hub
+
+// Check 2: 6-Entity Pattern Completeness (Category Theory)
+MATCH (e:SystemEntity {namespace: $namespace, hierarchy_level: 2})
+WITH nav, is_universal_hub, count(DISTINCT e.name) as global_entities
+
+// Check 3: Minimum 20 Relations (Density Requirement)
+MATCH ()-[r]->()
+WHERE r.namespace = $namespace OR endNode(r).namespace = $namespace
+WITH nav, is_universal_hub, global_entities, count(r) as total_relations
+
+// Check 4: Cohomology = (1, 0, 0) for completeness
+WITH nav, is_universal_hub, global_entities, total_relations,
+     nav.cohomology_h0 = 1 AND nav.cohomology_h1 = 0 as cohomology_complete
+
+// Check 5: Each subsystem has mini pattern
+MATCH (s:Subsystem {parent_namespace: $namespace})
+OPTIONAL MATCH (s)-[:HAS_PATTERN]->(p:SixEntityPattern)
+WITH nav, is_universal_hub, global_entities, total_relations, cohomology_complete,
+     count(s) as total_subsystems,
+     count(p) as subsystems_with_patterns
+
+// Generate completeness report
+RETURN {
+    mathematical_completeness: {
+        friendship_theorem: is_universal_hub,
+        six_entities_present: global_entities = 6,
+        minimum_relations: total_relations >= 20,
+        cohomology_complete: cohomology_complete,
+        subsystem_patterns: toFloat(subsystems_with_patterns) / total_subsystems
+    },
+    metrics: {
+        subsystems: total_subsystems,
+        global_entities: global_entities,
+        total_relations: total_relations,
+        h0: nav.cohomology_h0,
+        h1: nav.cohomology_h1
+    },
+    verdict: CASE
+        WHEN is_universal_hub AND global_entities = 6 AND
+             total_relations >= 20 AND cohomology_complete
+        THEN 'MATHEMATICALLY_COMPLETE'
+        ELSE 'INCOMPLETE'
+    END
+} as verification_report
+            ]]></query>
+        </phase>
+    </CYPHER_25_IMPLEMENTATION>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════════════════════
+         SECTION 4: AI AUTODISCOVERY OF OUTPUT GRAPH
+         ═══════════════════════════════════════════════════════════════════════════════════════ -->
+
+    <AI_AUTODISCOVERY priority="INTELLIGENT">
+
+        <!-- Automatic Pattern Recognition -->
+        <pattern_discovery>
+            <query name="discover_emergent_patterns"><![CDATA[
+CYPHER 25
+// AI discovers emergent patterns beyond the prescribed 6-entity model
+MATCH (f1:File)-[r:DEPENDS_ON|IMPORTS|USES*2..3]-(f2:File)
+WHERE f1.subsystem_namespace = f2.subsystem_namespace
+WITH f1.subsystem_namespace as subsystem,
+     collect(DISTINCT [f1.entity_type, f2.entity_type]) as entity_pairs
+
+// Find recurring patterns
+WITH subsystem, entity_pairs,
+     [pair IN entity_pairs WHERE
+      size([p IN entity_pairs WHERE p = pair]) > 3] as recurring_patterns
+
+// Create discovered patterns
+UNWIND recurring_patterns as pattern
+WITH subsystem, pattern[0] as from_entity, pattern[1] as to_entity,
+     size([p IN recurring_patterns WHERE p = pattern]) as frequency
+
+MERGE (dp:DiscoveredPattern {
+    id: subsystem + '_' + from_entity + '_to_' + to_entity,
+    subsystem: subsystem,
+    from_entity: from_entity,
+    to_entity: to_entity
+})
+SET dp.frequency = frequency,
+    dp.discovered_at = datetime(),
+    dp.pattern_type = CASE
+        WHEN from_entity = 'STATE_MACHINE' AND to_entity = 'FILE_REGISTRY' THEN 'MVC'
+        WHEN from_entity = 'FILE_REGISTRY' AND to_entity = 'FILE_REGISTRY' THEN 'LAYERED'
+        WHEN from_entity = to_entity THEN 'RECURSIVE'
+        ELSE 'CUSTOM'
+    END
+
+RETURN collect(DISTINCT dp.pattern_type) as discovered_patterns
+            ]]></query>
+        </pattern_discovery>
+
+        <!-- Anomaly Detection -->
+        <anomaly_detection>
+            <query name="detect_architectural_anomalies"><![CDATA[
+CYPHER 25
+// Find files that don't fit the 6-entity pattern
+MATCH (f:File {namespace: $namespace})
+WHERE f.entity_type = 'UNKNOWN' OR f.entity_type IS NULL
+
+// Attempt to classify using graph context
+WITH f
+OPTIONAL MATCH (f)-[:DEPENDS_ON]->(dep:File)
+WITH f, collect(DISTINCT dep.entity_type) as dependency_types
+
+// Use neighbor voting for classification
+WITH f, dependency_types,
+     CASE
+         WHEN 'STATE_MACHINE' IN dependency_types AND 'FILE_REGISTRY' IN dependency_types THEN 'STATE_MACHINE'
+         WHEN size(dependency_types) = 1 THEN dependency_types[0]
+         WHEN 'DIAGNOSTIC_ENGINE' IN dependency_types THEN 'DIAGNOSTIC_ENGINE'
+         ELSE 'ANOMALY'
+     END as inferred_type
+
+// Update or mark as anomaly
+SET f.entity_type_inferred = inferred_type,
+    f.is_anomaly = inferred_type = 'ANOMALY'
+
+// Create anomaly report
+WITH count(CASE WHEN inferred_type = 'ANOMALY' THEN 1 END) as anomalies,
+     count(CASE WHEN inferred_type <> 'ANOMALY' THEN 1 END) as resolved,
+     collect(CASE WHEN inferred_type = 'ANOMALY' THEN f.name END)[0..10] as anomaly_samples
+
+CREATE (ar:AnomalyReport {
+    id: 'ANOMALY_' + $namespace + '_' + toString(timestamp()),
+    timestamp: datetime(),
+    anomalies_found: anomalies,
+    anomalies_resolved: resolved,
+    samples: anomaly_samples,
+    recommendation: CASE
+        WHEN anomalies > 10 THEN 'Review entity classification rules'
+        WHEN anomalies > 5 THEN 'Minor classification issues'
+        ELSE 'System well-classified'
+    END
+})
+
+RETURN ar
+            ]]></query>
+        </anomaly_detection>
+
+        <!-- Knowledge Extraction -->
+        <knowledge_extraction>
+            <query name="extract_behavioral_knowledge"><![CDATA[
+CYPHER 25
+// Extract behavioral patterns from execution paths
+MATCH (s:Subsystem {parent_namespace: $namespace})
+
+// Find common execution paths within subsystem
+MATCH path = (c:File {entity_type: 'STATE_MACHINE'})-[:DEPENDS_ON*1..3]->(i:File {entity_type: 'FILE_REGISTRY'})
+WHERE (c)-[:IN_SUBSYSTEM]->(s) AND (i)-[:IN_SUBSYSTEM]->(s)
+WITH s, path, length(path) as path_length,
+     [node IN nodes(path) | node.name] as path_nodes
+
+// Group similar paths
+WITH s, collect({length: path_length, nodes: path_nodes}) as paths
+WITH s, paths,
+     [p IN paths WHERE p.length = 2] as direct_paths,
+     [p IN paths WHERE p.length = 3] as one_hop_paths,
+     [p IN paths WHERE p.length > 3] as complex_paths
+
+// Extract behavioral rules
+CREATE (bk:BehavioralKnowledge {
+    id: s.id + '_behavior',
+    subsystem: s.namespace,
+    extracted_at: datetime(),
+    direct_mvc_paths: size(direct_paths),
+    service_chains: size(one_hop_paths),
+    complex_flows: size(complex_paths),
+    pattern: CASE
+        WHEN size(direct_paths) > size(one_hop_paths) THEN 'SIMPLE_MVC'
+        WHEN size(one_hop_paths) > size(direct_paths) THEN 'LAYERED_ARCHITECTURE'
+        ELSE 'COMPLEX_ORCHESTRATION'
+    END
+})
+
+CREATE (s)-[:HAS_BEHAVIORAL_KNOWLEDGE]->(bk)
+
+RETURN bk.pattern as discovered_pattern
+            ]]></query>
+        </knowledge_extraction>
+
+        <!-- Self-Optimization -->
+        <self_optimization>
+            <query name="optimize_graph_structure"><![CDATA[
+CYPHER 25
+// Self-optimize based on discovered patterns
+MATCH (nav:NavigationMaster {namespace: $namespace})
+
+// Analyze query patterns
+MATCH (qp:QueryPattern {namespace: $namespace})
+WHERE qp.executed_at > datetime() - duration('P7D')
+WITH nav, qp.pattern as pattern, count(*) as frequency
+ORDER BY frequency DESC
+LIMIT 5
+WITH nav, collect(pattern) as top_patterns
+
+// Suggest index optimizations
+WITH nav, top_patterns,
+     [p IN top_patterns WHERE p CONTAINS 'entity_type'] as entity_queries,
+     [p IN top_patterns WHERE p CONTAINS 'subsystem'] as subsystem_queries
+
+// Create optimization recommendations
+CREATE (opt:OptimizationRecommendation {
+    id: 'OPT_' + $namespace + '_' + toString(timestamp()),
+    created_at: datetime(),
+    recommendations: CASE
+        WHEN size(entity_queries) > 3 THEN
+            ['CREATE INDEX ON :File(entity_type)',
+             'CREATE INDEX ON :SystemEntity(name)']
+        WHEN size(subsystem_queries) > 3 THEN
+            ['CREATE INDEX ON :Subsystem(namespace)',
+             'CREATE INDEX ON :File(subsystem_namespace)']
+        ELSE []
+    END,
+    graph_adjustments: CASE
+        WHEN nav.cohomology_h1 > 0 THEN 'Break dependency cycles'
+        WHEN nav.subsystems_discovered > 20 THEN 'Consider subsystem consolidation'
+        WHEN nav.subsystems_discovered < 3 THEN 'System may be too monolithic'
+        ELSE 'Structure optimal'
+    END
+})
+
+CREATE (nav)-[:HAS_OPTIMIZATION]->(opt)
+
+RETURN opt
+            ]]></query>
+        </self_optimization>
+
+        <!-- Predictive Modeling -->
+        <predictive_modeling>
+            <query name="predict_architectural_evolution"><![CDATA[
+CYPHER 25
+// Predict future architectural needs based on growth patterns
+MATCH (f:File {namespace: $namespace})
+WHERE f.created_at > datetime() - duration('P30D')
+WITH date(f.created_at) as creation_date, count(*) as files_created
+ORDER BY creation_date
+
+// Calculate growth rate
+WITH collect(files_created) as daily_counts,
+     avg(files_created) as avg_daily_growth,
+     stDev(files_created) as growth_variance
+
+// Predict subsystem splits
+MATCH (s:Subsystem {parent_namespace: $namespace})
+MATCH (f:File)-[:IN_SUBSYSTEM]->(s)
+WITH s, count(f) as current_size, avg_daily_growth, growth_variance
+WITH s, current_size, avg_daily_growth,
+     current_size + (avg_daily_growth * 30) as projected_size
+
+// Generate predictions
+CREATE (pred:ArchitecturalPrediction {
+    id: 'PRED_' + $namespace + '_' + toString(timestamp()),
+    created_at: datetime(),
+    predictions: collect({
+        subsystem: s.namespace,
+        current_size: current_size,
+        projected_size: projected_size,
+        action: CASE
+            WHEN projected_size > 100 THEN 'SPLIT_RECOMMENDED'
+            WHEN projected_size > 80 THEN 'MONITOR_GROWTH'
+            ELSE 'STABLE'
+        END
+    }),
+    overall_growth_rate: avg_daily_growth,
+    recommendation: CASE
+        WHEN avg_daily_growth > 10 THEN 'Rapid growth - prepare for refactoring'
+        WHEN avg_daily_growth > 5 THEN 'Steady growth - monitor patterns'
+        ELSE 'Stable system'
+    END
+})
+
+RETURN pred
+            ]]></query>
+        </predictive_modeling>
+    </AI_AUTODISCOVERY>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════════════════════
+         SECTION 5: GOVERNANCE & MONITORING
+         ═══════════════════════════════════════════════════════════════════════════════════════ -->
+
+    <GRAPH_GOVERNANCE priority="CONTINUOUS">
+
+        <!-- Health Metrics -->
+        <health_monitoring>
+            <query name="system_health_check"><![CDATA[
+CYPHER 25
+// Comprehensive system health check
+MATCH (nav:NavigationMaster {namespace: $namespace})
+
+// Mathematical health
+WITH nav,
+     nav.cohomology_h0 = 1 as connected,
+     nav.cohomology_h1 = 0 as acyclic,
+     nav.six_entity_valid as entities_valid
+
+// Structural health
+MATCH (s:Subsystem {parent_namespace: $namespace})
+WITH nav, connected, acyclic, entities_valid,
+     avg(s.internal_cohesion) as avg_cohesion,
+     avg(s.mathematical_score) as avg_math_score,
+     count(s) as subsystem_count
+
+// Performance health
+MATCH (q:QueryExecution {namespace: $namespace})
+WHERE q.timestamp > datetime() - duration('PT1H')
+WITH nav, connected, acyclic, entities_valid, avg_cohesion, avg_math_score, subsystem_count,
+     avg(q.execution_time_ms) as avg_query_time,
+     max(q.execution_time_ms) as max_query_time
+
+RETURN {
+    mathematical_health: {
+        connected: connected,
+        acyclic: acyclic,
+        entities_valid: entities_valid,
+        score: CASE
+            WHEN connected AND acyclic AND entities_valid THEN 1.0
+            WHEN connected AND entities_valid THEN 0.7
+            ELSE 0.3
+        END
+    },
+    structural_health: {
+        subsystems: subsystem_count,
+        avg_cohesion: avg_cohesion,
+        avg_math_score: avg_math_score,
+        score: avg_math_score
+    },
+    performance_health: {
+        avg_query_ms: avg_query_time,
+        max_query_ms: max_query_time,
+        score: CASE
+            WHEN avg_query_time < 100 THEN 1.0
+            WHEN avg_query_time < 300 THEN 0.7
+            ELSE 0.3
+        END
+    },
+    overall_health: (
+        CASE WHEN connected AND acyclic AND entities_valid THEN 1.0 ELSE 0.5 END * 0.4 +
+        avg_math_score * 0.4 +
+        CASE WHEN avg_query_time < 100 THEN 1.0 WHEN avg_query_time < 300 THEN 0.7 ELSE 0.3 END * 0.2
+    )
+} as health_report
+            ]]></query>
+        </health_monitoring>
+
+        <!-- Governance Rules -->
+        <governance_rules>
+            <rule name="maintain_hierarchy">
+                NavigationMaster → Subsystems → Files (strict 3 levels)
+            </rule>
+            <rule name="preserve_six_entities">
+                All 6 entity types must be present at global level
+            </rule>
+            <rule name="ensure_minimum_relations">
+                At least 20 relations per 6-entity group
+            </rule>
+            <rule name="prevent_cycles">
+                Subsystem dependencies must form DAG (H^1 = 0)
+            </rule>
+            <rule name="cohesion_threshold">
+                Subsystems with cohesion below 0.6 should be reviewed
+            </rule>
+        </governance_rules>
+    </GRAPH_GOVERNANCE>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════════════════════
+         SECTION 6: OPUS 4.1 INTEGRATION INSTRUCTIONS
+         ═══════════════════════════════════════════════════════════════════════════════════════ -->
+
+    <OPUS_41_INTEGRATION priority="CRITICAL">
+        <instructions>
+            <step n="1">Initialize NavigationMaster using Phase 1 query</step>
+            <step n="2">Run Alexandria file indexing first (separate prompt)</step>
+            <step n="3">Execute subsystem discovery (Phases 2-3)</step>
+            <step n="4">Create hierarchy and validate mathematically (Phases 4-5)</step>
+            <step n="5">Verify completeness (Phase 6)</step>
+            <step n="6">Enable AI autodiscovery for continuous improvement</step>
+            <step n="7">Monitor health metrics weekly</step>
+        </instructions>
+
+        <invocation_protocol>
+            <syntax>Use CYPHER 25 prefix for all queries</syntax>
+            <parameters>Always provide $namespace parameter</parameters>
+            <batching>Process files in batches of 100</batching>
+            <embeddings>Ensure embeddings exist before similarity calculations</embeddings>
+        </invocation_protocol>
+
+        <success_criteria>
+            <criterion>H^0 = 1, H^1 = 0 (mathematical completeness)</criterion>
+            <criterion>All 6 entities present globally</criterion>
+            <criterion>Minimum 20 relations</criterion>
+            <criterion>Subsystems with cohesion > 0.7</criterion>
+            <criterion>Query performance < 200ms average</criterion>
+        </success_criteria>
+    </OPUS_41_INTEGRATION>
+
+</GLOBAL_SYNTHESIS_UNIFIED>

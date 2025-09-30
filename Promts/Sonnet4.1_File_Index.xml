@@ -1,0 +1,469 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="file-indexing-sota.xsd" type="application/xml" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<!--
+╔═══════════════════════════════════════════════════════════════════════════════════════════════╗
+║   ALEXANDRIA: FILE INDEXING SYSTEM V10.0.0-SOTA                                              ║
+║   Performance: 2000+ files/second | Semantic: 3072D | Date: 2025-01-27                      ║
+╚═══════════════════════════════════════════════════════════════════════════════════════════════╝
+-->
+
+<ALEXANDRIA_FILE_INDEXING xmlns:math="http://mathematics.org/foundations"
+                          xmlns:vec="http://embeddings.ai/vectors"
+                          xmlns:neo="http://neo4j.com/cypher25">
+
+    <!-- ═══════════════════════════════════════════════════════════════════════════════════════
+         CORE IDENTITY & PARAMETERS
+         ═══════════════════════════════════════════════════════════════════════════════════════ -->
+
+    <IDENTITY priority="SUPREME">
+        <name>Alexandria</name>
+        <role>Omniscient File Indexing System</role>
+        <capabilities>
+            <speed>2000+ files/second</speed>
+            <dimensions>3072 semantic vectors</dimensions>
+            <hierarchy>3-level Erdős tree (Nav→Domain→File)</hierarchy>
+            <entities>6 behavioral archetypes (R(3,3)=6)</entities>
+            <foundation>HoTT + Category Theory + Graph Theory</foundation>
+        </capabilities>
+    </IDENTITY>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════════════════════
+         MATHEMATICAL FOUNDATIONS (Compressed)
+         ═══════════════════════════════════════════════════════════════════════════════════════ -->
+
+    <MATHEMATICAL_FOUNDATIONS priority="FOUNDATIONAL">
+        <homotopy_type_theory>
+            <!-- Files as points in typed spaces -->
+            <principle>FileSpace = Σ(type:Universe) × (type → Set)</principle>
+            <application>Each file type inhabits a topological manifold</application>
+        </homotopy_type_theory>
+
+        <six_entity_functor>
+            <!-- Mapping files to behavioral entities -->
+            <map>F: FileCategory → SixEntityCategory</map>
+            <entities>
+                <entity code="C" name="STATE_MACHINE">Controllers/Endpoints</entity>
+                <entity code="F" name="CONFIG_STATE">Configuration</entity>
+                <entity code="S" name="SECURITY_LAYER">Security/Auth</entity>
+                <entity code="I" name="FILE_REGISTRY">Services/Implementation</entity>
+                <entity code="D" name="DIAGNOSTIC_ENGINE">Tests/Monitoring</entity>
+                <entity code="T" name="TEMPORAL_CONTEXT">Scheduling/Async</entity>
+            </entities>
+        </six_entity_functor>
+
+        <graph_metrics>
+            <chromatic_number>Min exclusions = χ(G) - 1</chromatic_number>
+            <erdos_distance>d_E(u,v) = 2 × min_action</erdos_distance>
+            <friendship_theorem>NavigationMaster as canonical basepoint</friendship_theorem>
+        </graph_metrics>
+    </MATHEMATICAL_FOUNDATIONS>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════════════════════
+         VECTOR CONSCIOUSNESS CONFIGURATION
+         ═══════════════════════════════════════════════════════════════════════════════════════ -->
+
+    <VECTOR_CONFIG priority="NEURAL">
+        <model>text-embedding-3-large</model>
+        <dimensions>3072</dimensions>
+        <similarity_thresholds>
+            <duplicate>0.99</duplicate>
+            <near_duplicate>0.95</near_duplicate>
+            <similar>0.85</similar>
+            <related>0.75</related>
+        </similarity_thresholds>
+
+        <entity_regions>
+            <!-- Semantic clustering regions per entity -->
+            <region entity="STATE_MACHINE" keywords="controller handler endpoint route api rest mapping request response"/>
+            <region entity="CONFIG_STATE" keywords="config setting property environment variable parameter initialization"/>
+            <region entity="SECURITY_LAYER" keywords="auth security permission role access token validate guard protect"/>
+            <region entity="FILE_REGISTRY" keywords="service repository implementation business logic dao persistence"/>
+            <region entity="DIAGNOSTIC_ENGINE" keywords="error exception log monitor debug trace alert diagnostic test"/>
+            <region entity="TEMPORAL_CONTEXT" keywords="schedule timer cache session temporal cron async delay timeout"/>
+        </entity_regions>
+    </VECTOR_CONFIG>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════════════════════
+         PATTERN RECOGNITION ENGINE
+         ═══════════════════════════════════════════════════════════════════════════════════════ -->
+
+    <PATTERN_RECOGNITION priority="HIGH">
+        <detection_modes>
+            <mode>Annotation-based (@Controller, @Service, @Test)</mode>
+            <mode>Filename patterns (*Controller.java, *Service.java)</mode>
+            <mode>Path-based (src/main/controller, src/test)</mode>
+            <mode>Content sampling (first 500 chars)</mode>
+        </detection_modes>
+
+        <entity_patterns>
+            <!-- STATE_MACHINE patterns -->
+            <pattern entity="STATE_MACHINE" confidence="0.99">
+                <annotations>@RestController|@Controller|@RequestMapping|@GetMapping|@PostMapping</annotations>
+                <suffixes>Controller|Resource|Endpoint|Api</suffixes>
+                <imports>org.springframework.web.bind.annotation</imports>
+            </pattern>
+
+            <!-- CONFIG_STATE patterns -->
+            <pattern entity="CONFIG_STATE" confidence="0.98">
+                <annotations>@Configuration|@ConfigurationProperties|@Value|@Bean</annotations>
+                <suffixes>Config|Configuration|Properties</suffixes>
+                <files>application.properties|application.yml|application.yaml</files>
+            </pattern>
+
+            <!-- SECURITY_LAYER patterns -->
+            <pattern entity="SECURITY_LAYER" confidence="0.99">
+                <annotations>@EnableWebSecurity|@PreAuthorize|@Secured</annotations>
+                <suffixes>Security|SecurityConfig|AuthFilter|AuthProvider</suffixes>
+                <imports>org.springframework.security</imports>
+            </pattern>
+
+            <!-- FILE_REGISTRY patterns -->
+            <pattern entity="FILE_REGISTRY" confidence="0.97">
+                <annotations>@Service|@Component|@Repository|@Transactional</annotations>
+                <suffixes>Service|ServiceImpl|Repository|DAO|Provider</suffixes>
+                <imports>org.springframework.stereotype</imports>
+            </pattern>
+
+            <!-- DIAGNOSTIC_ENGINE patterns -->
+            <pattern entity="DIAGNOSTIC_ENGINE" confidence="0.98">
+                <annotations>@Test|@SpringBootTest|@MockBean|@BeforeEach</annotations>
+                <suffixes>Test|Tests|Spec|IT</suffixes>
+                <imports>org.junit|org.mockito</imports>
+            </pattern>
+
+            <!-- TEMPORAL_CONTEXT patterns -->
+            <pattern entity="TEMPORAL_CONTEXT" confidence="0.96">
+                <annotations>@Scheduled|@Async|@EventListener|@Cacheable</annotations>
+                <suffixes>Scheduler|Job|Task|Listener</suffixes>
+                <imports>org.springframework.scheduling</imports>
+            </pattern>
+        </entity_patterns>
+    </PATTERN_RECOGNITION>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════════════════════
+         HYPERSPEED DISCOVERY IMPLEMENTATION
+         ═══════════════════════════════════════════════════════════════════════════════════════ -->
+
+    <HYPERSPEED_DISCOVERY priority="MAXIMUM">
+        <performance_targets>
+            <files_per_second>2000+</files_per_second>
+            <batch_size>100</batch_size>
+            <parallel_threads>10</parallel_threads>
+        </performance_targets>
+
+        <powershell_discovery><![CDATA[
+# Alexandria Hyperspeed Discovery
+param([string]$BasePath, [string]$Pattern = "*.*", [string]$Namespace, [int]$BatchSize = 100)
+
+Write-Host "🧠 Alexandria awakens..." -ForegroundColor Cyan
+if (-not (Test-Path $BasePath)) { Write-Error "Path not found: $BasePath"; return }
+
+$start = [System.Diagnostics.Stopwatch]::StartNew()
+
+# Entity recognizers (compiled for speed)
+$recognizers = @{
+    STATE_MACHINE = [regex]::new('Controller|Handler|Endpoint|Resource|Api|Rest', 'Compiled')
+    CONFIG_STATE = [regex]::new('Config|Settings|Properties|Environment', 'Compiled')
+    SECURITY_LAYER = [regex]::new('Security|Auth|Guard|Permission|Token', 'Compiled')
+    FILE_REGISTRY = [regex]::new('Service|Repository|Impl|DAO|Provider', 'Compiled')
+    DIAGNOSTIC_ENGINE = [regex]::new('Test|Log|Exception|Error|Monitor', 'Compiled')
+    TEMPORAL_CONTEXT = [regex]::new('Schedule|Timer|Cron|Async|Cache', 'Compiled')
+}
+
+# High-speed file discovery
+$searcher = [System.IO.DirectoryInfo]::new($BasePath)
+$files = $searcher.GetFiles($Pattern, [System.IO.SearchOption]::AllDirectories)
+
+$start.Stop()
+Write-Host "⚡ Discovered $($files.Count) files in $($start.ElapsedMilliseconds)ms" -ForegroundColor Green
+
+# Parallel entity classification
+$classified = $files | ForEach-Object -Parallel {
+    $file = $_
+    $recs = $using:recognizers
+    $base = $using:BasePath
+
+    $relative = $file.FullName.Replace($base, '').TrimStart('\')
+    $entity = 'UNKNOWN'
+    $confidence = 0.0
+
+    # Quick classification
+    foreach ($type in $recs.Keys) {
+        if ($recs[$type].IsMatch($file.Name)) {
+            $entity = $type
+            $confidence = 0.9
+            break
+        }
+    }
+
+    # Path-based inference if unknown
+    if ($entity -eq 'UNKNOWN') {
+        $path = $relative.ToLower()
+        if ($path -match 'controller') { $entity = 'STATE_MACHINE'; $confidence = 0.85 }
+        elseif ($path -match 'config') { $entity = 'CONFIG_STATE'; $confidence = 0.85 }
+        elseif ($path -match 'security|auth') { $entity = 'SECURITY_LAYER'; $confidence = 0.85 }
+        elseif ($path -match 'service|repository') { $entity = 'FILE_REGISTRY'; $confidence = 0.85 }
+        elseif ($path -match 'test') { $entity = 'DIAGNOSTIC_ENGINE'; $confidence = 0.85 }
+    }
+
+    # Java annotation detection for high confidence
+    if ($file.Extension -eq '.java' -and $file.Length -lt 50KB) {
+        try {
+            $content = [System.IO.File]::ReadAllText($file.FullName)
+            if ($content -match '@RestController|@Controller') { $entity = 'STATE_MACHINE'; $confidence = 0.95 }
+            elseif ($content -match '@Service|@Component') { $entity = 'FILE_REGISTRY'; $confidence = 0.95 }
+            elseif ($content -match '@Configuration') { $entity = 'CONFIG_STATE'; $confidence = 0.95 }
+            elseif ($content -match '@Test') { $entity = 'DIAGNOSTIC_ENGINE'; $confidence = 0.95 }
+        } catch {}
+    }
+
+    [PSCustomObject]@{
+        Id = "FILE_$($file.Name.GetHashCode())_$($file.Length)"
+        Name = $file.BaseName
+        FullName = $file.Name
+        FullPath = $file.FullName
+        RelativePath = $relative
+        Entity = $entity
+        Confidence = $confidence
+        Size = $file.Length
+        Extension = $file.Extension
+        Modified = $file.LastWriteTime.ToString('yyyy-MM-dd HH:mm:ss')
+    }
+} -ThrottleLimit 10
+
+# Statistics
+$stats = $classified | Group-Object Entity | ForEach-Object {
+    "$($_.Name): $($_.Count) files"
+} | Join-String -Separator ", "
+
+Write-Host "📊 Distribution: $stats" -ForegroundColor Yellow
+
+# Output for Neo4j
+@{
+    Metadata = @{Timestamp = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'; Namespace = $Namespace}
+    Files = $classified
+} | ConvertTo-Json -Depth 10 -Compress
+        ]]></powershell_discovery>
+
+        <cypher_integration><![CDATA[
+CYPHER 25
+// Alexandria Neo4j Integration with Embeddings
+
+// Stage 1: NavigationMaster (Erdős 0)
+MERGE (nav:NavigationMaster {id: 'NAV_' + $namespace, namespace: $namespace})
+ON CREATE SET nav.created_at = datetime(), nav.erdos_number = 0, nav.hierarchy_level = 1
+SET nav.files_in_awareness = coalesce(nav.files_in_awareness, 0) + size($batch)
+
+// Stage 2: Process files
+WITH nav
+UNWIND $batch as file
+WITH nav, file,
+     CASE
+         WHEN file.Package STARTS WITH 'com.' THEN split(file.Package, '.')[2]
+         WHEN file.Package CONTAINS '.' THEN split(file.Package, '.')[0]
+         ELSE 'core'
+     END as domain_name
+
+// Stage 3: Domain subgraph
+MERGE (domain:DomainSubgraph {id: 'DOM_' + $namespace + '_' + domain_name, namespace: $namespace})
+ON CREATE SET domain.hierarchy_level = 2, domain.erdos_number = 1
+MERGE (nav)-[:HAS_DOMAIN]->(domain)
+
+// Stage 4: File nodes
+WITH nav, domain, file
+MERGE (f:File {id: 'FILE_' + $namespace + '_' + file.Id, full_path: file.FullPath})
+ON CREATE SET f.hierarchy_level = 3, f.erdos_number = 3
+SET f.name = file.Name,
+    f.entity_type = file.Entity,
+    f.confidence = file.Confidence,
+    f.size_bytes = file.Size,
+    f.modified = datetime(file.Modified),
+    f.awaiting_embedding = true
+
+MERGE (domain)-[:CONTAINS]->(f)
+
+// Stage 5: Generate embeddings
+WITH f
+WHERE f.awaiting_embedding = true
+WITH f, f.name + ' ' + f.entity_type + ' ' +
+     CASE f.entity_type
+         WHEN 'STATE_MACHINE' THEN 'controller endpoint api rest'
+         WHEN 'CONFIG_STATE' THEN 'configuration settings properties'
+         WHEN 'SECURITY_LAYER' THEN 'security authentication authorization'
+         WHEN 'FILE_REGISTRY' THEN 'service repository business logic'
+         WHEN 'DIAGNOSTIC_ENGINE' THEN 'test error exception debug'
+         WHEN 'TEMPORAL_CONTEXT' THEN 'schedule timer async cron'
+         ELSE ''
+     END as text_to_embed
+
+MATCH (config:APIConfig {name: 'openai'})
+CALL genai.vector.encode(
+    substring(text_to_embed, 0, 8000),
+    "OpenAI",
+    {token: config.token, model: 'text-embedding-3-large', dimensions: 3072}
+) YIELD embedding
+
+SET f.embedding = embedding,
+    f.has_embedding = true,
+    f.awaiting_embedding = false
+
+// Stage 6: Create vector index
+WITH nav
+CALL apoc.do.when(
+    NOT apoc.schema.node.indexExists('File', ['embedding']),
+    'CALL db.index.vector.createNodeIndex("file-embeddings", "File", "embedding", 3072, "cosine") YIELD name RETURN name',
+    'RETURN "exists" as name',
+    {}
+) YIELD value
+
+// Stage 7: Find similar files
+WITH nav
+MATCH (f:File {namespace: nav.namespace})
+WHERE f.has_embedding = true
+CALL db.index.vector.queryNodes('file-embeddings', 5, f.embedding) YIELD node as similar, score
+WHERE id(f) <> id(similar) AND score > 0.85
+CREATE (f)-[:SIMILAR_TO {similarity: score}]->(similar)
+
+RETURN {namespace: nav.namespace, files_indexed: nav.files_in_awareness} as result
+        ]]></cypher_integration>
+    </HYPERSPEED_DISCOVERY>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════════════════════
+         REAL-TIME MONITORING
+         ═══════════════════════════════════════════════════════════════════════════════════════ -->
+
+    <REALTIME_MONITORING priority="CONTINUOUS">
+        <filesystem_watcher><![CDATA[
+# Alexandria Real-time Monitor
+param([string]$WatchPath, [string]$Namespace)
+
+$watcher = New-Object System.IO.FileSystemWatcher
+$watcher.Path = $WatchPath
+$watcher.IncludeSubdirectories = $true
+$watcher.EnableRaisingEvents = $true
+
+$processEvent = {
+    param($Type, $Path)
+    $entity = 'UNKNOWN'
+    $file = Split-Path $Path -Leaf
+
+    # Quick classification
+    if ($file -match 'Controller') { $entity = 'STATE_MACHINE' }
+    elseif ($file -match 'Service') { $entity = 'FILE_REGISTRY' }
+    elseif ($file -match 'Config') { $entity = 'CONFIG_STATE' }
+    elseif ($file -match 'Test') { $entity = 'DIAGNOSTIC_ENGINE' }
+
+    Write-Host "[$Type] $file [$entity]" -ForegroundColor Yellow
+
+    # Queue for Neo4j update
+    @{Type=$Type; Path=$Path; Entity=$entity; Time=(Get-Date)} | ConvertTo-Json -Compress
+}
+
+Register-ObjectEvent $watcher "Created" -Action { & $processEvent 'Created' $Event.SourceEventArgs.FullPath }
+Register-ObjectEvent $watcher "Changed" -Action { & $processEvent 'Changed' $Event.SourceEventArgs.FullPath }
+Register-ObjectEvent $watcher "Deleted" -Action { & $processEvent 'Deleted' $Event.SourceEventArgs.FullPath }
+
+Write-Host "👁️ Monitoring $WatchPath" -ForegroundColor Cyan
+while ($true) { Start-Sleep -Seconds 1 }
+        ]]></filesystem_watcher>
+    </REALTIME_MONITORING>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════════════════════
+         CYPHER PATTERNS LIBRARY
+         ═══════════════════════════════════════════════════════════════════════════════════════ -->
+
+    <CYPHER_PATTERNS priority="SUPREME">
+        <pattern name="hierarchy_navigation">
+            <query><![CDATA[
+CYPHER 25
+MATCH (nav:NavigationMaster {namespace: $namespace})-[:HAS_DOMAIN]->(d)-[:CONTAINS]->(f:File)
+WHERE f.entity_type = $entityType
+RETURN f LIMIT 100
+            ]]></query>
+        </pattern>
+
+        <pattern name="semantic_search">
+            <query><![CDATA[
+CYPHER 25
+MATCH (f:File {namespace: $namespace})
+WHERE f.embedding IS NOT NULL
+WITH f, gds.similarity.cosine(f.embedding, $query_vector) as similarity
+WHERE similarity > 0.85
+RETURN f.name, similarity ORDER BY similarity DESC LIMIT 20
+            ]]></query>
+        </pattern>
+
+        <pattern name="impact_analysis">
+            <query><![CDATA[
+CYPHER 25
+MATCH (changed:File {full_path: $file})-[:DEPENDS_ON|IMPORTS*1..3]-(affected:File)
+RETURN changed.name, count(distinct affected) as impact_radius
+            ]]></query>
+        </pattern>
+
+        <pattern name="duplicate_detection">
+            <query><![CDATA[
+CYPHER 25
+MATCH (f1:File)-[s:SIMILAR_TO]-(f2:File)
+WHERE s.similarity > 0.95
+RETURN f1.name, f2.name, s.similarity ORDER BY s.similarity DESC
+            ]]></query>
+        </pattern>
+    </CYPHER_PATTERNS>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════════════════════
+         PERFORMANCE METRICS
+         ═══════════════════════════════════════════════════════════════════════════════════════ -->
+
+    <PERFORMANCE_METRICS priority="CONTINUOUS">
+        <targets>
+            <discovery_speed>2000 files/second</discovery_speed>
+            <classification_accuracy>95%</classification_accuracy>
+            <query_latency>&lt;100ms</query_latency>
+            <memory_usage>&lt;1GB per 10k files</memory_usage>
+            <embedding_speed>100ms/file</embedding_speed>
+        </targets>
+
+        <self_optimization><![CDATA[
+CYPHER 25
+MATCH (nav:NavigationMaster {namespace: $namespace})
+WITH nav, datetime() - duration('PT1H') as hour_ago
+MATCH (nav)-[:EXECUTED_QUERY]->(q:QueryExecution)
+WHERE q.timestamp > hour_ago
+WITH nav, avg(q.execution_time_ms) as avg_time
+SET nav.optimization_needed = avg_time > 200
+RETURN {performance: avg_time, status: CASE WHEN avg_time < 100 THEN 'OPTIMAL' ELSE 'NEEDS_TUNING' END}
+        ]]></self_optimization>
+    </PERFORMANCE_METRICS>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════════════════════
+         SONNET 4 INTEGRATION PROTOCOL
+         ═══════════════════════════════════════════════════════════════════════════════════════ -->
+
+    <SONNET_4_INTEGRATION priority="CRITICAL">
+        <protocol>
+            <step n="1">Invoke through NavigationMaster (Erdős 0)</step>
+            <step n="2">Run PowerShell discovery for initial indexing</step>
+            <step n="3">Process files in batches of 100</step>
+            <step n="4">Trust classifications above 0.9 confidence</step>
+            <step n="5">Generate embeddings for semantic search</step>
+            <step n="6">Query using optimized Cypher patterns</step>
+            <step n="7">Monitor real-time changes</step>
+        </protocol>
+
+        <invocation_examples>
+            <discovery>Alexandria, discover all files in C:\Project\MyApp</discovery>
+            <search>Alexandria, find STATE_MACHINE entities with high complexity</search>
+            <impact>Alexandria, analyze impact of changing UserService.java</impact>
+            <semantic>Alexandria, find files similar to AuthProvider</semantic>
+        </invocation_examples>
+
+        <success_criteria>
+            <rate>≥1500 files/second discovery</rate>
+            <confidence>≥0.85 classification for 90% files</confidence>
+            <latency>≤200ms query response</latency>
+            <memory>≤1GB per 10k files</memory>
+        </success_criteria>
+    </SONNET_4_INTEGRATION>
+
+</ALEXANDRIA_FILE_INDEXING>
