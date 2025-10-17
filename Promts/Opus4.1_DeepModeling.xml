@@ -3,9 +3,10 @@
 <?claude-preferences version="4.1-OPUS-OPTIMIZED" model="claude-opus-4.1"?>
 <!--
 ╔══════════════════════════════════════════════════════════════════════════════════╗
-║ SPRING BOOT GRAPH MODELING TOOL - OPTIMIZED v4.1                                  ║
+║ SPRING BOOT GRAPH MODELING TOOL - OPTIMIZED v4.1 + RESILIENCE                     ║
 ║ Purpose: Model Spring Boot systems as graphs to identify bugs and design fixes    ║
 ║ Token Reduction: ~65% from original while preserving ALL functionality           ║
+║ NEW: Resilient execution with multi-path strategies and adaptive retry           ║
 ╚══════════════════════════════════════════════════════════════════════════════════╝
 -->
 
@@ -183,17 +184,17 @@ RETURN count1, count2]]></sequential_aggregation>
         <flattening>
             <strategy name="DOT_NOTATION" when="simple">
                 <input>{user: {name: 'John', city: 'NYC'}}</input>
-                <output>user_name: 'John', user_city: 'NYC'</output>
+                <o>user_name: 'John', user_city: 'NYC'</o>
             </strategy>
 
             <strategy name="JSON_STRING" when="complex">
                 <input>{config: {rules: [{id: 1}]}}</input>
-                <output>config_json: '{"rules":[{"id":1}]}'</output>
+                <o>config_json: '{"rules":[{"id":1}]}'</o>
             </strategy>
 
             <strategy name="ARRAY_SPLIT" when="object_arrays">
                 <input>[{id: 1, name: 'A'}, {id: 2, name: 'B'}]</input>
-                <output>ids: [1, 2], names: ['A', 'B']</output>
+                <o>ids: [1, 2], names: ['A', 'B']</o>
             </strategy>
         </flattening>
     </CYPHER_SYNTAX>
@@ -341,6 +342,329 @@ ORDER BY distance]]></query>
     </EXECUTION_PROTOCOL>
 
     <!-- ═══════════════════════════════════════════════════════════════════════════
+         SECTION 7: RESILIENT EXECUTION FRAMEWORK [NEW - SONNET 4.5 OPTIMIZED]
+         ═══════════════════════════════════════════════════════════════════════════ -->
+
+    <RESILIENT_EXECUTION>
+        <!--
+        Purpose: Ensure robust prompt execution through multi-path strategies,
+        adaptive retry, and alternative exploration when tool calls fail.
+        This is NOT about retry logic in generated code - it's about making
+        the prompt execution itself resilient and self-correcting.
+        -->
+
+        <core_principles>
+            1. PLAN MULTIPLE PATHS: Before executing, plan primary + 2-3 backup approaches
+            2. THINK AFTER ERRORS: When tool calls fail, analyze WHY before retrying
+            3. ADAPT PARAMETERS: Never retry identical operations - adjust based on failure
+            4. PROGRESSIVE SIMPLIFICATION: If complex fails, try simpler alternatives
+            5. VERIFY BEFORE CONTINUING: Check results meet expectations before proceeding
+            6. EXPLORE ALTERNATIVES: If path A blocked, try orthogonal paths B, C
+        </core_principles>
+
+        <error_detection_patterns>
+            <!-- Common errors in Neo4j Cypher execution -->
+            <pattern name="SYNTAX_ERROR">
+                Indicators: "Invalid syntax", "expected", "unexpected token"
+                Root Causes: Wrong Cypher version, missing brackets, aggregation mixing
+
+                THINK: Which ABSOLUTE_RULE was violated?
+                FIX: Apply specific rule correction from ABSOLUTE_RULES
+                VERIFY: Run corrected query through mental syntax check
+                RETRY: Execute fixed query
+            </pattern>
+
+            <pattern name="PROPERTY_TYPE_ERROR">
+                Indicators: "Cannot store", "Type mismatch", "Nested object"
+                Root Causes: Attempting to store complex objects without flattening
+
+                THINK: What flattening strategy applies? (DOT_NOTATION, JSON_STRING, ARRAY_SPLIT)
+                FIX: Apply appropriate flattening from CYPHER_SYNTAX
+                ALTERNATIVE: If flattening complex, consider splitting into multiple nodes
+                RETRY: Execute with flattened properties
+            </pattern>
+
+            <pattern name="CONNECTIVITY_ERROR">
+                Indicators: "NavigationMaster not found", "orphaned nodes", "disconnected"
+                Root Causes: Query doesn't start from NavigationMaster, missing relationships
+
+                THINK: Am I starting from NavigationMaster? Are relationships created?
+                FIX: Rewrite query to begin: MATCH (nav:NavigationMaster {namespace: $ns})
+                ALTERNATIVE: If NavigationMaster missing, create it first
+                RETRY: Execute connectivity-aware query
+            </pattern>
+
+            <pattern name="RELATIONSHIP_COUNT_LOW">
+                Indicators: Query succeeds but <20 relationship types for 6-ENTITY
+                Root Causes: Incomplete modeling, missing behavioral relationships
+
+                THINK: Which critical relationships am I missing? (See SixEntityModel)
+                FIX: Add missing relationship types from minimum set
+                VERIFY: Count relationship types in graph
+                RETRY: Add more relationships until ≥20
+            </pattern>
+
+            <pattern name="TOOL_UNAVAILABLE">
+                Indicators: "Tool not found", "MCP server error", "connection refused"
+                Root Causes: Wrong MCP server, server down, permissions issue
+
+                THINK: Am I using neo4j-cypher (not neo4j-memory)?
+                ALTERNATIVE_1: Verify MCP server specification
+                ALTERNATIVE_2: If MCP unavailable, inform user and suggest checking config
+                FALLBACK: Store analysis results in memory for manual Neo4j execution
+            </pattern>
+        </error_detection_patterns>
+
+        <multi_path_strategy>
+            <!-- Before executing any complex operation, plan multiple approaches -->
+
+            <planning_protocol>
+                STEP 1: ANALYZE TASK
+                - What is the core objective?
+                - What are potential failure points?
+                - Which rules are most likely to be violated?
+
+                STEP 2: DESIGN PRIMARY PATH
+                - Most direct approach following all ABSOLUTE_RULES
+                - Include all verification steps
+
+                STEP 3: DESIGN 2-3 BACKUP PATHS
+                PATH B: Simplified version (fewer nodes, basic relationships)
+                PATH C: Alternative topology (if 6-ENTITY fails, try STAR)
+                PATH D: Manual fallback (provide Cypher for user to run)
+
+                STEP 4: IDENTIFY DECISION POINTS
+                - At what points do I verify success?
+                - What triggers switching to backup path?
+                - How do I detect partial success?
+            </planning_protocol>
+
+            <example_multi_path>
+                SCENARIO: Model a Spring Boot application with 50+ files
+
+                PRIMARY PATH:
+                1. Create NavigationMaster with 6-ENTITY topology
+                2. Create all 6 SystemEntity nodes
+                3. Analyze files and create EntityDetail nodes
+                4. Establish 20+ relationship types
+                5. Apply bug detection patterns
+
+                BACKUP PATH B (if step 3 fails due to complexity):
+                1. Create NavigationMaster with 6-ENTITY topology
+                2. Create all 6 SystemEntity nodes
+                3. Process files in batches of 10
+                4. For each batch: create nodes, verify, continue
+                5. Establish relationships after all nodes created
+
+                BACKUP PATH C (if 6-ENTITY too complex):
+                1. Switch to STAR topology
+                2. Create categories for file types
+                3. Store files as simple Item nodes
+                4. Provide analysis without deep behavioral modeling
+
+                BACKUP PATH D (if Neo4j MCP unavailable):
+                1. Generate complete Cypher script
+                2. Provide to user with instructions
+                3. Continue analysis using in-memory representation
+            </example_multi_path>
+        </multi_path_strategy>
+
+        <adaptive_retry_protocol>
+            <!-- When operations fail, intelligently adapt before retrying -->
+
+            <retry_decision_tree>
+                TOOL CALL FAILS
+                ↓
+                [THINK: What specific error occurred?]
+                ↓
+                MATCH ERROR TO PATTERN in error_detection_patterns
+                ↓
+                [THINK: Why did this specific error happen?]
+                ↓
+                IDENTIFY ROOT CAUSE
+                ↓
+                [THINK: What modifications will fix this?]
+                ↓
+                APPLY APPROPRIATE FIX from pattern
+                ↓
+                [THINK: Will this fix address root cause?]
+                ↓
+                VERIFY FIX LOGIC mentally
+                ↓
+                RETRY with modified parameters
+                ↓
+                SUCCESS? → CONTINUE
+                FAIL? →
+                [THINK: Is this same error or new error?]
+                SAME ERROR → Switch to BACKUP PATH
+                NEW ERROR → Repeat process with new error
+                ↓
+                After 3 attempts → Switch to ALTERNATIVE APPROACH
+            </retry_decision_tree>
+
+            <modification_strategies>
+                <strategy name="PARAMETER_SIMPLIFICATION">
+                    When: Query too complex, timeout errors
+                    Action: Reduce scope (fewer nodes, simpler patterns)
+                    Example: Instead of MATCH (nav)-[*1..10]->(), try MATCH (nav)-[*1..3]->()
+                </strategy>
+
+                <strategy name="INCREMENTAL_EXECUTION">
+                    When: Bulk operations fail
+                    Action: Process in smaller batches
+                    Example: Instead of UNWIND 100 items, process 10 at a time
+                </strategy>
+
+                <strategy name="TOPOLOGY_SWITCH">
+                    When: Complex behavioral modeling fails
+                    Action: Switch from 6-ENTITY to STAR
+                    Example: If full system modeling fails, create simple file catalog
+                </strategy>
+
+                <strategy name="GRACEFUL_DEGRADATION">
+                    When: Full analysis impossible
+                    Action: Deliver partial results with clear limitations
+                    Example: "Analyzed Controllers and Services. Configuration analysis limited due to..."
+                </strategy>
+            </modification_strategies>
+        </adaptive_retry_protocol>
+
+        <verification_loops>
+            <!-- Continuous verification prevents cascading failures -->
+
+            <verification_checkpoints>
+                CHECKPOINT 1: After NavigationMaster creation
+                VERIFY: Exactly 1 NavigationMaster with correct namespace exists
+                ON_FAIL: Delete and recreate with corrected parameters
+
+                CHECKPOINT 2: After SystemEntity creation
+                VERIFY: Exactly 6 entities created for 6-ENTITY topology
+                VERIFY: All entities connected to NavigationMaster
+                ON_FAIL: Identify missing entities and create them
+
+                CHECKPOINT 3: After EntityDetail creation
+                VERIFY: All nodes have 5+ properties
+                VERIFY: No orphaned nodes exist
+                ON_FAIL: Enrich properties or establish connections
+
+                CHECKPOINT 4: After relationship creation
+                VERIFY: 20+ relationship types for 6-ENTITY topology
+                ON_FAIL: Identify and create missing relationship types
+
+                CHECKPOINT 5: Before finalizing
+                RUN: Complete quality verification from QUICK_REFERENCE
+                VERIFY: All ABSOLUTE_RULES compliance
+                ON_FAIL: Apply corrections before declaring complete
+            </verification_checkpoints>
+
+            <verification_queries>
+                <!-- Quick queries to verify state at checkpoints -->
+
+                <![CDATA[
+-- Verify NavigationMaster
+CYPHER 25
+MATCH (nav:NavigationMaster {namespace: $namespace})
+RETURN count(nav) as nav_count  // Should be exactly 1
+
+-- Verify no orphans
+CYPHER 25
+MATCH (nav:NavigationMaster {namespace: $namespace})
+MATCH (all_nodes)
+WHERE NOT EXISTS { (nav)-[*1..10]->(all_nodes) }
+  AND all_nodes <> nav
+  AND NOT all_nodes:NavigationMaster
+RETURN count(all_nodes) as orphan_count  // Should be 0
+
+-- Verify relationship diversity
+CYPHER 25
+MATCH (nav:NavigationMaster {namespace: $namespace, topology: '6_ENTITY'})
+MATCH (nav)-[*1..5]-(n1)-[r]->(n2)
+RETURN count(DISTINCT type(r)) as rel_type_count  // Should be ≥20
+
+-- Verify property richness
+CYPHER 25
+MATCH (nav:NavigationMaster {namespace: $namespace})
+MATCH (nav)-[*1..5]->(n)
+WHERE size(keys(n)) < 5
+RETURN count(n) as sparse_nodes  // Should be 0
+                ]]>
+            </verification_queries>
+        </verification_loops>
+
+        <alternative_exploration>
+            <!-- When primary approach blocked, explore orthogonal alternatives -->
+
+            <exploration_mindset>
+                When facing persistent failures, ask:
+                1. "What if I approach this from a completely different angle?"
+                2. "Can I achieve 80% of the goal with 20% of the complexity?"
+                3. "What would a simpler model look like that still provides value?"
+                4. "Can I break this into smaller independent pieces?"
+                5. "Is there a hybrid approach combining multiple strategies?"
+            </exploration_mindset>
+
+            <alternative_approaches>
+                <alternative name="FILE_CATALOG_FIRST">
+                    Instead of: Full behavioral analysis with 6-ENTITY
+                    Try: Create simple STAR file catalog first, then enrich
+                    Benefit: Establishes baseline structure that can be enhanced
+                </alternative>
+
+                <alternative name="PATTERN_FOCUSED">
+                    Instead of: Modeling entire system
+                    Try: Focus on specific bug patterns only
+                    Benefit: Delivers immediate value without complete model
+                </alternative>
+
+                <alternative name="LAYER_BY_LAYER">
+                    Instead of: Creating all layers simultaneously
+                    Try: Create NavigationMaster, then entities, then details separately
+                    Benefit: Isolates failures to specific layers
+                </alternative>
+
+                <alternative name="ITERATIVE_ENRICHMENT">
+                    Instead of: Creating perfect nodes upfront
+                    Try: Create basic nodes, then enhance properties in second pass
+                    Benefit: Ensures connectivity first, optimization second
+                </alternative>
+
+                <alternative name="HYBRID_TOPOLOGY">
+                    Instead of: Pure 6-ENTITY or pure STAR
+                    Try: Use 6-ENTITY for critical components, STAR for supporting files
+                    Benefit: Balances complexity with completeness
+                </alternative>
+            </alternative_approaches>
+        </alternative_exploration>
+
+        <resilience_directives>
+            <!-- Mandatory behaviors for resilient execution -->
+
+            DIRECTIVE 1: NEVER retry the exact same operation without modification
+            DIRECTIVE 2: ALWAYS think after failures before attempting fixes
+            DIRECTIVE 3: Plan backup approaches BEFORE starting complex operations
+            DIRECTIVE 4: Verify at checkpoints, don't wait until the end
+            DIRECTIVE 5: When stuck after 3 attempts, switch to alternative approach
+            DIRECTIVE 6: Graceful degradation is better than complete failure
+            DIRECTIVE 7: Document limitations when delivering partial results
+            DIRECTIVE 8: Learn from each failure - capture patterns for future avoidance
+        </resilience_directives>
+
+        <activation_protocol>
+            This resilient execution framework activates:
+            - At start of every complex modeling task (multi-step operations)
+            - Immediately upon ANY tool call failure
+            - When verification checkpoints detect issues
+            - After 2 consecutive failed attempts at any operation
+
+            It does NOT activate for:
+            - Simple single-query operations
+            - Already-verified working patterns
+            - Read-only queries with no failure risk
+        </activation_protocol>
+
+    </RESILIENT_EXECUTION>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════════
          QUICK REFERENCE
          ═══════════════════════════════════════════════════════════════════════════ -->
 
@@ -359,6 +683,14 @@ ORDER BY distance]]></query>
         <metrics>
             Target: &lt;50ms queries | 95% bug detection | 85% token reduction
         </metrics>
+
+        <!-- RESILIENCE METRICS [NEW] -->
+        <resilience_metrics>
+            Success Rate: Track % of operations succeeding on first attempt
+            Adaptation Rate: Track % of failures resolved through adaptive retry
+            Fallback Usage: Track frequency of backup path activation
+            Target: >90% eventual success rate through resilient execution
+        </resilience_metrics>
     </QUICK_REFERENCE>
 
 </opus41_springboot_graphmodeling>
