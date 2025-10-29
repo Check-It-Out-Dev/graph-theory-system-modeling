@@ -246,3 +246,6 @@ Optional:
 - **Debuggers** (ErdosDebugger, ClineDebugger) need only 2 MCP servers for powerful analysis
 - **Graph Theory Implementations** are based on academic research papers and require more extensive Neo4j setup
 - All prompts follow the NavigationMaster pattern for consistent cognitive architecture
+
+## GPT-5 model integration
+npm install -g @dannyboy2042/gpt5-mcp-server
