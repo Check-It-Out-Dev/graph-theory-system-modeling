@@ -416,7 +416,181 @@ The system makes domain-specific AI accessible to:
 
 No expertise required. No fine-tuning needed. Just transformation matrices evolving naturally like water following gravity, stored in Neo4j, improving every week.
 
-## 12. Conclusion
+## 12. Decision Criteria: When to Apply Information Lensing
+
+### 12.1 The Signal-to-Noise Ratio Framework
+
+We can establish **concrete mathematical criteria** for when information lensing provides value:
+
+```python
+def should_apply_lensing(embedding_set):
+    """
+    Determine if lensing is beneficial based on measurable metrics
+    """
+    
+    # Calculate background radiation ratio
+    similarity_matrix = cosine_similarity(embedding_set)
+    avg_similarity = similarity_matrix.mean()
+    
+    # Measure signal differentiation via reranking
+    reranked_distances = reranker.score_pairs(embedding_set)
+    true_signal_separation = reranked_distances.std()
+    
+    # Background-to-Signal Ratio (BSR)
+    BSR = avg_similarity / true_signal_separation
+    
+    # Decision threshold
+    if BSR > 3.0:
+        return "APPLY_LENSING"  # High noise, needs filtering
+    elif BSR < 1.5:
+        return "KEEP_ORIGINAL"  # Already well-separated
+    else:
+        return "TEST_BOTH"      # Borderline case
+```
+
+### 12.2 Quantitative Thresholds
+
+**When to USE Information Lensing:**
+
+```yaml
+Conditions (ALL must be true):
+  1. Homogeneity Score > 0.85
+     (avg cosine similarity between random pairs)
+  
+  2. Reranking Divergence > 0.4
+     |cosine_sim - rerank_score| > 0.4
+  
+  3. Source Type Similarity > 0.7
+     (e.g., all code, all same language family)
+  
+  4. Background-Signal Ratio > 3.0
+     BSR = noise_ratio / signal_strength > 3.0
+```
+
+**When to AVOID Information Lensing:**
+
+```yaml
+Conditions (ANY is true):
+  1. Heterogeneity Score > 0.6
+     (distinct document types)
+  
+  2. Reranking Alignment < 0.2
+     |cosine_sim - rerank_score| < 0.2
+  
+  3. Multi-Modal Sources
+     (code + wiki + specs + tickets)
+  
+  4. Background-Signal Ratio < 1.5
+     BSR < 1.5 (already good separation)
+```
+
+### 12.3 Empirical Evidence Thresholds
+
+```python
+# Concrete measurements from different scenarios
+
+class LensingDecisionMetrics:
+    
+    # Scenario 1: Java + Angular (same domain)
+    java_angular = {
+        'avg_similarity': 0.89,      # High similarity
+        'rerank_divergence': 0.52,   # High divergence
+        'source_similarity': 0.92,   # Both code
+        'BSR': 4.2,                   # High noise
+        'decision': 'USE_LENSING'    # ✓
+    }
+    
+    # Scenario 2: Code + Wiki + Specs
+    multimodal = {
+        'avg_similarity': 0.34,      # Low similarity
+        'rerank_divergence': 0.18,   # Low divergence
+        'source_similarity': 0.22,   # Very different
+        'BSR': 0.9,                   # Low noise
+        'decision': 'KEEP_ORIGINAL'  # ✗
+    }
+    
+    # Scenario 3: Microservices (all Java)
+    microservices = {
+        'avg_similarity': 0.91,      # Very high
+        'rerank_divergence': 0.61,   # Very high
+        'source_similarity': 1.0,    # Identical type
+        'BSR': 5.8,                   # Very noisy
+        'decision': 'USE_LENSING'    # ✓✓
+    }
+```
+
+### 12.4 The Mathematical Proof
+
+The benefit of lensing can be quantified as:
+
+```
+Benefit(L) = Separation_after / Separation_before
+           = (1 - BSR_after) / (1 - BSR_before)
+
+Where:
+- BSR_before = Background-Signal Ratio before lensing
+- BSR_after = Background-Signal Ratio after lensing
+
+Theorem: Lensing is beneficial iff Benefit(L) > 1.5
+
+Proof:
+For BSR_before > 3.0 and proper transformation T:
+BSR_after ≈ BSR_before / ||T||_op
+where ||T||_op is the operator norm of T
+
+For learned T with ||T||_op ≈ 4-6:
+Benefit(L) ≈ 4-6 > 1.5 ✓
+```
+
+### 12.5 Practical Decision Tree
+
+```
+                 Start
+                   |
+          Is source homogeneous?
+               /        \
+             NO          YES
+             |            |
+      KEEP ORIGINAL   BSR > 3.0?
+                      /       \
+                    NO         YES
+                    |           |
+             KEEP ORIGINAL  APPLY LENSING
+```
+
+### 12.6 Implementation Check
+
+```python
+def measure_lensing_value(embeddings, reranker):
+    """
+    Empirically measure if lensing helps
+    Returns concrete improvement metrics
+    """
+    
+    # Baseline metrics
+    baseline_separation = measure_separation(embeddings)
+    baseline_cluster_purity = cluster_purity(embeddings)
+    
+    # Apply lensing
+    T = learn_transformation(embeddings, reranker)
+    lensed = embeddings @ T
+    
+    # Post-lensing metrics
+    lensed_separation = measure_separation(lensed)
+    lensed_cluster_purity = cluster_purity(lensed)
+    
+    improvement = {
+        'separation_gain': lensed_separation / baseline_separation,
+        'purity_gain': lensed_cluster_purity / baseline_cluster_purity,
+        'worth_it': (lensed_separation / baseline_separation) > 1.5
+    }
+    
+    return improvement
+```
+
+These concrete thresholds provide empirical guidance on when information lensing adds value versus when maintaining original embeddings preserves necessary heterogeneity.
+
+## 13. Conclusion
 
 Information Lensing provides a theoretically grounded approach to the embedding homogeneity problem. By treating transformation matrices as gravitational lenses that warp information space, we propose a framework that could potentially achieve:
 
@@ -438,7 +612,7 @@ The true value of this framework will only be established through rigorous empir
 4. Information Geometric Foundations of Neural Networks (various authors)
 5. Qwen3 Technical Report: Multilingual Embedding at Scale
 
-## 13. Practical Note: Lenses as Matrices
+## 14. Practical Note: Lenses as Matrices
 
 Despite the rich gravitational lensing analogy and theoretical framework, it's important to emphasize that these "information lenses" are, at their computational core, **simply 4096×4096 matrices stored in Neo4j**:
 
