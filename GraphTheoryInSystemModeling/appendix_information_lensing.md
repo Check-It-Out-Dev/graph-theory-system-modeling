@@ -415,7 +415,389 @@ For typical enterprise Java codebases:
 
 ---
 
-## 12. Conclusion
+## 12. Incremental Lens Calibration
+
+### 12.1 The Incremental Update Problem
+
+In production codebases, files are continuously added, modified, and deleted. Full lens recalibration requires $O(N^2)$ reranker calls for $N$ files—prohibitively expensive for large repositories with frequent changes.
+
+**Problem Statement:**
+
+Given:
+- Previous lens $T_{\text{old}}$ trained on file set $\mathcal{F}_{\text{old}}$
+- New file set $\mathcal{F}_{\text{new}} = \mathcal{F}_{\text{old}} \cup \mathcal{A} \setminus \mathcal{D} \cup \mathcal{M}$
+
+where:
+- $\mathcal{A}$ = added files
+- $\mathcal{D}$ = deleted files  
+- $\mathcal{M}$ = modified files
+
+Find $T_{\text{new}}$ without full recomputation.
+
+### 12.2 Concrete Example: Weekly Sprint Changes
+
+**Initial State (Week $n$):**
+
+```
+Repository:
+├── PaymentService.java      (e₁)
+├── InventoryService.java    (e₂)  
+├── AuthService.java         (e₃)
+├── UserRepository.java      (e₄)
+└── OrderController.java     (e₅)
+```
+
+Lens $T_{\text{old}}$ trained on all $\binom{5}{2} = 10$ pairs.
+
+**Changes (Week $n+1$):**
+
+```diff
++ ShippingService.java       (e₆)  [ADDED]
+~ PaymentService.java        (e₁') [MODIFIED: added refund logic]
+- InventoryService.java            [DELETED: moved to microservice]
+```
+
+**New State:**
+
+```
+Repository:
+├── PaymentService.java      (e₁') [changed embedding]
+├── AuthService.java         (e₃)  [unchanged]
+├── UserRepository.java      (e₄)  [unchanged]
+├── OrderController.java     (e₅)  [unchanged]
+└── ShippingService.java     (e₆)  [new]
+```
+
+### 12.3 Pair Classification
+
+We partition the pair space into four categories:
+
+| Category | Pairs | Count | Action |
+|----------|-------|-------|--------|
+| **Critical-New** | $(e_6, e_j)$ for all $j$ | 4 | Must compute |
+| **Critical-Modified** | $(e_1', e_j)$ for all $j$ | 4 | Must recompute |
+| **Invalidated** | $(e_2, \cdot)$ | 0 | Remove from consideration |
+| **Stable** | $(e_3, e_4), (e_3, e_5), (e_4, e_5)$ | 3 | Sample for regularization |
+
+**Pair Matrix Evolution:**
+
+$P_{\text{old}} = \begin{pmatrix} 
+- & p_{12} & p_{13} & p_{14} & p_{15} \\
+  & - & p_{23} & p_{24} & p_{25} \\
+  &   & - & p_{34} & p_{35} \\
+  &   &   & - & p_{45} \\
+  &   &   &   & -
+\end{pmatrix}$
+
+$P_{\text{new}} = \begin{pmatrix} 
+- & \cdot & p'_{13} & p'_{14} & p'_{15} & p'_{16} \\
+  & - & \cdot & \cdot & \cdot & \cdot \\
+  &   & - & p_{34} & p_{35} & p_{36} \\
+  &   &   & - & p_{45} & p_{46} \\
+  &   &   &   & - & p_{56} \\
+  &   &   &   &   & -
+\end{pmatrix}$
+
+where:
+- $p'_{1j}$ = recomputed (modified file)
+- $p_{j6}$ = new (added file)
+- Row/column 2 = deleted
+- $p_{34}, p_{35}, p_{45}$ = stable (reusable)
+
+### 12.4 Importance-Weighted Incremental Loss
+
+**Full Loss Function:**
+
+$\mathcal{L}_{\text{incremental}}(T) = \mathcal{L}_{\text{critical}} + \lambda_1 \mathcal{L}_{\text{memory}} + \lambda_2 \mathcal{L}_{\text{anchor}}$
+
+**Component 1: Critical Pairs (must learn)**
+
+$\mathcal{L}_{\text{critical}} = \frac{1}{|\mathcal{C}|} \sum_{(i,j) \in \mathcal{C}} \left( s_{\text{rerank}}(i,j) - \text{sim}(Te_i, Te_j) \right)^2$
+
+where $\mathcal{C} = \{(i,j) : i \in \mathcal{A} \cup \mathcal{M} \text{ or } j \in \mathcal{A} \cup \mathcal{M}\}$
+
+**Component 2: Memory Preservation (sampled stable pairs)**
+
+$\mathcal{L}_{\text{memory}} = \frac{1}{|\mathcal{S}|} \sum_{(i,j) \in \mathcal{S}} \left( s_{\text{rerank}}(i,j) - \text{sim}(Te_i, Te_j) \right)^2$
+
+where $\mathcal{S} \sim \text{Uniform}(\mathcal{P}_{\text{stable}})$ with $|\mathcal{S}| = \min(|\mathcal{C}|, |\mathcal{P}_{\text{stable}}|)$
+
+**Component 3: Anchor Regularization (prevent catastrophic drift)**
+
+$\mathcal{L}_{\text{anchor}} = \|T - T_{\text{old}}\|_F^2$
+
+**Recommended Hyperparameters:**
+- $\lambda_1 = 0.5$ (memory weight)
+- $\lambda_2 = 0.1$ (anchor weight)
+
+### 12.5 Matrix-Level Algorithm
+
+The following algorithm is designed for direct matrix implementation:
+
+**Input:**
+- $E_{\text{old}} \in \mathbb{R}^{N_{\text{old}} \times d}$: previous embedding matrix
+- $T_{\text{old}} \in \mathbb{R}^{d \times d}$: previous lens (or $U, \Sigma, V$ if low-rank)
+- $S_{\text{old}} \in \mathbb{R}^{N_{\text{old}} \times N_{\text{old}}}$: previous reranker similarity matrix
+- $\text{idx}_{\text{add}}$: indices of added files
+- $\text{idx}_{\text{mod}}$: indices of modified files
+- $\text{idx}_{\text{del}}$: indices of deleted files
+
+**Step 1: Construct New Embedding Matrix**
+
+```
+# Remove deleted rows
+mask_keep = ~isin(range(N_old), idx_del)
+E_kept = E_old[mask_keep, :]
+
+# Update modified embeddings (re-embed these files)
+for i in idx_mod:
+    E_kept[i, :] = embed(modified_file[i])
+
+# Append new embeddings
+E_new_files = stack([embed(f) for f in added_files])
+E_new = vstack([E_kept, E_new_files])
+
+# Result: E_new ∈ R^{N_new × d}
+```
+
+**Step 2: Identify Critical Pairs**
+
+```
+N_new = E_new.shape[0]
+idx_critical = union(idx_mod, range(N_kept, N_new))  # modified + added
+
+# Critical pair mask: C[i,j] = 1 if i or j is critical
+C = zeros(N_new, N_new)
+C[idx_critical, :] = 1
+C[:, idx_critical] = 1
+C = triu(C, k=1)  # upper triangular, no diagonal
+```
+
+**Step 3: Compute Critical Reranker Scores**
+
+```
+# Only compute reranker for critical pairs
+S_new = zeros(N_new, N_new)
+
+# Copy stable pairs from old matrix (with index remapping)
+S_new[stable_idx, stable_idx] = S_old[stable_old_idx, stable_old_idx]
+
+# Compute new pairs
+for (i, j) in where(C == 1):
+    S_new[i, j] = reranker(file[i], file[j])
+    S_new[j, i] = S_new[i, j]  # symmetric
+```
+
+**Step 4: Sample Memory Pairs**
+
+```
+# Stable pair indices
+stable_mask = triu(ones(N_new, N_new), k=1) - C
+stable_pairs = where(stable_mask == 1)
+
+# Sample |C| pairs for memory
+n_sample = min(sum(C), len(stable_pairs))
+memory_idx = random.choice(len(stable_pairs), n_sample, replace=False)
+M = zeros(N_new, N_new)
+M[stable_pairs[memory_idx]] = 1
+```
+
+**Step 5: Incremental Training**
+
+```
+# Initialize from old lens
+T = T_old.copy()  # or U, Σ, V = U_old, Σ_old, V_old
+
+for epoch in range(50):  # fewer epochs than full training
+    # Forward pass
+    E_transformed = E_new @ T
+    S_pred = cosine_similarity_matrix(E_transformed)
+    
+    # Losses (element-wise, then masked sum)
+    L_critical = mean((S_new - S_pred)² * C)
+    L_memory = mean((S_new - S_pred)² * M)
+    L_anchor = frobenius_norm(T - T_old)²
+    
+    L_total = L_critical + λ₁ * L_memory + λ₂ * L_anchor
+    
+    # Backward pass
+    T = T - η * gradient(L_total, T)
+```
+
+**Output:**
+- $T_{\text{new}}$: updated lens
+- $E_{\text{new}}$: new embedding matrix  
+- $S_{\text{new}}$: updated similarity matrix (cache for next iteration)
+
+### 12.6 Complexity Analysis
+
+| Operation | Full Recalibration | Incremental |
+|-----------|-------------------|-------------|
+| Reranker calls | $O(N^2)$ | $O(N \cdot |\Delta|)$ |
+| Embedding calls | $O(N)$ | $O(|\Delta|)$ |
+| Training pairs | $\binom{N}{2}$ | $\approx 2N|\Delta|$ |
+| Epochs | 100-200 | 30-50 |
+
+where $|\Delta| = |\mathcal{A}| + |\mathcal{M}|$
+
+**Example Savings (N=1000 files, 20 changes/week):**
+- Full: $\binom{1000}{2} = 499,500$ reranker calls
+- Incremental: $\approx 1000 \times 20 \times 2 = 40,000$ calls
+- **Speedup: 12.5×**
+
+### 12.7 Convergence Guarantee for Incremental Updates
+
+The anchor term $\mathcal{L}_{\text{anchor}}$ ensures bounded drift:
+
+$\|T_{\text{new}} - T_{\text{old}}\|_F \leq \frac{\|\nabla \mathcal{L}_{\text{critical}}\|_F}{\lambda_2}$
+
+**Theorem (Bounded Accumulated Drift):**
+
+After $K$ incremental updates:
+
+$\|T_K - T_0\|_F \leq \sum_{k=1}^{K} \frac{\|\nabla \mathcal{L}_{\text{critical}}^{(k)}\|_F}{\lambda_2}$
+
+If changes are bounded ($|\Delta_k| \leq \delta$ per week), drift grows at most linearly.
+
+**Monthly Reset Criterion:**
+
+Perform full recalibration when:
+
+$\|T_{\text{current}} - T_{\text{last\_full}}\|_F > \tau_{\text{reset}}$
+
+where $\tau_{\text{reset}} \approx 0.1 \cdot \|T_{\text{last\_full}}\|_F$ (10% relative drift).
+
+### 12.8 Practical Schedule
+
+| Frequency | Action | Trigger |
+|-----------|--------|---------|  
+| Daily/PR merge | Update embedding cache only | Any code change |
+| Weekly | Incremental lens calibration | $|\Delta| > 5$ files |
+| Monthly | Full recalibration | Drift > 10% OR $|\Delta_{\text{cumulative}}| > 0.2N$ |
+| Quarterly | Validation set review | Calendar |
+
+### 12.9 Theoretical Foundation: Lyapunov Functional Interpretation
+
+The incremental calibration scheme admits a rigorous interpretation through dynamical systems theory. This perspective reveals that our approach defines a **living model**—one that continuously co-evolves with its domain rather than remaining frozen after training.
+
+#### 12.9.1 The Lens as Dynamical System
+
+Consider the sequence of lenses generated by incremental updates:
+
+$T_0 \xrightarrow{\Delta_1} T_1 \xrightarrow{\Delta_2} T_2 \xrightarrow{\Delta_3} \cdots$
+
+This defines a discrete dynamical system on the manifold of transformation matrices:
+
+$T_{n+1} = \Phi(T_n, \Delta_n, D_n)$
+
+where:
+- $\Phi$: update operator (gradient descent on $\mathcal{L}_{\text{incremental}}$)
+- $\Delta_n$: code changes at step $n$
+- $D_n$: domain state (reranker scores) at step $n$
+
+#### 12.9.2 Loss as Lyapunov Functional
+
+A **Lyapunov functional** $V: \mathcal{X} \to \mathbb{R}$ for a dynamical system guarantees stability if:
+
+1. $V(x) \geq 0$ for all $x$ (non-negative)
+2. $V(x) = 0$ iff $x = x^*$ (zero at equilibrium)
+3. $V(x_{n+1}) < V(x_n)$ for $x_n \neq x^*$ (strictly decreasing)
+
+Our loss function satisfies these properties:
+
+$\mathcal{L}_{\text{incremental}}[T] = \underbrace{\mathcal{L}_{\text{critical}}}_{{\geq 0}} + \lambda_1 \underbrace{\mathcal{L}_{\text{memory}}}_{{\geq 0}} + \lambda_2 \underbrace{\mathcal{L}_{\text{anchor}}}_{{\geq 0}} \geq 0$
+
+**Condition 1:** Sum of squared errors is non-negative. ✓
+
+**Condition 2:** $\mathcal{L} = 0$ when transformed embeddings perfectly match reranker scores. ✓
+
+**Condition 3:** Gradient descent guarantees $\mathcal{L}(T_{n+1}) \leq \mathcal{L}(T_n)$ for appropriate learning rate. ✓
+
+#### 12.9.3 Convergence Theorem
+
+**Theorem (Lyapunov Stability of Incremental Calibration):**
+
+Let $\{T_n\}$ be the sequence of lenses produced by Algorithm 12.5 with learning rate $\eta < 2/L$ where $L$ is the Lipschitz constant of $\nabla\mathcal{L}$. Then:
+
+1. **Monotonic Improvement:** $\mathcal{L}[T_{n+1}] \leq \mathcal{L}[T_n]$ for all $n$
+
+2. **Bounded Trajectory:** $\|T_n - T_0\|_F \leq B$ for some finite $B$
+
+3. **Convergence:** $\lim_{n \to \infty} \|\nabla\mathcal{L}[T_n]\| = 0$
+
+**Proof Sketch:**
+
+The anchor term $\lambda_2 \|T - T_{\text{old}}\|_F^2$ acts as a regularizer that:
+- Prevents unbounded drift (ensures bounded trajectory)
+- Creates a basin of attraction around $T_{\text{old}}$
+- Guarantees the Hessian $\nabla^2\mathcal{L}$ has eigenvalues $\geq \lambda_2 > 0$
+
+Strong convexity from the anchor term, combined with Lipschitz gradients from the MSE terms, satisfies standard convergence conditions for gradient descent. $\square$
+
+#### 12.9.4 Living Models vs Frozen Models
+
+Traditional ML follows a **train-freeze-deploy** paradigm:
+
+```
+Data₀ → Train → Model* → Deploy → [frozen forever]
+```
+
+Information Lensing introduces a **train-deploy-evolve** paradigm:
+
+```
+Data₀ → Train → T₀ → Deploy
+              ↓
+Data₁ → Δ₁ → T₁ → Deploy  
+              ↓
+Data₂ → Δ₂ → T₂ → Deploy
+              ↓
+             ...
+```
+
+| Aspect | Frozen Model | Living Lens |
+|--------|--------------|-------------|
+| Adaptation | None post-training | Continuous |
+| Domain drift | Causes degradation | Tracked automatically |
+| Catastrophic forgetting | Risk during retraining | Prevented by anchor term |
+| Compute per update | $O(N^2)$ full retrain | $O(N \cdot |\Delta|)$ incremental |
+| Mathematical guarantee | None for evolution | Lyapunov stability |
+
+#### 12.9.5 Connection to Perelman's Ricci Flow
+
+Our framework shares deep structural similarities with Perelman's proof of the Poincaré conjecture:
+
+| Ricci Flow | Information Lensing |
+|------------|--------------------|
+| Metric tensor $g_{ij}(t)$ | Lens matrix $T(n)$ |
+| Ricci curvature $R_{ij}$ | Reranker gradient $\nabla\mathcal{L}$ |
+| Perelman's $\mathcal{W}$-entropy | $\mathcal{L}_{\text{incremental}}$ functional |
+| Flow toward canonical geometry | Convergence to domain-optimal lens |
+| Surgery at singularities | Monthly full recalibration |
+| Monotonicity of entropy | Monotonic decrease of loss |
+
+Perelman's insight was that the $\mathcal{W}$-entropy functional provides a "compass" through the space of geometries, guaranteeing that Ricci flow moves toward simpler structures despite local complexity.
+
+Similarly, $\mathcal{L}_{\text{incremental}}$ provides a compass through the space of lenses, guaranteeing movement toward better domain alignment despite the complexity of evolving codebases.
+
+#### 12.9.6 Implications for ML Research
+
+This framework suggests several research directions:
+
+1. **Continuous Learning Theory:** Formal study of models that evolve with their domains, with provable stability guarantees.
+
+2. **Functional Design:** Systematic construction of Lyapunov functionals for different adaptation scenarios (concept drift, distribution shift, adversarial perturbation).
+
+3. **Surgery Operations:** When incremental updates fail (analogous to Ricci flow singularities), what minimal "surgical" interventions restore convergence?
+
+4. **Multi-Scale Dynamics:** Different components of the lens may require different update frequencies—structural relationships change slowly, semantic relationships change faster.
+
+5. **Thermodynamic Interpretation:** If $\mathcal{L}$ acts as entropy, what is the "temperature" of the system? Can we define phase transitions in lens behavior?
+
+The key insight is that **treating ML models as dynamical systems** rather than static artifacts opens new theoretical and practical possibilities.
+
+---
+
+## 13. Conclusion
 
 Information Lensing provides a theoretically grounded, practically implementable approach to the embedding homogeneity problem. By treating transformation matrices as gravitational lenses that warp information space, we achieve:
 
