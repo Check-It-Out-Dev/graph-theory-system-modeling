@@ -114,7 +114,7 @@ class EmbeddingEngine:
         
         try:
             model_kwargs = {
-                "torch_dtype": self._get_torch_dtype(),
+                "dtype": self._get_torch_dtype(),
                 "trust_remote_code": self.config.trust_remote_code,
             }
             
@@ -195,13 +195,14 @@ class EmbeddingEngine:
             >>> result = engine.embed([
             ...     "Machine learning is a subset of AI...",
             ...     "Deep learning uses neural networks...",
-            ... ], prompt_name="passage")
+            ... ], prompt_name="document")
         """
         # Handle single text input
         if isinstance(texts, str):
             texts = [texts]
         
         texts = list(texts)
+        logger.debug(f"Processing {len(texts)} texts")
         
         # Determine prompt strategy
         effective_prompt_name = prompt_name

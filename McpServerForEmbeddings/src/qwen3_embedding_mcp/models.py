@@ -133,7 +133,7 @@ class EmbeddingModel:
             
             # Load using SentenceTransformer for optimal performance
             model_kwargs = {
-                "torch_dtype": torch_dtype,
+                "dtype": torch_dtype,
                 "trust_remote_code": self.settings.trust_remote_code,
             }
             
