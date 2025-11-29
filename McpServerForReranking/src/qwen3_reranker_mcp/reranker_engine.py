@@ -27,6 +27,14 @@ class ScoreResult:
     document: str
 
 
+@dataclass
+class BatchScoreResult:
+    """Result of scoring multiple pairs."""
+    scores: list[float]
+    pairs: list[tuple[str, str]]
+    symmetric: bool
+
+
 class RerankerEngine:
     """
     Domain-tuned reranker for Information Lensing.
@@ -230,6 +238,61 @@ class RerankerEngine:
     def score_pair_raw(self, query: str, document: str) -> float:
         """Just return the probability score."""
         return self.score_pair(query, document).score
+    
+    def score_pair_symmetric(self, code_a: str, code_b: str) -> float:
+        """
+        Score with symmetrization: (score(a,b) + score(b,a)) / 2
+        
+        Rerankers are inherently asymmetric (query vs document).
+        For Information Lensing we need symmetric similarity matrix,
+        so we average both directions.
+        
+        Args:
+            code_a: First code segment
+            code_b: Second code segment
+        
+        Returns:
+            Symmetric probability score (0.0-1.0)
+        """
+        score_ab = self.score_pair_raw(code_a, code_b)
+        score_ba = self.score_pair_raw(code_b, code_a)
+        return (score_ab + score_ba) / 2
+    
+    def score_batch(
+        self,
+        pairs: list[tuple[str, str]],
+        symmetric: bool = True,
+    ) -> BatchScoreResult:
+        """
+        Score multiple pairs efficiently.
+        
+        Args:
+            pairs: List of (code_a, code_b) tuples
+            symmetric: If True, compute (score(a,b) + score(b,a)) / 2
+        
+        Returns:
+            BatchScoreResult with scores in same order as input pairs
+        """
+        logger.info(f"Scoring batch of {len(pairs)} pairs (symmetric={symmetric})")
+        
+        scores = []
+        for i, (code_a, code_b) in enumerate(pairs):
+            if symmetric:
+                score = self.score_pair_symmetric(code_a, code_b)
+            else:
+                score = self.score_pair_raw(code_a, code_b)
+            scores.append(score)
+            
+            if (i + 1) % 10 == 0:
+                logger.debug(f"Processed {i + 1}/{len(pairs)} pairs")
+        
+        logger.info(f"Batch complete: {len(scores)} scores computed")
+        
+        return BatchScoreResult(
+            scores=scores,
+            pairs=pairs,
+            symmetric=symmetric,
+        )
     
     def get_model_info(self) -> dict:
         """Get model status."""

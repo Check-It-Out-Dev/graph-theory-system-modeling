@@ -50,6 +50,24 @@ class ScorePairInput(BaseModel):
     document: str = Field(
         description="Second code segment to compare against the first"
     )
+    symmetric: bool = Field(
+        default=True,
+        description="If True (default), compute (score(a,b) + score(b,a)) / 2 for symmetric similarity"
+    )
+
+
+class ScoreBatchInput(BaseModel):
+    """Input: multiple pairs to score in one call."""
+    
+    pairs: list[tuple[str, str]] = Field(
+        description="List of (code_a, code_b) pairs to score",
+        min_length=1,
+        max_length=100,
+    )
+    symmetric: bool = Field(
+        default=True,
+        description="If True, compute (score(a,b) + score(b,a)) / 2 for each pair"
+    )
 
 
 # =============================================================================
@@ -81,6 +99,22 @@ For Information Lensing:
         inputSchema=ScorePairInput.model_json_schema(),
     ),
     Tool(
+        name="score_batch",
+        description="""Score multiple pairs in a single call. Optimized for building similarity matrices.
+
+Input: List of (code_a, code_b) pairs (max 100)
+Output: List of scores in same order
+
+By default uses symmetric scoring: (score(a,b) + score(b,a)) / 2
+This ensures S[i,j] = S[j,i] as required for Information Lensing.
+
+Example usage for matrix construction:
+    pairs = [(files[i], files[j]) for i in range(N) for j in range(i+1, N)]
+    result = score_batch(pairs, symmetric=True)
+    # result.scores contains upper triangular matrix values""",
+        inputSchema=ScoreBatchInput.model_json_schema(),
+    ),
+    Tool(
         name="model_info",
         description="Get reranker model status and configuration.",
         inputSchema={"type": "object", "properties": {}},
@@ -107,21 +141,59 @@ async def call_tool(name: str, arguments: dict) -> CallToolResult:
             
             # Run scoring in thread pool
             loop = asyncio.get_event_loop()
-            result = await loop.run_in_executor(
-                None,
-                lambda: engine.score_pair(input_data.query, input_data.document),
-            )
+            
+            if input_data.symmetric:
+                # Symmetric scoring: (score(a,b) + score(b,a)) / 2
+                score = await loop.run_in_executor(
+                    None,
+                    lambda: engine.score_pair_symmetric(input_data.query, input_data.document),
+                )
+            else:
+                # Asymmetric scoring: query → document only
+                result = await loop.run_in_executor(
+                    None,
+                    lambda: engine.score_pair(input_data.query, input_data.document),
+                )
+                score = result.score
             
             # Simple response: just the score and minimal context
             response = {
-                "score": round(result.score, 4),
-                "interpretation": _interpret_score(result.score),
+                "score": round(score, 4),
+                "interpretation": _interpret_score(score),
+                "symmetric": input_data.symmetric,
             }
             
             return CallToolResult(
                 content=[TextContent(
                     type="text",
-                    text=f"**Score: {result.score:.4f}**\n\n```json\n{json.dumps(response, indent=2)}\n```"
+                    text=f"**Score: {score:.4f}**\n\n```json\n{json.dumps(response, indent=2)}\n```"
+                )]
+            )
+        
+        elif name == "score_batch":
+            input_data = ScoreBatchInput(**arguments)
+            
+            # Convert list of lists to list of tuples (JSON doesn't have tuples)
+            pairs = [tuple(p) for p in input_data.pairs]
+            
+            # Run batch scoring in thread pool
+            loop = asyncio.get_event_loop()
+            result = await loop.run_in_executor(
+                None,
+                lambda: engine.score_batch(pairs, symmetric=input_data.symmetric),
+            )
+            
+            # Response with all scores
+            response = {
+                "scores": [round(s, 4) for s in result.scores],
+                "count": len(result.scores),
+                "symmetric": result.symmetric,
+            }
+            
+            return CallToolResult(
+                content=[TextContent(
+                    type="text",
+                    text=f"**Batch complete: {len(result.scores)} pairs scored**\n\n```json\n{json.dumps(response, indent=2)}\n```"
                 )]
             )
         
