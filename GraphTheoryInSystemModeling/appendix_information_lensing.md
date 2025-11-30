@@ -437,8 +437,8 @@ Based on the framework, we predict the following improvements (to be validated e
 
 Lensing is most beneficial when:
 
-1. **High embedding homogeneity:** $\text{avg\_cosine\_sim} > 0.85$
-2. **Reranker divergence:** $|\text{cosine\_sim} - \text{reranker\_score}| > 0.40$
+1. **High embedding homogeneity:** $\text{avg-cosine-sim} > 0.85$
+2. **Reranker divergence:** $|\text{cosine-sim} - \text{reranker-score}| > 0.40$
 3. **Low effective dimensionality:** $d_{\text{eff}} < 200$
 4. **Domain specificity:** Code is specialized (e.g., enterprise Java) rather than generic
 
@@ -580,7 +580,7 @@ Target: 50k pairs regardless of codebase size, with theoretical guarantees on sa
 
 Apply Information Lensing when ALL conditions hold:
 
-$$\text{avg\_cosine\_similarity} > 0.85$$
+$$\text{avg-cosine-similarity} > 0.85$$
 $$|\text{cosine} - \text{reranker}|_{\text{avg}} > 0.40$$
 $$d_{\text{eff}} < 200$$
 
