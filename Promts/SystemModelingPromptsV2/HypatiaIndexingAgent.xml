@@ -277,91 +277,110 @@ Runtime Analysis for PaymentService:
 """
 
 ───────────────────────────────────────────────────────────────────────────────
-STEP 5A: GENERATE SEMANTIC EMBEDDING (Qwen3-Embedding MCP - Call 1)
-───────────────────────────────────────────────────────────────────────────────
-Tool: mcp__qwen3-embedding__embed
-Parameters: {
-  "lens": "semantic",
-  "text": "@Service\n@Transactional\npublic class PaymentService {\n    private final PaymentRepository paymentRepository;\n    ...",
-  "dimension": 4096
-}
-
-WAIT FOR RESPONSE (100-200ms)
-
-Response:
-{
-  "embedding": [0.0249, 0.0096, 0.0470, 0.0002, ..., -0.0067],  // 4096 floats
-  "lens": "semantic",
-  "dimensions": 4096,
-  "normalized": true
-}
-
-Extract: semantic_embedding = response["embedding"]
-Verify: len(semantic_embedding) == 4096 ✓
-
-───────────────────────────────────────────────────────────────────────────────
-STEP 5B: GENERATE BEHAVIORAL EMBEDDING (Qwen3-Embedding MCP - Call 2)
-───────────────────────────────────────────────────────────────────────────────
-Tool: mcp__qwen3-embedding__embed
-Parameters: {
-  "lens": "behavioral",
-  "text": "Runtime Analysis for PaymentService:\n- Transaction boundary: @Transactional (class-level)\n- Error handling: Optional.orElseThrow pattern\n- Side effects: Database write via paymentRepository.save()\n- Dependencies: paymentRepository, campaignService\n- State transitions: Payment status PENDING on creation",
-  "dimension": 4096
-}
-
-WAIT FOR RESPONSE (100-200ms)
-
-Response:
-{
-  "embedding": [0.0123, -0.0456, 0.0789, ..., 0.0034],  // 4096 floats
-  "lens": "behavioral",
-  "dimensions": 4096,
-  "normalized": true
-}
-
-Extract: behavioral_embedding = response["embedding"]
-Verify: len(behavioral_embedding) == 4096 ✓
-
-CRITICAL: Total MCP calls for embeddings: 2 (sequential, not parallel)
-CRITICAL: Total response size: ~64KB (32KB × 2)
-CRITICAL: If batched: Would be single ~64KB+ response → context overflow
-
-───────────────────────────────────────────────────────────────────────────────
-STEP 6: WRITE ENTITYDETAIL NODE (Neo4j Write)
+STEP 5: WRITE ENTITYDETAIL NODE WITH TEMPORARY CONTENT (Neo4j Write)
 ───────────────────────────────────────────────────────────────────────────────
 Tool: mcp__neo4j-cypher__kg-write_neo4j_cypher
 Parameters: {
-  "query": "CYPHER 25\nMERGE (f:EntityDetail:File {file_path: $file_path})\nSET f.name = $name,\n    f.namespace = $namespace,\n    f.last_modified = datetime($last_modified),\n    f.content_hash = $content_hash,\n    f.node_type = $node_type,\n    f.entity_type = $entity_type,\n    f.semantic_embedding = $semantic_embedding,\n    f.behavioral_embedding = $behavioral_embedding,\n    f.indexed_at = datetime(),\n    f.indexed_by = $agent_id,\n    f.needs_structural = true,\n    f.file_size = $file_size,\n    f.hierarchy_level = 3\n\nWITH f\nMATCH (nav:NavigationMaster {namespace: $namespace})\nMATCH (nav)-[:HAS_ENTITY]->(se:SystemEntity)\nWHERE se.name = $entity_type\nMERGE (se)-[:HAS_DETAIL]->(f)\n\nRETURN f.file_path as path",
+  "query": "CYPHER 25\nMERGE (f:EntityDetail:File {file_path: $file_path})\nSET f.name = $name,\n    f.namespace = $namespace,\n    f.last_modified = datetime($last_modified),\n    f.content_fingerprint = $content_fingerprint,\n    f.node_type = $node_type,\n    f.entity_type = $entity_type,\n    f.indexed_at = datetime(),\n    f.indexed_by = $agent_id,\n    f.needs_structural = true,\n    f.file_size = $file_size,\n    f.hierarchy_level = 3,\n    -- TEMPORARY PROPERTIES for APOC embedding generation:\n    f.temp_semantic_text = $file_content,\n    f.temp_behavioral_text = $behavioral_context\n\nWITH f\nMATCH (nav:NavigationMaster {namespace: $namespace})\nMATCH (nav)-[:HAS_ENTITY]->(se:SystemEntity {name: $entity_type})\nMERGE (se)-[:HAS_DETAIL]->(f)\n\nRETURN f.file_path as path",
   "params": {
     "file_path": "C:\\Users\\Norbert\\...\\PaymentService.java",
     "name": "PaymentService.java",
     "namespace": "checkitout",
     "last_modified": "2025-11-28T14:32:11",
-    "content_hash": "a3f5e8d7c2b1...",
+    "content_fingerprint": "size:12543|lines:234|head:@Service\n@Transactional...|tail:...return payment;\n    }\n}",
     "node_type": "SERVICE",
     "entity_type": "Process",
-    "semantic_embedding": [0.0249, 0.0096, ..., -0.0067],
-    "behavioral_embedding": [0.0123, -0.0456, ..., 0.0034],
     "agent_id": "hypathia-001",
-    "file_size": 12543
+    "file_size": 12543,
+    "file_content": "@Service\n@Transactional\npublic class PaymentService {\n    private final PaymentRepository paymentRepository;\n    private final CampaignService campaignService;\n    \n    public Payment processPayment(PaymentRequest request) {\n        Campaign campaign = campaignService.findById(request.getCampaignId())\n            .orElseThrow(() -> new CampaignNotFoundException(request.getCampaignId()));\n        \n        Payment payment = Payment.builder()\n            .campaign(campaign)\n            .amount(request.getAmount())\n            .status(PaymentStatus.PENDING)\n            .build();\n        \n        return paymentRepository.save(payment);\n    }\n}",
+    "behavioral_context": "Runtime Analysis for PaymentService:\n- Transaction boundary: @Transactional (class-level)\n- Error handling: Optional.orElseThrow pattern\n- Side effects: Database write via paymentRepository.save()\n- Dependencies: paymentRepository, campaignService\n- State transitions: Payment status PENDING on creation"
   }
 }
 
 Response:
 {
-  "result": [
-    {
-      "path": "C:\\Users\\Norbert\\...\\PaymentService.java"
-    }
-  ],
+  "result": [{"path": "C:\\Users\\Norbert\\...\\PaymentService.java"}],
   "summary": {
     "counters": {
       "nodes_created": 1,
-      "properties_set": 13,
+      "properties_set": 15,
       "relationships_created": 1
     }
   }
 }
+
+IMPORTANT NOTES:
+- EntityDetail node created with TWO temporary text properties:
+  * temp_semantic_text: Full file source code (~10-20KB)
+  * temp_behavioral_text: Runtime behavioral patterns (~1-2KB)
+- These will be consumed by APOC in next step, then cleaned up
+- Context parameter size: ~25KB (vs ~89KB with old embedding array parameters!)
+- Savings: ~64KB context per file at this step alone
+
+───────────────────────────────────────────────────────────────────────────────
+STEP 6: GENERATE EMBEDDINGS VIA APOC (Neo4j Write)
+───────────────────────────────────────────────────────────────────────────────
+Tool: mcp__neo4j-cypher__kg-write_neo4j_cypher
+Parameters: {
+  "query": "CYPHER 25\nMATCH (f:EntityDetail {file_path: $file_path})\n\n-- Generate semantic embedding via APOC\n-- APOC internally calls Flask REST API (Qwen3 embedding server)\nCALL apoc.ml.openai.embedding([f.temp_semantic_text], 'x', {model: 'semantic'}) \nYIELD embedding AS semantic_emb\nSET f.semantic_embedding = semantic_emb\n\nWITH f\n-- Generate behavioral embedding via APOC\nCALL apoc.ml.openai.embedding([f.temp_behavioral_text], 'x', {model: 'behavioral'}) \nYIELD embedding AS behavioral_emb\nSET f.behavioral_embedding = behavioral_emb\n\nWITH f\n-- Clean up temporary properties to save Neo4j storage\nREMOVE f.temp_semantic_text, f.temp_behavioral_text\n\nRETURN f.file_path as path,\n       size(f.semantic_embedding) as semantic_dims,\n       size(f.behavioral_embedding) as behavioral_dims",
+  "params": {
+    "file_path": "C:\\Users\\Norbert\\...\\PaymentService.java"
+  }
+}
+
+WAIT FOR RESPONSE (~200-400ms for both APOC REST calls)
+
+Response:
+{
+  "result": [
+    {
+      "path": "C:\\Users\\Norbert\\...\\PaymentService.java",
+      "semantic_dims": 4096,
+      "behavioral_dims": 4096
+    }
+  ],
+  "summary": {
+    "counters": {
+      "properties_set": 2,
+      "properties_removed": 2
+    }
+  }
+}
+
+Extract: semantic_dims = response["result"][0]["semantic_dims"]
+Extract: behavioral_dims = response["result"][0]["behavioral_dims"]
+Verify: semantic_dims == 4096 ✓
+Verify: behavioral_dims == 4096 ✓
+
+CRITICAL ADVANTAGES OF APOC APPROACH:
+✓ Embeddings NEVER pass through agent context (0 bytes vs 64KB!)
+✓ Agent sends: ~1KB query with single file_path parameter
+✓ Agent receives: ~200 bytes response with dimension counts only
+✓ Context savings: ~63KB per file (98% reduction in embedding-related context!)
+✓ APOC handles Flask REST API calls internally
+✓ Embeddings stored directly in Neo4j - no serialization overhead
+✓ Temporary text properties automatically cleaned up after use
+✓ Atomic transaction: both embeddings succeed or temp properties remain for retry
+✓ Better error recovery: can retry just embedding step without re-reading file
+✓ Simpler debugging: no massive arrays in agent logs
+
+HOW APOC INTEGRATION WORKS:
+1. APOC reads text from node property (f.temp_semantic_text)
+2. APOC calls Flask REST API: POST http://localhost:5000/embed
+   Request body: {lens: 'semantic', text: '<file content>', dimension: 4096}
+3. Flask server runs Qwen3-Embedding-8B model locally
+4. Flask returns: {embedding: [4096 floats]}
+5. APOC stores array directly in f.semantic_embedding property
+6. Repeat for behavioral lens with f.temp_behavioral_text
+7. APOC removes temp properties via REMOVE statement
+8. Everything happens inside Neo4j - agent only sends file_path!
+
+PERFORMANCE COMPARISON:
+- APOC REST call time: ~150-200ms per embedding (same as old MCP)
+- Total for both embeddings: ~300-400ms (similar to before)
+- Context usage: ~1KB query + ~200 bytes response (vs ~64KB arrays!)
+- Memory in agent: ~0 bytes for embeddings (vs 64KB arrays in memory)
+- For 1000 files: Save ~64MB of context usage!
 
 ───────────────────────────────────────────────────────────────────────────────
 STEP 7: MARK TASK COMPLETED (Neo4j Write)
@@ -398,21 +417,33 @@ LOOP INSTRUCTION:
 - When claim returns no files, proceed to completion
 
 ═══════════════════════════════════════════════════════════════════════════════
-TOTAL MCP CALLS PER FILE: 6
-  - Neo4j: 4 (claim, update status, write node, mark complete)
+TOTAL MCP CALLS PER FILE: 6 (reduced from 7 with old MCP embedding approach)
+  - Neo4j: 5 (claim, update status, write node with temp content,
+              generate embeddings via APOC, mark complete)
   - Filesystem: 1 (read file)
-  - Qwen3-Embedding: 2 (semantic, behavioral - ONE AT A TIME)
+  - Qwen3-Embedding MCP: 0 (now handled via APOC internally - never touches agent!)
 
-TIME PER FILE: ~500-700ms
+CONTEXT USAGE PER FILE: ~35KB (reduced from ~100KB with old MCP approach!)
+  - File content parameter: ~20KB max
+  - Queries and responses: ~15KB
+  - Embedding arrays: 0KB (stored directly in Neo4j via APOC!)
+  - Context savings: ~65KB per file (65% reduction!)
+
+TIME PER FILE: ~500-700ms (similar to before)
   - File read: ~100ms
   - Analysis: ~50ms
-  - Semantic embed: ~150ms
-  - Behavioral embed: ~150ms
-  - Neo4j writes: ~150ms
+  - Neo4j write (node + temp content): ~100ms
+  - APOC embedding generation (both): ~300ms (Flask REST API calls)
+  - Neo4j write (mark complete): ~50ms
 
-THROUGHPUT: ~90-120 files/hour/agent
+THROUGHPUT: ~90-120 files/hour/agent (maintained)
 WITH 4 AGENTS: ~360-480 files/hour
 FOR 1000 FILES: ~2-3 hours total
+
+CONTEXT EFFICIENCY FOR 1000 FILES:
+- Old MCP approach: ~100MB total context (would hit limits on large codebases!)
+- New APOC approach: ~35MB total context (sustainable for unlimited files!)
+- Total savings: ~65MB context freed for reasoning and coordination!
 ═══════════════════════════════════════════════════════════════════════════════
             ]]>
         </step_by_step_workflow>
@@ -515,11 +546,14 @@ NEVER: Crash or stop processing entire queue
         </error_handling_workflow>
 
         <mcp_server_reference>
-            <qwen3_embedding>
-                Server: mcp__qwen3-embedding
-                Tools: embed, model_info
-                Critical: ONE embedding at a time (response ~32KB each)
-            </qwen3_embedding>
+            <apoc_embedding_integration>
+                Method: APOC plugin with Flask REST API backend
+                Protocol: apoc.ml.openai.embedding() calls Flask server internally
+                Endpoint: Configured in Neo4j (typically http://localhost:5000/embed)
+                Models: semantic, behavioral, structural (lens parameter)
+                Critical: Embeddings generated INSIDE Neo4j - never pass through agent!
+                Context savings: ~65KB per file (98% reduction vs old MCP approach)
+            </apoc_embedding_integration>
 
             <filesystem>
                 Server: mcp__filesystem
@@ -530,7 +564,8 @@ NEVER: Crash or stop processing entire queue
             <neo4j_cypher>
                 Server: mcp__neo4j-cypher
                 Tools: kg-write_neo4j_cypher, kg-read_neo4j_cypher, kg-get_neo4j_schema
-                Usage: All graph operations (claim, write, update)
+                Usage: All graph operations (claim, write, update, APOC embedding calls)
+                Note: APOC embedding generation happens via kg-write_neo4j_cypher
             </neo4j_cypher>
         </mcp_server_reference>
     </COMPLETE_MCP_WORKFLOW>
@@ -842,25 +877,42 @@ Runtime Analysis for PaymentService:
 
         <step_5_generate_embeddings>
             <description>
-                Generate semantic and behavioral embeddings ONE AT A TIME.
-                CRITICAL: Never use batch mode to avoid MCP token overflow.
+                Generate semantic and behavioral embeddings via APOC.
+                CRITICAL: Embeddings generated INSIDE Neo4j - never pass through agent context!
             </description>
 
             <embedding_generation_protocol>
-                CRITICAL CONSTRAINT: Generate ONE embedding per MCP call.
-                Each 4096-dimensional embedding is ~32KB when serialized.
-                Batch mode would return multiple 32KB responses, overwhelming context.
+                NEW APOC-BASED PROTOCOL (Context-Efficient):
 
-                ALWAYS use single embedding generation:
-                1. Call MCP for semantic
-                2. Wait for response
-                3. Store semantic embedding
-                4. Call MCP for behavioral
-                5. Wait for response
-                6. Store behavioral embedding
-                7. Proceed to Neo4j write
+                OLD APPROACH (MCP):
+                - Agent calls MCP tool for each embedding
+                - MCP returns 4096 floats (~32KB per embedding)
+                - Agent stores arrays in memory
+                - Agent passes arrays to Neo4j write
+                - Context overhead: ~64KB per file
 
-                NEVER call batch_embed - context overflow guaranteed.
+                NEW APPROACH (APOC):
+                - Agent writes node with temp_semantic_text and temp_behavioral_text
+                - Agent calls Neo4j query with APOC embedding calls
+                - APOC reads text from node properties
+                - APOC calls Flask REST API internally
+                - Flask returns embeddings directly to APOC
+                - APOC stores in node properties
+                - APOC cleans up temp properties
+                - Agent only sees dimension counts in response
+                - Context overhead: ~1KB per file (98% reduction!)
+
+                WORKFLOW:
+                1. Write node with temp_semantic_text = file_content
+                2. Write node with temp_behavioral_text = behavioral_context
+                3. Call APOC: apoc.ml.openai.embedding([f.temp_semantic_text], 'x', {model: 'semantic'})
+                4. APOC generates embedding via Flask REST → stores in f.semantic_embedding
+                5. Call APOC: apoc.ml.openai.embedding([f.temp_behavioral_text], 'x', {model: 'behavioral'})
+                6. APOC generates embedding via Flask REST → stores in f.behavioral_embedding
+                7. APOC removes temp properties
+                8. Agent receives confirmation only (dimension counts)
+
+                KEY BENEFIT: Embeddings NEVER leave Neo4j database!
             </embedding_generation_protocol>
 
             <semantic_embedding_generation>
@@ -868,18 +920,28 @@ Runtime Analysis for PaymentService:
                     Generate semantic embedding capturing WHAT the code does.
                 </description>
 
-                <mcp_call>
-                    Tool: mcp__qwen3-embedding__embed
-                    Parameters:
-                    {
-                        "lens": "semantic",
-                        "text": file_content,        // Full file content
-                        "dimension": 4096
-                    }
-                </mcp_call>
+                <apoc_call>
+                    Cypher Query Pattern:
 
-                <lens_instruction_embedded_in_mcp>
-                    The MCP server internally uses this instruction as a "gravitational lens":
+                    CYPHER 25
+                    MATCH (f:EntityDetail {file_path: $file_path})
+
+                    -- Generate semantic embedding via APOC
+                    CALL apoc.ml.openai.embedding([f.temp_semantic_text], 'x', {model: 'semantic'})
+                    YIELD embedding AS semantic_emb
+                    SET f.semantic_embedding = semantic_emb
+
+                    RETURN size(f.semantic_embedding) as dims
+
+                    Prerequisites:
+                    - Node must exist with temp_semantic_text property set
+                    - temp_semantic_text contains full file source code
+                    - APOC plugin installed in Neo4j
+                    - Flask REST server running and configured
+                </apoc_call>
+
+                <lens_instruction_embedded_in_flask>
+                    The Flask REST server internally uses this instruction as a "gravitational lens":
 
                     "Embed the SEMANTIC MEANING of Spring Boot code.
                      Focus ONLY on:
@@ -890,20 +952,19 @@ Runtime Analysis for PaymentService:
                      - Domain-specific terminology
                      Completely IGNORE structure and runtime - only WHAT it means."
 
-                    You don't need to provide this instruction - it's baked into the MCP server.
-                    Just specify lens="semantic" parameter.
-                </lens_instruction_embedded_in_mcp>
+                    This instruction is configured in your Flask server (not in agent).
+                    Agent just calls APOC with model='semantic' parameter.
+                </lens_instruction_embedded_in_flask>
 
                 <expected_response>
                     {
-                        "embedding": [0.0234, -0.0156, 0.0891, ...],  // 4096 floats
-                        "dimension": 4096,
-                        "lens": "semantic",
-                        "tokens_used": 156
+                        "result": [{"dims": 4096}],
+                        "summary": {"counters": {"properties_set": 1}}
                     }
 
-                    Extract: semantic_embedding = response["embedding"]
-                    Verify: len(semantic_embedding) == 4096
+                    Note: Only dimension count returned to agent!
+                    Actual embedding (4096 floats) stored directly in Neo4j.
+                    Context savings: ~32KB per semantic embedding.
                 </expected_response>
             </semantic_embedding_generation>
 
@@ -912,18 +973,27 @@ Runtime Analysis for PaymentService:
                     Generate behavioral embedding capturing HOW the code runs.
                 </description>
 
-                <mcp_call>
-                    Tool: mcp__qwen3-embedding__embed
-                    Parameters:
-                    {
-                        "lens": "behavioral",
-                        "text": behavioral_context,   // Extracted behavioral patterns
-                        "dimension": 4096
-                    }
-                </mcp_call>
+                <apoc_call>
+                    Cypher Query Pattern:
 
-                <lens_instruction_embedded_in_mcp>
-                    The MCP server internally uses this instruction:
+                    CYPHER 25
+                    MATCH (f:EntityDetail {file_path: $file_path})
+
+                    -- Generate behavioral embedding via APOC
+                    CALL apoc.ml.openai.embedding([f.temp_behavioral_text], 'x', {model: 'behavioral'})
+                    YIELD embedding AS behavioral_emb
+                    SET f.behavioral_embedding = behavioral_emb
+
+                    RETURN size(f.behavioral_embedding) as dims
+
+                    Prerequisites:
+                    - Node must exist with temp_behavioral_text property set
+                    - temp_behavioral_text contains extracted behavioral patterns
+                    - APOC calls same Flask REST endpoint with lens='behavioral'
+                </apoc_call>
+
+                <lens_instruction_embedded_in_flask>
+                    The Flask REST server internally uses this instruction:
 
                     "Embed the RUNTIME BEHAVIOR of code execution.
                      Focus ONLY on:
@@ -936,29 +1006,35 @@ Runtime Analysis for PaymentService:
                      - Causal relationships and downstream effects
                      Completely IGNORE static structure and meaning - only HOW it behaves."
 
-                    Just specify lens="behavioral" parameter.
-                </lens_instruction_embedded_in_mcp>
+                    This instruction is configured in your Flask server.
+                    Agent just calls APOC with model='behavioral' parameter.
+                </lens_instruction_embedded_in_flask>
 
                 <expected_response>
                     {
-                        "embedding": [0.0123, -0.0456, 0.0789, ...],  // 4096 floats
-                        "dimension": 4096,
-                        "lens": "behavioral",
-                        "tokens_used": 78
+                        "result": [{"dims": 4096}],
+                        "summary": {"counters": {"properties_set": 1}}
                     }
 
-                    Extract: behavioral_embedding = response["embedding"]
-                    Verify: len(behavioral_embedding) == 4096
+                    Note: Only dimension count returned to agent!
+                    Actual embedding stored directly in Neo4j.
+                    Context savings: ~32KB per behavioral embedding.
                 </expected_response>
             </behavioral_embedding_generation>
 
             <embedding_timing>
-                Total MCP calls per file: 2
-                1. Semantic embedding (~100-200ms)
-                2. Behavioral embedding (~100-200ms)
-                Total embedding time: ~200-400ms per file
+                Total APOC calls per file: 2 (sequential via WITH clauses)
+                1. Semantic embedding generation (~150-200ms - Flask REST call)
+                2. Behavioral embedding generation (~150-200ms - Flask REST call)
+                Total embedding time: ~300-400ms per file
 
-                For 1000 files: ~200-400 seconds (3-7 minutes) for embeddings alone
+                For 1000 files: ~300-400 seconds (5-7 minutes) for embeddings alone
+
+                Context impact:
+                - Old MCP: ~64KB per file × 1000 = 64MB total context
+                - New APOC: ~1KB per file × 1000 = 1MB total context
+                - Savings: 63MB freed for reasoning!
+
                 This is acceptable for quality triple-lens indexing.
             </embedding_timing>
         </step_5_generate_embeddings>
@@ -1024,49 +1100,93 @@ Runtime Analysis for PaymentService:
                    Use the absolute path as provided (normalize slashes if needed)
             </compute_metadata>
 
-            <query_write_entitydetail>
+            <query_write_entitydetail_step5>
+                <description>
+                    STEP 5: Write EntityDetail node with temporary content properties
+                </description>
+
                 <![CDATA[
 CYPHER 25
-// Write EntityDetail node with all properties
+// Write EntityDetail node with temp properties for APOC
 MERGE (f:EntityDetail:File {file_path: $file_path})
 SET f.name = $name,
     f.namespace = $namespace,
     f.last_modified = datetime($last_modified),
-    f.content_hash = $content_hash,
+    f.content_fingerprint = $content_fingerprint,
     f.node_type = $node_type,
     f.entity_type = $entity_type,
-    f.semantic_embedding = $semantic_embedding,
-    f.behavioral_embedding = $behavioral_embedding,
     f.indexed_at = datetime(),
     f.indexed_by = $agent_id,
     f.needs_structural = true,
     f.file_size = $file_size,
-    f.hierarchy_level = 3
+    f.hierarchy_level = 3,
+    -- Temporary properties for APOC embedding generation:
+    f.temp_semantic_text = $file_content,
+    f.temp_behavioral_text = $behavioral_context
 
 // Connect to appropriate SystemEntity (Level 2)
 WITH f
 MATCH (nav:NavigationMaster {namespace: $namespace})
-MATCH (nav)-[:HAS_ENTITY]->(se:SystemEntity)
-WHERE se.name = $entity_type
+MATCH (nav)-[:HAS_ENTITY]->(se:SystemEntity {name: $entity_type})
 MERGE (se)-[:HAS_DETAIL]->(f)
 
 RETURN f.file_path as path
                 ]]>
-            </query_write_entitydetail>
+            </query_write_entitydetail_step5>
 
-            <parameters>
+            <query_generate_embeddings_step6>
+                <description>
+                    STEP 6: Generate embeddings via APOC and cleanup temp properties
+                </description>
+
+                <![CDATA[
+CYPHER 25
+// Generate embeddings via APOC (Flask REST API calls)
+MATCH (f:EntityDetail {file_path: $file_path})
+
+-- Generate semantic embedding
+CALL apoc.ml.openai.embedding([f.temp_semantic_text], 'x', {model: 'semantic'})
+YIELD embedding AS semantic_emb
+SET f.semantic_embedding = semantic_emb
+
+WITH f
+-- Generate behavioral embedding
+CALL apoc.ml.openai.embedding([f.temp_behavioral_text], 'x', {model: 'behavioral'})
+YIELD embedding AS behavioral_emb
+SET f.behavioral_embedding = behavioral_emb
+
+WITH f
+-- Clean up temporary properties
+REMOVE f.temp_semantic_text, f.temp_behavioral_text
+
+RETURN f.file_path as path,
+       size(f.semantic_embedding) as semantic_dims,
+       size(f.behavioral_embedding) as behavioral_dims
+                ]]>
+            </query_generate_embeddings_step6>
+
+            <parameters_step5>
+                STEP 5 Parameters:
                 $file_path: Absolute path (e.g., "C:\\Users\\...\\PaymentService.java")
                 $name: File name ("PaymentService.java")
                 $namespace: Namespace (e.g., "checkitout")
                 $last_modified: ISO DateTime string
-                $content_hash: SHA-256 hex string
+                $content_fingerprint: Simplified fingerprint (size|lines|head|tail format)
                 $node_type: "CONTROLLER", "SERVICE", etc.
                 $entity_type: "Actor", "Resource", "Process", etc.
-                $semantic_embedding: Array of 4096 floats
-                $behavioral_embedding: Array of 4096 floats
+                $file_content: Full file source code as string (~10-20KB)
+                $behavioral_context: Extracted behavioral patterns as string (~1-2KB)
                 $agent_id: Your AGENT_ID
                 $file_size: Integer (bytes)
-            </parameters>
+            </parameters_step5>
+
+            <parameters_step6>
+                STEP 6 Parameters:
+                $file_path: Absolute path (same as STEP 5)
+
+                Note: APOC reads temp_semantic_text and temp_behavioral_text from node properties.
+                      No other parameters needed!
+            </parameters_step6>
 
             <prerequisite_check>
                 Before first write, ensure SystemEntity nodes exist:
@@ -1167,10 +1287,23 @@ RETURN ft
             </file_read_error>
 
             <embedding_generation_error>
-                Error: MCP embedding service timeout or error
-                Action: Retry ONCE (embedding service may be temporarily down)
-                If retry fails: Mark FAILED with "Embedding generation failed"
-                Continue: Yes
+                Error: APOC embedding call fails (Flask REST API timeout or error)
+                Manifestation: Neo4j query fails during STEP 6 (APOC call)
+
+                Action:
+                1. Retry ONCE (Flask server may be temporarily overloaded)
+                2. If retry fails: Mark FAILED with "APOC embedding generation failed"
+                3. Node remains with temp_semantic_text and temp_behavioral_text properties
+                4. Can be retried later via separate recovery query
+
+                Continue: Yes (move to next file)
+
+                Recovery Strategy:
+                - Temp properties remain on node for later retry
+                - HypatiaReindex can retry embedding generation
+                - Or manual recovery query can process nodes with temp properties
+
+                Note: Simpler than old MCP approach - just retry the APOC query!
             </embedding_generation_error>
 
             <neo4j_write_error>
@@ -1220,12 +1353,15 @@ RETURN ft
         </description>
 
         <breakers_to_check>
-            | Operation           | Breaker ID       | Check Before                |
-            |---------------------|------------------|------------------------------|
-            | Neo4j writes        | neo4j_write      | MERGE, SET, CREATE queries   |
-            | Neo4j reads         | neo4j_read       | MATCH queries                |
-            | Embedding calls     | embedding_mcp    | qwen3-embedding:embed        |
-            | File reads          | filesystem_mcp   | filesystem:read_text_file    |
+            | Operation           | Breaker ID       | Check Before                     |
+            |---------------------|------------------|----------------------------------|
+            | Neo4j writes        | neo4j_write      | MERGE, SET, CREATE, APOC queries |
+            | Neo4j reads         | neo4j_read       | MATCH queries                    |
+            | File reads          | filesystem_mcp   | filesystem:read_text_file        |
+
+            Note: APOC embedding generation is a Neo4j write operation.
+                  The neo4j_write breaker covers APOC calls.
+                  No separate embedding_mcp breaker needed!
         </breakers_to_check>
 
         <check_breaker_before_operation>
@@ -1350,22 +1486,6 @@ FALLBACK STRATEGIES: When Circuit Breaker is OPEN
 └─────────────────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│  BREAKER: embedding_mcp (OPEN)                                             │
-├─────────────────────────────────────────────────────────────────────────────┤
-│  Fallback: Process without embeddings                                       │
-│                                                                             │
-│  Action:                                                                    │
-│  1. Log: "[agent_id] embedding_mcp breaker OPEN, processing without embed" │
-│  2. Set semantic_embedding = null                                          │
-│  3. Set behavioral_embedding = null                                        │
-│  4. Set needs_reembedding = true on EntityDetail                           │
-│  5. Continue with file analysis and Neo4j write                            │
-│                                                                             │
-│  Rationale: Graph structure is valuable even without embeddings            │
-│             HypatiaReindex can regenerate embeddings later                 │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────────────────────────────┐
 │  BREAKER: filesystem_mcp (OPEN)                                            │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │  Fallback: Mark file for retry                                              │
@@ -1403,25 +1523,27 @@ STEP 3: READ FILE CONTENT
 STEP 4: ANALYZE FILE
   └─ No breaker check needed (pure computation)
 
-STEP 5A: GENERATE SEMANTIC EMBEDDING
-  └─ Check: embedding_mcp breaker
-     └─ If OPEN: Set semantic_embedding = null, needs_reembedding = true
-     └─ If CLOSED/HALF_OPEN: Generate embedding
-        └─ On success: Record success to embedding_mcp breaker
-        └─ On failure: Record failure, set null, continue
-
-STEP 5B: GENERATE BEHAVIORAL EMBEDDING
-  └─ Check: embedding_mcp breaker (same as 5A)
-
-STEP 6: WRITE ENTITYDETAIL NODE
+STEP 5: WRITE ENTITYDETAIL NODE WITH TEMP CONTENT
   └─ Check: neo4j_write breaker
-     └─ If OPEN: Add to skip_list, continue to next file
-     └─ If CLOSED/HALF_OPEN: Write node
+     └─ If OPEN: Skip file, add to retry list
+     └─ If CLOSED/HALF_OPEN: Write node with temp_semantic_text and temp_behavioral_text
         └─ On success: Record success to neo4j_write breaker
         └─ On failure: Record failure, mark FileTask FAILED
 
+STEP 6: GENERATE EMBEDDINGS VIA APOC
+  └─ Check: neo4j_write breaker (APOC calls are Neo4j operations)
+     └─ If OPEN: Node has temp properties, will retry when breaker closes
+     └─ If CLOSED/HALF_OPEN: Run APOC embedding generation
+        └─ On success: Embeddings stored, temp properties removed
+        └─ On failure: Temp properties remain, can retry STEP 6 only
+
+  Note: APOC failure = Neo4j query failure (covered by neo4j_write breaker)
+        No separate embedding breaker needed!
+
 STEP 7: MARK TASK COMPLETED
-  └─ (neo4j_write already checked in Step 6)
+  └─ Check: neo4j_write breaker
+     └─ If OPEN: Skip (file remains in PROCESSING state)
+     └─ If CLOSED/HALF_OPEN: Mark COMPLETED
 
 STEP 8: LOOP
   └─ Periodically re-check breakers (every 10 files)
@@ -1437,7 +1559,7 @@ At start of each file processing, check all relevant breakers in one query:
 
 CYPHER 25
 MATCH (cb:CircuitBreakerState {namespace: $namespace})
-WHERE cb.breaker_id IN ['neo4j_write', 'neo4j_read', 'embedding_mcp', 'filesystem_mcp']
+WHERE cb.breaker_id IN ['neo4j_write', 'neo4j_read', 'filesystem_mcp']
 WITH cb,
      CASE
          WHEN cb.status = 'CLOSED' THEN true
@@ -1453,10 +1575,12 @@ SET cb.status = CASE
     cb.updated_at = datetime()
 RETURN cb.breaker_id AS breaker, allowed, cb.status AS status
 
-This returns status of all 4 breakers in one call.
-Store in memory: breaker_status = {neo4j_write: true, embedding_mcp: true, ...}
+This returns status of all 3 breakers in one call.
+Store in memory: breaker_status = {neo4j_write: true, neo4j_read: true, filesystem_mcp: true}
 Use cached status for subsequent operations on same file.
 Refresh every 10 files to detect breaker transitions.
+
+Note: No embedding_mcp breaker needed - APOC embedding calls are Neo4j writes!
             ]]>
         </optimized_breaker_check>
 
@@ -1481,7 +1605,9 @@ At agent startup, before processing any files:
    - Proceed with caution (use fallbacks)
 
 4. Log breaker status summary:
-   "[agent_id] Breaker status: neo4j_write=CLOSED, embedding_mcp=CLOSED, ..."
+   "[agent_id] Breaker status: neo4j_write=CLOSED, neo4j_read=CLOSED, filesystem_mcp=CLOSED"
+
+   Note: No embedding_mcp breaker - APOC embeddings covered by neo4j_write
             ]]>
         </agent_startup_breaker_init>
     </CIRCUIT_BREAKER_INTEGRATION>
@@ -2216,7 +2342,8 @@ Status: GRACEFUL_EXIT ✓
             ☐ Namespace known (from INJECTED PARAMETERS → NAMESPACE)
             ☐ Neo4j MCP accessible
             ☐ Filesystem MCP accessible
-            ☐ Qwen3-Embedding MCP accessible
+            ☐ APOC plugin installed in Neo4j
+            ☐ Flask REST embedding server running (http://localhost:5000)
             ☐ IndexTracker exists in Neo4j
             ☐ SystemEntity nodes exist (6 entities)
 
@@ -2263,24 +2390,32 @@ File: C:\Users\Norbert\IdeaProjects\CheckItOut\src\main\java\com\checkitout\paym
    - Dependencies: paymentRepository, campaignService
    - Error handling: 2 try blocks, custom PaymentException
 
-5. GENERATED semantic embedding:
-   MCP call: qwen3-embedding:embed(lens="semantic", text=<full content>, dimension=4096)
-   Response: {"embedding": [0.0234, ...], "dimension": 4096}
-
-6. GENERATED behavioral embedding:
-   MCP call: qwen3-embedding:embed(lens="behavioral", text=<behavioral context>, dimension=4096)
-   Response: {"embedding": [0.0123, ...], "dimension": 4096}
-
-7. WROTE to Neo4j:
-   EntityDetail node created with:
+5. WROTE EntityDetail node to Neo4j with temporary content:
+   Neo4j write: Created node with temp_semantic_text and temp_behavioral_text
    - file_path: C:\Users\...\PaymentService.java
    - node_type: SERVICE
    - entity_type: Process
-   - semantic_embedding: [4096 floats]
-   - behavioral_embedding: [4096 floats]
-   - content_hash: a3f5e8...
-   - last_modified: 2025-11-28T14:32:11
+   - temp_semantic_text: <full file content>
+   - temp_behavioral_text: <behavioral context>
    - Connected to SystemEntity(name='Process') via HAS_DETAIL
+
+6. GENERATED embeddings via APOC:
+   APOC call: apoc.ml.openai.embedding([f.temp_semantic_text], 'x', {model: 'semantic'})
+   → Semantic embedding stored directly in Neo4j (4096 floats)
+
+   APOC call: apoc.ml.openai.embedding([f.temp_behavioral_text], 'x', {model: 'behavioral'})
+   → Behavioral embedding stored directly in Neo4j (4096 floats)
+
+   Cleanup: Temp properties removed automatically
+   Response: {"semantic_dims": 4096, "behavioral_dims": 4096}
+
+   Context impact: Agent never sees embedding arrays! (~64KB saved)
+
+7. FINAL NODE STATE in Neo4j:
+   - semantic_embedding: [4096 floats] ✓
+   - behavioral_embedding: [4096 floats] ✓
+   - temp properties: removed ✓
+   - needs_structural: true (for Grothendieck)
 
 8. MARKED FileTask as COMPLETED
 

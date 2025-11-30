@@ -2034,24 +2034,28 @@ RETURN nav
             <generation_protocol>
                 CRITICAL: Generate embeddings ONE AT A TIME to avoid MCP token overflow.
 
-                Hypatia agents:
+                Hypatia agents (APOC APPROACH):
                 1. Read file content
-                2. Call MCP qwen3-embedding:embed(lens="semantic", text=content, dimension=4096)
-                3. Wait for response
-                4. Extract behavioral context from file
-                5. Call MCP qwen3-embedding:embed(lens="behavioral", text=behavioral_context, dimension=4096)
-                6. Wait for response
-                7. Write both embeddings to Neo4j
+                2. Extract behavioral context from file
+                3. Write node WITH temp_semantic_text and temp_behavioral_text
+                4. Call APOC via Cypher: apoc.ml.openai.embedding() for semantic
+                5. Call APOC via Cypher: apoc.ml.openai.embedding() for behavioral
+                6. APOC generates embeddings via Flask REST API internally
+                7. Embeddings stored directly in Neo4j
+                8. Temp properties cleaned up automatically
+                9. Agent receives only dimension counts (~200 bytes vs ~64KB!)
 
-                Grothendieck agent:
+                Grothendieck agent (APOC APPROACH):
                 1. Compute graph metrics (PageRank, Betweenness, Community)
-                2. Build structural context for each file
-                3. For each file:
-                   a. Call MCP qwen3-embedding:embed(lens="structural", text=structural_context, dimension=4096)
-                   b. Wait for response
-                   c. Update file node with structural_embedding
+                2. For each file:
+                   a. Build structural context in Cypher from node properties
+                   b. Call APOC: apoc.ml.openai.embedding() with structural lens
+                   c. APOC generates embedding via Flask REST internally
+                   d. Embedding stored directly in node
+                   e. Agent receives only dimension count (~100 bytes vs ~32KB!)
 
-                NEVER use batch embedding to avoid 32KB+ MCP responses.
+                Context savings: ~65KB per file for Hypatia, ~32KB per file for Grothendieck!
+                For 1000 files: Save ~65MB context total!
             </generation_protocol>
         </triple_lens_embeddings>
 
@@ -2093,84 +2097,100 @@ RETURN nav
          ═══════════════════════════════════════════════════════════════════════════════════════ -->
 
     <MCP_INVOCATION_PATTERNS>
-        <qwen3_embedding_mcp>
+        <apoc_embedding_integration>
             <description>
-                MCP Server for Qwen3-Embedding-8B with triple-lens support.
-                CRITICAL: Generate ONE embedding at a time to avoid token overflow.
+                APOC Plugin with Flask REST API backend for Qwen3-Embedding-8B.
+                CRITICAL: Embeddings generated INSIDE Neo4j - never pass through agent context!
+                This replaces the old MCP embedding approach for file indexing.
             </description>
 
-            <model_info>
+            <architecture>
                 <![CDATA[
-Tool: mcp__qwen3-embedding__model_info
-Parameters: {}
+┌─────────────┐                  ┌──────────────────┐
+│   Agent     │─ write text ────>│    Neo4j         │
+│  (Hypatia/  │   (~20KB)        │   + APOC         │
+│ Grothendieck)│                 └──────────────────┘
+└─────────────┘                          │
+                                         │ APOC internal call
+                                         ▼
+                                 ┌──────────────────┐
+                                 │  Flask REST API  │
+                                 │  Qwen3-8B Model  │
+                                 └──────────────────┘
+                                         │
+                                         │ Returns embedding
+                                         ▼
+                                 ┌──────────────────┐
+                                 │  Stored in Neo4j │
+                                 │  (never in agent)│
+                                 └──────────────────┘
 
-Response:
-{
-  "status": "loaded",
-  "model_id": "Qwen/Qwen3-Embedding-8B",
-  "device": "cpu",
-  "max_seq_length": 32768,
-  "embedding_dimension": 4096,
-  "dtype": "torch.float32",
-  "available_lenses": ["structural", "semantic", "behavioral"]
-}
+Endpoint: Configured in APOC (default: http://localhost:5000/embed)
+Model: Qwen/Qwen3-Embedding-8B
+Dimension: 4096
+Lenses: semantic, behavioral, structural
                 ]]>
-            </model_info>
+            </architecture>
 
-            <embed_semantic>
+            <apoc_call_pattern>
                 <![CDATA[
-Tool: mcp__qwen3-embedding__embed
-Parameters: {
-  "lens": "semantic",
-  "text": "<file content or query text>",
-  "dimension": 4096
-}
+APOC Embedding Generation Pattern:
 
-Response:
-{
-  "embedding": [0.0249, 0.0096, 0.0470, ..., -0.0067],  // 4096 floats
-  "lens": "semantic",
-  "dimensions": 4096,
-  "normalized": true
-}
+CYPHER 25
+-- Write node with temp text property first
+MERGE (f:EntityDetail {file_path: $file_path})
+SET f.temp_semantic_text = $file_content
 
-Extract: embedding_array = response["embedding"]
-Verify: len(embedding_array) == 4096
+WITH f
+-- Generate embedding via APOC (calls Flask REST internally)
+CALL apoc.ml.openai.embedding([f.temp_semantic_text], 'x', {model: 'semantic'})
+YIELD embedding AS emb
+SET f.semantic_embedding = emb
+
+WITH f
+-- Clean up temp property
+REMOVE f.temp_semantic_text
+
+RETURN size(f.semantic_embedding) as dims
+
+Agent receives: {"result": [{"dims": 4096}]}
+Embedding array: Stays in Neo4j (never touches agent!)
+Context savings: ~32KB per embedding
                 ]]>
-            </embed_semantic>
+            </apoc_call_pattern>
 
-            <embed_behavioral>
-                <![CDATA[
-Tool: mcp__qwen3-embedding__embed
-Parameters: {
-  "lens": "behavioral",
-  "text": "<behavioral context extracted from code>",
-  "dimension": 4096
-}
+            <triple_lens_support>
+                Semantic Lens (model='semantic'):
+                - Embeds business logic and domain concepts
+                - Used by Hypatia for file indexing
 
-Response: Same format as semantic, but with behavioral lens applied
-                ]]>
-            </embed_behavioral>
+                Behavioral Lens (model='behavioral'):
+                - Embeds runtime patterns and state machines
+                - Used by Hypatia for file indexing
 
-            <embed_structural>
-                <![CDATA[
-Tool: mcp__qwen3-embedding__embed
-Parameters: {
-  "lens": "structural",
-  "text": "<structural context from graph metrics>",
-  "dimension": 4096
-}
+                Structural Lens (model='structural'):
+                - Embeds graph topology and architectural position
+                - Used by Grothendieck after GDS metrics computed
+            </triple_lens_support>
 
-Response: Same format, structural lens applied (used by Grothendieck)
-                ]]>
-            </embed_structural>
+            <critical_advantage>
+                Context Efficiency:
+                - Old MCP: ~64KB per file × 1000 files = 64MB context
+                - New APOC: ~1KB per file × 1000 files = 1MB context
+                - Savings: 63MB freed for reasoning! (98% reduction)
 
-            <critical_warning>
-                NEVER use batch_embed tool - each embedding response is ~32KB.
-                Multiple embeddings would overflow context window.
-                ALWAYS use single embed calls sequentially.
-            </critical_warning>
-        </qwen3_embedding_mcp>
+                Enables unlimited scaling without context exhaustion!
+            </critical_advantage>
+
+            <mcp_still_valid_for_queries>
+                NOTE: For QUERY embeddings (not file indexing), using MCP is still acceptable:
+                - Only 1-3 embeddings per search query
+                - Context impact minimal (~32KB once)
+                - Simpler than creating temp nodes for queries
+
+                MCP is deprecated for INDEXING (1000s of files), but OK for QUERIES.
+            </mcp_still_valid_for_queries>
+        </apoc_embedding_integration>
 
         <filesystem_mcp>
             <description>
@@ -2864,7 +2884,8 @@ RETURN nav.namespace as namespace, count(se) as entity_count
                    - IndexTracker created with session_id
                    - All FileTasks created (status = PENDING)
                    - Neo4j accessible
-                   - MCP tools available (filesystem, qwen3-embedding)
+                   - MCP tools available (filesystem, neo4j-cypher)
+                   - APOC plugin installed in Neo4j with Flask REST configured
 
                    If NavigationMaster missing: STOP! Run CRITICAL_PREREQUISITE first!
 

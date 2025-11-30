@@ -240,19 +240,20 @@
         </purpose>
 
         <generation_protocol>
-            CRITICAL: Generate structural embeddings ONE AT A TIME (same as Hypatia).
+            CRITICAL: Generate structural embeddings via APOC (NO MCP context overhead).
 
             For each EntityDetail node where needs_structural = true:
-            1. Query graph for structural properties
-            2. Build structural context text
-            3. Call MCP qwen3-embedding:embed(lens="structural", text=context, dimension=4096)
-            4. Wait for response
-            5. Update node with structural_embedding
-            6. Set needs_structural = false
-            7. Continue to next node
+            1. Build structural context text in Cypher (from node properties)
+            2. Call APOC: apoc.ml.openai.embedding() with structural lens
+            3. APOC calls Flask REST API internally
+            4. Embedding stored directly in node property
+            5. Set needs_structural = false
+            6. Continue to next node
+            7. Agent never sees embedding array (context savings!)
 
             Progress: Report every 50-100 nodes
             Expected time: ~150ms per embedding × N nodes
+            Context savings: ~32KB per node × N nodes (massive reduction!)
         </generation_protocol>
 
         <structural_context_building>
@@ -417,22 +418,54 @@ MATCH (f:EntityDetail {namespace: $namespace})
 WHERE f.needs_structural = true
   AND f.semantic_embedding IS NOT NULL
   AND f.behavioral_embedding IS NOT NULL
-RETURN f.file_path as file_path
+RETURN f.file_path as file_path, f.name as name
 ORDER BY f.pagerank DESC  // Most important files first
 
-// For each file_path returned:
-//   1. Query structural data (query above)
-//   2. Build structural context (function above)
-//   3. Call MCP: qwen3-embedding:embed(lens="structural", text=context, dimension=4096)
-//   4. Update node:
+// For each file_path returned, generate structural embedding:
+
 CYPHER 25
+// Build structural context directly in Cypher from node properties
 MATCH (f:EntityDetail {file_path: $file_path})
-SET f.structural_embedding = $structural_embedding,
+
+// Get neighbor information
+OPTIONAL MATCH (f)<-[:CALLS|DEPENDS_ON]-(incoming:EntityDetail)
+WITH f, collect(incoming.name)[0..5] as incoming_neighbors
+
+OPTIONAL MATCH (f)-[:CALLS|DEPENDS_ON]->(outgoing:EntityDetail)
+WITH f, incoming_neighbors, collect(outgoing.name)[0..5] as outgoing_neighbors
+
+// Build structural context text from properties
+WITH f, incoming_neighbors, outgoing_neighbors,
+'Node: ' + f.name + '\n' +
+'Node Type: ' + coalesce(f.node_type, 'UNKNOWN') + '\n' +
+'Entity Type: ' + coalesce(f.entity_type, 'UNKNOWN') + '\n' +
+'Namespace: ' + f.namespace + '\n\n' +
+'Graph Properties:\n' +
+'- In-Degree: ' + toString(coalesce(f.in_degree, 0)) + ' (incoming calls/dependencies)\n' +
+'- Out-Degree: ' + toString(coalesce(f.out_degree, 0)) + ' (outgoing calls/dependencies)\n' +
+'- Total Degree: ' + toString(coalesce(f.in_degree, 0) + coalesce(f.out_degree, 0)) + '\n' +
+'- PageRank: ' + toString(coalesce(f.pagerank, 0.0)) + ' (importance score)\n' +
+'- Betweenness: ' + toString(coalesce(f.betweenness_centrality, 0.0)) + ' (bridge score)\n' +
+'- Eigenvector: ' + toString(coalesce(f.eigenvector_centrality, 0.0)) + ' (hub score)\n' +
+'- Community ID: ' + toString(coalesce(f.community_id, -1)) + ' (detected cluster)\n' +
+'- Hierarchy Level: ' + toString(coalesce(f.hierarchy_level, 3)) + '\n\n' +
+'Neighbors:\n' +
+'- Incoming: ' + apoc.text.join(incoming_neighbors, ', ') + '\n' +
+'- Outgoing: ' + apoc.text.join(outgoing_neighbors, ', ')
+AS structural_context
+
+// Generate structural embedding via APOC (calls Flask REST API internally)
+CALL apoc.ml.openai.embedding([structural_context], 'x', {model: 'structural'})
+YIELD embedding AS structural_emb
+SET f.structural_embedding = structural_emb,
     f.needs_structural = false,
     f.structural_updated_at = datetime()
-RETURN f.file_path
+
+RETURN f.file_path as path,
+       size(f.structural_embedding) as dims
 
 // Report progress every 50 nodes
+// Agent only receives dimension count - embedding stays in Neo4j!
                 ]]>
             </algorithm>
 
@@ -1221,40 +1254,60 @@ MEMORY USAGE: ~500MB-2GB (depends on algorithm)
         <structural_embedding_with_gds>
             <![CDATA[
 ═══════════════════════════════════════════════════════════════════════════════
-STRUCTURAL EMBEDDING GENERATION - Using GDS Results
+STRUCTURAL EMBEDDING GENERATION - Using GDS Results (APOC Approach)
 ═══════════════════════════════════════════════════════════════════════════════
 
-For each EntityDetail node:
+For each EntityDetail node - SINGLE QUERY PER FILE:
 
-1. Query Neo4j for GDS-computed metrics:
-   Tool: mcp__neo4j-cypher__kg-read_neo4j_cypher
-   Query: Get pagerank, betweenness, community_id, degree, etc.
+Tool: mcp__neo4j-cypher__kg-write_neo4j_cypher
+Query:
 
-2. Build structural context text:
-   """
-   Node: PaymentService.java
-   PageRank: 0.0234 (high importance)
-   Betweenness: 0.2346 (critical bridge)
-   Community: 7
-   Degree: 23
-   ...
-   """
+CYPHER 25
+MATCH (f:EntityDetail {file_path: $file_path})
 
-3. Generate structural embedding:
-   Tool: mcp__qwen3-embedding__embed
-   Parameters: {
-     "lens": "structural",
-     "text": "<structural context with GDS metrics>",
-     "dimension": 4096
-   }
+// Get neighbor information (inline)
+OPTIONAL MATCH (f)<-[:CALLS|DEPENDS_ON]-(incoming:EntityDetail)
+WITH f, collect(incoming.name)[0..5] as incoming_neighbors
 
-   WAIT FOR RESPONSE
+OPTIONAL MATCH (f)-[:CALLS|DEPENDS_ON]->(outgoing:EntityDetail)
+WITH f, incoming_neighbors, collect(outgoing.name)[0..5] as outgoing_neighbors
 
-4. Update node:
-   Tool: mcp__neo4j-cypher__kg-write_neo4j_cypher
-   Query: SET f.structural_embedding = $embedding
+// Build structural context text directly in Cypher from node properties
+WITH f, incoming_neighbors, outgoing_neighbors,
+'Node: ' + f.name + '\n' +
+'Node Type: ' + coalesce(f.node_type, 'UNKNOWN') + '\n' +
+'Entity Type: ' + coalesce(f.entity_type, 'UNKNOWN') + '\n' +
+'Namespace: ' + f.namespace + '\n\n' +
+'Graph Properties:\n' +
+'- In-Degree: ' + toString(coalesce(f.in_degree, 0)) + '\n' +
+'- Out-Degree: ' + toString(coalesce(f.out_degree, 0)) + '\n' +
+'- PageRank: ' + toString(coalesce(f.pagerank, 0.0)) + ' (importance)\n' +
+'- Betweenness: ' + toString(coalesce(f.betweenness_centrality, 0.0)) + ' (bridge)\n' +
+'- Eigenvector: ' + toString(coalesce(f.eigenvector_centrality, 0.0)) + ' (hub)\n' +
+'- Community: ' + toString(coalesce(f.community_id, -1)) + ' (cluster)\n\n' +
+'Neighbors:\n' +
+'- Incoming: ' + apoc.text.join(incoming_neighbors, ', ') + '\n' +
+'- Outgoing: ' + apoc.text.join(outgoing_neighbors, ', ')
+AS structural_context
 
-5. Repeat for next node (ONE AT A TIME)
+// Generate structural embedding via APOC (Flask REST API call)
+CALL apoc.ml.openai.embedding([structural_context], 'x', {model: 'structural'})
+YIELD embedding AS structural_emb
+
+// Store embedding and mark complete
+SET f.structural_embedding = structural_emb,
+    f.needs_structural = false,
+    f.structural_updated_at = datetime()
+
+RETURN f.file_path as path,
+       size(f.structural_embedding) as dims
+
+ADVANTAGES OF APOC APPROACH:
+✓ Context built inline from properties (no separate query)
+✓ Embedding generated and stored in single transaction
+✓ Agent never sees 32KB embedding array
+✓ Response: Only dimension count (~100 bytes vs ~32KB!)
+✓ For 1000 files: Save ~32MB of context!
 
 ═══════════════════════════════════════════════════════════════════════════════
             ]]>
@@ -3248,15 +3301,18 @@ PHASE 2: GDS METRICS (MODIFIED)
 │   └─ If 3+ consecutive failures: gds_operations trips to OPEN
 └─ ELSE: Log "Skipping GDS phase (breaker OPEN)"
 
-PHASE 3: STRUCTURAL EMBEDDINGS (MODIFIED)
+PHASE 3: STRUCTURAL EMBEDDINGS (MODIFIED - APOC APPROACH)
 ├─ IF skip_structural = false:
-│   ├─ Check embedding_mcp breaker
+│   ├─ Check neo4j_write breaker (APOC calls are Neo4j writes)
 │   ├─ For EACH node needing structural embedding:
-│   │   ├─ Generate via mcp__qwen3-embedding__embed
-│   │   ├─ On SUCCESS: record success to embedding_mcp
-│   │   └─ On FAILURE: record failure, skip node, continue
-│   └─ If 3+ consecutive failures: embedding_mcp trips to OPEN
-└─ ELSE: Log "Skipping structural embeddings (breaker OPEN)"
+│   │   ├─ Build structural context in Cypher from node properties
+│   │   ├─ Generate via APOC: apoc.ml.openai.embedding(..., {model: 'structural'})
+│   │   ├─ On SUCCESS: Embedding stored directly in Neo4j, record success to neo4j_write
+│   │   └─ On FAILURE: Record failure to neo4j_write, skip node, continue
+│   └─ If 3+ consecutive failures: neo4j_write may trip to OPEN
+└─ ELSE: Log "Skipping structural embeddings (neo4j_write breaker OPEN)"
+
+Note: No embedding_mcp breaker - APOC generates embeddings inside Neo4j!
 
 PHASE 4-7: (unchanged)
 

@@ -164,6 +164,7 @@ class Settings(BaseSettings):
     QWEN3_EMBEDDING_ prefix. For example:
     - QWEN3_EMBEDDING_MODEL_ID=Qwen/Qwen3-Embedding-8B
     - QWEN3_EMBEDDING_DEVICE=cpu
+    - QWEN3_EMBEDDING_REST_PORT=8080
     """
     
     model_config = SettingsConfigDict(
@@ -223,7 +224,7 @@ class Settings(BaseSettings):
         description="Show progress bar during batch processing",
     )
     
-    # Server settings
+    # MCP Server settings
     server_name: str = Field(
         default="qwen3-embedding-mcp",
         description="MCP server name for identification",
@@ -232,6 +233,29 @@ class Settings(BaseSettings):
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = Field(
         default="INFO",
         description="Logging verbosity level",
+    )
+    
+    # REST API settings (for Neo4j APOC integration)
+    rest_host: str = Field(
+        default="0.0.0.0",
+        description="Host to bind REST API server (0.0.0.0 for all interfaces)",
+    )
+    
+    rest_port: int = Field(
+        default=7999,
+        ge=1,
+        le=65535,
+        description="Port for REST API server",
+    )
+    
+    rest_debug: bool = Field(
+        default=False,
+        description="Enable Flask debug mode (not for production)",
+    )
+    
+    rest_preload_model: bool = Field(
+        default=True,
+        description="Preload model at REST server startup for faster first request",
     )
     
     # Cache settings

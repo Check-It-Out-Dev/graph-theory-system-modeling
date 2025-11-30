@@ -328,18 +328,25 @@ Cleanup: Orphaned hyperedges automatically removed
         <process_additions_mcp>
             <![CDATA[
 ═══════════════════════════════════════════════════════════════════════════════
-PROCESS ADDITIONS - Full Indexing (Same as Hypatia)
+PROCESS ADDITIONS - Full Indexing (Same as Hypatia - APOC Approach)
 ═══════════════════════════════════════════════════════════════════════════════
 
 For each ADDED file: Use EXACT same workflow as HypatiaIndexingAgent
 
 1. Read file: mcp__filesystem__read_text_file
 2. Analyze: node_type, entity_type, behavioral context
-3. Generate semantic embedding: mcp__qwen3-embedding__embed (lens="semantic")
-4. Generate behavioral embedding: mcp__qwen3-embedding__embed (lens="behavioral")
-5. Write EntityDetail: mcp__neo4j-cypher__kg-write_neo4j_cypher
+3. Write EntityDetail WITH temp content: mcp__neo4j-cypher__kg-write_neo4j_cypher
+   - Sets temp_semantic_text = file_content
+   - Sets temp_behavioral_text = behavioral_context
+4. Generate embeddings via APOC: mcp__neo4j-cypher__kg-write_neo4j_cypher
+   - CALL apoc.ml.openai.embedding() for semantic
+   - CALL apoc.ml.openai.embedding() for behavioral
+   - Embeddings stored directly in Neo4j (never touch agent context!)
+   - Temp properties automatically cleaned up
 
-See HypatiaIndexingAgent.xml SECTION 1.5 for complete workflow.
+See HypatiaIndexingAgent.xml SECTION 1.5 for complete APOC workflow.
+
+Context savings: ~64KB per added file (embeddings stay in Neo4j!)
 ═══════════════════════════════════════════════════════════════════════════════
             ]]>
         </process_additions_mcp>
@@ -363,28 +370,26 @@ Parameters: {
 Response: {content, size}
 
 ───────────────────────────────────────────────────────────────────────────────
-STEP 2: Re-analyze and generate new embeddings
+STEP 2: Re-analyze file
 ───────────────────────────────────────────────────────────────────────────────
-Same as ADDED files:
 - Detect node_type, entity_type (may have changed)
-- Generate semantic embedding (MCP call 1)
-- Generate behavioral embedding (MCP call 2)
+- Extract behavioral context
 
 ───────────────────────────────────────────────────────────────────────────────
-STEP 3: UPDATE existing EntityDetail node
+STEP 3: UPDATE existing EntityDetail node WITH temp content
 ───────────────────────────────────────────────────────────────────────────────
 Tool: mcp__neo4j-cypher__kg-write_neo4j_cypher
 Parameters: {
-  "query": "CYPHER 25\nMATCH (f:EntityDetail {file_path: $file_path})\n\nSET f.name = $name,\n    f.last_modified = datetime($last_modified),\n    f.content_hash = $content_hash,\n    f.node_type = $node_type,\n    f.entity_type = $entity_type,\n    f.semantic_embedding = $semantic_embedding,\n    f.behavioral_embedding = $behavioral_embedding,\n    f.indexed_at = datetime(),\n    f.indexed_by = 'hypatia-reindex',\n    f.needs_structural = true,\n    f.file_size = $file_size\n\n// Update SystemEntity connection if entity_type changed\nWITH f\nOPTIONAL MATCH (f)<-[old_rel:HAS_DETAIL]-(old_se:SystemEntity)\nWHERE old_se.name <> $entity_type\nDELETE old_rel\n\nWITH f\nMATCH (nav:NavigationMaster {namespace: $namespace})\nMATCH (nav)-[:HAS_ENTITY]->(new_se:SystemEntity {name: $entity_type})\nMERGE (new_se)-[:HAS_DETAIL]->(f)\n\nRETURN f.file_path as updated",
+  "query": "CYPHER 25\nMATCH (f:EntityDetail {file_path: $file_path})\n\nSET f.name = $name,\n    f.last_modified = datetime($last_modified),\n    f.content_fingerprint = $content_fingerprint,\n    f.node_type = $node_type,\n    f.entity_type = $entity_type,\n    f.indexed_at = datetime(),\n    f.indexed_by = 'hypatia-reindex',\n    f.needs_structural = true,\n    f.file_size = $file_size,\n    f.temp_semantic_text = $file_content,\n    f.temp_behavioral_text = $behavioral_context\n\n// Update SystemEntity connection if entity_type changed\nWITH f\nOPTIONAL MATCH (f)<-[old_rel:HAS_DETAIL]-(old_se:SystemEntity)\nWHERE old_se.name <> $entity_type\nDELETE old_rel\n\nWITH f\nMATCH (nav:NavigationMaster {namespace: $namespace})\nMATCH (nav)-[:HAS_ENTITY]->(new_se:SystemEntity {name: $entity_type})\nMERGE (new_se)-[:HAS_DETAIL]->(f)\n\nRETURN f.file_path as updated",
   "params": {
     "file_path": "C:\\Users\\Norbert\\...\\PaymentService.java",
     "name": "PaymentService.java",
     "last_modified": "2025-11-30T09:23:45",
-    "content_hash": "x9y8z7w6v5u4...",  // NEW hash
+    "content_fingerprint": "size:13456|lines:...|head:...|tail:...",
     "node_type": "SERVICE",
     "entity_type": "Process",
-    "semantic_embedding": [0.0234, ...],  // NEW embedding
-    "behavioral_embedding": [0.0123, ...],  // NEW embedding
+    "file_content": "<full file source code>",
+    "behavioral_context": "<extracted behavioral patterns>",
     "file_size": 13456,
     "namespace": "checkitout"
   }
@@ -395,12 +400,39 @@ Response:
   "result": [{"updated": "C:\\Users\\Norbert\\...\\PaymentService.java"}],
   "summary": {
     "counters": {
-      "properties_set": 9,
+      "properties_set": 11,
       "relationships_deleted": 0,
       "relationships_created": 0
     }
   }
 }
+
+───────────────────────────────────────────────────────────────────────────────
+STEP 4: GENERATE new embeddings via APOC
+───────────────────────────────────────────────────────────────────────────────
+Tool: mcp__neo4j-cypher__kg-write_neo4j_cypher
+Parameters: {
+  "query": "CYPHER 25\nMATCH (f:EntityDetail {file_path: $file_path})\n\n-- Generate semantic embedding via APOC\nCALL apoc.ml.openai.embedding([f.temp_semantic_text], 'x', {model: 'semantic'})\nYIELD embedding AS semantic_emb\nSET f.semantic_embedding = semantic_emb\n\nWITH f\n-- Generate behavioral embedding via APOC\nCALL apoc.ml.openai.embedding([f.temp_behavioral_text], 'x', {model: 'behavioral'})\nYIELD embedding AS behavioral_emb\nSET f.behavioral_embedding = behavioral_emb\n\nWITH f\n-- Clean up temporary properties\nREMOVE f.temp_semantic_text, f.temp_behavioral_text\n\nRETURN size(f.semantic_embedding) as semantic_dims,\n       size(f.behavioral_embedding) as behavioral_dims",
+  "params": {
+    "file_path": "C:\\Users\\Norbert\\...\\PaymentService.java"
+  }
+}
+
+Response:
+{
+  "result": [{
+    "semantic_dims": 4096,
+    "behavioral_dims": 4096
+  }],
+  "summary": {
+    "counters": {
+      "properties_set": 2,
+      "properties_removed": 2
+    }
+  }
+}
+
+Context savings: Agent receives only dimension counts, not embedding arrays! (~64KB saved)
 
 Note: Structural embedding will be regenerated by Grothendieck
 ═══════════════════════════════════════════════════════════════════════════════

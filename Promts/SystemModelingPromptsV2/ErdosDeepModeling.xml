@@ -226,6 +226,23 @@ NAMESPACE: checkitout
 ───────────────────────────────────────────────────────────────────────────────
 STEP 1: Generate query embedding (semantic lens)
 ───────────────────────────────────────────────────────────────────────────────
+NOTE ON QUERY EMBEDDINGS:
+For file indexing, we use APOC (avoids context overhead for 1000s of files).
+For QUERY embeddings, you have two options:
+
+OPTION A (RECOMMENDED - SIMPLER): Use MCP for query embeddings
+- Only 1-3 embeddings per search query
+- Context impact minimal (~32KB once)
+- Simpler than APOC for one-off queries
+
+OPTION B (PURE APOC): Use APOC for query embeddings too
+- Create temp node with query text
+- Generate embedding via APOC
+- Use in search, then delete temp node
+- Zero context overhead but more complex
+
+Using OPTION A (MCP):
+
 Tool: mcp__qwen3-embedding__embed
 Parameters: {
   "lens": "semantic",
@@ -506,20 +523,23 @@ STEP 3: Add to graph (enrich namespace)
    - Format: "size:{bytes}|lines:{count}|head:{first100}|tail:{last100}"
    - Example: "size:2345|lines:78|head:@Service\n@Transactional...|tail:...return result;\n}\n}"
    - NOTE: LLM cannot compute SHA-256 hashes cryptographically
-2. Generate semantic embedding: mcp__qwen3-embedding__embed (lens="semantic")
-3. Extract behavioral context from generated code
-4. Generate behavioral embedding: mcp__qwen3-embedding__embed (lens="behavioral")
+2. Write node with temp_semantic_text = generated_code
+3. Generate semantic embedding via APOC: apoc.ml.openai.embedding()
+4. Extract behavioral context from generated code
+5. Update node with temp_behavioral_text = behavioral_context
+6. Generate behavioral embedding via APOC: apoc.ml.openai.embedding()
+7. Cleanup temp properties via REMOVE
 
 Tool: mcp__neo4j-cypher__kg-write_neo4j_cypher
 Parameters: {
-  "query": "CYPHER 25\nCREATE (f:EntityDetail:File {\n    file_path: $file_path,\n    name: $name,\n    namespace: $namespace,\n    last_modified: datetime(),\n    content_fingerprint: $content_fingerprint,\n    node_type: 'SERVICE',\n    entity_type: 'Process',\n    semantic_embedding: $semantic_embedding,\n    behavioral_embedding: $behavioral_embedding,\n    indexed_at: datetime(),\n    indexed_by: 'erdos-deep-modeling',\n    needs_structural: true,\n    file_size: $file_size,\n    hierarchy_level: 3,\n    generated: true,\n    generation_task: $task\n})\n\nWITH f\nMATCH (nav:NavigationMaster {namespace: $namespace})\nMATCH (nav)-[:HAS_ENTITY]->(se:SystemEntity {name: 'Process'})\nMERGE (se)-[:HAS_DETAIL]->(f)\n\nRETURN f.file_path as created",
+  "query": "CYPHER 25\nCREATE (f:EntityDetail:File {\n    file_path: $file_path,\n    name: $name,\n    namespace: $namespace,\n    last_modified: datetime(),\n    content_fingerprint: $content_fingerprint,\n    node_type: 'SERVICE',\n    entity_type: 'Process',\n    indexed_at: datetime(),\n    indexed_by: 'erdos-deep-modeling',\n    needs_structural: true,\n    file_size: $file_size,\n    hierarchy_level: 3,\n    generated: true,\n    generation_task: $task,\n    temp_semantic_text: $generated_code,\n    temp_behavioral_text: $behavioral_context\n})\n\nWITH f\nMATCH (nav:NavigationMaster {namespace: $namespace})\nMATCH (nav)-[:HAS_ENTITY]->(se:SystemEntity {name: 'Process'})\nMERGE (se)-[:HAS_DETAIL]->(f)\n\nRETURN f.file_path as created",
   "params": {
     "file_path": "C:\\...\\SubscriptionService.java",
     "name": "SubscriptionService.java",
     "namespace": "checkitout",
     "content_fingerprint": "size:2345|lines:78|head:@Service...|tail:...}",
-    "semantic_embedding": [...],
-    "behavioral_embedding": [...],
+    "generated_code": "<full generated source code>",
+    "behavioral_context": "<extracted behavioral patterns>",
     "file_size": 2345,
     "task": "Generate subscription management service"
   }
@@ -530,6 +550,18 @@ Response:
   "result": [{"created": "C:\\...\\SubscriptionService.java"}],
   "summary": {"counters": {"nodes_created": 1, "relationships_created": 1}}
 }
+
+Then generate embeddings via APOC (separate query):
+
+Tool: mcp__neo4j-cypher__kg-write_neo4j_cypher
+Parameters: {
+  "query": "CYPHER 25\nMATCH (f:EntityDetail {file_path: $file_path})\n\nCALL apoc.ml.openai.embedding([f.temp_semantic_text], 'x', {model: 'semantic'})\nYIELD embedding AS semantic_emb\nSET f.semantic_embedding = semantic_emb\n\nWITH f\nCALL apoc.ml.openai.embedding([f.temp_behavioral_text], 'x', {model: 'behavioral'})\nYIELD embedding AS behavioral_emb\nSET f.behavioral_embedding = behavioral_emb\n\nWITH f\nREMOVE f.temp_semantic_text, f.temp_behavioral_text\n\nRETURN size(f.semantic_embedding) as dims",
+  "params": {"file_path": "C:\\...\\SubscriptionService.java"}
+}
+
+Response: {"result": [{"dims": 4096}]}
+
+Context savings: Embeddings never pass through agent! (~64KB saved)
 
 ───────────────────────────────────────────────────────────────────────────────
 STEP 4: Create CALLS relationships (discovered dependencies)
@@ -666,9 +698,9 @@ RETURN nav {
                 <![CDATA[
 CYPHER 25
 // Generate query embedding for semantic search
-// First: Use MCP to embed the query term
-// MCP call: qwen3-embedding:embed(lens="semantic", text=query_text, dimension=4096)
-// Returns: query_embedding (4096 floats)
+// For query embeddings, you can use MCP (simple, 1-3 per query) or APOC (zero context)
+// MCP approach: mcp__qwen3-embedding__embed(lens="semantic", text=query_text)
+// Returns: query_embedding (4096 floats) - acceptable for queries!
 
 // Then search graph
 MATCH (f:EntityDetail {namespace: $namespace})
@@ -709,7 +741,8 @@ CYPHER 25
 // Example: Find files with transaction + retry logic
 
 // First: Embed behavioral query
-// MCP call: qwen3-embedding:embed(lens="behavioral", text="transaction boundary with retry logic and error handling", dimension=4096)
+// MCP approach (acceptable for queries): mcp__qwen3-embedding__embed(lens="behavioral", ...)
+// Returns query embedding for similarity comparison
 
 MATCH (f:EntityDetail {namespace: $namespace})
 WHERE f.behavioral_embedding IS NOT NULL
