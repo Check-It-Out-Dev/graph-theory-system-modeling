@@ -24,7 +24,15 @@ from mcp.types import (
 )
 from pydantic import BaseModel, Field
 
-from .config import settings, DOMAIN_INSTRUCTIONS, LensType
+from .config import (
+    settings,
+    DOMAIN_INSTRUCTIONS,
+    LensType,
+    EMBEDDING_SERVER_VERSION,
+    MODEL_VERSION,
+    LENS_HASHES,
+    get_embedding_version_metadata,
+)
 from .embedding_engine import EmbeddingEngine, get_engine
 
 logger = logging.getLogger(__name__)
@@ -147,9 +155,9 @@ async def call_tool(name: str, arguments: dict) -> CallToolResult:
 async def _handle_embed(engine: EmbeddingEngine, arguments: dict) -> CallToolResult:
     """Handle single text embedding with lens."""
     input_data = EmbedInput(**arguments)
-    
+
     logger.info(f"Embedding with {input_data.lens} lens ({len(input_data.text)} chars)")
-    
+
     loop = asyncio.get_event_loop()
     result = await loop.run_in_executor(
         None,
@@ -159,17 +167,28 @@ async def _handle_embed(engine: EmbeddingEngine, arguments: dict) -> CallToolRes
             dimension=input_data.dimension,
         )
     )
-    
+
+    # Include version metadata for tracking in Neo4j
+    version_meta = get_embedding_version_metadata()
+
     response = {
         "embedding": result.embeddings[0],
         "lens": result.lens,
+        "lens_hash": LENS_HASHES[input_data.lens],  # For invalidation detection
         "dimensions": result.dimensions,
         "normalized": result.normalized,
+        "version": {
+            "model_id": version_meta["model_id"],
+            "model_version": version_meta["model_version"],
+            "server_version": version_meta["server_version"],
+            "lens_hash": LENS_HASHES[input_data.lens],
+            "generated_at": version_meta["generated_at"],
+        }
     }
-    
+
     return CallToolResult(
         content=[TextContent(
-            type="text", 
+            type="text",
             text=f"Generated {input_data.lens} embedding ({result.dimensions}D)\n\n```json\n{json.dumps(response, indent=2)}\n```"
         )]
     )
@@ -178,9 +197,9 @@ async def _handle_embed(engine: EmbeddingEngine, arguments: dict) -> CallToolRes
 async def _handle_batch_embed(engine: EmbeddingEngine, arguments: dict) -> CallToolResult:
     """Handle batch embedding with same lens."""
     input_data = BatchEmbedInput(**arguments)
-    
+
     logger.info(f"Batch embedding {len(input_data.texts)} texts with {input_data.lens} lens")
-    
+
     loop = asyncio.get_event_loop()
     result = await loop.run_in_executor(
         None,
@@ -190,14 +209,25 @@ async def _handle_batch_embed(engine: EmbeddingEngine, arguments: dict) -> CallT
             dimension=input_data.dimension,
         )
     )
-    
+
+    # Include version metadata for tracking in Neo4j
+    version_meta = get_embedding_version_metadata()
+
     response = {
         "embeddings": result.embeddings,
         "lens": result.lens,
+        "lens_hash": LENS_HASHES[input_data.lens],  # For invalidation detection
         "num_texts": result.num_texts,
         "dimensions": result.dimensions,
+        "version": {
+            "model_id": version_meta["model_id"],
+            "model_version": version_meta["model_version"],
+            "server_version": version_meta["server_version"],
+            "lens_hash": LENS_HASHES[input_data.lens],
+            "generated_at": version_meta["generated_at"],
+        }
     }
-    
+
     return CallToolResult(
         content=[TextContent(
             type="text",

@@ -8,6 +8,32 @@ Includes Information Lensing domain instructions for triple embedding generation
 from typing import Literal
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field
+import hashlib
+from datetime import datetime
+
+
+# =============================================================================
+# Embedding Version Constants
+# =============================================================================
+# Version tracking for embeddings ensures:
+# 1. We can detect when lens instructions change (embedding invalidation)
+# 2. We can track model versions across updates
+# 3. NavigationMaster can store which version was used for each embedding
+
+EMBEDDING_SERVER_VERSION = "2.0.1"  # Server version
+MODEL_VERSION = "2025.11.30-v1"     # Model version (update when model changes)
+
+
+def compute_lens_hash(lens_instruction: str) -> str:
+    """
+    Compute a short hash of lens instruction for version tracking.
+
+    This allows detecting when lens instructions change, which would
+    require re-generating embeddings for affected files.
+
+    Returns first 8 characters of SHA-256 hash.
+    """
+    return hashlib.sha256(lens_instruction.encode('utf-8')).hexdigest()[:8]
 
 
 # =============================================================================
@@ -69,6 +95,65 @@ DOMAIN_INSTRUCTIONS: dict[str, str] = {
 
 # Valid lens types for type checking
 LensType = Literal["structural", "semantic", "behavioral"]
+
+
+# =============================================================================
+# Computed Lens Hashes (auto-computed from instructions above)
+# =============================================================================
+# These are used to detect when lens instructions change, signaling
+# that embeddings generated with old instructions should be invalidated.
+
+LENS_HASHES: dict[str, str] = {
+    lens: compute_lens_hash(instruction)
+    for lens, instruction in DOMAIN_INSTRUCTIONS.items()
+}
+
+
+def get_embedding_version_metadata() -> dict:
+    """
+    Get complete embedding version metadata for storage in Neo4j.
+
+    Returns a dictionary suitable for JSON serialization and storage
+    in EntityDetail.embedding_version property.
+
+    Example output:
+    {
+        "model_id": "Qwen/Qwen3-Embedding-8B",
+        "model_version": "2025.11.30-v1",
+        "server_version": "2.0.1",
+        "lens_versions": {
+            "semantic": "a1b2c3d4",
+            "behavioral": "e5f6g7h8",
+            "structural": "i9j0k1l2"
+        },
+        "generated_at": "2025-11-30T12:00:00Z"
+    }
+    """
+    return {
+        "model_id": settings.model_id if 'settings' in dir() else "Qwen/Qwen3-Embedding-8B",
+        "model_version": MODEL_VERSION,
+        "server_version": EMBEDDING_SERVER_VERSION,
+        "lens_versions": LENS_HASHES.copy(),
+        "generated_at": datetime.utcnow().isoformat() + "Z"
+    }
+
+
+def check_lens_version_match(stored_hash: str, lens: LensType) -> bool:
+    """
+    Check if a stored lens hash matches the current lens instruction.
+
+    Use this to detect if an embedding needs regeneration due to
+    lens instruction changes.
+
+    Args:
+        stored_hash: Hash stored with the embedding in Neo4j
+        lens: Which lens to check against
+
+    Returns:
+        True if hashes match (embedding still valid)
+        False if hashes differ (embedding should be regenerated)
+    """
+    return stored_hash == LENS_HASHES.get(lens)
 
 
 class Settings(BaseSettings):

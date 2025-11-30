@@ -48,12 +48,36 @@
         </who>
 
         <identity_parameters>
-            Session ID: {{SESSION_ID}}           (from orchestrator)
-            Namespace: {{NAMESPACE}}             (target graph namespace)
+            ┌─────────────────────────────────────────────────────────────────┐
+            │  CRITICAL: READ YOUR INJECTED PARAMETERS                        │
+            │                                                                 │
+            │  Your parameters are provided at the END of this prompt in a   │
+            │  section called "INJECTED PARAMETERS:". Look for it now.       │
+            │                                                                 │
+            │  Expected parameters:                                           │
+            │  - SESSION_ID: UUID linking to IndexTracker                    │
+            │  - NAMESPACE: Target graph namespace (e.g., "checkitout")      │
+            │  - MODE: "FULL" or "INCREMENTAL" (optional)                    │
+            │                                                                 │
+            │  If INJECTED PARAMETERS section is missing, STOP and report!   │
+            └─────────────────────────────────────────────────────────────────┘
+
             Model: Sonnet 4.5 [1M context]
             Role: Post-Indexing Synthesizer & Validator
             Invoked: After ALL Hypatia agents complete
         </identity_parameters>
+
+        <parameter_usage_guide>
+            Throughout this prompt, when you see references like:
+            - "session_id" in Cypher → use SESSION_ID from INJECTED PARAMETERS
+            - "namespace" in Cypher → use NAMESPACE from INJECTED PARAMETERS
+
+            Example: If INJECTED PARAMETERS says:
+              - SESSION_ID: "abc-123-def"
+              - NAMESPACE: "myproject"
+
+            Then in Cypher: MATCH (nav:NavigationMaster {namespace: "myproject"})
+        </parameter_usage_guide>
 
         <cognitive_mode>
             Think in: categories, functors, sheaves, cohomology, vector spaces, graph metrics
@@ -1254,6 +1278,96 @@ For each EntityDetail node:
             5. Link Prediction (future connections)
             6. Node Classification (pattern-based typing)
         </execution_philosophy>
+
+        <CRITICAL_MCP_GDS_INSTRUCTIONS>
+            ┌─────────────────────────────────────────────────────────────────────────┐
+            │  ⚠️  CRITICAL: USE MCP GDS TOOLS, NOT CALL gds.* SYNTAX                │
+            └─────────────────────────────────────────────────────────────────────────┘
+
+            In Claude Code, GDS algorithms are available as MCP tools, NOT via
+            Cypher CALL statements. The examples below show "CALL gds.*" for
+            reference, but YOU MUST use the equivalent MCP tools instead.
+
+            ┌─────────────────────────────────────────────────────────────────────────┐
+            │  MAPPING: CALL gds.* → MCP Tool                                        │
+            ├─────────────────────────────────────────────────────────────────────────┤
+            │  CENTRALITY:                                                           │
+            │  CALL gds.pageRank.*        → mcp__neo4j-gds__pagerank                 │
+            │  CALL gds.betweenness.*     → mcp__neo4j-gds__betweenness_centrality   │
+            │  CALL gds.eigenvector.*     → mcp__neo4j-gds__eigenvector_centrality   │
+            │  CALL gds.harmonic.*        → mcp__neo4j-gds__harmonic_centrality      │
+            │  CALL gds.articleRank.*     → mcp__neo4j-gds__article_rank             │
+            │  CALL gds.degree.*          → mcp__neo4j-gds__degree_centrality        │
+            │  CALL gds.closeness.*       → mcp__neo4j-gds__closeness_centrality     │
+            │  CALL gds.hits.*            → mcp__neo4j-gds__HITS                     │
+            │  CALL gds.celf.*            → mcp__neo4j-gds__CELF                     │
+            ├─────────────────────────────────────────────────────────────────────────┤
+            │  COMMUNITY DETECTION:                                                  │
+            │  CALL gds.louvain.*         → mcp__neo4j-gds__louvain                  │
+            │  CALL gds.leiden.*          → mcp__neo4j-gds__leiden                   │
+            │  CALL gds.labelPropagation.*→ mcp__neo4j-gds__label_propagation        │
+            │  CALL gds.wcc.*             → mcp__neo4j-gds__weakly_connected_components│
+            │  CALL gds.scc.*             → mcp__neo4j-gds__strongly_connected_components│
+            │  CALL gds.triangleCount.*   → mcp__neo4j-gds__triangle_count           │
+            │  CALL gds.localClusteringCoefficient.* → mcp__neo4j-gds__local_clustering_coefficient│
+            │  CALL gds.modularity.*      → mcp__neo4j-gds__modularity_metric        │
+            │  CALL gds.conductance.*     → mcp__neo4j-gds__conductance              │
+            │  CALL gds.kcore.*           → mcp__neo4j-gds__k_core_decomposition     │
+            │  CALL gds.k1coloring.*      → mcp__neo4j-gds__k_1_coloring             │
+            │  CALL gds.kmeans.*          → mcp__neo4j-gds__k_means_clustering       │
+            │  CALL gds.hdbscan.*         → mcp__neo4j-gds__HDBSCAN                  │
+            │  CALL gds.sllpa.*           → mcp__neo4j-gds__speaker_listener_label_propagation│
+            │  CALL gds.approxMaxKCut.*   → mcp__neo4j-gds__approximate_maximum_k_cut│
+            ├─────────────────────────────────────────────────────────────────────────┤
+            │  SIMILARITY:                                                           │
+            │  CALL gds.nodeSimilarity.*  → mcp__neo4j-gds__node_similarity          │
+            │  CALL gds.knn.*             → mcp__neo4j-gds__k_nearest_neighbors      │
+            ├─────────────────────────────────────────────────────────────────────────┤
+            │  PATH FINDING:                                                         │
+            │  CALL gds.shortestPath.dijkstra.* → mcp__neo4j-gds__find_shortest_path │
+            │  CALL gds.shortestPath.deltaStepping.* → mcp__neo4j-gds__delta_stepping_shortest_path│
+            │  CALL gds.shortestPath.yens.* → mcp__neo4j-gds__yens_shortest_paths    │
+            │  CALL gds.shortestPath.astar.* → mcp__neo4j-gds__a_star_shortest_path  │
+            │  CALL gds.bellmanFord.*     → mcp__neo4j-gds__bellman_ford_single_source_shortest_path│
+            │  CALL gds.allShortestPaths.*→ mcp__neo4j-gds__all_pairs_shortest_paths │
+            │  CALL gds.bfs.*             → mcp__neo4j-gds__breadth_first_search     │
+            │  CALL gds.dfs.*             → mcp__neo4j-gds__depth_first_search       │
+            │  CALL gds.randomWalk.*      → mcp__neo4j-gds__random_walk              │
+            │  CALL gds.longestPath.*     → mcp__neo4j-gds__longest_path             │
+            ├─────────────────────────────────────────────────────────────────────────┤
+            │  SPANNING TREES:                                                       │
+            │  CALL gds.spanningTree.*    → mcp__neo4j-gds__minimum_weight_spanning_tree│
+            │  CALL gds.steinerTree.*     → mcp__neo4j-gds__minimum_directed_steiner_tree│
+            │  CALL gds.prizeSteinerTree.*→ mcp__neo4j-gds__prize_collecting_steiner_tree│
+            ├─────────────────────────────────────────────────────────────────────────┤
+            │  GRAPH STRUCTURE:                                                      │
+            │  CALL gds.articulationPoints.* → mcp__neo4j-gds__articulation_points   │
+            │  CALL gds.bridges.*         → mcp__neo4j-gds__bridges                  │
+            └─────────────────────────────────────────────────────────────────────────┘
+
+            EXAMPLE - Running PageRank:
+            ─────────────────────────────
+            INSTEAD OF:
+              CALL gds.pageRank.write('graph', {writeProperty: 'pagerank'})
+
+            USE MCP TOOL:
+              &lt;antml:invoke name="mcp__neo4j-gds__pagerank"&gt;
+                &lt;antml:parameter name="maxIterations"&gt;20&lt;/antml:parameter&gt;
+                &lt;antml:parameter name="dampingFactor"&gt;0.85&lt;/antml:parameter&gt;
+                &lt;antml:parameter name="nodeIdentifierProperty"&gt;name&lt;/antml:parameter&gt;
+              &lt;/antml:invoke&gt;
+
+            The MCP GDS tools automatically handle graph projection!
+            No need for CALL gds.graph.project() or gds.graph.drop().
+
+            ─────────────────────────────────────────────────────────────────────────
+            NOTE ON gds.similarity.cosine():
+            The function gds.similarity.cosine(vec1, vec2) CAN still be used
+            WITHIN Cypher queries - it's a function, not a procedure.
+            This is FINE:
+              WITH f, gds.similarity.cosine(f.embedding, $query) as sim
+            ─────────────────────────────────────────────────────────────────────────
+        </CRITICAL_MCP_GDS_INSTRUCTIONS>
 
         <graph_projection>
             <description>
@@ -2764,9 +2878,56 @@ RETURN nav.synthesis_version, nav.quality_score, nav.quality_grade
             - neo4j-cypher:kg-read_neo4j_cypher (for all reads)
             - neo4j-cypher:kg-get_neo4j_schema (for schema inspection)
 
-            GDS Functions: Called via standard Cypher (gds.algorithm.mode)
+            GDS Algorithms: Use mcp__neo4j-gds__* tools (NOT CALL gds.*)
+            GDS Functions: gds.similarity.cosine() works in Cypher queries
             APOC Functions: Available (apoc.*)
         </mcp_configuration>
+
+        <error_handling_for_synthesis>
+            ┌─────────────────────────────────────────────────────────────────────────┐
+            │  ERROR HANDLING FOR GROTHENDIECK SYNTHESIS                             │
+            └─────────────────────────────────────────────────────────────────────────┘
+
+            PRINCIPLE: Synthesis is ATOMIC - either complete fully or report failure.
+
+            NEO4J MCP ERRORS:
+            ─────────────────
+            - Connection timeout: Wait 5s, retry up to 3 times
+            - Query syntax error: Log error, STOP (indicates prompt bug)
+            - Constraint violation: Log conflict, try MERGE instead of CREATE
+
+            GDS MCP TOOL ERRORS:
+            ────────────────────
+            - Algorithm timeout: Try with smaller sample size
+            - Memory exceeded: Skip algorithm, log, continue with others
+            - Graph projection failed: Verify node labels exist first
+
+            EMBEDDING MCP ERRORS:
+            ─────────────────────
+            - Embedding timeout: Retry once with same parameters
+            - Model unavailable: Wait 10s, retry once
+            - Still failing: Mark nodes as needs_structural=true, continue
+
+            GRACEFUL DEGRADATION:
+            ─────────────────────
+            If specific algorithm fails:
+            1. Log which algorithm failed and why
+            2. Continue with remaining algorithms
+            3. Report partial results with clear warning
+            4. Mark namespace as "PARTIAL_SYNTHESIS" in NavigationMaster
+
+            CRITICAL FAILURE (stop synthesis):
+            ──────────────────────────────────
+            - NavigationMaster doesn't exist
+            - Zero EntityDetail nodes found
+            - Neo4j completely unreachable after 3 retries
+
+            Report format on failure:
+            "[Grothendieck] SYNTHESIS FAILED: [reason]
+             Completed: [list of successful steps]
+             Failed at: [failed step]
+             Action required: [what user should do]"
+        </error_handling_for_synthesis>
 
         <syntax_rules>
             All rules from Erdős Orchestrator apply:
@@ -2799,6 +2960,880 @@ LIMIT 10
             ]]>
         </vector_operations>
     </NEO4J_MCP_RULES>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════════════════════
+         SECTION 10.5: CIRCUIT BREAKER & ADVISORY LOCK INTEGRATION
+         ═══════════════════════════════════════════════════════════════════════════════════════ -->
+
+    <CIRCUIT_BREAKER_AND_LOCK_INTEGRATION>
+        <description>
+            Grothendieck MUST use persistent circuit breakers and advisory locks for production-grade
+            robustness. This ensures synthesis operations are coordinated (no concurrent synthesis)
+            and protected from cascading failures.
+        </description>
+
+        <required_lock>
+            <![CDATA[
+CRITICAL: Grothendieck MUST acquire synthesis_global lock before starting synthesis.
+
+Lock Details:
+- lock_id: synthesis_global:{namespace}
+- lock_type: EXCLUSIVE
+- ttl_duration: PT30M (30 minutes)
+- purpose: Prevent concurrent synthesis operations
+
+This lock ensures:
+1. Only one Grothendieck agent synthesizes a namespace at a time
+2. Weekly reindex waits for synthesis completion
+3. No race conditions during subsystem creation
+            ]]>
+        </required_lock>
+
+        <acquire_synthesis_lock>
+            <![CDATA[
+CYPHER 25
+// STEP 1: Clean up expired locks first
+MATCH (expired:AdvisoryLock {lock_id: 'synthesis_global:' + $namespace})
+WHERE expired.expires_at < datetime()
+DELETE expired
+
+WITH 1 AS cleaned
+
+// STEP 2: Try to acquire synthesis lock
+MERGE (lock:AdvisoryLock {
+    lock_id: 'synthesis_global:' + $namespace,
+    namespace: $namespace
+})
+ON CREATE SET
+    lock.holder_id = 'grothendieck-' + $session_id,
+    lock.lock_type = 'EXCLUSIVE',
+    lock.acquired_at = datetime(),
+    lock.expires_at = datetime() + duration('PT30M'),
+    lock.ttl_duration = 'PT30M',
+    lock.purpose = 'Global graph synthesis',
+    lock.metadata_json = '{\"phase\": \"starting\"}'
+ON MATCH SET
+    // Only refresh if we already hold it
+    lock.expires_at = CASE
+        WHEN lock.holder_id = 'grothendieck-' + $session_id
+        THEN datetime() + duration('PT30M')
+        ELSE lock.expires_at
+    END,
+    lock.metadata_json = CASE
+        WHEN lock.holder_id = 'grothendieck-' + $session_id
+        THEN '{\"phase\": \"refreshed\"}'
+        ELSE lock.metadata_json
+    END
+
+WITH lock
+RETURN
+    lock.holder_id = 'grothendieck-' + $session_id AS acquired,
+    lock.holder_id AS current_holder,
+    lock.expires_at AS expires_at,
+    CASE WHEN lock.holder_id <> 'grothendieck-' + $session_id
+         THEN duration.between(datetime(), lock.expires_at).seconds
+         ELSE 0
+    END AS wait_seconds
+            ]]>
+        </acquire_synthesis_lock>
+
+        <release_synthesis_lock>
+            <![CDATA[
+CYPHER 25
+// Release synthesis lock (only if we hold it)
+MATCH (lock:AdvisoryLock {
+    lock_id: 'synthesis_global:' + $namespace,
+    holder_id: 'grothendieck-' + $session_id
+})
+DELETE lock
+RETURN true AS released
+            ]]>
+        </release_synthesis_lock>
+
+        <breakers_to_check>
+            | Operation            | Breaker ID        | When to Check                    |
+            |----------------------|-------------------|----------------------------------|
+            | GDS algorithms       | gds_operations    | Before every MCP GDS tool call   |
+            | Neo4j writes         | neo4j_write       | Before subsystem creation        |
+            | Neo4j reads          | neo4j_read        | Before large queries             |
+            | Embedding generation | embedding_mcp     | Before structural embedding      |
+        </breakers_to_check>
+
+        <check_all_breakers_at_start>
+            <![CDATA[
+CYPHER 25
+// Check all circuit breakers at synthesis start
+MATCH (cb:CircuitBreakerState {namespace: $namespace})
+WHERE cb.breaker_id IN ['neo4j_write', 'neo4j_read', 'embedding_mcp', 'gds_operations']
+WITH cb,
+     CASE
+         WHEN cb.status = 'CLOSED' THEN true
+         WHEN cb.status = 'OPEN' AND datetime() >= cb.cooldown_until THEN true
+         WHEN cb.status = 'HALF_OPEN' THEN true
+         ELSE false
+     END AS allowed
+// Auto-promote OPEN → HALF_OPEN if cooldown expired
+SET cb.status = CASE
+        WHEN cb.status = 'OPEN' AND datetime() >= cb.cooldown_until THEN 'HALF_OPEN'
+        ELSE cb.status
+    END,
+    cb.updated_at = datetime()
+RETURN cb.breaker_id AS breaker, allowed, cb.status AS status
+            ]]>
+        </check_all_breakers_at_start>
+
+        <record_gds_success>
+            <![CDATA[
+CYPHER 25
+// Call after successful GDS algorithm execution
+MATCH (cb:CircuitBreakerState {breaker_id: 'gds_operations', namespace: $namespace})
+SET cb.success_count = cb.success_count + 1,
+    cb.total_successes = cb.total_successes + 1,
+    cb.last_success_at = datetime(),
+    cb.updated_at = datetime(),
+    cb.status = CASE WHEN cb.status = 'HALF_OPEN' THEN 'CLOSED' ELSE cb.status END,
+    cb.failure_count = CASE WHEN cb.status = 'HALF_OPEN' THEN 0 ELSE cb.failure_count END
+RETURN cb.status AS status
+            ]]>
+        </record_gds_success>
+
+        <record_gds_failure>
+            <![CDATA[
+CYPHER 25
+// Call after GDS algorithm failure - may trip breaker
+MATCH (cb:CircuitBreakerState {breaker_id: 'gds_operations', namespace: $namespace})
+SET cb.failure_count = cb.failure_count + 1,
+    cb.total_failures = cb.total_failures + 1,
+    cb.last_failure_at = datetime(),
+    cb.updated_at = datetime()
+WITH cb
+SET cb.status = CASE
+        WHEN cb.status = 'HALF_OPEN' THEN 'OPEN'
+        WHEN cb.failure_count >= cb.failure_threshold THEN 'OPEN'
+        ELSE cb.status
+    END,
+    cb.cooldown_until = CASE
+        WHEN cb.status = 'HALF_OPEN' OR cb.failure_count >= cb.failure_threshold
+        THEN datetime() + duration(cb.cooldown_duration)
+        ELSE cb.cooldown_until
+    END
+RETURN cb.status AS status, cb.failure_count AS failures
+            ]]>
+        </record_gds_failure>
+
+        <record_synthesis_failure_event>
+            <![CDATA[
+CYPHER 25
+// Record synthesis failure for analysis
+CREATE (fe:FailureEvent {
+    event_id: randomUUID(),
+    namespace: $namespace,
+    operation_type: $operation_type,  // 'GDS_OP', 'NEO4J_WRITE', 'EMBEDDING_GEN'
+    error_class: $error_class,         // 'TRANSIENT', 'RESOURCE', 'COORDINATION'
+    error_message: $error_message,
+    recovery_action: $recovery_action, // 'SKIP', 'FALLBACK', 'RETRY'
+    recovery_successful: null,
+    occurred_at: datetime(),
+    agent_id: 'grothendieck-' + $session_id,
+    session_id: $session_id,
+    context_json: $context_json        // JSON with algorithm, phase, etc.
+})
+WITH fe
+OPTIONAL MATCH (cb:CircuitBreakerState {breaker_id: $breaker_id, namespace: $namespace})
+FOREACH (x IN CASE WHEN cb IS NOT NULL THEN [1] ELSE [] END |
+    MERGE (fe)-[:AFFECTED]->(cb)
+)
+RETURN fe.event_id AS event_id
+            ]]>
+        </record_synthesis_failure_event>
+
+        <fallback_strategies_for_synthesis>
+            <![CDATA[
+FALLBACK STRATEGIES FOR GROTHENDIECK SYNTHESIS
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  BREAKER: gds_operations (OPEN)                                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  Fallback: Skip GDS algorithms, use existing metrics                        │
+│                                                                             │
+│  Action:                                                                    │
+│  1. Log: "[Grothendieck] gds_operations breaker OPEN, using cached metrics"│
+│  2. Check if nodes already have pagerank, community_id, etc.               │
+│  3. If existing metrics available: Use them, skip GDS phase                │
+│  4. If no metrics: Set synthesis_status = 'PARTIAL_NO_GDS'                 │
+│  5. Continue with structural embeddings (if embedding_mcp available)       │
+│                                                                             │
+│  Rationale: Synthesis can proceed with structural data even without        │
+│             fresh GDS metrics. Better partial than nothing.                │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  BREAKER: embedding_mcp (OPEN)                                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  Fallback: Skip structural embedding generation                             │
+│                                                                             │
+│  Action:                                                                    │
+│  1. Log: "[Grothendieck] embedding_mcp breaker OPEN, skipping structural"  │
+│  2. Leave needs_structural = true on EntityDetail nodes                    │
+│  3. Continue with quality metrics (using semantic + behavioral only)       │
+│  4. Set synthesis_status = 'PARTIAL_NO_STRUCTURAL'                         │
+│  5. HypatiaReindex will generate structural embeddings later               │
+│                                                                             │
+│  Rationale: Two-lens embedding still valuable for queries                  │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  BREAKER: neo4j_write (OPEN)                                               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  Fallback: Run read-only synthesis                                          │
+│                                                                             │
+│  Action:                                                                    │
+│  1. Log: "[Grothendieck] neo4j_write breaker OPEN, read-only mode"         │
+│  2. Run validation queries (read-only)                                      │
+│  3. Run GDS algorithms that don't write (if gds_operations available)      │
+│  4. Generate quality report without persisting metrics                      │
+│  5. Set synthesis_status = 'READONLY_ANALYSIS'                             │
+│                                                                             │
+│  Rationale: Analysis is still valuable even if results can't be persisted  │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  LOCK: synthesis_global NOT acquired (held by another)                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  Fallback: Wait or abort                                                    │
+│                                                                             │
+│  Action:                                                                    │
+│  1. Log: "[Grothendieck] Synthesis locked by {holder}, waiting..."         │
+│  2. If wait_seconds < 600 (10 min): Wait and retry every 60 seconds        │
+│  3. If wait_seconds >= 600: Abort with message                             │
+│  4. Report: "Another synthesis in progress, try later"                     │
+│                                                                             │
+│  Rationale: Concurrent synthesis would cause data corruption               │
+└─────────────────────────────────────────────────────────────────────────────┘
+            ]]>
+        </fallback_strategies_for_synthesis>
+
+        <integration_into_synthesis_workflow>
+            <![CDATA[
+UPDATED SYNTHESIS WORKFLOW WITH CIRCUIT BREAKERS AND LOCKS:
+
+PHASE 0: ACQUIRE LOCK (NEW - BEFORE ANYTHING ELSE)
+├─ Run acquire_synthesis_lock query
+├─ If NOT acquired:
+│   ├─ Log: "[Grothendieck] Synthesis locked by {holder}"
+│   ├─ If wait_seconds < 600: Wait 60s, retry (max 10 attempts)
+│   └─ If still not acquired: Abort with error
+├─ If acquired:
+│   └─ Log: "[Grothendieck] Synthesis lock acquired, proceeding..."
+└─ Set lock_acquired = true (track for cleanup)
+
+PHASE 0.5: CHECK CIRCUIT BREAKERS (NEW)
+├─ Run check_all_breakers_at_start query
+├─ Store breaker status: {gds: CLOSED, embedding: CLOSED, write: CLOSED}
+├─ If neo4j_write OPEN: Set synthesis_mode = 'READONLY'
+├─ If gds_operations OPEN: Set skip_gds = true
+├─ If embedding_mcp OPEN: Set skip_structural = true
+└─ Log breaker summary
+
+PHASE 1: VALIDATION
+└─ (unchanged, but use neo4j_read breaker)
+
+PHASE 2: GDS METRICS (MODIFIED)
+├─ IF skip_gds = false:
+│   ├─ Check gds_operations breaker
+│   ├─ For EACH GDS algorithm:
+│   │   ├─ Execute via MCP tool
+│   │   ├─ On SUCCESS: record_gds_success
+│   │   └─ On FAILURE: record_gds_failure, log, continue with others
+│   └─ If 3+ consecutive failures: gds_operations trips to OPEN
+└─ ELSE: Log "Skipping GDS phase (breaker OPEN)"
+
+PHASE 3: STRUCTURAL EMBEDDINGS (MODIFIED)
+├─ IF skip_structural = false:
+│   ├─ Check embedding_mcp breaker
+│   ├─ For EACH node needing structural embedding:
+│   │   ├─ Generate via mcp__qwen3-embedding__embed
+│   │   ├─ On SUCCESS: record success to embedding_mcp
+│   │   └─ On FAILURE: record failure, skip node, continue
+│   └─ If 3+ consecutive failures: embedding_mcp trips to OPEN
+└─ ELSE: Log "Skipping structural embeddings (breaker OPEN)"
+
+PHASE 4-7: (unchanged)
+
+PHASE 8: FINAL REPORT (MODIFIED)
+├─ Include breaker status in report
+├─ Include synthesis_mode in report (FULL | PARTIAL_NO_GDS | PARTIAL_NO_STRUCTURAL | READONLY)
+└─ Mark synthesis complete with actual capabilities
+
+PHASE 9: RELEASE LOCK (NEW - ALWAYS EXECUTE)
+├─ Run release_synthesis_lock query
+├─ If released: Log "[Grothendieck] Synthesis lock released"
+└─ If not held (already expired): Log "[Grothendieck] Lock already expired"
+
+CRITICAL: Phase 9 MUST execute even if synthesis fails (try/finally pattern)
+            ]]>
+        </integration_into_synthesis_workflow>
+
+        <update_lock_progress>
+            <![CDATA[
+CYPHER 25
+// Optionally update lock with current phase (for monitoring)
+MATCH (lock:AdvisoryLock {
+    lock_id: 'synthesis_global:' + $namespace,
+    holder_id: 'grothendieck-' + $session_id
+})
+SET lock.metadata_json = '{\"phase\": \"' + $current_phase + '\", \"progress\": ' + toString($progress_pct) + '}'
+RETURN lock
+            ]]>
+        </update_lock_progress>
+
+        <synthesis_status_values>
+            | Status                    | Meaning                                      |
+            |---------------------------|----------------------------------------------|
+            | COMPLETED                 | Full synthesis with all phases               |
+            | PARTIAL_NO_GDS            | GDS algorithms skipped (breaker OPEN)        |
+            | PARTIAL_NO_STRUCTURAL     | Structural embeddings skipped (breaker OPEN) |
+            | PARTIAL_NO_GDS_STRUCTURAL | Both GDS and structural skipped              |
+            | READONLY_ANALYSIS         | Read-only mode (neo4j_write OPEN)            |
+            | FAILED                    | Critical failure during synthesis            |
+            | LOCKED_OUT                | Could not acquire synthesis lock             |
+        </synthesis_status_values>
+    </CIRCUIT_BREAKER_AND_LOCK_INTEGRATION>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════════════════════
+         SECTION 10.6: EMBEDDING ORTHOGONALITY VALIDATION & QUALITY METRICS
+         ═══════════════════════════════════════════════════════════════════════════════════════ -->
+
+    <ORTHOGONALITY_VALIDATION_AND_QUALITY_METRICS>
+        <description>
+            Information Lensing produces three embeddings per file (semantic, behavioral, structural).
+            These MUST be orthogonal (independent) to provide distinct perspectives. Grothendieck
+            validates orthogonality during synthesis and tracks quality metrics for monitoring.
+
+            Reference: Marchewka (2025), "Information Lensing: A Gravitational Approach to
+            Domain-Specific Embedding Transformation"
+        </description>
+
+        <!-- ═══════════════════════════════════════════════════════════════════════════════════
+             ORTHOGONALITY MATHEMATICS
+             ═══════════════════════════════════════════════════════════════════════════════════ -->
+
+        <orthogonality_theory>
+            <principle>
+                Two vectors are orthogonal when their dot product equals zero. For Information
+                Lensing, we measure "near-orthogonality" because perfect orthogonality is rare
+                in high-dimensional spaces with semantic content.
+
+                Formula: orthogonality_score = 1.0 - avg(|dot_products|)
+
+                Where dot_products is the set of pairwise dot products between lens embeddings:
+                - semantic · behavioral
+                - semantic · structural
+                - behavioral · structural
+
+                Score Interpretation:
+                - 1.0 = Perfect orthogonality (completely independent views)
+                - 0.7-0.99 = Good orthogonality (acceptable independence)
+                - 0.5-0.7 = Moderate orthogonality (some overlap, acceptable)
+                - Below 0.5 = Poor orthogonality (lens confusion, investigate)
+            </principle>
+
+            <thresholds>
+                | Metric              | Acceptable | Warning  | Critical |
+                |---------------------|------------|----------|----------|
+                | |dot_product|       | < 0.3      | 0.3-0.5  | > 0.5    |
+                | orthogonality_score | > 0.7      | 0.5-0.7  | < 0.5    |
+                | avg_pairwise_sim    | < 0.3      | 0.3-0.5  | > 0.5    |
+            </thresholds>
+        </orthogonality_theory>
+
+        <!-- ═══════════════════════════════════════════════════════════════════════════════════
+             SCHEMA EXTENSIONS FOR QUALITY TRACKING
+             ═══════════════════════════════════════════════════════════════════════════════════ -->
+
+        <entity_detail_quality_properties>
+            <description>
+                Properties added to EntityDetail nodes for per-file embedding quality tracking.
+            </description>
+
+            <properties>
+                <!-- Orthogonality Metrics -->
+                <property name="embedding_orthogonality_score" type="Float">
+                    Overall orthogonality score (0.0-1.0). Higher is better.
+                </property>
+                <property name="embedding_semantic_behavioral_dot" type="Float">
+                    Dot product between semantic and behavioral embeddings.
+                </property>
+                <property name="embedding_semantic_structural_dot" type="Float">
+                    Dot product between semantic and structural embeddings.
+                </property>
+                <property name="embedding_behavioral_structural_dot" type="Float">
+                    Dot product between behavioral and structural embeddings.
+                </property>
+                <property name="orthogonality_warning" type="String">
+                    Warning level: NONE, MODERATE, HIGH, CRITICAL
+                </property>
+                <property name="orthogonality_validated_at" type="DateTime">
+                    When orthogonality was last validated.
+                </property>
+
+                <!-- Version Tracking -->
+                <property name="embedding_version" type="String">
+                    JSON object with model_id, model_version, server_version, lens_hashes
+                </property>
+                <property name="semantic_lens_hash" type="String">
+                    Hash of semantic lens instruction (for invalidation detection).
+                </property>
+                <property name="behavioral_lens_hash" type="String">
+                    Hash of behavioral lens instruction.
+                </property>
+                <property name="structural_lens_hash" type="String">
+                    Hash of structural lens instruction.
+                </property>
+            </properties>
+        </entity_detail_quality_properties>
+
+        <navigation_master_quality_properties>
+            <description>
+                Aggregate quality metrics stored on NavigationMaster for global monitoring.
+            </description>
+
+            <properties>
+                <!-- Coverage Metrics -->
+                <property name="embedding_coverage" type="Float">
+                    Percentage of EntityDetail nodes with all three embeddings (0.0-1.0).
+                </property>
+                <property name="embedding_partial_count" type="Integer">
+                    Count of nodes with incomplete embeddings (1 or 2 lenses only).
+                </property>
+                <property name="embedding_missing_count" type="Integer">
+                    Count of nodes with no embeddings at all.
+                </property>
+
+                <!-- Orthogonality Aggregates -->
+                <property name="embedding_orthogonality_avg" type="Float">
+                    Average orthogonality score across all EntityDetail nodes.
+                </property>
+                <property name="embedding_orthogonality_min" type="Float">
+                    Minimum orthogonality score (worst case).
+                </property>
+                <property name="embedding_orthogonality_stddev" type="Float">
+                    Standard deviation of orthogonality scores.
+                </property>
+                <property name="orthogonality_warning_count" type="Integer">
+                    Count of nodes with orthogonality warnings.
+                </property>
+                <property name="orthogonality_critical_count" type="Integer">
+                    Count of nodes with critical orthogonality issues.
+                </property>
+
+                <!-- Consistency Metrics -->
+                <property name="embedding_consistency_score" type="Float">
+                    Measure of version consistency across all nodes (0.0-1.0).
+                </property>
+                <property name="embedding_stale_count" type="Integer">
+                    Count of nodes with outdated lens versions.
+                </property>
+                <property name="embedding_model_version" type="String">
+                    Current expected model version.
+                </property>
+                <property name="embedding_quality_validated_at" type="DateTime">
+                    When aggregate quality was last computed.
+                </property>
+            </properties>
+        </navigation_master_quality_properties>
+
+        <!-- ═══════════════════════════════════════════════════════════════════════════════════
+             ORTHOGONALITY VALIDATION QUERIES
+             ═══════════════════════════════════════════════════════════════════════════════════ -->
+
+        <validate_single_file_orthogonality>
+            <description>
+                Compute and store orthogonality metrics for a single EntityDetail node.
+                REQUIRES: All three embeddings (semantic, behavioral, structural) present.
+            </description>
+
+            <query><![CDATA[
+// Validate orthogonality for a single EntityDetail
+MATCH (ed:EntityDetail {qualified_name: $qualified_name})
+WHERE ed.embedding_semantic IS NOT NULL
+  AND ed.embedding_behavioral IS NOT NULL
+  AND ed.embedding_structural IS NOT NULL
+
+// Compute pairwise dot products
+WITH ed,
+     // Semantic · Behavioral
+     reduce(dot = 0.0, i IN range(0, size(ed.embedding_semantic)-1) |
+         dot + ed.embedding_semantic[i] * ed.embedding_behavioral[i]
+     ) AS sem_beh_dot,
+     // Semantic · Structural
+     reduce(dot = 0.0, i IN range(0, size(ed.embedding_semantic)-1) |
+         dot + ed.embedding_semantic[i] * ed.embedding_structural[i]
+     ) AS sem_str_dot,
+     // Behavioral · Structural
+     reduce(dot = 0.0, i IN range(0, size(ed.embedding_behavioral)-1) |
+         dot + ed.embedding_behavioral[i] * ed.embedding_structural[i]
+     ) AS beh_str_dot
+
+// Compute orthogonality score
+WITH ed, sem_beh_dot, sem_str_dot, beh_str_dot,
+     1.0 - (abs(sem_beh_dot) + abs(sem_str_dot) + abs(beh_str_dot)) / 3.0 AS ortho_score
+
+// Determine warning level
+WITH ed, sem_beh_dot, sem_str_dot, beh_str_dot, ortho_score,
+     CASE
+         WHEN ortho_score < 0.5 THEN 'CRITICAL'
+         WHEN ortho_score < 0.7 THEN 'HIGH'
+         WHEN ortho_score < 0.85 THEN 'MODERATE'
+         ELSE 'NONE'
+     END AS warning_level
+
+// Update EntityDetail with orthogonality metrics
+SET ed.embedding_orthogonality_score = ortho_score,
+    ed.embedding_semantic_behavioral_dot = sem_beh_dot,
+    ed.embedding_semantic_structural_dot = sem_str_dot,
+    ed.embedding_behavioral_structural_dot = beh_str_dot,
+    ed.orthogonality_warning = warning_level,
+    ed.orthogonality_validated_at = datetime()
+
+RETURN ed.qualified_name AS file,
+       ortho_score AS orthogonality_score,
+       warning_level AS warning,
+       sem_beh_dot AS semantic_behavioral,
+       sem_str_dot AS semantic_structural,
+       beh_str_dot AS behavioral_structural
+            ]]></query>
+
+            <parameters>
+                - $qualified_name: Full qualified name of the EntityDetail node
+            </parameters>
+        </validate_single_file_orthogonality>
+
+        <validate_all_orthogonality_batch>
+            <description>
+                Batch validate orthogonality for all EntityDetail nodes with complete embeddings.
+                Use during synthesis Phase 6 (after embedding generation).
+            </description>
+
+            <query><![CDATA[
+// Batch orthogonality validation for all complete embeddings
+MATCH (ed:EntityDetail)
+WHERE ed.embedding_semantic IS NOT NULL
+  AND ed.embedding_behavioral IS NOT NULL
+  AND ed.embedding_structural IS NOT NULL
+  AND (ed.orthogonality_validated_at IS NULL
+       OR ed.orthogonality_validated_at < datetime() - duration('PT24H'))
+
+WITH ed LIMIT 100  // Process in batches to avoid memory issues
+
+// Compute pairwise dot products
+WITH ed,
+     reduce(dot = 0.0, i IN range(0, size(ed.embedding_semantic)-1) |
+         dot + ed.embedding_semantic[i] * ed.embedding_behavioral[i]
+     ) AS sem_beh_dot,
+     reduce(dot = 0.0, i IN range(0, size(ed.embedding_semantic)-1) |
+         dot + ed.embedding_semantic[i] * ed.embedding_structural[i]
+     ) AS sem_str_dot,
+     reduce(dot = 0.0, i IN range(0, size(ed.embedding_behavioral)-1) |
+         dot + ed.embedding_behavioral[i] * ed.embedding_structural[i]
+     ) AS beh_str_dot
+
+WITH ed, sem_beh_dot, sem_str_dot, beh_str_dot,
+     1.0 - (abs(sem_beh_dot) + abs(sem_str_dot) + abs(beh_str_dot)) / 3.0 AS ortho_score
+
+WITH ed, sem_beh_dot, sem_str_dot, beh_str_dot, ortho_score,
+     CASE
+         WHEN ortho_score < 0.5 THEN 'CRITICAL'
+         WHEN ortho_score < 0.7 THEN 'HIGH'
+         WHEN ortho_score < 0.85 THEN 'MODERATE'
+         ELSE 'NONE'
+     END AS warning_level
+
+SET ed.embedding_orthogonality_score = ortho_score,
+    ed.embedding_semantic_behavioral_dot = sem_beh_dot,
+    ed.embedding_semantic_structural_dot = sem_str_dot,
+    ed.embedding_behavioral_structural_dot = beh_str_dot,
+    ed.orthogonality_warning = warning_level,
+    ed.orthogonality_validated_at = datetime()
+
+RETURN count(ed) AS validated_count,
+       avg(ortho_score) AS avg_orthogonality,
+       min(ortho_score) AS min_orthogonality,
+       collect(CASE WHEN warning_level <> 'NONE' THEN ed.qualified_name ELSE NULL END)[0..10] AS warning_files
+            ]]></query>
+        </validate_all_orthogonality_batch>
+
+        <!-- ═══════════════════════════════════════════════════════════════════════════════════
+             AGGREGATE QUALITY METRICS QUERIES
+             ═══════════════════════════════════════════════════════════════════════════════════ -->
+
+        <compute_embedding_coverage>
+            <description>
+                Compute embedding coverage metrics and update NavigationMaster.
+            </description>
+
+            <query><![CDATA[
+// Compute embedding coverage statistics
+MATCH (nm:NavigationMaster {is_master: true})
+MATCH (ed:EntityDetail)
+
+WITH nm,
+     count(ed) AS total_files,
+     sum(CASE
+         WHEN ed.embedding_semantic IS NOT NULL
+          AND ed.embedding_behavioral IS NOT NULL
+          AND ed.embedding_structural IS NOT NULL
+         THEN 1 ELSE 0
+     END) AS complete_embeddings,
+     sum(CASE
+         WHEN (ed.embedding_semantic IS NOT NULL OR
+               ed.embedding_behavioral IS NOT NULL OR
+               ed.embedding_structural IS NOT NULL)
+          AND NOT (ed.embedding_semantic IS NOT NULL
+               AND ed.embedding_behavioral IS NOT NULL
+               AND ed.embedding_structural IS NOT NULL)
+         THEN 1 ELSE 0
+     END) AS partial_embeddings,
+     sum(CASE
+         WHEN ed.embedding_semantic IS NULL
+          AND ed.embedding_behavioral IS NULL
+          AND ed.embedding_structural IS NULL
+         THEN 1 ELSE 0
+     END) AS missing_embeddings
+
+SET nm.embedding_coverage = CASE WHEN total_files > 0
+                                 THEN toFloat(complete_embeddings) / total_files
+                                 ELSE 0.0 END,
+    nm.embedding_partial_count = partial_embeddings,
+    nm.embedding_missing_count = missing_embeddings,
+    nm.embedding_total_files = total_files,
+    nm.embedding_complete_count = complete_embeddings
+
+RETURN nm.embedding_coverage AS coverage,
+       complete_embeddings AS complete,
+       partial_embeddings AS partial,
+       missing_embeddings AS missing,
+       total_files AS total
+            ]]></query>
+        </compute_embedding_coverage>
+
+        <compute_orthogonality_aggregates>
+            <description>
+                Compute aggregate orthogonality metrics across all files.
+            </description>
+
+            <query><![CDATA[
+// Compute aggregate orthogonality metrics
+MATCH (nm:NavigationMaster {is_master: true})
+MATCH (ed:EntityDetail)
+WHERE ed.embedding_orthogonality_score IS NOT NULL
+
+WITH nm,
+     collect(ed.embedding_orthogonality_score) AS scores,
+     count(ed) AS validated_count
+
+WITH nm, scores, validated_count,
+     reduce(sum = 0.0, s IN scores | sum + s) / size(scores) AS avg_ortho,
+     reduce(min_val = 1.0, s IN scores | CASE WHEN s < min_val THEN s ELSE min_val END) AS min_ortho
+
+// Compute standard deviation
+WITH nm, scores, validated_count, avg_ortho, min_ortho,
+     sqrt(reduce(var = 0.0, s IN scores | var + (s - avg_ortho) * (s - avg_ortho)) / size(scores)) AS stddev_ortho
+
+// Count warnings
+OPTIONAL MATCH (ed_warn:EntityDetail)
+WHERE ed_warn.orthogonality_warning IN ['MODERATE', 'HIGH']
+WITH nm, avg_ortho, min_ortho, stddev_ortho, validated_count, count(ed_warn) AS warning_count
+
+OPTIONAL MATCH (ed_crit:EntityDetail)
+WHERE ed_crit.orthogonality_warning = 'CRITICAL'
+WITH nm, avg_ortho, min_ortho, stddev_ortho, validated_count, warning_count, count(ed_crit) AS critical_count
+
+SET nm.embedding_orthogonality_avg = avg_ortho,
+    nm.embedding_orthogonality_min = min_ortho,
+    nm.embedding_orthogonality_stddev = stddev_ortho,
+    nm.orthogonality_warning_count = warning_count,
+    nm.orthogonality_critical_count = critical_count,
+    nm.embedding_quality_validated_at = datetime()
+
+RETURN avg_ortho AS average_orthogonality,
+       min_ortho AS minimum_orthogonality,
+       stddev_ortho AS stddev_orthogonality,
+       warning_count AS warnings,
+       critical_count AS critical_issues,
+       validated_count AS files_validated
+            ]]></query>
+        </compute_orthogonality_aggregates>
+
+        <compute_version_consistency>
+            <description>
+                Check embedding version consistency across all nodes.
+                Identifies stale embeddings that need regeneration.
+            </description>
+
+            <query><![CDATA[
+// Check version consistency (parameterized with current versions)
+MATCH (nm:NavigationMaster {is_master: true})
+MATCH (ed:EntityDetail)
+WHERE ed.embedding_semantic IS NOT NULL
+
+WITH nm, ed,
+     // Check if any lens hash is outdated
+     CASE WHEN ed.semantic_lens_hash <> $current_semantic_hash
+           OR ed.behavioral_lens_hash <> $current_behavioral_hash
+           OR ed.structural_lens_hash <> $current_structural_hash
+          THEN 1 ELSE 0
+     END AS is_stale
+
+WITH nm,
+     count(ed) AS total_with_embeddings,
+     sum(is_stale) AS stale_count,
+     collect(CASE WHEN is_stale = 1 THEN ed.qualified_name ELSE NULL END)[0..20] AS stale_files
+
+SET nm.embedding_stale_count = stale_count,
+    nm.embedding_consistency_score = CASE WHEN total_with_embeddings > 0
+                                          THEN 1.0 - (toFloat(stale_count) / total_with_embeddings)
+                                          ELSE 1.0 END,
+    nm.embedding_model_version = $current_model_version
+
+RETURN nm.embedding_consistency_score AS consistency_score,
+       stale_count AS stale_embeddings,
+       total_with_embeddings AS total_embeddings,
+       stale_files AS files_needing_update
+            ]]></query>
+
+            <parameters>
+                - $current_semantic_hash: Current hash from embedding server
+                - $current_behavioral_hash: Current hash from embedding server
+                - $current_structural_hash: Current hash from embedding server
+                - $current_model_version: Current model version string
+            </parameters>
+        </compute_version_consistency>
+
+        <!-- ═══════════════════════════════════════════════════════════════════════════════════
+             QUALITY INVESTIGATION QUERIES
+             ═══════════════════════════════════════════════════════════════════════════════════ -->
+
+        <find_orthogonality_issues>
+            <description>
+                Find files with orthogonality issues for investigation.
+            </description>
+
+            <query><![CDATA[
+// Find files with orthogonality issues
+MATCH (ed:EntityDetail)
+WHERE ed.orthogonality_warning IN ['HIGH', 'CRITICAL']
+
+RETURN ed.qualified_name AS file,
+       ed.embedding_orthogonality_score AS score,
+       ed.orthogonality_warning AS severity,
+       ed.embedding_semantic_behavioral_dot AS sem_beh,
+       ed.embedding_semantic_structural_dot AS sem_str,
+       ed.embedding_behavioral_structural_dot AS beh_str,
+       ed.orthogonality_validated_at AS validated_at
+ORDER BY ed.embedding_orthogonality_score ASC
+LIMIT 50
+            ]]></query>
+        </find_orthogonality_issues>
+
+        <find_embedding_gaps>
+            <description>
+                Find files missing one or more embeddings.
+            </description>
+
+            <query><![CDATA[
+// Find files with incomplete embeddings
+MATCH (ed:EntityDetail)
+WHERE NOT (ed.embedding_semantic IS NOT NULL
+       AND ed.embedding_behavioral IS NOT NULL
+       AND ed.embedding_structural IS NOT NULL)
+
+RETURN ed.qualified_name AS file,
+       CASE WHEN ed.embedding_semantic IS NULL THEN 'MISSING' ELSE 'OK' END AS semantic,
+       CASE WHEN ed.embedding_behavioral IS NULL THEN 'MISSING' ELSE 'OK' END AS behavioral,
+       CASE WHEN ed.embedding_structural IS NULL THEN 'MISSING' ELSE 'OK' END AS structural,
+       ed.last_modified AS last_modified
+ORDER BY ed.qualified_name
+            ]]></query>
+        </find_embedding_gaps>
+
+        <!-- ═══════════════════════════════════════════════════════════════════════════════════
+             INTEGRATION INTO SYNTHESIS WORKFLOW
+             ═══════════════════════════════════════════════════════════════════════════════════ -->
+
+        <synthesis_integration>
+            <description>
+                How to integrate orthogonality validation into the synthesis workflow.
+            </description>
+
+            <workflow_placement>
+                Phase 6 (Embedding Enhancement) should include orthogonality validation:
+
+                1. After generating/updating embeddings via qwen3-embedding MCP
+                2. Call validate_all_orthogonality_batch query
+                3. Log any files with warnings or critical issues
+                4. Continue even with warnings (don't block synthesis)
+
+                Phase 8 (Final Validation) should include quality aggregation:
+
+                1. Call compute_embedding_coverage query
+                2. Call compute_orthogonality_aggregates query
+                3. Call compute_version_consistency query
+                4. Include results in final synthesis report
+            </workflow_placement>
+
+            <quality_thresholds_for_synthesis>
+                | Metric                      | Target    | Acceptable | Investigate |
+                |-----------------------------|-----------|------------|-------------|
+                | embedding_coverage          | > 0.95    | > 0.80     | < 0.80      |
+                | embedding_orthogonality_avg | > 0.85    | > 0.70     | < 0.70      |
+                | orthogonality_critical_count| 0         | < 5        | >= 5        |
+                | embedding_consistency_score | 1.0       | > 0.90     | < 0.90      |
+            </quality_thresholds_for_synthesis>
+
+            <report_format>
+                Include in FINAL_REPORT:
+
+                ═══════════════════════════════════════════════════════════════════════════════
+                EMBEDDING QUALITY METRICS:
+                ═══════════════════════════════════════════════════════════════════════════════
+                Coverage: {embedding_coverage}% ({complete}/{total} files with all 3 lenses)
+                Orthogonality: avg={avg_ortho:.3f}, min={min_ortho:.3f}, stddev={stddev:.3f}
+                Warnings: {warning_count} files, Critical: {critical_count} files
+                Version Consistency: {consistency_score}% ({stale_count} stale embeddings)
+
+                Top Orthogonality Issues:
+                {list_of_problematic_files_with_scores}
+            </report_format>
+        </synthesis_integration>
+
+        <!-- ═══════════════════════════════════════════════════════════════════════════════════
+             ERROR HANDLING & FALLBACK
+             ═══════════════════════════════════════════════════════════════════════════════════ -->
+
+        <error_handling>
+            <principle>
+                Orthogonality validation is a QUALITY CHECK, not a gate. Synthesis should
+                continue even if validation fails. Issues are logged for investigation.
+            </principle>
+
+            <fallback_behaviors>
+                | Scenario                          | Action                              |
+                |-----------------------------------|-------------------------------------|
+                | Missing embedding(s)              | Skip validation for that file       |
+                | Computation error                 | Log error, continue synthesis       |
+                | All embeddings have issues        | Complete synthesis, flag for review |
+                | Version check fails               | Log stale count, continue           |
+            </fallback_behaviors>
+
+            <logging_requirements>
+                - Log all CRITICAL orthogonality issues with file names
+                - Log aggregate statistics in synthesis summary
+                - Log version mismatches for reindexing prioritization
+                - Store validation timestamp for incremental updates
+            </logging_requirements>
+        </error_handling>
+    </ORTHOGONALITY_VALIDATION_AND_QUALITY_METRICS>
 
     <!-- ═══════════════════════════════════════════════════════════════════════════════════════
          SECTION 11: FINAL REPORT TEMPLATE
@@ -2865,6 +3900,30 @@ Multi-Space Clustering:
   - Behavioral communities: {behavioral_communities}
   - Structural communities: {structural_communities}
   - Consistency: {clustering_consistency}
+
+═════════════════════════════════════════════════════════════════════════════════
+EMBEDDING QUALITY METRICS:
+═════════════════════════════════════════════════════════════════════════════════
+Coverage:
+  - Complete (3 lenses): {embedding_complete_count}/{embedding_total_files} ({embedding_coverage}%)
+  - Partial (1-2 lenses): {embedding_partial_count}
+  - Missing: {embedding_missing_count}
+
+Orthogonality Validation:
+  - Average Score: {embedding_orthogonality_avg} (target: >0.70)
+  - Minimum Score: {embedding_orthogonality_min}
+  - Std Deviation: {embedding_orthogonality_stddev}
+  - Warning Files: {orthogonality_warning_count}
+  - Critical Issues: {orthogonality_critical_count}
+
+Version Consistency:
+  - Consistency Score: {embedding_consistency_score}% (target: 100%)
+  - Stale Embeddings: {embedding_stale_count}
+  - Model Version: {embedding_model_version}
+  - Quality Validated: {embedding_quality_validated_at}
+
+Orthogonality Issues (if any):
+{orthogonality_issues_list}
 
 ═════════════════════════════════════════════════════════════════════════════════
 MATHEMATICAL VALIDATION:
