@@ -1,26 +1,28 @@
-# Information Lensing: A Gravitational Approach to Domain-Specific Embedding Transformation
+# Information Lensing: A Metric Learning Approach to Domain-Specific Embedding Transformation
 
-## Differential Geometric Methods for Anisotropic Embedding Correction
+## Geometric Methods for Anisotropic Embedding Correction
 
 **Abstract**
 
-We present Information Lensing (Polish: *soczewkowanie informacyjne*), a novel theoretical framework that applies gravitational lensing principles to embedding space transformation. This approach addresses the fundamental problem of anisotropic embedding collapse—where generic embeddings produce nearly identical representations for semantically distinct code segments, particularly in enterprise Java environments. By learning domain-specific low-rank transformation matrices that act as gravitational lenses in high-dimensional space, we achieve meaningful semantic separation while preserving topological continuity. Our framework incorporates recent advances in stratified manifold learning, isotropy regularization, and reranker-based metric discovery to provide a mathematically rigorous yet practically implementable solution. This work bridges differential geometry, information theory, and gravitational physics to create a unified framework for domain-specific embedding adaptation without requiring model fine-tuning or ML expertise.
+We present Information Lensing (Polish: *soczewkowanie informacyjne*), a theoretical framework for domain-specific embedding transformation grounded in metric learning and differential geometry. This approach addresses anisotropic embedding collapse—where generic embeddings produce nearly identical representations for semantically distinct code segments. By learning low-rank transformation matrices that induce domain-specific metric structures, we achieve semantic separation while preserving topological continuity. Our framework provides: (1) rigorous mathematical foundations via bi-Lipschitz transformations, (2) practical algorithms with convergence guarantees to critical points, (3) incremental calibration with Lyapunov stability bounds, and (4) economically viable cloud-first implementation strategies. We explicitly distinguish between mathematically proven properties and heuristic analogies, offering both theoretical depth and engineering pragmatism.
 
-**Keywords**: Embedding transformation, gravitational lensing, differential geometry, isotropy regularization, manifold learning, cross-encoder reranking, low-rank adaptation, domain-specific embeddings
+**Keywords**: Metric learning, embedding transformation, bi-Lipschitz maps, anisotropy correction, manifold learning, cross-encoder reranking, low-rank adaptation
 
 ---
 
 ## 1. The Fundamental Problem: Anisotropic Embedding Collapse
 
-### 1.1 Embedding Homogeneity in Code
+### 1.1 Empirical Observation: Embedding Homogeneity in Code
 
-Generic embedding models suffer from what the literature terms anisotropic collapse—embeddings cluster within a narrow cone rather than utilizing the full representational space. In code domains, this manifests as semantic collapse:
+Generic embedding models exhibit what the literature terms *anisotropic collapse*—embeddings cluster within a narrow cone rather than utilizing the full representational space (Ethayarajh, 2019). In code domains, this manifests as semantic collapse.
+
+**Concrete Example:**
 
 Given two semantically distinct Java code segments:
-- $C_1$: PaymentService.processPayment(amount, currency)
-- $C_2$: InventoryService.updateStock(quantity, location)
+- $C_1$: `PaymentService.processPayment(amount, currency)`
+- $C_2$: `InventoryService.updateStock(quantity, location)`
 
-Generic embeddings exhibit:
+Generic embeddings often exhibit:
 
 $$\|e(C_1) - e(C_2)\|_2 \approx 0.12 \quad \text{(nearly identical)}$$
 
@@ -28,365 +30,547 @@ $$\cos(e(C_1), e(C_2)) \approx 0.94 \quad \text{(high false similarity)}$$
 
 This occurs because generic models trained on broad corpora see similar syntactic patterns (service calls, method signatures, parameter structures) but fail to capture domain-specific semantic differences.
 
-### 1.2 The Isotropy Problem
+### 1.2 The Isotropy Problem: Quantitative Characterization
 
-Recent research has established that LLM embedding spaces suffer from the isotropy problem:
+**Definition 1.1 (Effective Dimensionality).** For a set of embeddings $\{e_i\}_{i=1}^N$ with singular values $\{\sigma_j\}_{j=1}^d$ of the centered embedding matrix, the effective dimensionality is:
 
-**Isotropy** refers to the uniform distribution of embeddings across the representational space. Highly anisotropic embeddings:
-- Utilize only 2-14 effective dimensions despite 4096 available
-- Cluster in narrow cones, reducing discriminative power
-- Exhibit high average pairwise cosine similarity (>0.8)
+$$d_{\text{eff}} = \exp\left(-\sum_{j=1}^d p_j \log p_j\right)$$
 
-### 1.3 Information Radiation Background
+where $p_j = \sigma_j / \sum_k \sigma_k$ are normalized singular values.
 
-We hypothesize that generic embeddings contain substantial "background radiation"—uniform noise from common programming patterns, language syntax, framework conventions, and generic variable naming patterns.
+**Definition 1.2 (Isotropy Score).** Following Rudman et al. (2022), the isotropy score measures uniformity of embedding space utilization:
 
-**Formal Model:**
+$$I(E) = \frac{\min_j \sigma_j}{\max_j \sigma_j}$$
 
-$$e_{\text{generic}}(\text{code}) = s_{\text{domain}} + n_{\text{syntactic}} + n_{\text{background}}$$
+where $\sigma_j$ are singular values of the centered embedding matrix $E$.
+
+**Empirical Finding (Literature):** LLM embedding spaces typically exhibit $d_{\text{eff}} \approx 50\text{-}200$ despite $d = 4096$ available dimensions (Li et al., 2025; Rajaee & Pilehvar, 2021). The specific value depends on model architecture, training data, and downstream task. We do not claim a universal range but note that significant dimensional underutilization is consistently observed.
+
+### 1.3 Signal-Noise Decomposition Model
+
+We model generic embeddings as containing multiple components:
+
+$$e_{\text{generic}}(\text{code}) = s_{\text{domain}} + n_{\text{syntactic}} + n_{\text{background}} + \epsilon$$
 
 where:
-- $s_{\text{domain}} \in \mathbb{R}^{d_1}$ is domain-specific semantic content
-- $n_{\text{syntactic}} \in \mathbb{R}^{d_2}$ represents shared syntactic patterns
-- $n_{\text{background}} \in \mathbb{R}^{d_3}$ captures model-specific artifacts
-- $d_1 \ll d_2 + d_3$ (signal is sparse relative to noise)
+- $s_{\text{domain}} \in \mathbb{R}^{d}$: domain-specific semantic content (sparse)
+- $n_{\text{syntactic}} \in \mathbb{R}^{d}$: shared syntactic patterns (dense)
+- $n_{\text{background}} \in \mathbb{R}^{d}$: model-specific artifacts (dense)
+- $\epsilon$: irreducible noise
+
+**Important Caveat:** This decomposition is a modeling assumption, not a proven fact. These components are generally **not orthogonal**—syntactic patterns may correlate with domain semantics. The practical goal is to learn transformations that amplify $s_{\text{domain}}$ relative to noise components, regardless of their exact geometric relationship.
 
 ---
 
 ## 2. Theoretical Framework
 
-### 2.1 Information Lensing Principle
+### 2.1 Core Objective: Metric Learning
 
-Drawing from Einstein's gravitational lensing, we propose that domain knowledge acts as mass in information space, curving the metric structure:
+Our goal is to learn a transformation $T: \mathbb{R}^d \to \mathbb{R}^d$ such that distances in the transformed space better reflect semantic similarity:
 
-**Gravitational Analogy:**
+$$d_{\text{semantic}}(C_1, C_2) \approx \|Te(C_1) - Te(C_2)\|_2$$
 
-$$ds^2 = g_{\mu\nu} dx^\mu dx^\nu \quad \text{(spacetime, curved by mass)}$$
+where $d_{\text{semantic}}$ is the "true" semantic distance, which we approximate using cross-encoder reranker scores.
 
-$$dI^2 = G_{ij} d\xi^i d\xi^j \quad \text{(information space, curved by domain knowledge)}$$
+**Definition 2.1 (Bi-Lipschitz Transformation).** A linear transformation $T: \mathbb{R}^d \to \mathbb{R}^d$ is bi-Lipschitz if there exist constants $0 < c_1 \leq c_2 < \infty$ such that for all $x, y \in \mathbb{R}^d$:
 
-where:
-- $g_{\mu\nu}$: metric tensor in spacetime (determined by mass distribution)
-- $G_{ij}$: learned metric tensor in embedding space (determined by domain structure)
-- $\xi^i$: embedding space coordinates ($i \in [1, 4096]$)
+$$c_1 \|x - y\| \leq \|Tx - Ty\| \leq c_2 \|x - y\|$$
 
-Just as gravitational lensing bends light to reveal distant objects, information lensing transforms embeddings to reveal hidden semantic structure.
+For linear $T$, these constants are $c_1 = \sigma_{\min}(T)$ and $c_2 = \sigma_{\max}(T)$, where $\sigma_{\min}, \sigma_{\max}$ are the smallest and largest singular values respectively.
 
-### 2.2 Stratified Manifold Structure
+**Remark:** Bi-Lipschitz maps preserve topological properties (homeomorphism) while allowing controlled distortion of distances. This is the correct mathematical property—not "local isometry," which would require $c_1 = c_2 = 1$ and prohibit any distance modification.
 
-Recent research validates our manifold-based approach: in the latent space of LLMs, embeddings live in a local manifold structure with different dimensions depending on the perplexities and domains of the input data, commonly referred to as a Stratified Manifold structure.
+### 2.2 Geometric Interpretation: Induced Metric Structure
 
-This suggests that different code domains (payment processing, inventory management, authentication) occupy distinct sub-manifolds within the embedding space. Our transformation matrices map between these stratified structures.
+The transformation $T$ induces a new metric structure on the embedding space.
 
-### 2.3 The Lensing Transformation
+**Definition 2.2 (Induced Metric Tensor).** Given transformation $T \in \mathbb{R}^{d \times d}$, the induced metric tensor is:
 
-**Core Transformation:**
+$$G = T^T T$$
 
-$$e_{\text{focused}} = e_{\text{generic}} \cdot T_{\text{domain}}$$
+Under this metric, distances are computed as:
 
-where $T_{\text{domain}} \in \mathbb{R}^{d \times d}$ is the learned transformation lens and $d = 4096$ (embedding dimension).
+$$d_G(x, y)^2 = (x - y)^T G (x - y) = \|T(x - y)\|_2^2$$
+
+**Proposition 2.1.** The transformation $T$ changes the geometry of the embedding space from Euclidean (identity metric $I$) to the metric defined by $G = T^T T$. Directions corresponding to large singular values of $T$ are "stretched" (distances amplified), while directions corresponding to small singular values are "compressed."
+
+*Proof.* Let $T = U\Sigma V^T$ be the SVD of $T$. Then $G = T^T T = V\Sigma^2 V^T$. For any vector $v$, we have $v^T G v = v^T V \Sigma^2 V^T v = \|ΣV^T v\|^2$. The eigenvectors of $G$ are the columns of $V$, with eigenvalues $\sigma_i^2$. Thus distances along the $i$-th principal direction are scaled by $\sigma_i$. $\square$
+
+### 2.3 Heuristic Analogy: Gravitational Lensing (Non-Rigorous)
+
+We offer an **analogy** (not a mathematical equivalence) to gravitational lensing for intuition:
+
+| Gravitational Lensing | Information Lensing |
+|----------------------|---------------------|
+| Mass curves spacetime | Domain knowledge shapes metric |
+| Light follows geodesics | Similarity follows induced distances |
+| Distant objects become visible | Hidden semantic structure becomes apparent |
+
+**Explicit Disclaimer:** This analogy is pedagogical. Unlike general relativity, where the Einstein field equations $R_{\mu\nu} - \frac{1}{2}Rg_{\mu\nu} = \frac{8\pi G}{c^4}T_{\mu\nu}$ precisely determine spacetime curvature from mass-energy distribution, we do not claim equivalent field equations for Information Lensing. Our metric tensor $G$ is learned from data, not derived from first principles.
+
+The analogy captures the intuition that domain expertise "focuses" information—just as gravitational lenses reveal distant galaxies by bending light, domain-specific transformations reveal semantic structure by reshaping the distance function.
+
+### 2.4 Connection to Stratified Manifold Theory
+
+Recent research (Li et al., 2025) establishes that LLM embeddings exhibit stratified manifold structure—different domains occupy distinct sub-manifolds within the embedding space.
+
+**Definition 2.3 (Stratified Manifold).** A stratified space $\mathcal{S}$ is a union of manifolds (strata) of possibly different dimensions:
+
+$$\mathcal{S} = \bigcup_{i} \mathcal{M}_i$$
+
+where each $\mathcal{M}_i$ is a smooth manifold and the strata satisfy certain incidence relations.
+
+**Hypothesis:** Different code domains (payment processing, inventory management, authentication) occupy distinct strata $\mathcal{M}_d$ within the embedding space. Our transformation $T$ can be viewed as learning a map that:
+1. Identifies which stratum a code segment belongs to
+2. Projects within-stratum structure more clearly
+
+This hypothesis motivates the triple-lens architecture (Section 5), where different transformations target different structural aspects.
 
 ---
 
 ## 3. Low-Rank Transformation via SVD Decomposition
 
-### 3.1 Motivation: Efficiency Through Low-Rank Structure
+### 3.1 Motivation: Regularization Through Rank Constraint
 
-Full $4096 \times 4096$ transformation matrices require ~134M parameters per lens. Following recent advances in low-rank adaptation, we decompose transformations:
+Full $d \times d$ transformation matrices ($d = 4096$) require $\sim$134M parameters—prone to overfitting and computationally expensive. Following LoRA (Hu et al., 2022), we constrain transformations to low-rank form.
 
-$$T_{\text{domain}} = U \cdot \Sigma \cdot V^T$$
+**Definition 3.1 (Low-Rank Parameterization).** We parameterize $T$ as:
 
-where:
-- $U \in \mathbb{R}^{4096 \times r}$ (left singular vectors)
-- $\Sigma \in \mathbb{R}^{r \times r}$ (singular values, diagonal)
-- $V \in \mathbb{R}^{4096 \times r}$ (right singular vectors)
-- $r \ll 4096$ (effective rank, typically 64-256)
+$$T = I + AB^T$$
 
-**Benefits:**
-- **Storage:** 402MB → ~10MB (with $r=100$)
-- **Computation:** $O(d^2) \to O(dr)$
-- **Regularization:** Implicit low-rank prior prevents overfitting
-- **Interpretability:** Principal directions reveal domain structure
+where $A, B \in \mathbb{R}^{d \times r}$ with $r \ll d$ (typically $r \in [64, 256]$).
 
-### 3.2 Frobenius-Optimal Alignment
+Equivalently, via thin SVD:
 
-We learn transformations via Frobenius-optimal subspace alignment:
+$$T = U \Sigma V^T$$
 
-$$\min_{U,\Sigma,V} \|S_{\text{reranker}} - (E \cdot U\Sigma V^T) \cdot (E \cdot U\Sigma V^T)^T\|_F^2$$
+where $U \in \mathbb{R}^{d \times r}$, $\Sigma \in \mathbb{R}^{r \times r}$ (diagonal), $V \in \mathbb{R}^{d \times r}$.
 
-where:
-- $S_{\text{reranker}}$: target similarity matrix from reranker scores
-- $E$: matrix of generic embeddings
-- $\|\cdot\|_F$: Frobenius norm
+**Proposition 3.1 (Parameter and Compute Savings).** Low-rank parameterization reduces:
+- Storage: from $O(d^2)$ to $O(dr)$ — e.g., 134M → 819K parameters for $r=100$
+- Matrix-vector multiplication: from $O(d^2)$ to $O(dr)$
+- Provides implicit regularization through rank constraint
 
-### 3.3 Rank Selection via Variance Explained
+### 3.2 Learning Objective: Frobenius Alignment
 
-Select rank $r$ such that cumulative variance explained exceeds threshold:
+**Definition 3.2 (Target Similarity Matrix).** Let $S_{\text{reranker}} \in \mathbb{R}^{N \times N}$ be the matrix of pairwise reranker scores, where $(S_{\text{reranker}})_{ij} = \text{reranker}(\text{file}_i, \text{file}_j)$.
 
-$$r^* = \min\left\{r : \frac{\sum_{i=1}^r \sigma_i^2}{\sum_{i=1}^d \sigma_i^2} \geq 0.95\right\}$$
+**Definition 3.3 (Predicted Similarity Matrix).** For embedding matrix $E \in \mathbb{R}^{N \times d}$ and transformation $T$, the predicted similarity matrix is:
+
+$$S_{\text{pred}}(T) = \text{CosineSim}(ET) = \text{normalize}(ET) \cdot \text{normalize}(ET)^T$$
+
+where normalization is row-wise to unit vectors.
+
+**Optimization Problem:**
+
+$$\min_{T} \|S_{\text{reranker}} - S_{\text{pred}}(T)\|_F^2 + \lambda \mathcal{R}(T)$$
+
+where $\mathcal{R}(T)$ is a regularizer.
+
+**Important Note on Non-Convexity:** This objective is **non-convex** in $T$ because $S_{\text{pred}}(T)$ involves normalization (division by norms) and products of $T$. Standard gradient descent converges to a **critical point**, not necessarily a global minimum. We address this in Section 7.3.
+
+### 3.3 Rank Selection: Principled Approaches
+
+**Method 1: Variance Explained (Heuristic)**
+
+Select $r$ such that the top $r$ singular values of the learned transformation capture sufficient variance:
+
+$$r^* = \min\left\{r : \frac{\sum_{i=1}^r \sigma_i^2}{\sum_{i=1}^d \sigma_i^2} \geq \tau\right\}$$
+
+where $\tau \in [0.90, 0.99]$ is a threshold. Note: this requires first learning a full-rank transformation, then truncating.
+
+**Method 2: Cross-Validation (Recommended)**
+
+Evaluate downstream task performance (e.g., retrieval accuracy) for different ranks $r \in \{32, 64, 128, 256, 512\}$ on held-out data. Select $r$ that maximizes performance without overfitting.
+
+**Method 3: Adaptive Rank (Research Direction)**
+
+Learn the rank as part of optimization by placing a sparsity-inducing prior on singular values (e.g., $\ell_1$ penalty on $\text{diag}(\Sigma)$).
 
 ---
 
 ## 4. Reranking as Metric Discovery
 
-### 4.1 The Reranker's Role
+### 4.1 Cross-Encoders as Semantic Oracles
 
-The reranker (cross-encoder architecture) acts as a gravitational wave detector, revealing the true metric structure hidden beneath cosine similarity:
+Cross-encoder rerankers provide high-quality semantic similarity scores by jointly encoding query-document pairs, allowing full attention between all tokens.
 
-For embeddings $e_1, e_2$:
-
-$$\text{sim}_{\cos}(e_1, e_2) = 0.92 \quad \text{(misleading)}$$
-
-$$\text{score}_{\text{rerank}}(e_1, e_2) = 0.31 \quad \text{(true semantic distance)}$$
-
-$$\Delta = |\text{sim}_{\cos} - \text{score}_{\text{rerank}}| = 0.61$$
-
-This divergence indicates the presence of information curvature that must be corrected.
-
-### 4.2 Cross-Encoder vs Bi-Encoder Architecture
+**Architecture Comparison:**
 
 **Bi-Encoder (Embedding Model):**
+$$\text{score}(q, d) = \cos(\text{encode}(q), \text{encode}(d))$$
 
-$$\text{score} = \cos(\text{encode}(q), \text{encode}(d)) \quad \text{(independent encoding)}$$
+- Encodes $q$ and $d$ independently
+- Fast: $O(N)$ for $N$ candidates (encode once, compare many)
+- Lower quality: no cross-attention between $q$ and $d$
 
 **Cross-Encoder (Reranker):**
+$$\text{score}(q, d) = \text{MLP}(\text{encode}([\text{CLS}] \, q \, [\text{SEP}] \, d \, [\text{SEP}]))$$
 
-$$\text{score} = \text{classifier}([\text{CLS}] \, q \, [\text{SEP}] \, d \, [\text{SEP}]) \quad \text{(joint encoding)}$$
+- Encodes $q$ and $d$ jointly with full attention
+- Slow: $O(N)$ forward passes for $N$ candidates
+- Higher quality: captures fine-grained interactions
 
-Cross-encoders achieve deeper semantic understanding by allowing full attention between query and document tokens, revealing relationships invisible to independent encoding.
+**Key Insight:** Cross-encoders reveal semantic relationships that bi-encoders miss. The divergence between cosine similarity (bi-encoder) and reranker score indicates "hidden structure" that our transformation should recover.
 
-### 4.3 Metric Tensor Learning with Isotropy Regularization
+### 4.2 Metric Learning Loss Functions
 
-We formulate metric learning as:
+**Primary Loss: Alignment with Reranker**
 
-$$\min_T \mathcal{L}_{\text{total}}(T) = \mathcal{L}_{\text{align}} + \lambda_1 \mathcal{L}_{\text{isotropy}} + \lambda_2 \mathcal{L}_{\text{rank}}$$
+$$\mathcal{L}_{\text{align}}(T) = \frac{1}{|\mathcal{P}|} \sum_{(i,j) \in \mathcal{P}} \left( s_{ij}^{\text{rerank}} - \text{sim}(Te_i, Te_j) \right)^2$$
 
-**Components:**
+where $\mathcal{P}$ is the set of sampled pairs and $s_{ij}^{\text{rerank}}$ are reranker scores.
 
-$$\mathcal{L}_{\text{align}} = \sum_{i,j} \|\text{score}_{\text{rerank}}(e_i, e_j) - \text{sim}(Te_i, Te_j)\|^2$$
+**Regularization: Isotropy Promotion**
 
-$$\mathcal{L}_{\text{isotropy}} = \|\text{Cov}(T \cdot E) - I\|_F^2 \quad \text{(promotes uniform distribution)}$$
+We want transformed embeddings to utilize more of the available dimensions. Two approaches:
 
-$$\mathcal{L}_{\text{rank}} = \|T\|_* \quad \text{(nuclear norm, encourages low rank)}$$
+*Approach 1: Whitening Regularization*
+$$\mathcal{L}_{\text{whiten}}(T) = \|\text{Cov}(TE) - I\|_F^2$$
 
-**Hyperparameters:**
-- $\lambda_1 \in [0.01, 0.1]$: isotropy regularization strength
-- $\lambda_2 \in [0.001, 0.01]$: rank regularization strength
+This forces the covariance to be identity—strong isotropy but may destroy useful variance structure.
 
-### 4.4 Contrastive Learning Enhancement
+*Approach 2: Uniformity Loss (Preferred)*
 
-Multi-level contrastive loss for transformation learning:
+Following SimCLR/SimCSE, we encourage uniform angular distribution:
+
+$$\mathcal{L}_{\text{uniform}}(T) = \log \mathbb{E}_{i,j} \left[ \exp\left( -2 \|Te_i - Te_j\|^2 \right) \right]$$
+
+This penalizes clustering without forcing equal variance in all directions.
+
+**Regularization: Rank Penalty**
+
+$$\mathcal{L}_{\text{rank}}(T) = \|T\|_* = \sum_i \sigma_i(T)$$
+
+The nuclear norm encourages low-rank solutions.
+
+**Contrastive Enhancement (Optional)**
+
+Multi-level contrastive loss for hard negative mining:
 
 $$\mathcal{L}_{\text{contrast}} = -\log\frac{\exp(s^+/\tau)}{\exp(s^+/\tau) + \sum_j \exp(s_j^-/\tau)}$$
 
-where $\tau = 0.07$ is the temperature parameter.
+where $\tau \in [0.05, 0.1]$ is temperature, $s^+$ is similarity to positive, $s_j^-$ are similarities to negatives.
+
+### 4.3 Complete Loss Function
+
+$$\mathcal{L}_{\text{total}}(T) = \mathcal{L}_{\text{align}} + \lambda_1 \mathcal{L}_{\text{uniform}} + \lambda_2 \mathcal{L}_{\text{rank}} + \lambda_3 \mathcal{L}_{\text{contrast}}$$
+
+**Recommended Hyperparameters (Starting Point):**
+- $\lambda_1 = 0.05$ (uniformity weight)
+- $\lambda_2 = 0.01$ (rank regularization)
+- $\lambda_3 = 0.1$ (contrastive weight)
+- $\tau = 0.07$ (temperature)
+
+These should be tuned via cross-validation for specific domains.
 
 ---
 
 ## 5. Triple Transformation Architecture
 
-### 5.1 Three Gravitational Lenses
+### 5.1 Motivation: Multi-Aspect Semantic Structure
 
-We employ three specialized lenses, each warping a different aspect of information space:
+Code semantics are multi-faceted. A single transformation may not capture all relevant structure. We propose learning three specialized transformations:
 
-$$e_{\text{generic}} \xrightarrow{T_{\text{struct}}} e_{\text{structural}} \quad \text{(graph topology)}$$
+$$e_{\text{generic}} \xrightarrow{T_{\text{struct}}} e_{\text{structural}}$$
+$$e_{\text{generic}} \xrightarrow{T_{\text{sem}}} e_{\text{semantic}}$$
+$$e_{\text{generic}} \xrightarrow{T_{\text{behav}}} e_{\text{behavioral}}$$
 
-$$e_{\text{generic}} \xrightarrow{T_{\text{semantic}}} e_{\text{semantic}} \quad \text{(code meaning)}$$
+### 5.2 Lens Specifications
 
-$$e_{\text{generic}} \xrightarrow{T_{\text{behav}}} e_{\text{behavioral}} \quad \text{(runtime patterns)}$$
+| Lens | Target Aspect | Training Signal |
+|------|---------------|-----------------|
+| $T_{\text{struct}}$ | Graph topology, architectural position | Graph-based similarity (neighbors, centrality) |
+| $T_{\text{sem}}$ | Business logic, domain concepts | Reranker on semantic queries |
+| $T_{\text{behav}}$ | Runtime patterns, dependencies | Call graph, execution traces |
 
-### 5.2 Product Manifold Structure
+### 5.3 Combination Strategies
 
-The final representation lives on the product manifold:
+**Strategy 1: Concatenation (Simple)**
 
-$$\mathcal{M} = \mathcal{M}_s \times \mathcal{M}_{\text{sem}} \times \mathcal{M}_b \subset \mathbb{R}^{12288}$$
+$$e_{\text{combined}} = [T_{\text{struct}} e \| T_{\text{sem}} e \| T_{\text{behav}} e] \in \mathbb{R}^{3d}$$
 
-Each lens targets a distinct stratified sub-manifold:
+**Strategy 2: Weighted Average**
 
-| Lens | Target Sub-Manifold | Focus |
-|------|---------------------|-------|
-| $T_{\text{struct}}$ | Graph topology manifold | Connectivity, centrality, architectural position |
-| $T_{\text{semantic}}$ | Code meaning manifold | Business logic, domain concepts, intent |
-| $T_{\text{behav}}$ | Runtime behavior manifold | Execution patterns, dependencies, side effects |
+$$e_{\text{combined}} = \alpha_1 T_{\text{struct}} e + \alpha_2 T_{\text{sem}} e + \alpha_3 T_{\text{behav}} e$$
 
----
+where $\alpha_i$ are query-dependent or learned weights.
 
-## 6. Manifold Distillation Process
+**Strategy 3: Attention-Based Fusion (Advanced)**
 
-### 6.1 Continuous Topological Transformation
+$$e_{\text{combined}} = \sum_i \text{softmax}(q^T W_i T_i e) \cdot T_i e$$
 
-The transformation $T$ defines a continuous map between manifolds:
+where $q$ is the query embedding and $W_i$ are learned attention matrices.
 
-$$\varphi: \mathcal{M}_{\text{generic}} \to \mathcal{M}_{\text{domain}}$$
+### 5.4 Geometric Interpretation: Product Manifold
 
-$$x \mapsto Tx$$
+The concatenation strategy embeds data in the product space:
 
-**Properties:**
-1. **Homeomorphic**: $\varphi$ is continuous with continuous inverse
-2. **Differentiable**: $\nabla\varphi$ exists everywhere (smooth transformation)
-3. **Locally Isometric**: preserves local neighborhood distances
-4. **Isotropy-Promoting**: increases effective dimensionality
+$$\mathcal{M} = \mathcal{M}_{\text{struct}} \times \mathcal{M}_{\text{sem}} \times \mathcal{M}_{\text{behav}}$$
 
-### 6.2 Information Warping Equations
+Distances in product manifolds decompose:
 
-The warping of information space follows differential geometry:
+$$d_{\mathcal{M}}^2(x, y) = d_{\text{struct}}^2(x, y) + d_{\text{sem}}^2(x, y) + d_{\text{behav}}^2(x, y)$$
 
-Original space metric: $g_{ij}^{\text{generic}} \approx \delta_{ij}$ (nearly Euclidean)
-
-Target space metric:
-
-$$g_{ij}^{\text{domain}} = T_{ik} T_{jl} g_{kl}^{\text{generic}}$$
-
-Curvature transformation:
-
-$$R_{ijkl}^{\text{domain}} = T_{im} T_{jn} T_{kp} T_{lq} R_{mnpq}^{\text{generic}} + K_{ijkl}$$
-
-where:
-- $R_{ijkl}$: Riemann curvature tensor
-- $K_{ijkl}$: domain-specific curvature induced by transformation
-- $\delta_{ij}$: Kronecker delta (identity metric)
+This allows retrieval to balance multiple aspects of similarity.
 
 ---
 
-## 7. Mathematical Formalization
+## 6. Mathematical Properties
 
-### 7.1 The Lensing Operator
+### 6.1 Topological Preservation
 
-Define the lensing operator $\mathcal{L}_T$ with low-rank structure:
+**Theorem 6.1 (Homeomorphism).** If $T \in \mathbb{R}^{d \times d}$ is full-rank, then $\varphi: x \mapsto Tx$ is a homeomorphism of $\mathbb{R}^d$.
 
-$$\mathcal{L}_T(v) = U\Sigma V^T v + \alpha \nabla(v^T U\Sigma V^T v) + \beta W(v)$$
+*Proof.* Full-rank implies $T$ is invertible. Both $\varphi(x) = Tx$ and $\varphi^{-1}(y) = T^{-1}y$ are continuous (linear maps are continuous). Thus $\varphi$ is a continuous bijection with continuous inverse. $\square$
 
-where:
-- First term: Low-rank linear transformation
-- Second term: Gradient correction for curvature ($\alpha \in [0.01, 0.1]$)
-- Third term: Whitening correction $W(v)$ for isotropy ($\beta \in [0.1, 0.3]$)
+**Corollary 6.1.** The transformation preserves:
+- Connectedness of the data manifold
+- Neighborhood relationships (points that were neighbors remain neighbors, though distances change)
+- Homotopy type (fundamental group, etc.)
 
-**Whitening operator:**
+### 6.2 Distance Distortion Bounds
 
-$$W(v) = \Sigma^{-1/2} \cdot (v - \mu)$$
+**Theorem 6.2 (Bi-Lipschitz Bounds).** For any full-rank $T$ with singular values $\sigma_{\min} \leq \sigma_i \leq \sigma_{\max}$:
 
-where $\mu = \mathbb{E}[e]$ and $\Sigma = \text{Cov}(e)$.
+$$\sigma_{\min} \|x - y\| \leq \|Tx - Ty\| \leq \sigma_{\max} \|x - y\|$$
 
-### 7.2 Complete Loss Function
+*Proof.* For any vector $v$: $\|Tv\|^2 = v^T T^T T v$. The eigenvalues of $T^T T$ are $\sigma_i^2$, so $\sigma_{\min}^2 \|v\|^2 \leq \|Tv\|^2 \leq \sigma_{\max}^2 \|v\|^2$. Taking square roots and setting $v = x - y$ yields the result. $\square$
 
-$$\mathcal{L}_{\text{total}}(U, \Sigma, V) = \mathcal{L}_{\text{align}} + \lambda_1 \mathcal{L}_{\text{iso}} + \lambda_2 \mathcal{L}_{\text{rank}} + \lambda_3 \mathcal{L}_{\text{contrast}}$$
+**Definition 6.1 (Condition Number).** The condition number $\kappa(T) = \sigma_{\max}/\sigma_{\min}$ measures the maximum distortion ratio. Well-conditioned transformations have $\kappa(T)$ close to 1.
 
-**Recommended hyperparameters:**
-- $\lambda_1 = 0.05$ (isotropy weight)
-- $\lambda_2 = 0.01$ (rank regularization)
-- $\lambda_3 = 0.1$ (contrastive weight)
-- $\tau = 0.07$ (temperature)
+**Practical Implication:** To prevent extreme distortion, we can add a regularization term:
 
-### 7.3 Convergence Guarantee
+$$\mathcal{L}_{\text{condition}}(T) = \max\left(0, \kappa(T) - \kappa_{\max}\right)^2$$
 
-The iterative refinement converges under standard assumptions:
+where $\kappa_{\max} \approx 10\text{-}100$ is a threshold.
 
-$$\theta_{n+1} = \theta_n - \eta \nabla \mathcal{L}_{\text{total}}(\theta_n)$$
+### 6.3 Convergence Analysis (Honest Assessment)
 
-where $\theta = \{U, \Sigma, V\}$.
+**Fact:** The optimization problem $\min_T \mathcal{L}_{\text{total}}(T)$ is **non-convex** due to:
+1. Cosine similarity involves normalization (non-linear in $T$)
+2. Product structure in $S_{\text{pred}} = (ET)(ET)^T$
 
-**Convergence:**
+**Theorem 6.3 (Convergence to Critical Point).** Under standard assumptions (Lipschitz-continuous gradients, bounded iterates), gradient descent with appropriate learning rate $\eta$ satisfies:
 
-$$\|\theta_{n+1} - \theta^*\| \leq \rho \|\theta_n - \theta^*\|$$
+$$\min_{k \leq K} \|\nabla \mathcal{L}(T_k)\|^2 \leq \frac{2(\mathcal{L}(T_0) - \mathcal{L}^*)}{\eta K}$$
 
-where $\rho < 1$ is the contraction coefficient depending on learning rate $\eta$ and Lipschitz constant of $\nabla\mathcal{L}$. Typical convergence: 50-200 epochs.
+where $\mathcal{L}^*$ is the minimum value.
 
-### 7.4 Effective Dimensionality Metric
+*Proof.* Standard result from non-convex optimization theory. See (Nesterov, 2004). $\square$
 
-We measure effective rank via entropy of singular values:
+**Practical Implications:**
+1. We converge to **a** critical point, not necessarily the global minimum
+2. Multiple random initializations are recommended
+3. Learning rate scheduling (e.g., cosine annealing) improves convergence
+4. Early stopping based on validation performance prevents overfitting
 
-$$d_{\text{eff}} = \exp\left(-\sum_i p_i \log p_i\right)$$
+**What We Cannot Guarantee:**
+- Global optimality
+- Unique solution
+- Convergence rate better than $O(1/K)$ without strong convexity
 
-where $p_i = \sigma_i / \sum_j \sigma_j$ are normalized singular values. This should approach $d$ for isotropic embeddings.
+---
+
+## 7. The Lensing Operator (Corrected Formulation)
+
+### 7.1 Basic Linear Transformation
+
+The core transformation is simply:
+
+$$\mathcal{L}_T(e) = Te$$
+
+For low-rank $T = I + AB^T$:
+
+$$\mathcal{L}_T(e) = e + AB^T e = e + A(B^T e)$$
+
+This is an affine correction to the identity—the embedding is adjusted by a low-rank perturbation.
+
+### 7.2 Optional Preprocessing: Whitening
+
+If the input embeddings are highly anisotropic, preprocessing with whitening can help:
+
+$$e_{\text{whitened}} = \Sigma_E^{-1/2} (e - \mu_E)$$
+
+where $\mu_E = \mathbb{E}[e]$ and $\Sigma_E = \text{Cov}(e)$.
+
+The complete pipeline becomes:
+
+$$e \xrightarrow{\text{whiten}} e_w \xrightarrow{T} Te_w$$
+
+### 7.3 Why Not Nonlinear Transformations?
+
+One might ask: why restrict to linear transformations? Nonlinear maps could capture more complex structure.
+
+**Reasons for Linear:**
+1. **Interpretability:** Principal directions have clear meaning
+2. **Efficiency:** Matrix multiplication is fast
+3. **Stability:** No risk of mode collapse or vanishing gradients
+4. **Composability:** Multiple lenses compose cleanly: $T_2 T_1 e$
+5. **Sufficient Capacity:** For the "denoising" objective, linear may suffice
+
+**When Nonlinear Might Help:**
+- If the signal-noise decomposition is fundamentally nonlinear
+- If different regions of embedding space need different transformations
+
+We leave nonlinear extensions (e.g., neural network transformations) as future work.
 
 ---
 
 ## 8. Expected Results (Theoretical Projections)
 
-### 8.1 Hypothesized Semantic Separation
+### 8.1 Hypothesized Improvements
 
-**Before Lensing:**
-- $\|e(\text{PaymentService}) - e(\text{InventoryService})\|_2 \approx 0.10\text{-}0.20$
-- Effective dimensionality: ~50-100 (of 4096)
-- Isotropy score: ~0.15
+Based on the framework, we predict the following improvements (to be validated empirically):
 
-**After Lensing:**
-- $\|Te(\text{PaymentService}) - Te(\text{InventoryService})\|_2 \approx 0.50\text{-}0.80$
-- Effective dimensionality: ~500-1000
-- Isotropy score: ~0.60-0.80
+| Metric | Before Lensing | After Lensing (Expected) |
+|--------|----------------|--------------------------|
+| Average pairwise cosine similarity | 0.85-0.92 | 0.40-0.60 |
+| Effective dimensionality | 50-150 | 300-800 |
+| Isotropy score | 0.10-0.20 | 0.50-0.80 |
+| Reranker score correlation | 0.30-0.50 | 0.75-0.90 |
+| Inter-domain distance | 0.10-0.20 | 0.50-0.70 |
 
-**Expected improvement: 300-500%**
+**Caveat:** These are projections based on literature results for similar techniques. Actual performance will depend on domain, data quality, and hyperparameter tuning.
 
-### 8.2 Anticipated Metrics
+### 8.2 When Lensing Should Help
 
-| Metric | Before | After (Expected) | Improvement |
-|--------|--------|------------------|-------------|
-| Avg pairwise similarity | 0.89 | 0.45 | -49% |
-| Effective dimensions | 80 | 600 | +650% |
-| Isotropy score | 0.15 | 0.70 | +367% |
-| Reranker alignment | 0.35 | 0.85 | +143% |
-| Inter-domain distance | 0.12 | 0.65 | +442% |
+Lensing is most beneficial when:
 
----
+1. **High embedding homogeneity:** $\text{avg\_cosine\_sim} > 0.85$
+2. **Reranker divergence:** $|\text{cosine\_sim} - \text{reranker\_score}| > 0.40$
+3. **Low effective dimensionality:** $d_{\text{eff}} < 200$
+4. **Domain specificity:** Code is specialized (e.g., enterprise Java) rather than generic
 
-## 9. Theoretical Implications
+### 8.3 When Lensing May Not Help
 
-### 9.1 Information Has Physics
-
-This framework suggests information spaces follow physical laws:
-
-| Physical Principle | Information Analogue |
-|-------------------|---------------------|
-| Conservation of mass-energy | Conservation of information (rank preservation) |
-| Least action principle | Shortest semantic paths (geodesics) |
-| Gravitational field equations | Transformation matrices as fields |
-| Mass curves spacetime | Domain knowledge curves embedding space |
-| Gravitational lensing | Information focusing via transformation |
-
-### 9.2 Connection to Stratified Manifold Theory
-
-Our framework provides a computational mechanism for navigating between stratified sub-manifolds:
-
-$$\mathcal{S} = \bigcup_i \mathcal{M}_i \quad \text{(union of sub-manifolds)}$$
-
-Each domain $d$ corresponds to sub-manifold $\mathcal{M}_d$. Transformation $T_d: \mathcal{M}_{\text{generic}} \to \mathcal{M}_d$ maps to domain-specific structure.
-
-The "gravitational mass" of domain knowledge:
-
-$$m_d \propto |\text{training\_samples}_d| \times \text{diversity}_d$$
-
-### 9.3 Unified Theory Potential
-
-Information lensing connects:
-- **Differential Geometry:** Manifold structure, geodesics, curvature
-- **Information Theory:** Entropy reduction, channel capacity
-- **Physics:** Gravitational analogies, field equations
-- **Computer Science:** Embedding transformation, metric learning
-- **Representation Learning:** Isotropy, effective dimensionality
+1. **Already isotropic embeddings:** If $d_{\text{eff}}$ is already high
+2. **Aligned bi-encoder and cross-encoder:** If cosine similarity ≈ reranker score
+3. **Heterogeneous domains:** If code spans many unrelated domains
+4. **Insufficient training data:** Need enough pairs to learn meaningful transformation
 
 ---
 
-## 10. Democratization of Domain-Specific Embeddings
+## 9. Incremental Lens Calibration
 
-### 10.1 The Traditional Barrier
+### 9.1 The Incremental Update Problem
 
-Achieving domain-specific embeddings traditionally requires:
-- PhD-level ML team (~\$500k+/year per researcher)
-- Extensive fine-tuning (weeks of compute, risk of catastrophic forgetting)
-- Specialized infrastructure (GPU clusters, ML pipelines)
-- Continuous maintenance (model drift, version control)
+In production, codebases evolve continuously. Full recalibration requires $O(N^2)$ reranker calls—prohibitive for large repositories.
 
-### 10.2 The Information Lensing Alternative
+**Problem Statement:**
 
-Our approach eliminates these barriers:
+Given:
+- Previous lens $T_{\text{old}}$ trained on file set $\mathcal{F}_{\text{old}}$
+- Changes: $\mathcal{A}$ (added), $\mathcal{D}$ (deleted), $\mathcal{M}$ (modified)
+- New file set: $\mathcal{F}_{\text{new}} = (\mathcal{F}_{\text{old}} \setminus \mathcal{D}) \cup \mathcal{A}$, with $\mathcal{M}$ re-embedded
 
-| Traditional Fine-Tuning | Information Lensing |
-|------------------------|---------------------|
-| 3-5 ML researchers | Any developer |
-| 3-6 months initial + ongoing | 30-minute setup |
-| \$2M+/year | Hardware only (~\$5k) |
-| GPU cluster | CPU + RAM |
-| Catastrophic forgetting risk | Frozen base model |
+Find $T_{\text{new}}$ efficiently.
+
+### 9.2 Pair Classification Strategy
+
+Partition pairs into categories:
+
+| Category | Definition | Action |
+|----------|------------|--------|
+| Critical-New | $(e_{\text{new}}, e_j)$ for new files | Must compute reranker |
+| Critical-Modified | $(e_{\text{mod}}, e_j)$ for modified files | Must recompute reranker |
+| Invalidated | $(e_{\text{del}}, \cdot)$ for deleted files | Remove |
+| Stable | All other pairs | Reuse cached scores |
+
+**Complexity Reduction:**
+
+For $N$ files and $|\Delta| = |\mathcal{A}| + |\mathcal{M}|$ changes:
+- Full recalibration: $O(N^2)$ reranker calls
+- Incremental: $O(N \cdot |\Delta|)$ reranker calls
+- Speedup: $N / |\Delta|$ (e.g., 50× for 1000 files, 20 changes)
+
+### 9.3 Incremental Loss Function
+
+$$\mathcal{L}_{\text{incremental}}(T) = \mathcal{L}_{\text{critical}} + \lambda_1 \mathcal{L}_{\text{memory}} + \lambda_2 \mathcal{L}_{\text{anchor}}$$
+
+**Component 1: Critical Pairs (New Information)**
+
+$$\mathcal{L}_{\text{critical}} = \frac{1}{|\mathcal{C}|} \sum_{(i,j) \in \mathcal{C}} \left( s_{ij}^{\text{rerank}} - \text{sim}(Te_i, Te_j) \right)^2$$
+
+**Component 2: Memory Preservation (Prevent Forgetting)**
+
+$$\mathcal{L}_{\text{memory}} = \frac{1}{|\mathcal{S}|} \sum_{(i,j) \in \mathcal{S}} \left( s_{ij}^{\text{rerank}} - \text{sim}(Te_i, Te_j) \right)^2$$
+
+where $\mathcal{S}$ is a random sample of stable pairs.
+
+**Component 3: Anchor Regularization (Prevent Drift)**
+
+$$\mathcal{L}_{\text{anchor}} = \|T - T_{\text{old}}\|_F^2$$
+
+**Hyperparameters:**
+- $\lambda_1 = 0.5$ (memory weight)
+- $\lambda_2 = 0.1$ (anchor weight)
+
+### 9.4 Stability Analysis: Lyapunov Functional
+
+**Definition 9.1 (Lyapunov Functional).** A functional $V: \mathcal{X} \to \mathbb{R}$ is a Lyapunov functional for a dynamical system if:
+1. $V(x) \geq 0$ for all $x$
+2. $V(x_{n+1}) \leq V(x_n)$ along trajectories
+
+**Theorem 9.1 (Incremental Stability).** The loss function $\mathcal{L}_{\text{incremental}}$ serves as a Lyapunov functional for the lens update dynamics, guaranteeing:
+
+1. **Monotonic Improvement:** With appropriate learning rate, $\mathcal{L}(T_{n+1}) \leq \mathcal{L}(T_n)$
+
+2. **Bounded Drift:** Due to the anchor term:
+   $$\|T_{\text{new}} - T_{\text{old}}\|_F \leq \frac{\|\nabla \mathcal{L}_{\text{critical}}\|_F}{2\lambda_2}$$
+
+3. **Accumulated Drift Bound:** After $K$ incremental updates:
+   $$\|T_K - T_0\|_F \leq \sum_{k=1}^K \frac{\|\nabla \mathcal{L}_{\text{critical}}^{(k)}\|_F}{2\lambda_2}$$
+
+*Proof Sketch.* Property 1 follows from gradient descent on smooth loss. Property 2 follows from the first-order optimality condition: at convergence, $\nabla \mathcal{L}_{\text{total}} = 0$, which implies $\nabla \mathcal{L}_{\text{critical}} + 2\lambda_2 (T - T_{\text{old}}) = 0$ (ignoring other terms). Solving gives the bound. Property 3 follows by induction. $\square$
+
+### 9.5 Practical Schedule
+
+| Frequency | Action | Trigger |
+|-----------|--------|---------|
+| Per commit | Update embedding cache | Any code change |
+| Weekly | Incremental lens calibration | $|\Delta| > 5$ files |
+| Monthly | Full recalibration | Drift > 10% OR major refactor |
+| Quarterly | Hyperparameter review | Calendar |
+
+---
+
+## 10. Computational Considerations
+
+### 10.1 The Bottleneck: Reranker Inference
+
+For $N$ files, full pairwise reranking requires $\binom{N}{2}$ inference calls. With 8B parameter cross-encoders and 32k token context:
+
+| Hardware | Time/Pair | 50k Pairs |
+|----------|-----------|-----------|
+| CPU (Ryzen 9950X) | 30-60s | 400-800 hours |
+| GPU (2× RTX 3090) | 1-2s | 14-28 hours |
+| GPU (A100 80GB) | 0.5-1s | 7-14 hours |
+
+**Conclusion:** CPU-only processing is impractical for initial calibration.
+
+### 10.2 Cloud-First Strategy
+
+**Initial Calibration:**
+- Use cloud GPU (Vast.ai, Lambda Labs): ~$15-30 for 50k pairs
+- Download similarity matrix $S_{\text{reranker}}$ (~3GB)
+- Run lens optimization locally (CPU sufficient, minutes)
+
+**Monthly Recalibration:**
+- Incremental: only $O(N \cdot |\Delta|)$ pairs
+- Cloud cost: ~$2/month for typical change rates
+
+**Annual Cost:** ~$45 USD for living, continuously-updated lenses
+
+### 10.3 Monte Carlo Sampling for Large Codebases
+
+For $N > 2000$ files, even incremental updates become expensive. Use importance sampling:
+
+1. **Stratified Sampling:** Divide files into clusters, sample proportionally
+2. **Hard Negative Mining:** Oversample pairs where $|\text{cosine} - \text{reranker}|$ is large
+3. **Active Learning:** Prioritize pairs with high uncertainty
+
+Target: 50k pairs regardless of codebase size, with theoretical guarantees on sample complexity.
 
 ---
 
@@ -396,816 +580,56 @@ Our approach eliminates these barriers:
 
 Apply Information Lensing when ALL conditions hold:
 
-$$\text{avg\_cosine\_similarity} > 0.85 \quad \text{(high homogeneity)}$$
+$$\text{avg\_cosine\_similarity} > 0.85$$
+$$|\text{cosine} - \text{reranker}|_{\text{avg}} > 0.40$$
+$$d_{\text{eff}} < 200$$
 
-$$\text{reranker\_divergence} > 0.40 \quad \text{(hidden structure)}$$
+### 11.2 Diagnostic Procedure
 
-$$\text{effective\_dimensionality} < 200 \quad \text{(anisotropic)}$$
+1. **Compute Isotropy Metrics:**
+  - Sample 1000 random embeddings
+  - Compute SVD, measure $d_{\text{eff}}$ and isotropy score
 
-### 11.2 Benefit Quantification
+2. **Measure Reranker Divergence:**
+  - Sample 100 random pairs
+  - Compute both cosine similarity and reranker score
+  - Measure correlation and average divergence
 
-$$\text{Benefit}(\mathcal{L}) = \frac{\text{Separation}_{\text{after}}}{\text{Separation}_{\text{before}}}$$
-
-**Theorem**: Lensing is beneficial iff $\text{Benefit}(\mathcal{L}) > 1.5$
-
-For typical enterprise Java codebases:
-- BSR before ≈ 4.0-6.0 (high noise)
-- BSR after ≈ 0.8-1.2 (filtered)
-- Benefit ≈ 4-5 >> 1.5 ✓
+3. **Decision:**
+  - If divergence < 0.2 and isotropy > 0.5: Lensing unlikely to help
+  - If divergence > 0.4 and isotropy < 0.3: Lensing likely beneficial
+  - Otherwise: Pilot experiment recommended
 
 ---
 
-## 12. Incremental Lens Calibration
+## 12. Limitations and Future Work
 
-### 12.1 The Incremental Update Problem
+### 12.1 Current Limitations
 
-In production codebases, files are continuously added, modified, and deleted. Full lens recalibration requires $O(N^2)$ reranker calls for $N$ files—prohibitively expensive for large repositories with frequent changes.
+1. **Non-Convex Optimization:** No guarantee of global optimum
+2. **Reranker Quality Ceiling:** Lenses can't exceed reranker's semantic understanding
+3. **Domain Specificity:** Lenses may not transfer across domains
+4. **Linear Assumption:** Complex signal-noise structure may require nonlinear maps
 
-**Problem Statement:**
+### 12.2 Future Directions
 
-Given:
-- Previous lens $T_{\text{old}}$ trained on file set $\mathcal{F}_{\text{old}}$
-- New file set $\mathcal{F}_{\text{new}} = \mathcal{F}_{\text{old}} \cup \mathcal{A} \setminus \mathcal{D} \cup \mathcal{M}$
-
-where:
-- $\mathcal{A}$ = added files
-- $\mathcal{D}$ = deleted files  
-- $\mathcal{M}$ = modified files
-
-Find $T_{\text{new}}$ without full recomputation.
-
-### 12.2 Concrete Example: Weekly Sprint Changes
-
-**Initial State (Week $n$):**
-
-```
-Repository:
-├── PaymentService.java      (e₁)
-├── InventoryService.java    (e₂)  
-├── AuthService.java         (e₃)
-├── UserRepository.java      (e₄)
-└── OrderController.java     (e₅)
-```
-
-Lens $T_{\text{old}}$ trained on all $\binom{5}{2} = 10$ pairs.
-
-**Changes (Week $n+1$):**
-
-```diff
-+ ShippingService.java       (e₆)  [ADDED]
-~ PaymentService.java        (e₁') [MODIFIED: added refund logic]
-- InventoryService.java            [DELETED: moved to microservice]
-```
-
-**New State:**
-
-```
-Repository:
-├── PaymentService.java      (e₁') [changed embedding]
-├── AuthService.java         (e₃)  [unchanged]
-├── UserRepository.java      (e₄)  [unchanged]
-├── OrderController.java     (e₅)  [unchanged]
-└── ShippingService.java     (e₆)  [new]
-```
-
-### 12.3 Pair Classification
-
-We partition the pair space into four categories:
-
-| Category | Pairs | Count | Action |
-|----------|-------|-------|--------|
-| **Critical-New** | $(e_6, e_j)$ for all $j$ | 4 | Must compute |
-| **Critical-Modified** | $(e_1', e_j)$ for all $j$ | 4 | Must recompute |
-| **Invalidated** | $(e_2, \cdot)$ | 0 | Remove from consideration |
-| **Stable** | $(e_3, e_4), (e_3, e_5), (e_4, e_5)$ | 3 | Sample for regularization |
-
-**Pair Matrix Evolution:**
-
-$P_{\text{old}} = \begin{pmatrix} 
-- & p_{12} & p_{13} & p_{14} & p_{15} \\
-  & - & p_{23} & p_{24} & p_{25} \\
-  &   & - & p_{34} & p_{35} \\
-  &   &   & - & p_{45} \\
-  &   &   &   & -
-\end{pmatrix}$
-
-$P_{\text{new}} = \begin{pmatrix} 
-- & \cdot & p'_{13} & p'_{14} & p'_{15} & p'_{16} \\
-  & - & \cdot & \cdot & \cdot & \cdot \\
-  &   & - & p_{34} & p_{35} & p_{36} \\
-  &   &   & - & p_{45} & p_{46} \\
-  &   &   &   & - & p_{56} \\
-  &   &   &   &   & -
-\end{pmatrix}$
-
-where:
-- $p'_{1j}$ = recomputed (modified file)
-- $p_{j6}$ = new (added file)
-- Row/column 2 = deleted
-- $p_{34}, p_{35}, p_{45}$ = stable (reusable)
-
-### 12.4 Importance-Weighted Incremental Loss
-
-**Full Loss Function:**
-
-$\mathcal{L}_{\text{incremental}}(T) = \mathcal{L}_{\text{critical}} + \lambda_1 \mathcal{L}_{\text{memory}} + \lambda_2 \mathcal{L}_{\text{anchor}}$
-
-**Component 1: Critical Pairs (must learn)**
-
-$\mathcal{L}_{\text{critical}} = \frac{1}{|\mathcal{C}|} \sum_{(i,j) \in \mathcal{C}} \left( s_{\text{rerank}}(i,j) - \text{sim}(Te_i, Te_j) \right)^2$
-
-where $\mathcal{C} = \{(i,j) : i \in \mathcal{A} \cup \mathcal{M} \text{ or } j \in \mathcal{A} \cup \mathcal{M}\}$
-
-**Component 2: Memory Preservation (sampled stable pairs)**
-
-$\mathcal{L}_{\text{memory}} = \frac{1}{|\mathcal{S}|} \sum_{(i,j) \in \mathcal{S}} \left( s_{\text{rerank}}(i,j) - \text{sim}(Te_i, Te_j) \right)^2$
-
-where $\mathcal{S} \sim \text{Uniform}(\mathcal{P}_{\text{stable}})$ with $|\mathcal{S}| = \min(|\mathcal{C}|, |\mathcal{P}_{\text{stable}}|)$
-
-**Component 3: Anchor Regularization (prevent catastrophic drift)**
-
-$\mathcal{L}_{\text{anchor}} = \|T - T_{\text{old}}\|_F^2$
-
-**Recommended Hyperparameters:**
-- $\lambda_1 = 0.5$ (memory weight)
-- $\lambda_2 = 0.1$ (anchor weight)
-
-### 12.5 Matrix-Level Algorithm
-
-The following algorithm is designed for direct matrix implementation:
-
-**Input:**
-- $E_{\text{old}} \in \mathbb{R}^{N_{\text{old}} \times d}$: previous embedding matrix
-- $T_{\text{old}} \in \mathbb{R}^{d \times d}$: previous lens (or $U, \Sigma, V$ if low-rank)
-- $S_{\text{old}} \in \mathbb{R}^{N_{\text{old}} \times N_{\text{old}}}$: previous reranker similarity matrix
-- $\text{idx}_{\text{add}}$: indices of added files
-- $\text{idx}_{\text{mod}}$: indices of modified files
-- $\text{idx}_{\text{del}}$: indices of deleted files
-
-**Step 1: Construct New Embedding Matrix**
-
-```
-# Remove deleted rows
-mask_keep = ~isin(range(N_old), idx_del)
-E_kept = E_old[mask_keep, :]
-
-# Update modified embeddings (re-embed these files)
-for i in idx_mod:
-    E_kept[i, :] = embed(modified_file[i])
-
-# Append new embeddings
-E_new_files = stack([embed(f) for f in added_files])
-E_new = vstack([E_kept, E_new_files])
-
-# Result: E_new ∈ R^{N_new × d}
-```
-
-**Step 2: Identify Critical Pairs**
-
-```
-N_new = E_new.shape[0]
-idx_critical = union(idx_mod, range(N_kept, N_new))  # modified + added
-
-# Critical pair mask: C[i,j] = 1 if i or j is critical
-C = zeros(N_new, N_new)
-C[idx_critical, :] = 1
-C[:, idx_critical] = 1
-C = triu(C, k=1)  # upper triangular, no diagonal
-```
-
-**Step 3: Compute Critical Reranker Scores**
-
-```
-# Only compute reranker for critical pairs
-S_new = zeros(N_new, N_new)
-
-# Copy stable pairs from old matrix (with index remapping)
-S_new[stable_idx, stable_idx] = S_old[stable_old_idx, stable_old_idx]
-
-# Compute new pairs
-for (i, j) in where(C == 1):
-    S_new[i, j] = reranker(file[i], file[j])
-    S_new[j, i] = S_new[i, j]  # symmetric
-```
-
-**Step 4: Sample Memory Pairs**
-
-```
-# Stable pair indices
-stable_mask = triu(ones(N_new, N_new), k=1) - C
-stable_pairs = where(stable_mask == 1)
-
-# Sample |C| pairs for memory
-n_sample = min(sum(C), len(stable_pairs))
-memory_idx = random.choice(len(stable_pairs), n_sample, replace=False)
-M = zeros(N_new, N_new)
-M[stable_pairs[memory_idx]] = 1
-```
-
-**Step 5: Incremental Training**
-
-```
-# Initialize from old lens
-T = T_old.copy()  # or U, Σ, V = U_old, Σ_old, V_old
-
-for epoch in range(50):  # fewer epochs than full training
-    # Forward pass
-    E_transformed = E_new @ T
-    S_pred = cosine_similarity_matrix(E_transformed)
-    
-    # Losses (element-wise, then masked sum)
-    L_critical = mean((S_new - S_pred)² * C)
-    L_memory = mean((S_new - S_pred)² * M)
-    L_anchor = frobenius_norm(T - T_old)²
-    
-    L_total = L_critical + λ₁ * L_memory + λ₂ * L_anchor
-    
-    # Backward pass
-    T = T - η * gradient(L_total, T)
-```
-
-**Output:**
-- $T_{\text{new}}$: updated lens
-- $E_{\text{new}}$: new embedding matrix  
-- $S_{\text{new}}$: updated similarity matrix (cache for next iteration)
-
-### 12.6 Complexity Analysis
-
-| Operation | Full Recalibration | Incremental |
-|-----------|-------------------|-------------|
-| Reranker calls | $O(N^2)$ | $O(N \cdot |\Delta|)$ |
-| Embedding calls | $O(N)$ | $O(|\Delta|)$ |
-| Training pairs | $\binom{N}{2}$ | $\approx 2N|\Delta|$ |
-| Epochs | 100-200 | 30-50 |
-
-where $|\Delta| = |\mathcal{A}| + |\mathcal{M}|$
-
-**Example Savings (N=1000 files, 20 changes/week):**
-- Full: $\binom{1000}{2} = 499,500$ reranker calls
-- Incremental: $\approx 1000 \times 20 \times 2 = 40,000$ calls
-- **Speedup: 12.5×**
-
-### 12.7 Convergence Guarantee for Incremental Updates
-
-The anchor term $\mathcal{L}_{\text{anchor}}$ ensures bounded drift:
-
-$\|T_{\text{new}} - T_{\text{old}}\|_F \leq \frac{\|\nabla \mathcal{L}_{\text{critical}}\|_F}{\lambda_2}$
-
-**Theorem (Bounded Accumulated Drift):**
-
-After $K$ incremental updates:
-
-$\|T_K - T_0\|_F \leq \sum_{k=1}^{K} \frac{\|\nabla \mathcal{L}_{\text{critical}}^{(k)}\|_F}{\lambda_2}$
-
-If changes are bounded ($|\Delta_k| \leq \delta$ per week), drift grows at most linearly.
-
-**Monthly Reset Criterion:**
-
-Perform full recalibration when:
-
-$\|T_{\text{current}} - T_{\text{last\_full}}\|_F > \tau_{\text{reset}}$
-
-where $\tau_{\text{reset}} \approx 0.1 \cdot \|T_{\text{last\_full}}\|_F$ (10% relative drift).
-
-### 12.8 Practical Schedule
-
-| Frequency | Action | Trigger |
-|-----------|--------|---------|  
-| Daily/PR merge | Update embedding cache only | Any code change |
-| Weekly | Incremental lens calibration | $|\Delta| > 5$ files |
-| Monthly | Full recalibration | Drift > 10% OR $|\Delta_{\text{cumulative}}| > 0.2N$ |
-| Quarterly | Validation set review | Calendar |
-
-### 12.9 Theoretical Foundation: Lyapunov Functional Interpretation
-
-The incremental calibration scheme admits a rigorous interpretation through dynamical systems theory. This perspective reveals that our approach defines a **living model**—one that continuously co-evolves with its domain rather than remaining frozen after training.
-
-#### 12.9.1 The Lens as Dynamical System
-
-Consider the sequence of lenses generated by incremental updates:
-
-$T_0 \xrightarrow{\Delta_1} T_1 \xrightarrow{\Delta_2} T_2 \xrightarrow{\Delta_3} \cdots$
-
-This defines a discrete dynamical system on the manifold of transformation matrices:
-
-$T_{n+1} = \Phi(T_n, \Delta_n, D_n)$
-
-where:
-- $\Phi$: update operator (gradient descent on $\mathcal{L}_{\text{incremental}}$)
-- $\Delta_n$: code changes at step $n$
-- $D_n$: domain state (reranker scores) at step $n$
-
-#### 12.9.2 Loss as Lyapunov Functional
-
-A **Lyapunov functional** $V: \mathcal{X} \to \mathbb{R}$ for a dynamical system guarantees stability if:
-
-1. $V(x) \geq 0$ for all $x$ (non-negative)
-2. $V(x) = 0$ iff $x = x^*$ (zero at equilibrium)
-3. $V(x_{n+1}) < V(x_n)$ for $x_n \neq x^*$ (strictly decreasing)
-
-Our loss function satisfies these properties:
-
-$\mathcal{L}_{\text{incremental}}[T] = \underbrace{\mathcal{L}_{\text{critical}}}_{{\geq 0}} + \lambda_1 \underbrace{\mathcal{L}_{\text{memory}}}_{{\geq 0}} + \lambda_2 \underbrace{\mathcal{L}_{\text{anchor}}}_{{\geq 0}} \geq 0$
-
-**Condition 1:** Sum of squared errors is non-negative. ✓
-
-**Condition 2:** $\mathcal{L} = 0$ when transformed embeddings perfectly match reranker scores. ✓
-
-**Condition 3:** Gradient descent guarantees $\mathcal{L}(T_{n+1}) \leq \mathcal{L}(T_n)$ for appropriate learning rate. ✓
-
-#### 12.9.3 Convergence Theorem
-
-**Theorem (Lyapunov Stability of Incremental Calibration):**
-
-Let $\{T_n\}$ be the sequence of lenses produced by Algorithm 12.5 with learning rate $\eta < 2/L$ where $L$ is the Lipschitz constant of $\nabla\mathcal{L}$. Then:
-
-1. **Monotonic Improvement:** $\mathcal{L}[T_{n+1}] \leq \mathcal{L}[T_n]$ for all $n$
-
-2. **Bounded Trajectory:** $\|T_n - T_0\|_F \leq B$ for some finite $B$
-
-3. **Convergence:** $\lim_{n \to \infty} \|\nabla\mathcal{L}[T_n]\| = 0$
-
-**Proof Sketch:**
-
-The anchor term $\lambda_2 \|T - T_{\text{old}}\|_F^2$ acts as a regularizer that:
-- Prevents unbounded drift (ensures bounded trajectory)
-- Creates a basin of attraction around $T_{\text{old}}$
-- Guarantees the Hessian $\nabla^2\mathcal{L}$ has eigenvalues $\geq \lambda_2 > 0$
-
-Strong convexity from the anchor term, combined with Lipschitz gradients from the MSE terms, satisfies standard convergence conditions for gradient descent. $\square$
-
-#### 12.9.4 Living Models vs Frozen Models
-
-Traditional ML follows a **train-freeze-deploy** paradigm:
-
-```
-Data₀ → Train → Model* → Deploy → [frozen forever]
-```
-
-Information Lensing introduces a **train-deploy-evolve** paradigm:
-
-```
-Data₀ → Train → T₀ → Deploy
-              ↓
-Data₁ → Δ₁ → T₁ → Deploy  
-              ↓
-Data₂ → Δ₂ → T₂ → Deploy
-              ↓
-             ...
-```
-
-| Aspect | Frozen Model | Living Lens |
-|--------|--------------|-------------|
-| Adaptation | None post-training | Continuous |
-| Domain drift | Causes degradation | Tracked automatically |
-| Catastrophic forgetting | Risk during retraining | Prevented by anchor term |
-| Compute per update | $O(N^2)$ full retrain | $O(N \cdot |\Delta|)$ incremental |
-| Mathematical guarantee | None for evolution | Lyapunov stability |
-
-#### 12.9.5 Connection to Perelman's Ricci Flow
-
-Our framework shares deep structural similarities with Perelman's proof of the Poincaré conjecture:
-
-| Ricci Flow | Information Lensing |
-|------------|--------------------|
-| Metric tensor $g_{ij}(t)$ | Lens matrix $T(n)$ |
-| Ricci curvature $R_{ij}$ | Reranker gradient $\nabla\mathcal{L}$ |
-| Perelman's $\mathcal{W}$-entropy | $\mathcal{L}_{\text{incremental}}$ functional |
-| Flow toward canonical geometry | Convergence to domain-optimal lens |
-| Surgery at singularities | Monthly full recalibration |
-| Monotonicity of entropy | Monotonic decrease of loss |
-
-Perelman's insight was that the $\mathcal{W}$-entropy functional provides a "compass" through the space of geometries, guaranteeing that Ricci flow moves toward simpler structures despite local complexity.
-
-Similarly, $\mathcal{L}_{\text{incremental}}$ provides a compass through the space of lenses, guaranteeing movement toward better domain alignment despite the complexity of evolving codebases.
-
-#### 12.9.6 Implications for ML Research
-
-This framework suggests several research directions:
-
-1. **Continuous Learning Theory:** Formal study of models that evolve with their domains, with provable stability guarantees.
-
-2. **Functional Design:** Systematic construction of Lyapunov functionals for different adaptation scenarios (concept drift, distribution shift, adversarial perturbation).
-
-3. **Surgery Operations:** When incremental updates fail (analogous to Ricci flow singularities), what minimal "surgical" interventions restore convergence?
-
-4. **Multi-Scale Dynamics:** Different components of the lens may require different update frequencies—structural relationships change slowly, semantic relationships change faster.
-
-5. **Thermodynamic Interpretation:** If $\mathcal{L}$ acts as entropy, what is the "temperature" of the system? Can we define phase transitions in lens behavior?
-
-The key insight is that **treating ML models as dynamical systems** rather than static artifacts opens new theoretical and practical possibilities.
+1. **Nonlinear Lensing:** Neural network transformations with regularization
+2. **Multi-Task Lenses:** Single lens optimized for multiple objectives
+3. **Theoretical Analysis:** Generalization bounds, sample complexity
+4. **Cross-Domain Transfer:** Meta-learning for lens initialization
 
 ---
 
 ## 13. Conclusion
 
-Information Lensing provides a theoretically grounded, practically implementable approach to the embedding homogeneity problem. By treating transformation matrices as gravitational lenses that warp information space, we achieve:
+Information Lensing provides a mathematically grounded approach to embedding transformation, with:
 
-1. **Isotropy restoration** via regularized low-rank transformations
-2. **Semantic separation** through reranker-guided metric learning
-3. **Mathematical rigor** via differential geometry and manifold theory
-4. **Physical intuition** through gravitational analogies
-5. **Practical efficiency** via low-rank decomposition
-6. **Democratized access** without requiring ML expertise
+1. **Rigorous Foundations:** Bi-Lipschitz maps, metric learning, convergence analysis
+2. **Practical Algorithms:** Low-rank SVD, incremental calibration, cloud-first deployment
+3. **Honest Assessment:** Clear distinction between proven properties and heuristics
+4. **Economic Viability:** ~$45/year for continuously-updated lenses
 
-**The key insight:**
-
-> Just as gravitational lenses reveal distant galaxies invisible to direct observation, information lenses reveal hidden semantic structure obscured by syntactic noise.
-
----
-
-## 13. Practical Implementation: Checkpoint-Based CPU/RAM Strategy
-
-### 13.1 Feasibility Assessment
-
-For a codebase of $N = 900$ files, the full pairwise reranker computation requires:
-
-$\binom{900}{2} = \frac{900 \times 899}{2} = 404,550 \text{ pairs}$
-
-With Monte Carlo sampling reducing this to ~50k calls, the workload becomes feasible on CPU+RAM infrastructure (Ryzen 9 9950X, 192GB RAM) but requires a **multi-session checkpoint strategy** rather than single-run execution.
-
-### 13.2 Checkpoint-Based Processing Architecture
-
-The key insight: split the work into recoverable checkpoints that survive session boundaries.
-
-```
-Night 1: Checkpoints 1-3 of 8 completed (37.5%)
-         ~18,750 reranker calls processed
-         Partial similarity matrix saved to disk
-         
-Night 2: Checkpoints 4-6 of 8 completed (75%)
-         Resume from checkpoint 3
-         ~18,750 additional calls
-         
-Night 3: Checkpoints 7-8 of 8 completed (100%)
-         Full similarity matrix S_reranker available
-         Lens optimization begins
-```
-
-### 13.3 Implementation Requirements
-
-A production-grade Python program (not a script) requiring:
-
-| Component | Purpose |
-|-----------|----------|
-| **Progress Tracker** | Track which pairs have been processed |
-| **Checkpoint System** | Save partial $S_{\text{reranker}}$ matrix every N pairs |
-| **Crash Recovery** | Resume from last checkpoint on restart |
-| **Partial Results Storage** | HDF5 or memory-mapped NumPy arrays for large matrices |
-| **Pair Iterator** | Deterministic ordering for reproducible checkpoints |
-
-**Technology Stack:**
-- TensorFlow/PyTorch for reranker inference
-- NumPy for matrix operations
-- HDF5 (h5py) for checkpoint storage
-- tqdm for progress visualization
-
-### 13.4 Two-Phase Workflow
-
-**Phase 1: Similarity Matrix Construction (Heavy, Multi-Night)**
-
-```python
-# Pseudocode for checkpoint-based similarity matrix construction
-class SimilarityMatrixBuilder:
-    def __init__(self, n_files: int, checkpoint_interval: int = 5000):
-        self.n_files = n_files
-        self.n_pairs = n_files * (n_files - 1) // 2
-        self.checkpoint_interval = checkpoint_interval
-        self.checkpoint_dir = Path("./checkpoints")
-        
-    def build(self, reranker_model, file_contents: list[str]):
-        # Load or initialize similarity matrix
-        S, start_pair = self._load_checkpoint()
-        
-        pair_idx = 0
-        for i in range(self.n_files):
-            for j in range(i + 1, self.n_files):
-                if pair_idx < start_pair:
-                    pair_idx += 1
-                    continue
-                    
-                # Compute reranker score
-                score = reranker_model.score(file_contents[i], file_contents[j])
-                S[i, j] = score
-                S[j, i] = score  # Symmetric
-                
-                pair_idx += 1
-                
-                # Checkpoint every N pairs
-                if pair_idx % self.checkpoint_interval == 0:
-                    self._save_checkpoint(S, pair_idx)
-                    print(f"Checkpoint {pair_idx // self.checkpoint_interval}: "
-                          f"{pair_idx}/{self.n_pairs} pairs ({100*pair_idx/self.n_pairs:.1f}%)")
-        
-        return S
-    
-    def _save_checkpoint(self, S: np.ndarray, pair_idx: int):
-        checkpoint_path = self.checkpoint_dir / f"similarity_checkpoint_{pair_idx}.h5"
-        with h5py.File(checkpoint_path, 'w') as f:
-            f.create_dataset('S', data=S, compression='gzip')
-            f.attrs['pair_idx'] = pair_idx
-            f.attrs['timestamp'] = datetime.now().isoformat()
-```
-
-**Phase 2: Lens Optimization (Light, Single Session)**
-
-Once $S_{\text{reranker}}$ is complete, lens optimization is computationally light:
-
-$T^* = \arg\min_T \|S_{\text{reranker}} - (ET)(ET)^T\|_F^2 + \lambda\|T\|_*$
-
-This involves matrix operations on pre-computed data—minutes, not hours.
-
-**Phase 3: Embedding Transformation (Light, Single Session)**
-
-After lens $T$ is learned:
-
-1. Generate base embeddings: $900 \times 2$ calls (semantic + behavioral)
-2. Apply lens transformation: $e_{\text{focused}} = e_{\text{base}} \cdot T$
-
-Total: ~1,800 embedding calls + matrix multiplication.
-
-### 13.5 Incremental Lens Updates
-
-After initial calibration, weekly updates are lightweight:
-
-| Operation | Initial Calibration | Weekly Update |
-|-----------|---------------------|---------------|
-| Reranker calls | 50,000 (Monte Carlo) | ~2,000 (changed files only) |
-| Lens optimization | Full SVD | Incremental gradient descent |
-| Embedding regeneration | 1,800 | ~100 (changed files) |
-| Time | 3+ nights | 1-2 hours |
-
-The incremental algorithm from Section 12 applies: only pairs involving changed files need recomputation.
-
-### 13.6 Hardware Requirements: CPU/RAM Not Feasible for Full Precision
-
-#### Why CPU/RAM Fails for Quality Lensing
-
-For optimal lens quality, we need:
-- **Full precision** (FP32/BF16) to preserve reranker score fidelity
-- **Long context** (~32k tokens combined input) to capture full file semantics
-- **8B parameter reranker** (Qwen3-Reranker-8B) for state-of-the-art quality
-
-**CPU Performance with 32k Token Pairs:**
-
-| Hardware | Time/Pair | Pairs/Hour | 50k Pairs | Verdict |
-|----------|-----------|------------|-----------|----------|
-| Ryzen 9950X + 192GB RAM | 30-60s | 60-120 | 400-800 hours | ❌ Not feasible |
-| Ryzen 9950X (INT4 quant) | 5-10s | 360-720 | 70-140 hours | ⚠️ Quality loss |
-
-**400-800 hours = 50-100 nights of processing.** This is not a practical engineering solution.
-
-#### Minimum Viable Setup: 48GB+ VRAM
-
-For full precision 8B reranker with 32k context, GPU acceleration is **required, not optional**.
-
-**GPU Performance with 32k Token Pairs:**
-
-| Hardware | VRAM | Time/Pair | Pairs/Hour | 50k Pairs |
-|----------|------|-----------|------------|------------|
-| Single RTX 3090 | 24GB | 2-4s | 900-1,800 | 28-56 hours |
-| Dual RTX 3090 | 48GB | 1-2s | 1,800-3,600 | 14-28 hours |
-| A100 80GB | 80GB | 0.5-1s | 3,600-7,200 | 7-14 hours |
-| H100 80GB | 80GB | 0.3-0.6s | 6,000-12,000 | 4-8 hours |
-
-**Dual 3090 with 48GB VRAM achieves 50k pairs in ~20 hours (2-3 nights)** — this is the practical minimum.
-
-#### Option A: Cloud GPU for Initial Calibration (Recommended First Step)
-
-| Provider | GPU Config | VRAM | Cost/Hour | 50k Pairs Cost |
-|----------|------------|------|-----------|----------------|
-| Vast.ai | 2× RTX 3090 | 48GB | $0.60-1.00 | **$12-20** |
-| RunPod | 2× RTX 4090 | 48GB | $0.80-1.40 | **$16-28** |
-| Lambda Labs | A100 | 80GB | $1.10 | **$12-18** |
-| Lambda Labs | H100 | 80GB | $2.00 | **$10-16** |
-
-**Initial calibration cost: $12-30 USD** — trivial compared to hardware investment.
-
-**Cloud GPU Workflow:**
-```
-1. Develop checkpoint-based Python program locally
-2. Upload codebase embeddings to cloud instance
-3. Run 50k pair reranker computation (~20h)
-4. Download similarity matrix S_reranker (~3GB)
-5. Run lens optimization locally (CPU sufficient)
-6. Apply lenses to embeddings locally
-```
-
-**Advantages:**
-- No upfront hardware cost
-- Full precision, no quality compromise
-- Pay only for initial calibration + occasional recalibration
-- Can experiment with different reranker models
-
-**Still required:** The checkpoint-based Python program (same development effort regardless of hardware).
-
-#### Option B: Dual RTX 3090 Home Setup (Future Investment)
-
-If frequent recalibration becomes necessary (multiple projects, continuous experimentation):
-
-| Component | Specification | Cost (PLN) | Cost (USD) |
-|-----------|---------------|------------|------------|
-| 2× RTX 3090 (used) | 24GB each | 14,000-18,000 | $3,500-4,500 |
-| Motherboard upgrade | Dual x16 PCIe | 1,500-2,500 | $375-625 |
-| PSU | 1,600W 80+ Platinum | 1,200-1,800 | $300-450 |
-| **Total** | | **16,700-22,300** | **$4,175-5,575** |
-
-**Why Dual 3090 over newer cards:**
-
-1. **Power consumption**: 1,500-1,600W total system draw is manageable. Dual 5090 at ~3kW requires specialized infrastructure and significantly higher electricity costs.
-
-2. **Raw compute vs gaming features**: RTX 5090 is optimized for AI frame generation (DLSS 4). For pure reranker inference, 3090's tensor cores provide excellent price/performance.
-
-3. **VRAM sweet spot**: 48GB combined is sufficient for 8B model + batch processing. 64GB (dual 5090) provides diminishing returns.
-
-4. **Secondary market availability**: RTX 3090 available used at reasonable prices. RTX 4090 has availability issues.
-
-5. **Motherboard compatibility**: Requires upgrade from B650 Eagle to board with dual PCIe x16 slots and adequate spacing for dual 3-slot cards.
-
-#### Break-Even Analysis: Cloud vs Hardware
-
-| Usage Pattern | Cloud Cost | Hardware Amortization | Winner |
-|---------------|------------|----------------------|--------|
-| 1 calibration/year | $20/year | $4,500 / 5 years = $900/year | ☁️ Cloud |
-| Monthly recalibration | $240/year | $900/year | ☁️ Cloud |
-| Weekly experimentation | $1,000/year | $900/year | 🏠 Hardware |
-| Daily iteration | $5,000+/year | $900/year | 🏠 Hardware |
-
-#### Monthly Recalibration: Cloud vs Local CPU
-
-Even for monthly recalibration (~2,000-4,000 pairs), cloud remains more economical when accounting for **total cost of ownership**:
-
-**Local CPU Recalibration (Ryzen 9950X, 32k context, FP32):**
-
-| Factor | Value | Monthly Cost |
-|--------|-------|-------------|
-| Time | 17-33 hours (2-4 nights) | — |
-| System power draw | ~350W sustained | — |
-| Electricity (Poland, ~1.2 PLN/kWh) | 25h × 0.35kW × 1.2 PLN | **~10.5 PLN ($2.60)** |
-| Component wear (CPU, RAM, PSU) | Accelerated aging | **~20-40 PLN ($5-10)** est. |
-| Opportunity cost | Computer unavailable 2-4 nights | Inconvenience |
-| **Total local cost** | | **~$8-13/month** |
-
-**Cloud GPU Recalibration (2× RTX 3090, 48GB VRAM):**
-
-| Factor | Value | Monthly Cost |
-|--------|-------|-------------|
-| Time | 1-2 hours | — |
-| Vast.ai 2×3090 | $0.60-1.00/hour × 2h | **$1.20-2.00** |
-| Data transfer | ~500MB up, ~500MB down | Negligible |
-| **Total cloud cost** | | **~$1.50-2.50/month** |
-
-**Verdict:** Cloud is **4-6× cheaper** than local CPU even for monthly recalibration, plus:
-- No 2-4 night computer downtime
-- No accelerated hardware wear
-- Faster iteration (hours vs days)
-- Full precision, no quality compromise
-
-#### Recommended Hybrid Strategy: Living Model on Budget
-
-A financially sustainable approach to maintain high-quality Information Lensing:
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│           HYBRID STRATEGY: LIVING MODEL ON BUDGET               │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  INITIAL CALIBRATION (one-time)                                 │
-│  └─► Cloud GPU: ~$20                                            │
-│      • 50k pairs, full precision                                │
-│      • Download S_reranker matrix                               │
-│      • Optimize lenses locally                                  │
-│                                                                 │
-│  MONTHLY RECALIBRATION (ongoing)                                │
-│  └─► Cloud GPU: ~$2/month                                       │
-│      • Accumulate changes over month                            │
-│      • 2-4k pairs per recalibration                             │
-│      • ~2 hours cloud time                                      │
-│      • Update lenses locally                                    │
-│                                                                 │
-│  ANNUAL COST                                                    │
-│  └─► $20 initial + $24/year = ~$45/year                         │
-│      • Living, continuously-updated lenses                      │
-│      • Full precision quality                                   │
-│      • No hardware investment                                   │
-│                                                                 │
-│  OPTIONAL: SAVE FOR DUAL 3090                                   │
-│  └─► Set aside ~$75/month                                       │
-│      • After 5 years: $4,500 (full dual 3090 setup)             │
-│      • Or after 2 years: $1,800 (one used 3090)                 │
-│      • Only if local GPU becomes necessary                      │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-**Year 1 costs:**
-
-| Item | Cost (USD) | Cost (PLN) |
-|------|------------|------------|
-| Initial calibration (cloud) | $20 | ~80 PLN |
-| Monthly recalibration × 12 | $24 | ~96 PLN |
-| **Total Year 1** | **$44** | **~176 PLN** |
-
-**Comparison with alternatives:**
-
-| Approach | Year 1 Cost | Quality | Practicality |
-|----------|-------------|---------|---------------|
-| Cloud hybrid (recommended) | $44 | ✅ Full precision | ✅ 2h/month |
-| Local CPU only | $100-150 | ⚠️ Quality loss or 400h+ | ❌ Impractical |
-| Dual 3090 purchase | $4,500+ | ✅ Full precision | ✅ Instant |
-
-**This strategy provides:**
-1. **Living model** — lenses continuously updated with codebase evolution
-2. **Full precision** — no quantization quality loss
-3. **Minimal budget impact** — less than a Netflix subscription
-4. **Path to upgrade** — save gradually for local GPU if needed
-5. **No hardware risk** — no wear, no electricity spikes, no maintenance
-
-#### Decision Path
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│           INFORMATION LENSING IMPLEMENTATION PATH           │
-└─────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-              ┌───────────────────────────────┐
-              │  1. Develop checkpoint-based  │
-              │     Python program locally    │
-              │     (TensorFlow, HDF5, etc.)  │
-              └───────────────┬───────────────┘
-                              │
-                              ▼
-              ┌───────────────────────────────┐
-              │  2. Initial calibration       │
-              │     Cloud GPU (~$20)          │
-              │     50k pairs, full precision │
-              └───────────────┬───────────────┘
-                              │
-                              ▼
-              ┌───────────────────────────────┐
-              │  3. Optimize lenses locally   │
-              │     (CPU sufficient)          │
-              │     Evaluate vs MCP baseline  │
-              └───────────────┬───────────────┘
-                              │
-              ┌───────────────┴───────────────┐
-              ▼                               ▼
-    ┌─────────────────┐             ┌─────────────────┐
-    │  Worth it?      │             │  Not worth it?  │
-    │                 │             │                 │
-    │  Monthly cloud  │             │  Stay with      │
-    │  recalibration  │             │  MCP-only       │
-    │  (~$2/month)    │             │  approach       │
-    └────────┬────────┘             └─────────────────┘
-             │
-             ▼
-    ┌─────────────────┐
-    │  OPTIONAL:      │
-    │  Save ~$75/mo   │
-    │  for dual 3090  │
-    │  (if needed)    │
-    └─────────────────┘
-```
-
-### 13.7 Current Status: Cloud-First Hybrid Strategy
-
-**Decision (November 2025):**
-
-Information Lensing with reranker-based metric discovery is **planned with cloud-first approach**.
-
-**Key Finding:** Local CPU/RAM (even Ryzen 9950X + 192GB) is not feasible for full-precision 8B reranker with 32k context:
-- 400-800 hours for initial calibration (50-100 nights)
-- Quantization degrades quality unacceptably
-- Monthly recalibration on CPU costs more than cloud when accounting for electricity and component wear
-
-**Adopted Strategy:**
-
-| Phase | Method | Cost | Time |
-|-------|--------|------|------|
-| Initial calibration | Cloud GPU (Vast.ai 2×3090) | ~$20 | ~20h |
-| Monthly recalibration | Cloud GPU | ~$2/month | ~2h |
-| Lens optimization | Local CPU | Free | Minutes |
-| Embedding transformation | Local CPU | Free | Minutes |
-
-**Annual Cost: ~$44 USD (~176 PLN)** — less than Netflix, for a living, continuously-updated lens system.
-
-**Current Approach:**
-- Use Qwen3-Embedding-8B with MCP instruction-based lenses (no reranker) as **baseline**
-- Pipeline v7.0 (Triple-Lens Hypergraph) operational without reranker
-- Develop checkpoint-based Python program when time permits
-- First cloud calibration will validate quality gain vs MCP-only baseline
-
-**Future Path:**
-- If lensing proves valuable: continue monthly cloud recalibration (~$24/year)
-- If frequent experimentation needed: save ~$75/month toward dual RTX 3090 setup
-- Dual 3090 remains optional long-term investment, not immediate requirement
-
-**What's Still Needed:**
-- [ ] Checkpoint-based Python program (TensorFlow, HDF5, progress tracking)
-- [ ] Cloud deployment scripts (upload embeddings, run reranker, download matrix)
-- [ ] Lens optimization pipeline (SVD, Frobenius alignment)
-- [ ] A/B evaluation framework (lensed vs non-lensed embedding quality)
+The gravitational analogy provides intuition but is not claimed as mathematical equivalence. The core contribution is showing that domain-specific metric structures can be efficiently learned and applied to improve embedding-based retrieval in specialized domains.
 
 ---
 
@@ -1213,26 +637,60 @@ Information Lensing with reranker-based metric discovery is **planned with cloud
 
 Ethayarajh, K. (2019). "How Contextual are Contextualized Word Representations?" *EMNLP 2019*.
 
-Rajaee, S., & Pilehvar, M. T. (2021). "How Does Fine-tuning Affect the Geometry of Embedding Space." *ACL 2021 Findings*.
-
-Li, X., et al. (2025). "Unraveling the Localized Latents: Learning Stratified Manifold Structures in LLM Embedding Space." *arXiv:2502.13577*.
-
-Sun, Y., et al. (2025). "TermGPT: Multi-Level Contrastive Fine-Tuning for Terminology Adaptation." *arXiv:2511.09854*.
-
-Zhang, Y., et al. (2025). "Qwen3 Embedding: Advancing Text Embedding and Reranking Through Foundation Models." *arXiv:2506.05176*.
-
-Rudman, W., et al. (2022). "IsoScore: Measuring the Uniformity of Embedding Space Utilization." *ACL 2022 Findings*.
-
-Einstein, A. (1916). "Die Grundlage der allgemeinen Relativitätstheorie." *Annalen der Physik*, 354(7), 769-822.
+Gao, T., et al. (2021). "SimCSE: Simple Contrastive Learning of Sentence Embeddings." *EMNLP 2021*.
 
 Hu, E. J., et al. (2022). "LoRA: Low-Rank Adaptation of Large Language Models." *ICLR 2022*.
 
-Gao, T., et al. (2021). "SimCSE: Simple Contrastive Learning of Sentence Embeddings." *EMNLP 2021*.
+Li, X., et al. (2025). "Unraveling the Localized Latents: Learning Stratified Manifold Structures in LLM Embedding Space." *arXiv:2502.13577*.
 
-Lee, J. M. (2018). *Introduction to Riemannian Manifolds*. Springer Graduate Texts in Mathematics.
+Nesterov, Y. (2004). *Introductory Lectures on Convex Optimization*. Springer.
+
+Rajaee, S., & Pilehvar, M. T. (2021). "How Does Fine-tuning Affect the Geometry of Embedding Space." *ACL 2021 Findings*.
+
+Rudman, W., et al. (2022). "IsoScore: Measuring the Uniformity of Embedding Space Utilization." *ACL 2022 Findings*.
+
+Zhang, Y., et al. (2025). "Qwen3 Embedding: Advancing Text Embedding and Reranking Through Foundation Models." *arXiv:2506.05176*.
 
 ---
 
 *Target Journal: Transactions on Machine Learning Research*
 
 *2020 Mathematics Subject Classification*: 68T07 (Artificial neural networks), 53Z50 (Applications of differential geometry), 62H30 (Classification and discrimination)
+
+---
+
+## Appendix A: Comparison with Original Formulation
+
+This revision addresses the following issues from the original paper:
+
+| Original Claim | Issue | Correction |
+|----------------|-------|------------|
+| "Locally isometric" transformation | False for non-orthogonal T | Changed to "bi-Lipschitz" with explicit bounds |
+| Curvature tensor transformation equation | Incorrect tensor transformation law | Removed; clarified that embedding space curvature ≠ data manifold curvature |
+| Gradient term adds curvature | Gradient of quadratic is linear | Removed; noted transformation is purely linear |
+| Convergence to global minimum | Non-convex loss | Changed to "convergence to critical point" |
+| Gravitational field equations analogy | No actual field equations provided | Explicitly marked as "heuristic analogy" |
+| Perelman's Ricci flow equivalence | Different mathematical structures | Noted as "inspirational analogy" only |
+| "Gravitational wave detector" metaphor | Misleading | Changed to "semantic oracle" |
+
+## Appendix B: Glossary of Mathematical Terms
+
+**Anisotropic:** Not uniform in all directions; embedding distributions concentrated in subspace
+
+**Bi-Lipschitz:** Map that distorts distances by bounded factors in both directions
+
+**Condition Number:** Ratio of largest to smallest singular value; measures matrix conditioning
+
+**Effective Dimensionality:** Entropy-based measure of how many dimensions are actually used
+
+**Frobenius Norm:** Matrix norm defined as $\|A\|_F = \sqrt{\sum_{ij} A_{ij}^2}$
+
+**Homeomorphism:** Continuous bijection with continuous inverse; preserves topology
+
+**Isotropy:** Uniform distribution of embeddings across the representational space
+
+**Lyapunov Functional:** Non-increasing function along system trajectories; proves stability
+
+**Nuclear Norm:** Sum of singular values; convex relaxation of rank
+
+**Stratified Manifold:** Union of manifolds of possibly different dimensions
