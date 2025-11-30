@@ -175,7 +175,7 @@ where $\mathcal{R}(T)$ is a regularizer.
 
 Select $r$ such that the top $r$ singular values of the learned transformation capture sufficient variance:
 
-$$r^* = \min\left\{r : \frac{\sum_{i=1}^r \sigma_i^2}{\sum_{i=1}^d \sigma_i^2} \geq \tau\right\}$$
+$$r^* = \min \left\lbrace r : \frac{\sum_{i=1}^r \sigma_i^2}{\sum_{i=1}^d \sigma_i^2} \geq \tau \right\rbrace$$
 
 where $\tau \in [0.90, 0.99]$ is a threshold. Note: this requires first learning a full-rank transformation, then truncating.
 
