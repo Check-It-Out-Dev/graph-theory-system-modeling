@@ -1,96 +1,69 @@
-# Qwen3-Embedding MCP Server
+# Qwen3-Embedding MCP Server with Information Lensing
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![MCP](https://img.shields.io/badge/MCP-Compatible-green.svg)](https://modelcontextprotocol.io)
 
-A high-performance [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server providing state-of-the-art text embeddings using **Qwen3-Embedding-8B** — the #1 ranked model on the MTEB multilingual leaderboard (score 70.58, as of June 2025).
+A high-performance [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server providing state-of-the-art text embeddings using **Qwen3-Embedding-8B** with **Information Lensing** — domain-specific embedding transformation for enterprise codebases.
+
+## What is Information Lensing?
+
+Just as gravitational lensing bends light to reveal distant galaxies, **Information Lensing** curves embedding space to reveal hidden semantic structure in code.
+
+Generic embeddings suffer from **semantic collapse** — `PaymentService` and `InventoryService` look nearly identical (0.94 cosine similarity) despite having completely different business purposes.
+
+Information Lensing applies three "gravitational lenses" that focus embeddings on different aspects:
+
+| Lens | Focus | Use Case |
+|------|-------|----------|
+| **structural** | Graph topology, architectural position, connectivity | Finding related modules, dependency analysis |
+| **semantic** | Business logic, domain concepts, code meaning | Finding code by functionality |
+| **behavioral** | Runtime patterns, state machines, side effects | Finding code by execution behavior |
+
+Reference: Marchewka (2025), "Information Lensing: A Gravitational Approach to Domain-Specific Embedding Transformation"
 
 ## Features
 
+- 🔭 **Information Lensing**: Three domain-specific lenses (structural, semantic, behavioral)
 - 🚀 **State-of-the-Art Quality**: Qwen3-Embedding-8B ranks #1 on MTEB multilingual benchmark
-- 🌍 **100+ Languages**: Comprehensive multilingual and cross-lingual support
-- 📏 **Flexible Dimensions**: Matryoshka Representation Learning (MRL) for custom dimensions (128-4096)
-- 🎯 **Instruction-Aware**: Built-in `query`/`passage` prompts + custom instructions (1-5% boost)
-- 📄 **32K Context**: Process long documents up to 32,768 tokens
+- 🌍 **100+ Languages**: Including programming languages (Java, TypeScript, Python, etc.)
+- 📏 **Flexible Dimensions**: MRL for custom dimensions (128-4096)
+- 📄 **32K Context**: Process long files up to 32,768 tokens
 - 💻 **CPU Optimized**: Designed for high-RAM CPU systems (64GB+ recommended)
-- 🔌 **MCP Native**: Seamless integration with Claude Desktop, Cursor, and other MCP clients
 
 ## Requirements
 
 - **Python**: 3.10 or higher
-- **RAM**: 32GB minimum, 64GB+ recommended for optimal performance
-- **Disk**: ~16GB for model weights (cached after first download)
-- **OS**: Windows, macOS, or Linux
+- **RAM**: 32GB minimum, 64GB+ recommended
+- **Disk**: ~16GB for model weights
 
 ## Quick Start
 
 ### Installation
 
 ```bash
-# Clone the repository
+# Clone and setup
 git clone https://github.com/NorbertMarchewka/qwen3-embedding-mcp.git
 cd qwen3-embedding-mcp
-
-# Create virtual environment
 python -m venv .venv
-
-# Activate (Windows)
-.venv\Scripts\activate
-
-# Activate (macOS/Linux)
-source .venv/bin/activate
-
-# Install dependencies
+.venv\Scripts\activate  # Windows
 pip install -e .
 ```
 
-### Running the Server
+### Running
 
 ```bash
-# Run directly
 python -m qwen3_embedding_mcp
-
-# Or use the entry point
-qwen3-embedding-mcp
 ```
-
-The server will:
-1. Load the Qwen3-Embedding-8B model (~1-3 minutes on first run)
-2. Cache model weights for faster subsequent starts
-3. Listen for MCP connections via stdio
 
 ### Claude Desktop Configuration
 
-Add to your `claude_desktop_config.json`:
-
 ```json
 {
   "mcpServers": {
     "qwen3-embedding": {
-      "command": "python",
-      "args": ["-m", "qwen3_embedding_mcp"],
-      "cwd": "C:/path/to/qwen3-embedding-mcp",
-      "env": {
-        "QWEN3_EMBEDDING_DEVICE": "cpu",
-        "QWEN3_EMBEDDING_LOG_LEVEL": "INFO"
-      }
-    }
-  }
-}
-```
-
-**Windows with virtual environment:**
-
-```json
-{
-  "mcpServers": {
-    "qwen3-embedding": {
-      "command": "C:/path/to/qwen3-embedding-mcp/.venv/Scripts/python.exe",
-      "args": ["-m", "qwen3_embedding_mcp"],
-      "env": {
-        "QWEN3_EMBEDDING_DEVICE": "cpu"
-      }
+      "command": "C:/path/to/.venv/Scripts/python.exe",
+      "args": ["-m", "qwen3_embedding_mcp"]
     }
   }
 }
@@ -98,190 +71,156 @@ Add to your `claude_desktop_config.json`:
 
 ## Available Tools
 
-### `embed`
+### `embed` — Single Document with Lens
 
-Generate embeddings for one or more texts.
+Generate embedding for a document using Information Lensing.
 
 ```json
 {
-  "texts": "What is machine learning?",
-  "is_query": true
-}
-```
-
-Or for documents:
-```json
-{
-  "texts": ["Machine learning is...", "Deep learning uses..."],
-  "prompt_name": "passage"
-}
-```
-
-With custom instruction:
-```json
-{
-  "texts": "quantum entanglement applications",
-  "instruction": "Given a scientific query, retrieve relevant research papers",
-  "dimension": 1024
+  "text": "class PaymentService { ... }",
+  "lens": "semantic"
 }
 ```
 
 **Parameters:**
-- `texts` (required): String or array of strings to embed (max 32K tokens each)
-- `is_query` (optional): Set true for search queries (uses built-in query prompt)
-- `prompt_name` (optional): Built-in prompt - "query" or "passage" (recommended)
-- `instruction` (optional): Custom instruction (overrides prompt_name)
-- `dimension` (optional): Output dimension, 128-4096 (default: 4096)
-- `normalize` (optional): L2-normalize embeddings (default: true)
+- `text` (required): Document content (max 32K tokens)
+- `lens` (required): `"structural"`, `"semantic"`, or `"behavioral"`
+- `dimension` (optional): Output dimension 128-4096 (default: 4096)
 
-### `similarity`
+**Returns:** 4096-dimensional embedding focused on the selected aspect.
 
-Compute semantic similarity between queries and documents.
+---
+
+### `embed_triple` — All Three Lenses
+
+Generate all three lens embeddings in one call. Use for building the triple-embedded hypergraph.
 
 ```json
 {
-  "queries": ["What is the capital of France?"],
-  "documents": [
-    "Paris is the capital of France.",
-    "London is the capital of England.",
-    "Berlin is the capital of Germany."
-  ],
-  "query_instruction": "Given a question, retrieve the answer"
+  "text": "class PaymentService { ... }"
 }
 ```
 
-**Returns:** Similarity matrix and ranked results.
+**Returns:**
+```json
+{
+  "structural": { "embedding": [...], "dimensions": 4096 },
+  "semantic": { "embedding": [...], "dimensions": 4096 },
+  "behavioral": { "embedding": [...], "dimensions": 4096 }
+}
+```
 
-### `model_info`
+---
 
-Get information about the loaded model.
+### `batch_embed` — Multiple Documents, Same Lens
+
+```json
+{
+  "texts": ["class A { ... }", "class B { ... }"],
+  "lens": "semantic"
+}
+```
+
+---
+
+### `similarity` — Compare Queries to Documents
+
+```json
+{
+  "queries": ["payment processing"],
+  "documents": ["PaymentService.java content...", "InventoryService.java content..."],
+  "query_lens": "semantic"
+}
+```
+
+---
+
+### `model_info` — Status and Available Lenses
 
 ```json
 {}
 ```
 
-**Returns:** Model status, device, dimensions, and configuration.
+## Domain Instructions (Information Lensing)
+
+The three lenses apply these domain-specific instructions automatically:
+
+### Structural Lens
+> Embed the STRUCTURAL TOPOLOGY of code in a directed heterogeneous hypergraph. Focus ONLY on: graph connectivity, centrality measures, community structure, node types (Controller, Service, Repository), edge types (METHOD_CALL, DEPENDENCY_INJECTION), design patterns. Completely IGNORE what the code does - only HOW it's connected.
+
+### Semantic Lens
+> Embed the SEMANTIC MEANING of Spring Boot code for CheckItOut. Focus ONLY on: business logic (influencer marketing, campaigns, payments), what this code DOES functionally, algorithms, domain terminology, API contracts. Completely IGNORE structure and runtime - only WHAT it means.
+
+### Behavioral Lens
+> Embed the RUNTIME BEHAVIOR of code execution. Focus ONLY on: state machines, error handling, retry logic, circuit breakers, transaction boundaries, async operations, side effects (DB writes, network calls), causal relationships. Completely IGNORE static structure and meaning - only HOW it behaves.
+
+## Usage Example
+
+```
+User: Embed this PaymentService code with semantic lens
+
+Claude: [calls embed with lens="semantic"]
+Result: 4096D embedding focused on business meaning
+```
+
+```
+User: Generate all three embeddings for InventoryController
+
+Claude: [calls embed_triple]
+Result: structural, semantic, and behavioral embeddings
+```
 
 ## Configuration
 
-All settings can be configured via environment variables with the `QWEN3_EMBEDDING_` prefix:
-
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `QWEN3_EMBEDDING_MODEL_ID` | `Qwen/Qwen3-Embedding-8B` | HuggingFace model ID |
-| `QWEN3_EMBEDDING_DEVICE` | `cpu` | Device: `cpu`, `cuda`, `mps`, `auto` |
-| `QWEN3_EMBEDDING_TORCH_DTYPE` | `float32` | Model precision |
+| `QWEN3_EMBEDDING_MODEL_ID` | `Qwen/Qwen3-Embedding-8B` | Model ID |
+| `QWEN3_EMBEDDING_DEVICE` | `cpu` | Device: cpu, cuda, mps |
 | `QWEN3_EMBEDDING_DEFAULT_DIMENSION` | `4096` | Default embedding dimension |
-| `QWEN3_EMBEDDING_MAX_SEQUENCE_LENGTH` | `8192` | Max input tokens |
-| `QWEN3_EMBEDDING_BATCH_SIZE` | `8` | Batch size for processing |
-| `QWEN3_EMBEDDING_LOG_LEVEL` | `INFO` | Logging verbosity |
-| `QWEN3_EMBEDDING_CACHE_DIR` | (HF default) | Custom cache directory |
+| `QWEN3_EMBEDDING_LOG_LEVEL` | `INFO` | Logging level |
 
-You can also use a `.env` file in the project root.
-
-## Usage Examples
-
-### Semantic Search
+## Architecture
 
 ```
-User: Use the embed tool to create embeddings for my search query "best restaurants in Warsaw"
-
-Claude: [calls embed tool with instruction for retrieval]
+┌─────────────────────────────────────────────────────────────┐
+│                    MCP Client (Claude)                      │
+└─────────────────────┬───────────────────────────────────────┘
+                      │
+                      ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    MCP Server (stdio)                       │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │                   Tool Router                        │   │
+│  │  embed | embed_triple | batch_embed | similarity    │   │
+│  └─────────────────────┬───────────────────────────────┘   │
+│                        │                                    │
+│  ┌─────────────────────▼───────────────────────────────┐   │
+│  │              Embedding Engine                        │   │
+│  │  ┌─────────────────────────────────────────────┐    │   │
+│  │  │         Information Lensing Layer           │    │   │
+│  │  │  structural | semantic | behavioral         │    │   │
+│  │  └─────────────────────┬───────────────────────┘    │   │
+│  │                        │                             │   │
+│  │  ┌─────────────────────▼───────────────────────┐    │   │
+│  │  │          Qwen3-Embedding-8B                 │    │   │
+│  │  │          (sentence-transformers)            │    │   │
+│  │  └─────────────────────────────────────────────┘    │   │
+│  └─────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
 ```
-
-### Document Similarity
-
-```
-User: Compare these two documents for similarity using the similarity tool
-
-Claude: [calls similarity tool, returns similarity score]
-```
-
-### RAG Pipeline Integration
-
-The embeddings are perfect for building RAG pipelines:
-
-1. **Indexing**: Embed documents without instruction
-2. **Querying**: Embed queries with retrieval instruction
-3. **Retrieval**: Use similarity or vector database
-4. **Generation**: Pass retrieved context to LLM
 
 ## Performance
 
-### Memory Usage
-- Model weights: ~32GB RAM (float32)
-- Runtime overhead: ~2-4GB
-- Total recommended: 64GB+
+- **Single embed**: ~200-500ms (CPU)
+- **Triple embed**: ~600-1500ms (CPU)
+- **Batch of 20**: ~2-4s (CPU)
+- **Cold start**: ~2-3 minutes (model loading)
 
-### Latency (CPU, Ryzen 9 9950X)
-- Single text: ~200-500ms
-- Batch of 8: ~1-2s
-- First request (cold start): ~2-3 minutes
+## Related Work
 
-### Embedding Quality
-- MTEB Multilingual: 70.58 (#1 as of June 2025)
-- MTEB English: Competitive with top models
-- Code Retrieval: Strong performance
-
-## Troubleshooting
-
-### Model Loading Slow
-
-First load downloads ~16GB. Subsequent loads use cache:
-```bash
-# Custom cache directory
-export QWEN3_EMBEDDING_CACHE_DIR=/path/to/cache
-```
-
-### Out of Memory
-
-For systems with <64GB RAM:
-```bash
-# Use smaller model
-export QWEN3_EMBEDDING_MODEL_ID=Qwen/Qwen3-Embedding-0.6B
-
-# Or use smaller dimensions
-export QWEN3_EMBEDDING_DEFAULT_DIMENSION=1024
-```
-
-### CUDA Out of Memory
-
-The 8B model requires ~16GB VRAM. For smaller GPUs:
-```bash
-export QWEN3_EMBEDDING_DEVICE=cpu
-```
-
-## Development
-
-```bash
-# Install dev dependencies
-pip install -e ".[dev]"
-
-# Run tests
-pytest
-
-# Type checking
-mypy src/
-
-# Linting
-ruff check src/
-```
-
-## License
-
-MIT License - see [LICENSE](LICENSE) for details.
-
-## Acknowledgments
-
-- [Qwen Team](https://github.com/QwenLM) for the Qwen3-Embedding models
-- [Anthropic](https://anthropic.com) for the Model Context Protocol
-- [Sentence Transformers](https://sbert.net) for the excellent library
-
-## Related Projects
-
-- [Qwen3-Reranker MCP](https://github.com/NorbertMarchewka/qwen3-reranker-mcp) - Companion reranking server
-- [MCP Python SDK](https://github.com/modelcontextprotocol/python-sdk) - Official MCP SDK
-- [Sentence Transformers](https://github.com/UKPLab/sentence-transformers) - Embedding library
+- [Information Lensing Appendix](../GraphTheoryInSystemModeling/appendix_information_lensing.md)
+- [Triple 4096D Pipeline](../WorkingNotes/enhanced_graph_pipeline.md)
+- [Qwen3-Embedding Paper](https://arxiv.org/abs/2506.05176)
 
 ---
 

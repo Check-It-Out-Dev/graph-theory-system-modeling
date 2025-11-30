@@ -814,6 +814,401 @@ Information Lensing provides a theoretically grounded, practically implementable
 
 ---
 
+## 13. Practical Implementation: Checkpoint-Based CPU/RAM Strategy
+
+### 13.1 Feasibility Assessment
+
+For a codebase of $N = 900$ files, the full pairwise reranker computation requires:
+
+$\binom{900}{2} = \frac{900 \times 899}{2} = 404,550 \text{ pairs}$
+
+With Monte Carlo sampling reducing this to ~50k calls, the workload becomes feasible on CPU+RAM infrastructure (Ryzen 9 9950X, 192GB RAM) but requires a **multi-session checkpoint strategy** rather than single-run execution.
+
+### 13.2 Checkpoint-Based Processing Architecture
+
+The key insight: split the work into recoverable checkpoints that survive session boundaries.
+
+```
+Night 1: Checkpoints 1-3 of 8 completed (37.5%)
+         ~18,750 reranker calls processed
+         Partial similarity matrix saved to disk
+         
+Night 2: Checkpoints 4-6 of 8 completed (75%)
+         Resume from checkpoint 3
+         ~18,750 additional calls
+         
+Night 3: Checkpoints 7-8 of 8 completed (100%)
+         Full similarity matrix S_reranker available
+         Lens optimization begins
+```
+
+### 13.3 Implementation Requirements
+
+A production-grade Python program (not a script) requiring:
+
+| Component | Purpose |
+|-----------|----------|
+| **Progress Tracker** | Track which pairs have been processed |
+| **Checkpoint System** | Save partial $S_{\text{reranker}}$ matrix every N pairs |
+| **Crash Recovery** | Resume from last checkpoint on restart |
+| **Partial Results Storage** | HDF5 or memory-mapped NumPy arrays for large matrices |
+| **Pair Iterator** | Deterministic ordering for reproducible checkpoints |
+
+**Technology Stack:**
+- TensorFlow/PyTorch for reranker inference
+- NumPy for matrix operations
+- HDF5 (h5py) for checkpoint storage
+- tqdm for progress visualization
+
+### 13.4 Two-Phase Workflow
+
+**Phase 1: Similarity Matrix Construction (Heavy, Multi-Night)**
+
+```python
+# Pseudocode for checkpoint-based similarity matrix construction
+class SimilarityMatrixBuilder:
+    def __init__(self, n_files: int, checkpoint_interval: int = 5000):
+        self.n_files = n_files
+        self.n_pairs = n_files * (n_files - 1) // 2
+        self.checkpoint_interval = checkpoint_interval
+        self.checkpoint_dir = Path("./checkpoints")
+        
+    def build(self, reranker_model, file_contents: list[str]):
+        # Load or initialize similarity matrix
+        S, start_pair = self._load_checkpoint()
+        
+        pair_idx = 0
+        for i in range(self.n_files):
+            for j in range(i + 1, self.n_files):
+                if pair_idx < start_pair:
+                    pair_idx += 1
+                    continue
+                    
+                # Compute reranker score
+                score = reranker_model.score(file_contents[i], file_contents[j])
+                S[i, j] = score
+                S[j, i] = score  # Symmetric
+                
+                pair_idx += 1
+                
+                # Checkpoint every N pairs
+                if pair_idx % self.checkpoint_interval == 0:
+                    self._save_checkpoint(S, pair_idx)
+                    print(f"Checkpoint {pair_idx // self.checkpoint_interval}: "
+                          f"{pair_idx}/{self.n_pairs} pairs ({100*pair_idx/self.n_pairs:.1f}%)")
+        
+        return S
+    
+    def _save_checkpoint(self, S: np.ndarray, pair_idx: int):
+        checkpoint_path = self.checkpoint_dir / f"similarity_checkpoint_{pair_idx}.h5"
+        with h5py.File(checkpoint_path, 'w') as f:
+            f.create_dataset('S', data=S, compression='gzip')
+            f.attrs['pair_idx'] = pair_idx
+            f.attrs['timestamp'] = datetime.now().isoformat()
+```
+
+**Phase 2: Lens Optimization (Light, Single Session)**
+
+Once $S_{\text{reranker}}$ is complete, lens optimization is computationally light:
+
+$T^* = \arg\min_T \|S_{\text{reranker}} - (ET)(ET)^T\|_F^2 + \lambda\|T\|_*$
+
+This involves matrix operations on pre-computed data—minutes, not hours.
+
+**Phase 3: Embedding Transformation (Light, Single Session)**
+
+After lens $T$ is learned:
+
+1. Generate base embeddings: $900 \times 2$ calls (semantic + behavioral)
+2. Apply lens transformation: $e_{\text{focused}} = e_{\text{base}} \cdot T$
+
+Total: ~1,800 embedding calls + matrix multiplication.
+
+### 13.5 Incremental Lens Updates
+
+After initial calibration, weekly updates are lightweight:
+
+| Operation | Initial Calibration | Weekly Update |
+|-----------|---------------------|---------------|
+| Reranker calls | 50,000 (Monte Carlo) | ~2,000 (changed files only) |
+| Lens optimization | Full SVD | Incremental gradient descent |
+| Embedding regeneration | 1,800 | ~100 (changed files) |
+| Time | 3+ nights | 1-2 hours |
+
+The incremental algorithm from Section 12 applies: only pairs involving changed files need recomputation.
+
+### 13.6 Hardware Requirements: CPU/RAM Not Feasible for Full Precision
+
+#### Why CPU/RAM Fails for Quality Lensing
+
+For optimal lens quality, we need:
+- **Full precision** (FP32/BF16) to preserve reranker score fidelity
+- **Long context** (~32k tokens combined input) to capture full file semantics
+- **8B parameter reranker** (Qwen3-Reranker-8B) for state-of-the-art quality
+
+**CPU Performance with 32k Token Pairs:**
+
+| Hardware | Time/Pair | Pairs/Hour | 50k Pairs | Verdict |
+|----------|-----------|------------|-----------|----------|
+| Ryzen 9950X + 192GB RAM | 30-60s | 60-120 | 400-800 hours | ❌ Not feasible |
+| Ryzen 9950X (INT4 quant) | 5-10s | 360-720 | 70-140 hours | ⚠️ Quality loss |
+
+**400-800 hours = 50-100 nights of processing.** This is not a practical engineering solution.
+
+#### Minimum Viable Setup: 48GB+ VRAM
+
+For full precision 8B reranker with 32k context, GPU acceleration is **required, not optional**.
+
+**GPU Performance with 32k Token Pairs:**
+
+| Hardware | VRAM | Time/Pair | Pairs/Hour | 50k Pairs |
+|----------|------|-----------|------------|------------|
+| Single RTX 3090 | 24GB | 2-4s | 900-1,800 | 28-56 hours |
+| Dual RTX 3090 | 48GB | 1-2s | 1,800-3,600 | 14-28 hours |
+| A100 80GB | 80GB | 0.5-1s | 3,600-7,200 | 7-14 hours |
+| H100 80GB | 80GB | 0.3-0.6s | 6,000-12,000 | 4-8 hours |
+
+**Dual 3090 with 48GB VRAM achieves 50k pairs in ~20 hours (2-3 nights)** — this is the practical minimum.
+
+#### Option A: Cloud GPU for Initial Calibration (Recommended First Step)
+
+| Provider | GPU Config | VRAM | Cost/Hour | 50k Pairs Cost |
+|----------|------------|------|-----------|----------------|
+| Vast.ai | 2× RTX 3090 | 48GB | $0.60-1.00 | **$12-20** |
+| RunPod | 2× RTX 4090 | 48GB | $0.80-1.40 | **$16-28** |
+| Lambda Labs | A100 | 80GB | $1.10 | **$12-18** |
+| Lambda Labs | H100 | 80GB | $2.00 | **$10-16** |
+
+**Initial calibration cost: $12-30 USD** — trivial compared to hardware investment.
+
+**Cloud GPU Workflow:**
+```
+1. Develop checkpoint-based Python program locally
+2. Upload codebase embeddings to cloud instance
+3. Run 50k pair reranker computation (~20h)
+4. Download similarity matrix S_reranker (~3GB)
+5. Run lens optimization locally (CPU sufficient)
+6. Apply lenses to embeddings locally
+```
+
+**Advantages:**
+- No upfront hardware cost
+- Full precision, no quality compromise
+- Pay only for initial calibration + occasional recalibration
+- Can experiment with different reranker models
+
+**Still required:** The checkpoint-based Python program (same development effort regardless of hardware).
+
+#### Option B: Dual RTX 3090 Home Setup (Future Investment)
+
+If frequent recalibration becomes necessary (multiple projects, continuous experimentation):
+
+| Component | Specification | Cost (PLN) | Cost (USD) |
+|-----------|---------------|------------|------------|
+| 2× RTX 3090 (used) | 24GB each | 14,000-18,000 | $3,500-4,500 |
+| Motherboard upgrade | Dual x16 PCIe | 1,500-2,500 | $375-625 |
+| PSU | 1,600W 80+ Platinum | 1,200-1,800 | $300-450 |
+| **Total** | | **16,700-22,300** | **$4,175-5,575** |
+
+**Why Dual 3090 over newer cards:**
+
+1. **Power consumption**: 1,500-1,600W total system draw is manageable. Dual 5090 at ~3kW requires specialized infrastructure and significantly higher electricity costs.
+
+2. **Raw compute vs gaming features**: RTX 5090 is optimized for AI frame generation (DLSS 4). For pure reranker inference, 3090's tensor cores provide excellent price/performance.
+
+3. **VRAM sweet spot**: 48GB combined is sufficient for 8B model + batch processing. 64GB (dual 5090) provides diminishing returns.
+
+4. **Secondary market availability**: RTX 3090 available used at reasonable prices. RTX 4090 has availability issues.
+
+5. **Motherboard compatibility**: Requires upgrade from B650 Eagle to board with dual PCIe x16 slots and adequate spacing for dual 3-slot cards.
+
+#### Break-Even Analysis: Cloud vs Hardware
+
+| Usage Pattern | Cloud Cost | Hardware Amortization | Winner |
+|---------------|------------|----------------------|--------|
+| 1 calibration/year | $20/year | $4,500 / 5 years = $900/year | ☁️ Cloud |
+| Monthly recalibration | $240/year | $900/year | ☁️ Cloud |
+| Weekly experimentation | $1,000/year | $900/year | 🏠 Hardware |
+| Daily iteration | $5,000+/year | $900/year | 🏠 Hardware |
+
+#### Monthly Recalibration: Cloud vs Local CPU
+
+Even for monthly recalibration (~2,000-4,000 pairs), cloud remains more economical when accounting for **total cost of ownership**:
+
+**Local CPU Recalibration (Ryzen 9950X, 32k context, FP32):**
+
+| Factor | Value | Monthly Cost |
+|--------|-------|-------------|
+| Time | 17-33 hours (2-4 nights) | — |
+| System power draw | ~350W sustained | — |
+| Electricity (Poland, ~1.2 PLN/kWh) | 25h × 0.35kW × 1.2 PLN | **~10.5 PLN ($2.60)** |
+| Component wear (CPU, RAM, PSU) | Accelerated aging | **~20-40 PLN ($5-10)** est. |
+| Opportunity cost | Computer unavailable 2-4 nights | Inconvenience |
+| **Total local cost** | | **~$8-13/month** |
+
+**Cloud GPU Recalibration (2× RTX 3090, 48GB VRAM):**
+
+| Factor | Value | Monthly Cost |
+|--------|-------|-------------|
+| Time | 1-2 hours | — |
+| Vast.ai 2×3090 | $0.60-1.00/hour × 2h | **$1.20-2.00** |
+| Data transfer | ~500MB up, ~500MB down | Negligible |
+| **Total cloud cost** | | **~$1.50-2.50/month** |
+
+**Verdict:** Cloud is **4-6× cheaper** than local CPU even for monthly recalibration, plus:
+- No 2-4 night computer downtime
+- No accelerated hardware wear
+- Faster iteration (hours vs days)
+- Full precision, no quality compromise
+
+#### Recommended Hybrid Strategy: Living Model on Budget
+
+A financially sustainable approach to maintain high-quality Information Lensing:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│           HYBRID STRATEGY: LIVING MODEL ON BUDGET               │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  INITIAL CALIBRATION (one-time)                                 │
+│  └─► Cloud GPU: ~$20                                            │
+│      • 50k pairs, full precision                                │
+│      • Download S_reranker matrix                               │
+│      • Optimize lenses locally                                  │
+│                                                                 │
+│  MONTHLY RECALIBRATION (ongoing)                                │
+│  └─► Cloud GPU: ~$2/month                                       │
+│      • Accumulate changes over month                            │
+│      • 2-4k pairs per recalibration                             │
+│      • ~2 hours cloud time                                      │
+│      • Update lenses locally                                    │
+│                                                                 │
+│  ANNUAL COST                                                    │
+│  └─► $20 initial + $24/year = ~$45/year                         │
+│      • Living, continuously-updated lenses                      │
+│      • Full precision quality                                   │
+│      • No hardware investment                                   │
+│                                                                 │
+│  OPTIONAL: SAVE FOR DUAL 3090                                   │
+│  └─► Set aside ~$75/month                                       │
+│      • After 5 years: $4,500 (full dual 3090 setup)             │
+│      • Or after 2 years: $1,800 (one used 3090)                 │
+│      • Only if local GPU becomes necessary                      │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Year 1 costs:**
+
+| Item | Cost (USD) | Cost (PLN) |
+|------|------------|------------|
+| Initial calibration (cloud) | $20 | ~80 PLN |
+| Monthly recalibration × 12 | $24 | ~96 PLN |
+| **Total Year 1** | **$44** | **~176 PLN** |
+
+**Comparison with alternatives:**
+
+| Approach | Year 1 Cost | Quality | Practicality |
+|----------|-------------|---------|---------------|
+| Cloud hybrid (recommended) | $44 | ✅ Full precision | ✅ 2h/month |
+| Local CPU only | $100-150 | ⚠️ Quality loss or 400h+ | ❌ Impractical |
+| Dual 3090 purchase | $4,500+ | ✅ Full precision | ✅ Instant |
+
+**This strategy provides:**
+1. **Living model** — lenses continuously updated with codebase evolution
+2. **Full precision** — no quantization quality loss
+3. **Minimal budget impact** — less than a Netflix subscription
+4. **Path to upgrade** — save gradually for local GPU if needed
+5. **No hardware risk** — no wear, no electricity spikes, no maintenance
+
+#### Decision Path
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│           INFORMATION LENSING IMPLEMENTATION PATH           │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+              ┌───────────────────────────────┐
+              │  1. Develop checkpoint-based  │
+              │     Python program locally    │
+              │     (TensorFlow, HDF5, etc.)  │
+              └───────────────┬───────────────┘
+                              │
+                              ▼
+              ┌───────────────────────────────┐
+              │  2. Initial calibration       │
+              │     Cloud GPU (~$20)          │
+              │     50k pairs, full precision │
+              └───────────────┬───────────────┘
+                              │
+                              ▼
+              ┌───────────────────────────────┐
+              │  3. Optimize lenses locally   │
+              │     (CPU sufficient)          │
+              │     Evaluate vs MCP baseline  │
+              └───────────────┬───────────────┘
+                              │
+              ┌───────────────┴───────────────┐
+              ▼                               ▼
+    ┌─────────────────┐             ┌─────────────────┐
+    │  Worth it?      │             │  Not worth it?  │
+    │                 │             │                 │
+    │  Monthly cloud  │             │  Stay with      │
+    │  recalibration  │             │  MCP-only       │
+    │  (~$2/month)    │             │  approach       │
+    └────────┬────────┘             └─────────────────┘
+             │
+             ▼
+    ┌─────────────────┐
+    │  OPTIONAL:      │
+    │  Save ~$75/mo   │
+    │  for dual 3090  │
+    │  (if needed)    │
+    └─────────────────┘
+```
+
+### 13.7 Current Status: Cloud-First Hybrid Strategy
+
+**Decision (November 2025):**
+
+Information Lensing with reranker-based metric discovery is **planned with cloud-first approach**.
+
+**Key Finding:** Local CPU/RAM (even Ryzen 9950X + 192GB) is not feasible for full-precision 8B reranker with 32k context:
+- 400-800 hours for initial calibration (50-100 nights)
+- Quantization degrades quality unacceptably
+- Monthly recalibration on CPU costs more than cloud when accounting for electricity and component wear
+
+**Adopted Strategy:**
+
+| Phase | Method | Cost | Time |
+|-------|--------|------|------|
+| Initial calibration | Cloud GPU (Vast.ai 2×3090) | ~$20 | ~20h |
+| Monthly recalibration | Cloud GPU | ~$2/month | ~2h |
+| Lens optimization | Local CPU | Free | Minutes |
+| Embedding transformation | Local CPU | Free | Minutes |
+
+**Annual Cost: ~$44 USD (~176 PLN)** — less than Netflix, for a living, continuously-updated lens system.
+
+**Current Approach:**
+- Use Qwen3-Embedding-8B with MCP instruction-based lenses (no reranker) as **baseline**
+- Pipeline v7.0 (Triple-Lens Hypergraph) operational without reranker
+- Develop checkpoint-based Python program when time permits
+- First cloud calibration will validate quality gain vs MCP-only baseline
+
+**Future Path:**
+- If lensing proves valuable: continue monthly cloud recalibration (~$24/year)
+- If frequent experimentation needed: save ~$75/month toward dual RTX 3090 setup
+- Dual 3090 remains optional long-term investment, not immediate requirement
+
+**What's Still Needed:**
+- [ ] Checkpoint-based Python program (TensorFlow, HDF5, progress tracking)
+- [ ] Cloud deployment scripts (upload embeddings, run reranker, download matrix)
+- [ ] Lens optimization pipeline (SVD, Frobenius alignment)
+- [ ] A/B evaluation framework (lensed vs non-lensed embedding quality)
+
+---
+
 ## References
 
 Ethayarajh, K. (2019). "How Contextual are Contextualized Word Representations?" *EMNLP 2019*.

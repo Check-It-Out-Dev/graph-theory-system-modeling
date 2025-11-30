@@ -1,8 +1,13 @@
 """
 Embedding Engine for Qwen3-Embedding-8B.
 
-Handles model loading, embedding generation, and similarity computation.
+Handles model loading and embedding generation.
 Designed for CPU inference with large RAM (optimized for systems with 64GB+ RAM).
+
+Supports Information Lensing via instruction-aware embeddings:
+- structural: graph topology, architectural position
+- semantic: business domain, code meaning
+- behavioral: runtime patterns, execution flow
 """
 
 import logging
@@ -13,7 +18,7 @@ import numpy as np
 import torch
 from sentence_transformers import SentenceTransformer
 
-from .config import Settings, settings
+from .config import Settings, settings, DOMAIN_INSTRUCTIONS, LensType
 
 logger = logging.getLogger(__name__)
 
@@ -26,14 +31,7 @@ class EmbeddingResult:
     model_id: str
     num_texts: int
     normalized: bool
-
-
-@dataclass
-class SimilarityResult:
-    """Result of a similarity computation."""
-    scores: list[list[float]]
-    num_queries: int
-    num_documents: int
+    lens: str | None = None  # Which lens was applied
 
 
 class EmbeddingEngine:
@@ -43,13 +41,24 @@ class EmbeddingEngine:
     Features:
     - Lazy model loading (loads on first use)
     - Configurable embedding dimensions via MRL (Matryoshka Representation Learning)
-    - Instruction-aware embeddings for improved retrieval
+    - Information Lensing via instruction-aware embeddings
     - Batch processing with automatic chunking
     - Thread-safe for concurrent requests
     
+    Information Lensing:
+        The engine supports three "gravitational lenses" that curve the embedding
+        space toward different aspects of code semantics:
+        
+        - structural: Graph topology, architectural position, connectivity
+        - semantic: Business domain, intent, conceptual meaning  
+        - behavioral: Runtime patterns, execution flow, side effects
+        
+        Reference: Marchewka (2025), "Information Lensing: A Gravitational 
+        Approach to Domain-Specific Embedding Transformation"
+    
     Example:
         >>> engine = EmbeddingEngine()
-        >>> result = engine.embed(["Hello world", "How are you?"])
+        >>> result = engine.embed("class PaymentService...", lens="semantic")
         >>> print(result.embeddings[0][:5])  # First 5 dimensions
     """
     
@@ -150,52 +159,55 @@ class EmbeddingEngine:
             logger.error(f"Failed to load model: {e}")
             raise RuntimeError(f"Model loading failed: {e}") from e
     
+    def _format_instruction(self, instruction: str, text: str) -> str:
+        """Format text with instruction prefix (Qwen3 format)."""
+        return f"Instruct: {instruction}\nQuery: {text}"
+    
+    def _get_lens_instruction(self, lens: LensType) -> str:
+        """Get the domain instruction for a specific lens type."""
+        if lens not in DOMAIN_INSTRUCTIONS:
+            raise ValueError(f"Unknown lens type: {lens}. Valid: {list(DOMAIN_INSTRUCTIONS.keys())}")
+        return DOMAIN_INSTRUCTIONS[lens]
+    
     def embed(
         self,
         texts: str | Sequence[str],
         *,
+        lens: LensType | None = None,
         instruction: str | None = None,
         dimension: int | None = None,
         normalize: bool | None = None,
-        prompt_name: str | None = None,
-        is_query: bool = False,
     ) -> EmbeddingResult:
         """
         Generate embeddings for input text(s).
         
-        Qwen3-Embedding is instruction-aware and supports two modes:
-        1. Built-in prompts: Use prompt_name="query" or "passage" (recommended)
-        2. Custom instruction: Provide your own instruction string
+        Information Lensing Mode (recommended for code):
+            Use the `lens` parameter to apply domain-specific embedding focus:
+            - "structural": Graph topology, architectural position
+            - "semantic": Business domain, code meaning
+            - "behavioral": Runtime patterns, execution flow
         
         Args:
             texts: Single text or list of texts to embed (max 32K tokens each).
-            instruction: Custom instruction to prepend. If provided, overrides prompt_name.
-                        Example: "Given a web search query, retrieve relevant passages"
+            lens: Information Lensing type ("structural", "semantic", "behavioral").
+                  If provided, applies domain-specific instruction automatically.
+                  Overrides instruction.
+            instruction: Custom instruction to prepend (for advanced use).
             dimension: Output embedding dimension (uses MRL truncation if < max).
-                      Defaults to config.default_dimension (4096).
-            normalize: Whether to L2-normalize embeddings. Defaults to config setting.
-            prompt_name: Built-in prompt name ("query" or "passage") for retrieval tasks.
-                        Use "query" for search queries, "passage" for documents.
-            is_query: Shorthand for prompt_name="query". Ignored if prompt_name is set.
+            normalize: Whether to L2-normalize embeddings.
             
         Returns:
             EmbeddingResult containing embeddings and metadata.
             
-        Example:
-            >>> # For retrieval queries (using built-in prompt)
-            >>> result = engine.embed("What is machine learning?", is_query=True)
+        Example (Information Lensing):
+            >>> # Embed graph structure data
+            >>> result = engine.embed(graph_context, lens="structural")
             
-            >>> # For retrieval queries (using custom instruction)
-            >>> result = engine.embed(
-            ...     "What is machine learning?",
-            ...     instruction="Given a scientific question, retrieve relevant papers"
-            ... )
+            >>> # Embed source code
+            >>> result = engine.embed(code_content, lens="semantic")
             
-            >>> # For documents/passages
-            >>> result = engine.embed([
-            ...     "Machine learning is a subset of AI...",
-            ...     "Deep learning uses neural networks...",
-            ... ], prompt_name="document")
+            >>> # Embed runtime behavior data
+            >>> result = engine.embed(behavior_data, lens="behavioral")
         """
         # Handle single text input
         if isinstance(texts, str):
@@ -204,15 +216,18 @@ class EmbeddingEngine:
         texts = list(texts)
         logger.debug(f"Processing {len(texts)} texts")
         
-        # Determine prompt strategy
-        effective_prompt_name = prompt_name
-        if effective_prompt_name is None and is_query:
-            effective_prompt_name = "query"
+        # Determine instruction source (priority: lens > instruction)
+        effective_lens: str | None = None
         
-        # Apply custom instruction if provided (overrides prompt_name)
-        if instruction:
+        if lens:
+            # Information Lensing mode - use domain instruction
+            lens_instruction = self._get_lens_instruction(lens)
+            texts = [self._format_instruction(lens_instruction, text) for text in texts]
+            effective_lens = lens
+            logger.debug(f"Applied {lens} lens instruction")
+        elif instruction:
+            # Custom instruction mode
             texts = [self._format_instruction(instruction, text) for text in texts]
-            effective_prompt_name = None  # Don't use built-in prompt with custom instruction
         
         # Get settings
         dim = dimension or self.config.default_dimension
@@ -224,9 +239,6 @@ class EmbeddingEngine:
             "batch_size": self.config.batch_size,
             "show_progress_bar": self.config.show_progress,
         }
-        
-        if effective_prompt_name:
-            encode_kwargs["prompt_name"] = effective_prompt_name
         
         embeddings = self.model.encode(texts, **encode_kwargs)
         
@@ -243,62 +255,8 @@ class EmbeddingEngine:
             model_id=self.config.model_id,
             num_texts=len(texts),
             normalized=norm,
+            lens=effective_lens,
         )
-    
-    def similarity(
-        self,
-        queries: str | Sequence[str],
-        documents: str | Sequence[str],
-        *,
-        query_instruction: str | None = None,
-    ) -> SimilarityResult:
-        """
-        Compute similarity scores between queries and documents.
-        
-        Args:
-            queries: Query text(s).
-            documents: Document text(s).
-            query_instruction: Optional instruction for query embeddings.
-            
-        Returns:
-            SimilarityResult with similarity matrix (queries x documents).
-        """
-        # Handle single inputs
-        if isinstance(queries, str):
-            queries = [queries]
-        if isinstance(documents, str):
-            documents = [documents]
-        
-        queries = list(queries)
-        documents = list(documents)
-        
-        # Embed queries with instruction if provided
-        query_embeddings = self.embed(
-            queries,
-            instruction=query_instruction,
-            normalize=True,
-        ).embeddings
-        
-        # Embed documents without instruction
-        doc_embeddings = self.embed(
-            documents,
-            normalize=True,
-        ).embeddings
-        
-        # Compute cosine similarity (dot product since normalized)
-        query_arr = np.array(query_embeddings)
-        doc_arr = np.array(doc_embeddings)
-        scores = np.dot(query_arr, doc_arr.T)
-        
-        return SimilarityResult(
-            scores=scores.tolist(),
-            num_queries=len(queries),
-            num_documents=len(documents),
-        )
-    
-    def _format_instruction(self, instruction: str, text: str) -> str:
-        """Format text with instruction prefix."""
-        return f"Instruct: {instruction}\nQuery: {text}"
     
     def get_model_info(self) -> dict:
         """
@@ -312,6 +270,7 @@ class EmbeddingEngine:
                 "status": "not_loaded",
                 "model_id": self.config.model_id,
                 "device": self.config.device,
+                "available_lenses": list(DOMAIN_INSTRUCTIONS.keys()),
             }
         
         return {
@@ -321,6 +280,7 @@ class EmbeddingEngine:
             "max_seq_length": self.model.max_seq_length,
             "embedding_dimension": self.model.get_sentence_embedding_dimension(),
             "dtype": str(self._get_torch_dtype()),
+            "available_lenses": list(DOMAIN_INSTRUCTIONS.keys()),
         }
     
     def warmup(self) -> None:
@@ -331,7 +291,7 @@ class EmbeddingEngine:
         and to get more consistent latency measurements.
         """
         logger.info("Warming up model...")
-        _ = self.embed("Warmup text for model initialization.")
+        _ = self.embed("Warmup text for model initialization.", lens="semantic")
         logger.info("Warmup complete")
     
     def unload(self) -> None:

@@ -2,11 +2,73 @@
 Configuration management for Qwen3-Embedding MCP Server.
 
 Uses Pydantic Settings for type-safe configuration with environment variable support.
+Includes Information Lensing domain instructions for triple embedding generation.
 """
 
 from typing import Literal
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field
+
+
+# =============================================================================
+# Information Lensing Domain Instructions
+# =============================================================================
+# These act as "prompt-based gravitational lenses" that curve the embedding space
+# toward domain-relevant semantic structure without requiring matrix transformations.
+#
+# Reference: Information Lensing Framework (Marchewka, 2025)
+# See: appendix_information_lensing.md, enhanced_graph_pipeline.md
+
+DOMAIN_INSTRUCTIONS: dict[str, str] = {
+    # -------------------------------------------------------------------------
+    # STRUCTURAL LENS: Graph topology, architectural position, connectivity
+    # -------------------------------------------------------------------------
+    "structural": (
+        "Embed the STRUCTURAL TOPOLOGY of code in a directed heterogeneous hypergraph. "
+        "Focus ONLY on: "
+        "graph connectivity (in-degree, out-degree, directed paths), "
+        "centrality measures (betweenness, pagerank, eigenvector), "
+        "community structure and clustering, "
+        "node types (Controller, Service, Repository, Entity, Config), "
+        "edge types (METHOD_CALL, DEPENDENCY_INJECTION, DATA_FLOW), "
+        "hyperedge participation with source/target roles, "
+        "design patterns and architectural motifs. "
+        "Completely IGNORE what the code does - only HOW it's connected."
+    ),
+    
+    # -------------------------------------------------------------------------
+    # SEMANTIC LENS: Business domain, intent, conceptual meaning
+    # -------------------------------------------------------------------------
+    "semantic": (
+        "Embed the SEMANTIC MEANING of Spring Boot code for CheckItOut. "
+        "Focus ONLY on: "
+        "business logic (influencer marketing, campaigns, payments), "
+        "what this code DOES functionally, "
+        "algorithms and data transformations, "
+        "domain-specific terminology, "
+        "API contracts and interfaces. "
+        "Completely IGNORE structure and runtime - only WHAT it means."
+    ),
+    
+    # -------------------------------------------------------------------------
+    # BEHAVIORAL LENS: Runtime patterns, execution flow, side effects
+    # -------------------------------------------------------------------------
+    "behavioral": (
+        "Embed the RUNTIME BEHAVIOR of code execution. "
+        "Focus ONLY on: "
+        "state machines and transitions, "
+        "error handling and recovery patterns, "
+        "retry logic and circuit breakers, "
+        "transaction boundaries, "
+        "async operations and threading, "
+        "side effects (DB writes, network calls, events), "
+        "causal relationships and downstream effects. "
+        "Completely IGNORE static structure and meaning - only HOW it behaves."
+    ),
+}
+
+# Valid lens types for type checking
+LensType = Literal["structural", "semantic", "behavioral"]
 
 
 class Settings(BaseSettings):

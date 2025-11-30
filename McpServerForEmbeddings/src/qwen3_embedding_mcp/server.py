@@ -1,14 +1,19 @@
 """
-Qwen3-Embedding MCP Server Implementation.
+Qwen3-Embedding MCP Server with Information Lensing.
 
-Provides embedding generation capabilities via the Model Context Protocol.
-Designed for integration with Claude Desktop, Cursor, and other MCP clients.
+Provides embedding generation via the Model Context Protocol with three
+domain-specific "gravitational lenses" for code understanding:
+- structural: Graph topology, architectural position
+- semantic: Business domain, code meaning
+- behavioral: Runtime patterns, execution flow
+
+Reference: Marchewka (2025), "Information Lensing: A Gravitational 
+Approach to Domain-Specific Embedding Transformation"
 """
 
 import asyncio
 import json
 import logging
-from typing import Annotated
 
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
@@ -17,9 +22,9 @@ from mcp.types import (
     TextContent,
     CallToolResult,
 )
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field
 
-from .config import settings
+from .config import settings, DOMAIN_INSTRUCTIONS, LensType
 from .embedding_engine import EmbeddingEngine, get_engine
 
 logger = logging.getLogger(__name__)
@@ -28,150 +33,84 @@ logger = logging.getLogger(__name__)
 mcp_server = Server(settings.server_name)
 
 
-# ============================================================================
-# Tool Input Schemas
-# ============================================================================
+# =============================================================================
+# Tool Input Schemas (Simplified)
+# =============================================================================
 
 class EmbedInput(BaseModel):
-    """Input schema for single text embedding."""
+    """Input schema for single text embedding with Information Lensing."""
     
     text: str = Field(
-        description="Single text to generate embedding for. Maximum 32K tokens."
+        description="Document content to embed (max 32K tokens)"
     )
-    instruction: str | None = Field(
-        default=None,
-        description="Custom instruction for task-specific embeddings. "
-                   "Example: 'Given a scientific question, retrieve relevant papers'. "
-                   "If provided, overrides prompt_name."
-    )
-    prompt_name: str | None = Field(
-        default=None,
-        description="Built-in prompt: 'query' (for search queries) or 'document' (for indexing)."
-    )
-    is_query: bool = Field(
-        default=False,
-        description="Shorthand for prompt_name='query'. Set true for search queries."
+    lens: LensType = Field(
+        description="Information Lens type: 'structural', 'semantic', or 'behavioral'"
     )
     dimension: int | None = Field(
         default=None,
         ge=128,
         le=4096,
-        description="Output dimension (128-4096). Smaller = faster but less accurate. Default: 4096."
-    )
-    normalize: bool = Field(
-        default=True,
-        description="L2-normalize embeddings. Enables dot product for similarity."
+        description="Output dimension (128-4096). Default: 4096"
     )
 
 
 class BatchEmbedInput(BaseModel):
-    """Input schema for batch text embedding (max 20 texts)."""
+    """Input schema for batch embedding with same lens."""
     
     texts: list[str] = Field(
-        description="List of texts to embed. Maximum 20 texts, each up to 32K tokens.",
+        description="List of documents to embed (max 20)",
         min_length=1,
         max_length=20,
     )
-    instruction: str | None = Field(
-        default=None,
-        description="Custom instruction applied to all texts."
-    )
-    prompt_name: str | None = Field(
-        default=None,
-        description="Built-in prompt: 'query' or 'document'. Applied to all texts."
-    )
-    is_query: bool = Field(
-        default=False,
-        description="Shorthand for prompt_name='query'."
+    lens: LensType = Field(
+        description="Information Lens type: 'structural', 'semantic', or 'behavioral'"
     )
     dimension: int | None = Field(
         default=None,
         ge=128,
         le=4096,
-        description="Output dimension for all embeddings. Default: 4096."
-    )
-    normalize: bool = Field(
-        default=True,
-        description="L2-normalize all embeddings."
+        description="Output dimension. Default: 4096"
     )
 
 
-class SimilarityInput(BaseModel):
-    """Input schema for the similarity tool."""
-    
-    queries: list[str] = Field(
-        description="Query texts to compare (max 10).",
-        min_length=1,
-        max_length=10,
-    )
-    documents: list[str] = Field(
-        description="Document texts to compare against (max 20).",
-        min_length=1,
-        max_length=20,
-    )
-    query_instruction: str | None = Field(
-        default=None,
-        description="Optional instruction for query embeddings."
-    )
-
-
-# ============================================================================
+# =============================================================================
 # Tool Definitions
-# ============================================================================
+# =============================================================================
 
 TOOLS = [
     Tool(
         name="embed",
-        description="""Generate embedding for a SINGLE text using Qwen3-Embedding-8B.
+        description="""Generate embedding for a document using Information Lensing.
 
-Converts text into a dense vector (4096 dimensions by default) capturing semantic meaning.
-Use for: semantic search, similarity, clustering, RAG pipelines.
+Apply one of three "gravitational lenses" to focus the embedding:
+- structural: Graph topology, architectural position, connectivity
+- semantic: Business logic, domain concepts, code meaning
+- behavioral: Runtime patterns, state machines, side effects
 
-For multiple texts, use 'batch_embed' instead.
+Returns 4096-dimensional vector (or custom dimension via MRL).
 
-INSTRUCTION-AWARE - for best retrieval:
-- Queries: Set is_query=true OR prompt_name="query"
-- Documents: Set prompt_name="document"
-- Custom: Use instruction parameter""",
+Example: embed("class PaymentService...", lens="semantic")""",
         inputSchema=EmbedInput.model_json_schema(),
     ),
     Tool(
         name="batch_embed",
-        description="""Generate embeddings for MULTIPLE texts (max 20) using Qwen3-Embedding-8B.
+        description="""Generate embeddings for multiple documents (max 20) with same lens.
 
-Efficiently processes up to 20 texts in a single call. Each text gets its own embedding.
-Same instruction/prompt_name applies to all texts in the batch.
-
-Returns array of embeddings in same order as input texts.
-
-For single text, use 'embed' instead.""",
+More efficient than calling embed() multiple times.
+All documents get the same lens applied.""",
         inputSchema=BatchEmbedInput.model_json_schema(),
     ),
     Tool(
-        name="similarity",
-        description="""Compute semantic similarity between queries and documents.
-
-Returns similarity matrix (queries × documents). Scores range -1 to 1:
-- 1.0 = Identical meaning
-- 0.0 = Unrelated  
-- -1.0 = Opposite meaning
-
-Max 10 queries × 20 documents per call.""",
-        inputSchema=SimilarityInput.model_json_schema(),
-    ),
-    Tool(
         name="model_info",
-        description="""Get information about the loaded embedding model.
-
-Returns: model ID, device (CPU/GPU), max sequence length, embedding dimensions, dtype.""",
+        description="""Get model status and available lenses.""",
         inputSchema={"type": "object", "properties": {}},
     ),
 ]
 
 
-# ============================================================================
+# =============================================================================
 # Tool Handlers
-# ============================================================================
+# =============================================================================
 
 @mcp_server.list_tools()
 async def list_tools() -> list[Tool]:
@@ -189,8 +128,6 @@ async def call_tool(name: str, arguments: dict) -> CallToolResult:
             return await _handle_embed(engine, arguments)
         elif name == "batch_embed":
             return await _handle_batch_embed(engine, arguments)
-        elif name == "similarity":
-            return await _handle_similarity(engine, arguments)
         elif name == "model_info":
             return await _handle_model_info(engine)
         else:
@@ -208,130 +145,91 @@ async def call_tool(name: str, arguments: dict) -> CallToolResult:
 
 
 async def _handle_embed(engine: EmbeddingEngine, arguments: dict) -> CallToolResult:
-    """Handle single text embedding."""
+    """Handle single text embedding with lens."""
     input_data = EmbedInput(**arguments)
     
-    logger.info(f"Embedding single text ({len(input_data.text)} chars)")
+    logger.info(f"Embedding with {input_data.lens} lens ({len(input_data.text)} chars)")
     
     loop = asyncio.get_event_loop()
     result = await loop.run_in_executor(
         None,
         lambda: engine.embed(
-            texts=input_data.text,  # Single string
-            instruction=input_data.instruction,
-            prompt_name=input_data.prompt_name,
-            is_query=input_data.is_query,
+            texts=input_data.text,
+            lens=input_data.lens,
             dimension=input_data.dimension,
-            normalize=input_data.normalize,
         )
     )
     
     response = {
-        "embedding": result.embeddings[0],  # Single embedding
+        "embedding": result.embeddings[0],
+        "lens": result.lens,
         "dimensions": result.dimensions,
         "normalized": result.normalized,
-        "model": result.model_id,
     }
     
-    summary = f"Generated embedding with {result.dimensions} dimensions.\n\n```json\n{json.dumps(response, indent=2)}\n```"
-    
-    return CallToolResult(content=[TextContent(type="text", text=summary)])
+    return CallToolResult(
+        content=[TextContent(
+            type="text", 
+            text=f"Generated {input_data.lens} embedding ({result.dimensions}D)\n\n```json\n{json.dumps(response, indent=2)}\n```"
+        )]
+    )
 
 
 async def _handle_batch_embed(engine: EmbeddingEngine, arguments: dict) -> CallToolResult:
-    """Handle batch text embedding."""
+    """Handle batch embedding with same lens."""
     input_data = BatchEmbedInput(**arguments)
     
-    logger.info(f"Batch embedding {len(input_data.texts)} texts")
+    logger.info(f"Batch embedding {len(input_data.texts)} texts with {input_data.lens} lens")
     
     loop = asyncio.get_event_loop()
     result = await loop.run_in_executor(
         None,
         lambda: engine.embed(
-            texts=input_data.texts,  # List of strings
-            instruction=input_data.instruction,
-            prompt_name=input_data.prompt_name,
-            is_query=input_data.is_query,
+            texts=input_data.texts,
+            lens=input_data.lens,
             dimension=input_data.dimension,
-            normalize=input_data.normalize,
         )
     )
     
     response = {
-        "embeddings": result.embeddings,  # List of embeddings
+        "embeddings": result.embeddings,
+        "lens": result.lens,
         "num_texts": result.num_texts,
         "dimensions": result.dimensions,
-        "normalized": result.normalized,
-        "model": result.model_id,
     }
     
-    summary = f"Generated {result.num_texts} embeddings with {result.dimensions} dimensions each.\n\n```json\n{json.dumps(response, indent=2)}\n```"
-    
-    return CallToolResult(content=[TextContent(type="text", text=summary)])
-
-
-async def _handle_similarity(engine: EmbeddingEngine, arguments: dict) -> CallToolResult:
-    """Handle similarity computation."""
-    input_data = SimilarityInput(**arguments)
-    
-    logger.info(f"Computing similarity: {len(input_data.queries)} queries × {len(input_data.documents)} documents")
-    
-    loop = asyncio.get_event_loop()
-    result = await loop.run_in_executor(
-        None,
-        lambda: engine.similarity(
-            queries=input_data.queries,
-            documents=input_data.documents,
-            query_instruction=input_data.query_instruction,
-        )
+    return CallToolResult(
+        content=[TextContent(
+            type="text",
+            text=f"Generated {result.num_texts} {input_data.lens} embeddings ({result.dimensions}D)\n\n```json\n{json.dumps(response, indent=2)}\n```"
+        )]
     )
-    
-    # Create ranked results for each query
-    ranked_results = []
-    for i, query in enumerate(input_data.queries):
-        scores = result.scores[i]
-        ranked = sorted(
-            [(j, input_data.documents[j], scores[j]) for j in range(len(input_data.documents))],
-            key=lambda x: x[2],
-            reverse=True
-        )
-        ranked_results.append({
-            "query": query[:100] + "..." if len(query) > 100 else query,
-            "results": [
-                {"rank": r + 1, "score": round(score, 4), "document": doc[:100] + "..." if len(doc) > 100 else doc}
-                for r, (idx, doc, score) in enumerate(ranked)
-            ]
-        })
-    
-    response = {
-        "similarity_matrix": result.scores,
-        "ranked_results": ranked_results,
-        "num_queries": result.num_queries,
-        "num_documents": result.num_documents,
-    }
-    
-    summary = f"Computed similarity: {result.num_queries} queries × {result.num_documents} documents.\n\n```json\n{json.dumps(response, indent=2)}\n```"
-    
-    return CallToolResult(content=[TextContent(type="text", text=summary)])
 
 
 async def _handle_model_info(engine: EmbeddingEngine) -> CallToolResult:
     """Handle model info request."""
     info = engine.get_model_info()
+    
+    # Add lens descriptions
+    info["lens_descriptions"] = {
+        lens: instr[:100] + "..."
+        for lens, instr in DOMAIN_INSTRUCTIONS.items()
+    }
+    
     return CallToolResult(
         content=[TextContent(type="text", text=f"```json\n{json.dumps(info, indent=2)}\n```")]
     )
 
 
-# ============================================================================
+# =============================================================================
 # Server Lifecycle
-# ============================================================================
+# =============================================================================
 
 async def run_server() -> None:
     """Run the MCP server using stdio transport."""
-    logger.info(f"Starting {settings.server_name} v1.0.0")
+    logger.info(f"Starting {settings.server_name} v2.0.0 (Information Lensing)")
     logger.info(f"Model: {settings.model_id}")
-    logger.info(f"Device: {settings.device}")
+    logger.info(f"Available lenses: {list(DOMAIN_INSTRUCTIONS.keys())}")
     
     # Pre-load model for faster first request
     engine = get_engine()
