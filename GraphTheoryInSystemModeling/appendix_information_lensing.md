@@ -24,7 +24,7 @@ Given two semantically distinct Java code segments:
 
 Generic embeddings often exhibit:
 
-$$\|e(C_1) - e(C_2)\|_2 \approx 0.12 \quad \text{(nearly identical)}$$
+$$\\|e(C_1) - e(C_2)\\|_2 \approx 0.12 \quad \text{(nearly identical)}$$
 
 $$\cos(e(C_1), e(C_2)) \approx 0.94 \quad \text{(high false similarity)}$$
 
@@ -68,13 +68,13 @@ where:
 
 Our goal is to learn a transformation $T: \mathbb{R}^d \to \mathbb{R}^d$ such that distances in the transformed space better reflect semantic similarity:
 
-$$d_{\text{semantic}}(C_1, C_2) \approx \|Te(C_1) - Te(C_2)\|_2$$
+$$d_{\text{semantic}}(C_1, C_2) \approx \\|Te(C_1) - Te(C_2)\\|_2$$
 
 where $d_{\text{semantic}}$ is the "true" semantic distance, which we approximate using cross-encoder reranker scores.
 
 **Definition 2.1 (Bi-Lipschitz Transformation).** A linear transformation $T: \mathbb{R}^d \to \mathbb{R}^d$ is bi-Lipschitz if there exist constants $0 < c_1 \leq c_2 < \infty$ such that for all $x, y \in \mathbb{R}^d$:
 
-$$c_1 \|x - y\| \leq \|Tx - Ty\| \leq c_2 \|x - y\|$$
+$$c_1 \\|x - y\\| \leq \\|Tx - Ty\\| \leq c_2 \\|x - y\\|$$
 
 For linear $T$, these constants are $c_1 = \sigma_{\min}(T)$ and $c_2 = \sigma_{\max}(T)$, where $\sigma_{\min}, \sigma_{\max}$ are the smallest and largest singular values respectively.
 
@@ -90,11 +90,11 @@ $$G = T^T T$$
 
 Under this metric, distances are computed as:
 
-$$d_G(x, y)^2 = (x - y)^T G (x - y) = \|T(x - y)\|_2^2$$
+$$d_G(x, y)^2 = (x - y)^T G (x - y) = \\|T(x - y)\\|_2^2$$
 
 **Proposition 2.1.** The transformation $T$ changes the geometry of the embedding space from Euclidean (identity metric $I$) to the metric defined by $G = T^T T$. Directions corresponding to large singular values of $T$ are "stretched" (distances amplified), while directions corresponding to small singular values are "compressed."
 
-*Proof.* Let $T = U\Sigma V^T$ be the SVD of $T$. Then $G = T^T T = V\Sigma^2 V^T$. For any vector $v$, we have $v^T G v = v^T V \Sigma^2 V^T v = \|ΣV^T v\|^2$. The eigenvectors of $G$ are the columns of $V$, with eigenvalues $\sigma_i^2$. Thus distances along the $i$-th principal direction are scaled by $\sigma_i$. $\square$
+*Proof.* Let $T = U\Sigma V^T$ be the SVD of $T$. Then $G = T^T T = V\Sigma^2 V^T$. For any vector $v$, we have $v^T G v = v^T V \Sigma^2 V^T v = \\|ΣV^T v\\|^2$. The eigenvectors of $G$ are the columns of $V$, with eigenvalues $\sigma_i^2$. Thus distances along the $i$-th principal direction are scaled by $\sigma_i$. $\square$
 
 ### 2.3 Heuristic Analogy: Gravitational Lensing (Non-Rigorous)
 
@@ -163,7 +163,7 @@ where normalization is row-wise to unit vectors.
 
 **Optimization Problem:**
 
-$$\min_{T} \|S_{\text{reranker}} - S_{\text{pred}}(T)\|_F^2 + \lambda \mathcal{R}(T)$$
+$$\min_{T} \\|S_{\text{reranker}} - S_{\text{pred}}(T)\\|_F^2 + \lambda \mathcal{R}(T)$$
 
 where $\mathcal{R}(T)$ is a regularizer.
 
@@ -226,7 +226,7 @@ where $\mathcal{P}$ is the set of sampled pairs and $s_{ij}^{\text{rerank}}$ are
 We want transformed embeddings to utilize more of the available dimensions. Two approaches:
 
 *Approach 1: Whitening Regularization*
-$$\mathcal{L}_{\text{whiten}}(T) = \|\text{Cov}(TE) - I\|_F^2$$
+$$\mathcal{L}_{\text{whiten}}(T) = \\|\text{Cov}(TE) - I\\|_F^2$$
 
 This forces the covariance to be identity—strong isotropy but may destroy useful variance structure.
 
@@ -234,13 +234,13 @@ This forces the covariance to be identity—strong isotropy but may destroy usef
 
 Following SimCLR/SimCSE, we encourage uniform angular distribution:
 
-$$\mathcal{L}_{\text{uniform}}(T) = \log \mathbb{E}_{i,j} \left[ \exp\left( -2 \|Te_i - Te_j\|^2 \right) \right]$$
+$$\mathcal{L}_{\text{uniform}}(T) = \log \mathbb{E}_{i,j} \left[ \exp\left( -2 \\|Te_i - Te_j\\|^2 \right) \right]$$
 
 This penalizes clustering without forcing equal variance in all directions.
 
 **Regularization: Rank Penalty**
 
-$$\mathcal{L}_{\text{rank}}(T) = \|T\|_* = \sum_i \sigma_i(T)$$
+$$\mathcal{L}_{\text{rank}}(T) = \\|T\\|_* = \sum_i \sigma_i(T)$$
 
 The nuclear norm encourages low-rank solutions.
 
@@ -333,9 +333,9 @@ This allows retrieval to balance multiple aspects of similarity.
 
 **Theorem 6.2 (Bi-Lipschitz Bounds).** For any full-rank $T$ with singular values $\sigma_{\min} \leq \sigma_i \leq \sigma_{\max}$:
 
-$$\sigma_{\min} \|x - y\| \leq \|Tx - Ty\| \leq \sigma_{\max} \|x - y\|$$
+$$\sigma_{\min} \\|x - y\\| \leq \\|Tx - Ty\\| \leq \sigma_{\max} \\|x - y\\|$$
 
-*Proof.* For any vector $v$: $\|Tv\|^2 = v^T T^T T v$. The eigenvalues of $T^T T$ are $\sigma_i^2$, so $\sigma_{\min}^2 \|v\|^2 \leq \|Tv\|^2 \leq \sigma_{\max}^2 \|v\|^2$. Taking square roots and setting $v = x - y$ yields the result. $\square$
+*Proof.* For any vector $v$: $\\|Tv\\|^2 = v^T T^T T v$. The eigenvalues of $T^T T$ are $\sigma_i^2$, so $\sigma_{\min}^2 \\|v\\|^2 \leq \\|Tv\\|^2 \leq \sigma_{\max}^2 \\|v\\|^2$. Taking square roots and setting $v = x - y$ yields the result. $\square$
 
 **Definition 6.1 (Condition Number).** The condition number $\kappa(T) = \sigma_{\max}/\sigma_{\min}$ measures the maximum distortion ratio. Well-conditioned transformations have $\kappa(T)$ close to 1.
 
@@ -353,7 +353,7 @@ where $\kappa_{\max} \approx 10\text{-}100$ is a threshold.
 
 **Theorem 6.3 (Convergence to Critical Point).** Under standard assumptions (Lipschitz-continuous gradients, bounded iterates), gradient descent with appropriate learning rate $\eta$ satisfies:
 
-$$\min_{k \leq K} \|\nabla \mathcal{L}(T_k)\|^2 \leq \frac{2(\mathcal{L}(T_0) - \mathcal{L}^*)}{\eta K}$$
+$$\min_{k \leq K} \\|\nabla \mathcal{L}(T_k)\\|^2 \leq \frac{2(\mathcal{L}(T_0) - \mathcal{L}^*)}{\eta K}$$
 
 where $\mathcal{L}^*$ is the minimum value.
 
@@ -500,7 +500,7 @@ where $\mathcal{S}$ is a random sample of stable pairs.
 
 **Component 3: Anchor Regularization (Prevent Drift)**
 
-$$\mathcal{L}_{\text{anchor}} = \|T - T_{\text{old}}\|_F^2$$
+$$\mathcal{L}_{\text{anchor}} = \\|T - T_{\text{old}}\\|_F^2$$
 
 **Hyperparameters:**
 - $\lambda_1 = 0.5$ (memory weight)
@@ -517,10 +517,10 @@ $$\mathcal{L}_{\text{anchor}} = \|T - T_{\text{old}}\|_F^2$$
 1. **Monotonic Improvement:** With appropriate learning rate, $\mathcal{L}(T_{n+1}) \leq \mathcal{L}(T_n)$
 
 2. **Bounded Drift:** Due to the anchor term:
-   $$\|T_{\text{new}} - T_{\text{old}}\|_F \leq \frac{\|\nabla \mathcal{L}_{\text{critical}}\|_F}{2\lambda_2}$$
+   $$\\|T_{\text{new}} - T_{\text{old}}\\|_F \leq \frac{\\|\nabla \mathcal{L}_{\text{critical}}\\|_F}{2\lambda_2}$$
 
 3. **Accumulated Drift Bound:** After $K$ incremental updates:
-   $$\|T_K - T_0\|_F \leq \sum_{k=1}^K \frac{\|\nabla \mathcal{L}_{\text{critical}}^{(k)}\|_F}{2\lambda_2}$$
+   $$\\|T_K - T_0\\|_F \leq \sum_{k=1}^K \frac{\\|\nabla \mathcal{L}_{\text{critical}}^{(k)}\\|_F}{2\lambda_2}$$
 
 *Proof Sketch.* Property 1 follows from gradient descent on smooth loss. Property 2 follows from the first-order optimality condition: at convergence, $\nabla \mathcal{L}_{\text{total}} = 0$, which implies $\nabla \mathcal{L}_{\text{critical}} + 2\lambda_2 (T - T_{\text{old}}) = 0$ (ignoring other terms). Solving gives the bound. Property 3 follows by induction. $\square$
 
