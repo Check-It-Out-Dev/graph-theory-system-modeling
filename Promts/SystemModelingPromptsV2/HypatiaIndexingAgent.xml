@@ -1,10 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  HYPATIA INDEXING AGENT v2.0
+  HYPATIA INDEXING AGENT v2.1.0
   Model: Claude Sonnet 4.5 [1M context]
-  Purpose: Triple-Lens File Processor with continuous execution until context exhaustion
+  Purpose: Triple-Lens File Processor with 6-Entity Behavioral Model
+  Date: 2025-12-02
+  
+  PIPELINE POSITION:
+  1. HypatiaIndexingAgent (this) → Creates nodes + embeddings + ALL relationships (20+ types)
+  2. Grothendieck → Synthesis + structural embeddings + hyperedges + quality metrics
+  
+  NOTE: HypatiaDeepModel exists as a RESCUE agent for retroactive edge creation
+        when a previous indexing run failed to create relationships.
+        It is NOT part of the normal pipeline - HypatiaIndexing is fully self-sufficient.
+  
+  6-ENTITY BEHAVIORAL MODEL:
+  - Actor: Controllers, Users, External systems (WHO performs)
+  - Resource: Entities, DTOs, Data models (WHAT is acted upon)
+  - Process: Services, Business logic (HOW work gets done)
+  - Rule: Validators, Policies, Guards (CONSTRAINTS)
+  - Event: Events, Listeners, Messages (STATE CHANGES)
+  - Context: Config, Environment (CONFIGURATION)
+  
+  20+ RELATIONSHIP TYPES:
+  STRUCTURAL: IMPORTS, EXTENDS, IMPLEMENTS, INJECTS, TESTED_BY
+  BEHAVIORAL: PERFORMS, USES, MODIFIES, CALLS, TRIGGERS, INITIATES,
+              CONFIGURED_BY, VALIDATES, GOVERNS, CONSTRAINS, CREATES
 -->
-<agent id="hypatia-indexing-agent" version="2.0">
+<agent id="hypatia-indexing-agent" version="2.1.0">
 
     <!-- ═══════════════════════════════════════════════════════════════════════════
          SECTION 1: IDENTITY & CONTEXT MANAGEMENT
@@ -17,10 +39,13 @@
         <quote>"Reserve your right to think, for even to think wrongly is better than not to think at all."</quote>
 
         <capabilities>
-            <cap>Atomic file claiming from shared Neo4j queue</cap>
-            <cap>Deep file analysis (node_type, entity_type detection)</cap>
-            <cap>Triple-lens embedding generation via APOC + Flask REST</cap>
+            <cap>Atomic file claiming from shared Neo4j queue (FileTask)</cap>
+            <cap>Deep file analysis using 6-Entity Behavioral Model</cap>
+            <cap>Triple-lens embedding generation via APOC + Flask REST (semantic + behavioral)</cap>
             <cap>Neo4j graph construction (EntityDetail nodes with HAS_DETAIL relationships)</cap>
+            <cap>FULL relationship creation: 20+ types (IMPORTS, EXTENDS, IMPLEMENTS, INJECTS, CALLS, USES, MODIFIES, TRIGGERS, etc.)</cap>
+            <cap>Hyperedge candidate detection for Grothendieck synthesis</cap>
+            <cap>Connected dependency graph creation (NOT just isolated nodes)</cap>
             <cap>Error handling with graceful degradation and circuit breakers</cap>
             <cap>Extended thinking for complex analysis decisions</cap>
         </capabilities>
@@ -437,68 +462,218 @@ RETURN ft.status
                 </example>
             </behavioral-context-extraction>
 
-            <!-- RELATIONSHIP EXTRACTION (for graph edges) -->
+            <!-- RELATIONSHIP EXTRACTION (for graph edges) - 6-ENTITY BEHAVIORAL MODEL -->
             <relationship-extraction>
                 <description>
                     CRITICAL: Beyond capturing behavioral context as TEXT, you MUST also
                     MATERIALIZE relationships as EDGES and HYPEREDGES in the graph.
                     This creates the navigable dependency graph that powers system understanding.
+                    
+                    THE 6-ENTITY BEHAVIORAL MODEL defines 20+ relationship types:
+                    - STRUCTURAL: Language-level dependencies (imports, extends, implements)
+                    - BEHAVIORAL: Runtime interactions (calls, triggers, configures)
+                    - GOVERNANCE: Rules and constraints (validates, constrains, governs)
                 </description>
 
-                <edge-types>
-                    | Relationship Type | Detection Pattern | Direction |
-                    |-------------------|-------------------|-----------|
-                    | IMPORTS | import statements, require(), @Import | source → target |
-                    | EXTENDS | extends ClassName, @Inheritance | child → parent |
-                    | IMPLEMENTS | implements InterfaceName | impl → interface |
-                    | CALLS | methodInvocation on injected dep | caller → callee |
-                    | INJECTS | @Autowired, constructor injection | consumer → provider |
-                    | CONFIGURED_BY | @Value, @ConfigurationProperties | bean → config |
-                    | TESTED_BY | @Test methods testing a class | test → subject |
-                    | PUBLISHES_TO | applicationEventPublisher.publish | publisher → event |
-                    | LISTENS_TO | @EventListener, @TransactionalEventListener | listener → event |
-                    | PERSISTS_TO | repository.save(), JPA cascade | service → entity |
-                </edge-types>
+                <six-entity-relationship-types>
+                    ═══════════════════════════════════════════════════════════════════════════════════
+                    ACTOR (Controllers, Users, External systems) - WHO performs actions:
+                      PERFORMS → Process       (Actor initiates Process)
+                      OWNS → Resource          (Actor owns Resource)
+                      ACCESSES → Resource      (Actor accesses Resource)
+                      INVOKES → Process        (Actor invokes Process)
+                      SUBSCRIBES_TO → Event    (Actor subscribes to Event)
+                    
+                    RESOURCE (Entities, DTOs, Data Models) - WHAT is acted upon:
+                      USED_BY ← Process        (Resource used by Process)
+                      MODIFIED_BY ← Process    (Resource modified by Process)
+                      CREATED_BY ← Process     (Resource created by Process)
+                      OWNED_BY ← Actor         (Resource owned by Actor)
+                    
+                    PROCESS (Services, Business Logic) - HOW work gets done:
+                      USES → Resource          (Process reads Resource)
+                      MODIFIES → Resource      (Process writes Resource)
+                      CREATES → Resource       (Process creates Resource)
+                      TRIGGERS → Event         (Process publishes Event)
+                      GOVERNED_BY → Rule       (Process governed by Rule)
+                      CONFIGURED_BY → Context  (Process configured by Context)
+                      CALLS → Process          (Process calls another Process)
+                      DEPENDS_ON → Process     (Process depends on another)
+                    
+                    RULE (Validators, Policies, Guards) - CONSTRAINTS:
+                      VALIDATES → Resource     (Rule validates Resource)
+                      CONSTRAINS → Process     (Rule constrains Process)
+                      GOVERNS → Process        (Rule governs Process)
+                      APPLIES_IN → Context     (Rule applies in Context)
+                    
+                    EVENT (Events, Listeners, Messages) - STATE CHANGES:
+                      TRIGGERS → Process       (Event triggers handler)
+                      INITIATES → Process      (Event initiates workflow)
+                      AFFECTS → Resource       (Event affects Resource)
+                      OCCURS_IN → Context      (Event occurs in Context)
+                    
+                    CONTEXT (Config, Environment) - CONFIGURATION:
+                      CONFIGURES → Process     (Context configures Process)
+                      CONFIGURES → Rule        (Context configures Rule)
+                      SCOPES → Rule            (Context scopes Rule)
+                    
+                    STRUCTURAL (Language-level):
+                      IMPORTS                  (File imports another)
+                      EXTENDS                  (Class extends class)
+                      IMPLEMENTS               (Class implements interface)
+                      INJECTS                  (DI: Class injects class)
+                      TESTED_BY                (Test tests subject)
+                    ═══════════════════════════════════════════════════════════════════════════════════
+                </six-entity-relationship-types>
+
+                <edge-types-by-category>
+                    <!-- STRUCTURAL EDGES (always create during indexing) -->
+                    <category name="STRUCTURAL" priority="1">
+                        | Relationship | Detection Pattern | Direction |
+                        |--------------|-------------------|-----------|
+                        | IMPORTS | import statements, require(), @Import | source → target |
+                        | EXTENDS | extends ClassName, @Inheritance | child → parent |
+                        | IMPLEMENTS | implements InterfaceName | impl → interface |
+                        | INJECTS | @Autowired, constructor injection | consumer → provider |
+                        | TESTED_BY | @Test methods testing a class | test → subject |
+                    </category>
+                    
+                    <!-- BEHAVIORAL EDGES (create based on method analysis) -->
+                    <category name="BEHAVIORAL" priority="2">
+                        | Relationship | Detection Pattern | Direction |
+                        |--------------|-------------------|-----------|
+                        | PERFORMS | Controller calls Service method | Actor → Process |
+                        | CALLS | service.method() invocation | Process → Process |
+                        | USES | repository.find*(), .get*() | Process → Resource |
+                        | MODIFIES | repository.save(), .update(), .delete() | Process → Resource |
+                        | CREATES | new Entity(), builder().build() | Process → Resource |
+                        | TRIGGERS | applicationEventPublisher.publish() | Process → Event |
+                        | INITIATES | @EventListener handler method | Event → Process |
+                        | CONFIGURED_BY | @Value, @ConfigurationProperties | Process → Context |
+                    </category>
+                    
+                    <!-- GOVERNANCE EDGES (create based on annotation analysis) -->
+                    <category name="GOVERNANCE" priority="3">
+                        | Relationship | Detection Pattern | Direction |
+                        |--------------|-------------------|-----------|
+                        | VALIDATES | @Valid, custom Validator | Rule → Resource |
+                        | CONSTRAINS | @PreAuthorize on method | Rule → Process |
+                        | GOVERNS | @Transactional boundary | Rule → Process |
+                        | APPLIES_IN | Profile-specific @Conditional | Rule → Context |
+                    </category>
+                </edge-types-by-category>
 
                 <hyperedge-types>
-                    | Hyperedge Type | Description | Connected Nodes |
-                    |----------------|-------------|-----------------|
-                    | TRANSACTION_BOUNDARY | Files within same @Transactional scope | Service + repos/services |
-                    | FEATURE_COHORT | Files implementing same feature | Controller + Service + Repo + Entity |
-                    | EVENT_FLOW | Event emission → consumption chain | Publisher + Event + Listeners |
-                    | SECURITY_DOMAIN | Files protected by same security rule | @PreAuthorize grouped |
-                    | STATE_MACHINE | Files participating in state transitions | Enum + state-changing Services |
+                    | Hyperedge Type | Description | Detection Pattern | Connected Nodes |
+                    |----------------|-------------|-------------------|------------------|
+                    | TRANSACTION_BOUNDARY | Files within same @Transactional scope | @Transactional annotation | Service + repos/services |
+                    | FEATURE_COHORT | Files implementing same feature | Common path prefix + naming | Controller + Service + Repo + Entity |
+                    | EVENT_FLOW | Event emission → consumption chain | publish() + @EventListener | Publisher + Event + Listeners |
+                    | SECURITY_DOMAIN | Files protected by same security rule | @PreAuthorize with same expr | @PreAuthorize grouped |
+                    | STATE_MACHINE | Files participating in state transitions | Status enum + state methods | Enum + state-changing Services |
+                    | VALIDATION_CHAIN | Validators applied to same resource | @Valid + custom validators | DTOs + Validators + Resources |
+                    | CONFIG_SCOPE | Files sharing configuration context | Same @Profile, @Conditional | Config + dependent beans |
                 </hyperedge-types>
 
                 <extraction-workflow>
                     For EACH file being indexed, after writing EntityDetail:
 
-                    1. PARSE IMPORTS:
+                    1. PARSE IMPORTS (STRUCTURAL):
                        - Java: import com.example.ClassName → resolve to file_path
                        - TypeScript: import { X } from './path' → resolve relative path
+                       - Filter: INCLUDE com.checkitout.*, pl.checkitout.*
+                       - Filter: EXCLUDE java.*, javax.*, org.springframework.*, lombok.*
                        - Create: (thisFile)-[:IMPORTS {line: N}]->(importedFile)
 
-                    2. PARSE CLASS HIERARCHY:
+                    2. PARSE CLASS HIERARCHY (STRUCTURAL):
                        - extends ParentClass → (thisFile)-[:EXTENDS]->(parentFile)
                        - implements Interface → (thisFile)-[:IMPLEMENTS]->(interfaceFile)
 
-                    3. PARSE DEPENDENCY INJECTION:
-                       - Constructor params, @Autowired fields
+                    3. PARSE DEPENDENCY INJECTION (STRUCTURAL):
+                       - Constructor params, @Autowired fields, @Value properties
                        - Resolve type to file_path
                        - Create: (thisFile)-[:INJECTS {field: 'name'}]->(dependencyFile)
 
-                    4. PARSE METHOD CALLS (first-level):
+                    4. PARSE METHOD CALLS (BEHAVIORAL) - Use method-to-relationship mapping:
                        - Identify injected dependencies used in methods
-                       - Create: (thisFile)-[:CALLS {method: 'name'}]->(calleeFile)
+                       - Map method name to relationship type:
+                         * save|persist|update|merge|delete|remove → MODIFIES
+                         * find|get|load|read|fetch|query|search → USES
+                         * create|new|build|construct → CREATES
+                         * validate|check|verify|assert|ensure → VALIDATES
+                         * publish|emit|fire|dispatch|send → TRIGGERS
+                         * handle|on|listen|receive|consume → INITIATES
+                         * process|execute|run|perform|do → CALLS
+                         * configure|setup|init → CONFIGURES
+                       - Create appropriate relationship based on mapping
 
-                    5. DETECT HYPEREDGE PARTICIPATION:
-                       - If @Transactional found: mark for TRANSACTION_BOUNDARY hyperedge
-                       - If @EventListener found: mark for EVENT_FLOW hyperedge
-                       - Store: hyperedge_candidates: ['TRANSACTION_BOUNDARY', 'EVENT_FLOW']
+                    5. PARSE EVENT PATTERNS (BEHAVIORAL):
+                       - applicationEventPublisher.publish(new XxxEvent) → TRIGGERS
+                       - @EventListener methods → mark for INITIATES (reverse direction)
+                       - @TransactionalEventListener → mark for EVENT_FLOW hyperedge
+
+                    6. PARSE GOVERNANCE PATTERNS (GOVERNANCE):
+                       - @PreAuthorize expressions → mark for SECURITY_DOMAIN hyperedge
+                       - @Valid on parameters → VALIDATES relationship
+                       - @Transactional → mark for TRANSACTION_BOUNDARY hyperedge
+
+                    7. DETECT HYPEREDGE PARTICIPATION:
+                       - @Transactional → TRANSACTION_BOUNDARY
+                       - @EventListener / @TransactionalEventListener → EVENT_FLOW
+                       - @PreAuthorize → SECURITY_DOMAIN
+                       - Status enum or state transitions → STATE_MACHINE
+                       - @Valid + Validator classes → VALIDATION_CHAIN
+                       - @Profile / @Conditional → CONFIG_SCOPE
+                       - Store: hyperedge_candidates: ['TRANSACTION_BOUNDARY', 'EVENT_FLOW', ...]
 
                     Resolution: Query existing EntityDetail nodes to find target file_paths.
                     Skip unresolved imports (external dependencies like Spring, java.util).
+                    Store unresolved in: unresolved_imports: ['dependency1', 'dependency2']
                 </extraction-workflow>
+
+                <java-parsing-patterns>
+                    <!-- Import detection -->
+                    <imports>import\s+([\w.]+);?</imports>
+                    
+                    <!-- Class hierarchy -->
+                    <extends>class\s+(\w+)\s+extends\s+(\w+)</extends>
+                    <implements>class\s+(\w+)\s+implements\s+([\w,\s]+)</implements>
+
+                    <!-- Dependency Injection -->
+                    <autowired>@Autowired\s+(?:private\s+)?(\w+)\s+(\w+);</autowired>
+                    <constructor_injection>(?:public|private)\s+\w+\(([^)]+)\)</constructor_injection>
+                    <value>@Value\s*\(\s*["']\$\{([^}]+)\}["']\s*\)</value>
+
+                    <!-- Method calls on injected fields -->
+                    <method_call>(\w+)\s*\.\s*(\w+)\s*\(</method_call>
+
+                    <!-- Events -->
+                    <publish>applicationEventPublisher\.publish(?:Event)?\s*\(\s*new\s+(\w+)</publish>
+                    <listener>@EventListener.*\s+(?:public\s+)?\w+\s+\w+\s*\(\s*(\w+)</listener>
+
+                    <!-- Annotations -->
+                    <transactional>@Transactional</transactional>
+                    <preauthorize>@PreAuthorize\s*\(\s*["']([^"']+)["']\s*\)</preauthorize>
+                    <valid>@Valid</valid>
+                </java-parsing-patterns>
+
+                <method-to-relationship-mapping>
+                    <!-- Repository/Resource methods -->
+                    save|persist|update|merge|delete|remove → MODIFIES (Process → Resource)
+                    find|get|load|read|fetch|query|search → USES (Process → Resource)
+                    create|new|build|construct → CREATES (Process → Resource)
+                    
+                    <!-- Validation -->
+                    validate|check|verify|assert|ensure → VALIDATES (Rule → Resource)
+                    
+                    <!-- Events -->
+                    publish|emit|fire|dispatch|send → TRIGGERS (Process → Event)
+                    handle|on|listen|receive|consume → INITIATES (Event → Process)
+                    
+                    <!-- Service orchestration -->
+                    process|execute|run|perform|do → CALLS (Process → Process)
+                    configure|setup|init → CONFIGURES (Context → Process)
+                </method-to-relationship-mapping>
 
                 <cypher-create-import><![CDATA[
 CYPHER 25
@@ -696,46 +871,58 @@ RETURN f.file_path AS path,
         </step>
 
         <!-- ─────────────────────────────────────────────────────────────────────────
-             STEP 6B: CREATE RELATIONSHIP EDGES (CRITICAL - GRAPH CONNECTIVITY)
+             STEP 6B: CREATE RELATIONSHIP EDGES (CRITICAL - 6-ENTITY MODEL - 20+ TYPES)
              ───────────────────────────────────────────────────────────────────────── -->
         <step id="6b" name="create-relationship-edges">
             <description>
-                CRITICAL: After embeddings, MATERIALIZE the code relationships as graph edges.
-                This step creates the navigable dependency graph between files.
+                CRITICAL: After embeddings, MATERIALIZE code relationships as graph edges.
+                This creates the navigable 6-Entity dependency graph.
 
-                Without this step, the graph is just isolated nodes with embeddings.
-                WITH this step, the graph becomes a connected dependency network.
+                Without this step: isolated nodes with embeddings (USELESS)
+                WITH this step: connected dependency network (POWERFUL)
+
+                20+ RELATIONSHIP TYPES organized by category:
+                - STRUCTURAL (5): IMPORTS, EXTENDS, IMPLEMENTS, INJECTS, TESTED_BY
+                - BEHAVIORAL (8): PERFORMS, CALLS, USES, MODIFIES, CREATES, TRIGGERS, INITIATES, CONFIGURED_BY
+                - GOVERNANCE (3): VALIDATES, CONSTRAINS, GOVERNS
             </description>
 
             <workflow>
-                Using the file content analyzed in Step 4, create relationships:
+                Using file content analyzed in Step 4, create relationships in ORDER:
 
-                1. FOR EACH import statement found:
-                   - Extract class name (e.g., "CampaignService" from "import ...CampaignService")
-                   - Query for target: MATCH (t:EntityDetail) WHERE t.file_path ENDS WITH 'CampaignService.java'
-                   - If found: CREATE (source)-[:IMPORTS]->(target)
-                   - If not found: Add to unresolved_imports property
+                PHASE 1: STRUCTURAL RELATIONSHIPS (always create)
+                1.1 IMPORTS - from import statements (internal only)
+                1.2 EXTENDS - from class hierarchy
+                1.3 IMPLEMENTS - from interface implementation
+                1.4 INJECTS - from DI annotations (@Autowired, constructor)
+                1.5 TESTED_BY - from test class naming convention
 
-                2. FOR EACH constructor/field injection:
-                   - Identify injected type name
-                   - Query for provider file
-                   - CREATE (consumer)-[:INJECTS {field: 'fieldName'}]->(provider)
+                PHASE 2: BEHAVIORAL RELATIONSHIPS (based on method analysis)
+                2.1 PERFORMS - Actor (Controller) calls Process (Service)
+                2.2 CALLS - Process calls Process (service-to-service)
+                2.3 USES - Process reads Resource (find*, get*, load*)
+                2.4 MODIFIES - Process writes Resource (save*, update*, delete*)
+                2.5 CREATES - Process creates Resource (new*, build*)
+                2.6 TRIGGERS - Process publishes Event (publish*, emit*)
+                2.7 INITIATES - Event triggers Process (@EventListener)
+                2.8 CONFIGURED_BY - Process uses Context (@Value)
 
-                3. FOR EACH extends/implements:
-                   - CREATE (child)-[:EXTENDS]->(parent)
-                   - CREATE (implementor)-[:IMPLEMENTS]->(interface)
+                PHASE 3: GOVERNANCE RELATIONSHIPS (from annotations)
+                3.1 VALIDATES - Rule validates Resource (@Valid)
+                3.2 CONSTRAINS - Rule constrains Process (@PreAuthorize)
+                3.3 GOVERNS - Rule governs Process (@Transactional)
 
-                4. FOR EACH method call on injected dependency:
-                   - CREATE (caller)-[:CALLS {method: 'methodName'}]->(callee)
-
-                5. SET hyperedge_candidates property:
-                   - If @Transactional: add 'TRANSACTION_BOUNDARY'
-                   - If @EventListener: add 'EVENT_FLOW'
-                   - If @PreAuthorize: add 'SECURITY_DOMAIN'
+                PHASE 4: HYPEREDGE CANDIDATES
+                4.1 Set hyperedge_candidates property for Grothendieck synthesis
             </workflow>
+
+            <!-- ══════════════════════════════════════════════════════════════════════
+                 PHASE 1: STRUCTURAL RELATIONSHIPS
+                 ══════════════════════════════════════════════════════════════════════ -->
 
             <cypher-batch-imports><![CDATA[
 CYPHER 25
+// IMPORTS: File imports another file (internal dependencies only)
 UNWIND $imports AS imp
 MATCH (source:EntityDetail {file_path: $source_path, namespace: $ns})
 MATCH (target:EntityDetail {namespace: $ns})
@@ -747,8 +934,32 @@ SET r.import_statement = imp.import_text,
 RETURN count(r) AS imports_created
             ]]></cypher-batch-imports>
 
-            <cypher-batch-injections><![CDATA[
+            <cypher-extends><![CDATA[
 CYPHER 25
+// EXTENDS: Class extends parent class
+MATCH (child:EntityDetail {file_path: $source_path, namespace: $ns})
+MATCH (parent:EntityDetail {namespace: $ns})
+WHERE parent.file_path ENDS WITH $parent_file
+MERGE (child)-[r:EXTENDS]->(parent)
+SET r.created_at = datetime()
+RETURN 1 AS extends_created
+            ]]></cypher-extends>
+
+            <cypher-batch-implements><![CDATA[
+CYPHER 25
+// IMPLEMENTS: Class implements interface(s)
+UNWIND $interfaces AS iface
+MATCH (impl:EntityDetail {file_path: $source_path, namespace: $ns})
+MATCH (interface:EntityDetail {namespace: $ns})
+WHERE interface.file_path ENDS WITH iface.interface_file
+MERGE (impl)-[r:IMPLEMENTS]->(interface)
+SET r.created_at = datetime()
+RETURN count(r) AS implements_created
+            ]]></cypher-batch-implements>
+
+            <cypher-batch-injects><![CDATA[
+CYPHER 25
+// INJECTS: Dependency injection (@Autowired, constructor params)
 UNWIND $injections AS inj
 MATCH (consumer:EntityDetail {file_path: $source_path, namespace: $ns})
 MATCH (provider:EntityDetail {namespace: $ns})
@@ -757,29 +968,296 @@ MERGE (consumer)-[r:INJECTS]->(provider)
 SET r.field_name = inj.field_name,
     r.injection_type = inj.injection_type,
     r.created_at = datetime()
-RETURN count(r) AS injections_created
-            ]]></cypher-batch-injections>
+RETURN count(r) AS injects_created
+            ]]></cypher-batch-injects>
 
-            <cypher-set-hyperedge-candidates><![CDATA[
+            <cypher-tested-by><![CDATA[
 CYPHER 25
+// TESTED_BY: Test class tests a subject class
+// Naming convention: PaymentServiceTest.java tests PaymentService.java
+MATCH (test:EntityDetail {file_path: $source_path, namespace: $ns})
+WHERE test.node_type = 'TEST'
+WITH test,
+     replace(replace(replace(test.name, 'Test.java', '.java'), 'Tests.java', '.java'), 'IT.java', '.java') AS subject_name
+MATCH (subject:EntityDetail {namespace: $ns})
+WHERE subject.name = subject_name AND subject.node_type <> 'TEST'
+MERGE (test)-[r:TESTED_BY]->(subject)
+SET r.created_at = datetime()
+RETURN count(r) AS tested_by_created
+            ]]></cypher-tested-by>
+
+            <!-- ══════════════════════════════════════════════════════════════════════
+                 PHASE 2: BEHAVIORAL RELATIONSHIPS
+                 ══════════════════════════════════════════════════════════════════════ -->
+
+            <cypher-batch-performs><![CDATA[
+CYPHER 25
+// PERFORMS: Actor (Controller) initiates Process (Service)
+// Detected when Controller calls Service methods
+UNWIND $performs AS perf
+MATCH (actor:EntityDetail {file_path: $source_path, namespace: $ns})
+WHERE actor.entity_type = 'Actor'
+MATCH (process:EntityDetail {namespace: $ns})
+WHERE process.file_path ENDS WITH perf.target_file
+  AND process.entity_type = 'Process'
+MERGE (actor)-[r:PERFORMS]->(process)
+ON CREATE SET r.methods = [perf.method], r.created_at = datetime()
+ON MATCH SET r.methods = CASE 
+    WHEN perf.method IN r.methods THEN r.methods 
+    ELSE r.methods + perf.method 
+  END
+RETURN count(r) AS performs_created
+            ]]></cypher-batch-performs>
+
+            <cypher-batch-calls><![CDATA[
+CYPHER 25
+// CALLS: Process calls another Process (service-to-service orchestration)
+// Method patterns: process*, execute*, run*, perform*, do*
+UNWIND $calls AS call
+MATCH (caller:EntityDetail {file_path: $source_path, namespace: $ns})
+MATCH (callee:EntityDetail {namespace: $ns})
+WHERE callee.file_path ENDS WITH call.target_file
+MERGE (caller)-[r:CALLS]->(callee)
+ON CREATE SET r.methods = [call.method], r.created_at = datetime()
+ON MATCH SET r.methods = CASE 
+    WHEN call.method IN r.methods THEN r.methods 
+    ELSE r.methods + call.method 
+  END
+RETURN count(r) AS calls_created
+            ]]></cypher-batch-calls>
+
+            <cypher-batch-uses><![CDATA[
+CYPHER 25
+// USES: Process reads Resource (read operations)
+// Method patterns: find*, get*, load*, read*, fetch*, query*, search*
+UNWIND $uses AS use
+MATCH (process:EntityDetail {file_path: $source_path, namespace: $ns})
+MATCH (resource:EntityDetail {namespace: $ns})
+WHERE resource.file_path ENDS WITH use.target_file
+MERGE (process)-[r:USES]->(resource)
+ON CREATE SET r.methods = [use.method], r.created_at = datetime()
+ON MATCH SET r.methods = CASE 
+    WHEN use.method IN r.methods THEN r.methods 
+    ELSE r.methods + use.method 
+  END
+RETURN count(r) AS uses_created
+            ]]></cypher-batch-uses>
+
+            <cypher-batch-modifies><![CDATA[
+CYPHER 25
+// MODIFIES: Process writes Resource (write operations)
+// Method patterns: save*, persist*, update*, merge*, delete*, remove*
+UNWIND $modifies AS mod
+MATCH (process:EntityDetail {file_path: $source_path, namespace: $ns})
+MATCH (resource:EntityDetail {namespace: $ns})
+WHERE resource.file_path ENDS WITH mod.target_file
+MERGE (process)-[r:MODIFIES]->(resource)
+ON CREATE SET r.methods = [mod.method], r.created_at = datetime()
+ON MATCH SET r.methods = CASE 
+    WHEN mod.method IN r.methods THEN r.methods 
+    ELSE r.methods + mod.method 
+  END
+RETURN count(r) AS modifies_created
+            ]]></cypher-batch-modifies>
+
+            <cypher-batch-creates><![CDATA[
+CYPHER 25
+// CREATES: Process creates Resource (entity instantiation)
+// Method patterns: create*, new*, build*, construct*
+UNWIND $creates AS cr
+MATCH (process:EntityDetail {file_path: $source_path, namespace: $ns})
+MATCH (resource:EntityDetail {namespace: $ns})
+WHERE resource.file_path ENDS WITH cr.target_file
+MERGE (process)-[r:CREATES]->(resource)
+ON CREATE SET r.methods = [cr.method], r.created_at = datetime()
+ON MATCH SET r.methods = CASE 
+    WHEN cr.method IN r.methods THEN r.methods 
+    ELSE r.methods + cr.method 
+  END
+RETURN count(r) AS creates_created
+            ]]></cypher-batch-creates>
+
+            <cypher-batch-triggers><![CDATA[
+CYPHER 25
+// TRIGGERS: Process publishes Event
+// Detected: applicationEventPublisher.publish(new XxxEvent)
+UNWIND $triggers AS trig
+MATCH (publisher:EntityDetail {file_path: $source_path, namespace: $ns})
+MATCH (event:EntityDetail {namespace: $ns})
+WHERE event.entity_type = 'Event'
+  AND (event.name CONTAINS trig.event_class OR event.file_path CONTAINS trig.event_class)
+MERGE (publisher)-[r:TRIGGERS]->(event)
+SET r.created_at = datetime()
+RETURN count(r) AS triggers_created
+            ]]></cypher-batch-triggers>
+
+            <cypher-batch-initiates><![CDATA[
+CYPHER 25
+// INITIATES: Event triggers Process (event handlers)
+// Detected: @EventListener or @TransactionalEventListener
+UNWIND $initiates AS init
+MATCH (listener:EntityDetail {file_path: $source_path, namespace: $ns})
+MATCH (event:EntityDetail {namespace: $ns})
+WHERE event.entity_type = 'Event'
+  AND (event.name CONTAINS init.event_class OR event.file_path CONTAINS init.event_class)
+MERGE (event)-[r:INITIATES]->(listener)
+SET r.transactional = init.is_transactional,
+    r.handler_method = init.handler_method,
+    r.created_at = datetime()
+RETURN count(r) AS initiates_created
+            ]]></cypher-batch-initiates>
+
+            <cypher-batch-configured-by><![CDATA[
+CYPHER 25
+// CONFIGURED_BY: Process uses Context configuration
+// Detected: @Value, @ConfigurationProperties
+UNWIND $configured_by AS cfg
+MATCH (consumer:EntityDetail {file_path: $source_path, namespace: $ns})
+MATCH (config:EntityDetail {namespace: $ns})
+WHERE config.entity_type = 'Context'
+  AND (config.file_path ENDS WITH cfg.config_file OR config.node_type = 'CONFIG')
+MERGE (consumer)-[r:CONFIGURED_BY]->(config)
+SET r.property = cfg.property,
+    r.created_at = datetime()
+RETURN count(r) AS configured_by_created
+            ]]></cypher-batch-configured-by>
+
+            <!-- ══════════════════════════════════════════════════════════════════════
+                 PHASE 3: GOVERNANCE RELATIONSHIPS
+                 ══════════════════════════════════════════════════════════════════════ -->
+
+            <cypher-batch-validates><![CDATA[
+CYPHER 25
+// VALIDATES: Rule validates Resource
+// Detected: @Valid annotation on DTO parameters, custom Validators
+UNWIND $validates AS val
+MATCH (rule:EntityDetail {file_path: $source_path, namespace: $ns})
+WHERE rule.entity_type = 'Rule' OR rule.node_type = 'SECURITY'
+MATCH (resource:EntityDetail {namespace: $ns})
+WHERE resource.file_path ENDS WITH val.target_file
+MERGE (rule)-[r:VALIDATES]->(resource)
+SET r.validation_type = val.validation_type,
+    r.created_at = datetime()
+RETURN count(r) AS validates_created
+            ]]></cypher-batch-validates>
+
+            <cypher-constrains><![CDATA[
+CYPHER 25
+// CONSTRAINS: Security Rule constrains Process
+// Detected: @PreAuthorize on methods
+MATCH (process:EntityDetail {file_path: $source_path, namespace: $ns})
+WHERE $preauthorize_expression IS NOT NULL AND $preauthorize_expression <> ''
+OPTIONAL MATCH (rule:EntityDetail {namespace: $ns})
+WHERE rule.entity_type = 'Rule' AND rule.node_type = 'SECURITY'
+WITH process, rule
+WHERE rule IS NOT NULL
+MERGE (rule)-[r:CONSTRAINS]->(process)
+SET r.expression = $preauthorize_expression,
+    r.created_at = datetime()
+RETURN count(r) AS constrains_created
+            ]]></cypher-constrains>
+
+            <cypher-governs><![CDATA[
+CYPHER 25
+// GOVERNS: Transaction boundary governs Process
+// Detected: @Transactional annotation (marks transaction boundaries)
+MATCH (process:EntityDetail {file_path: $source_path, namespace: $ns})
+WHERE $has_transactional = true
+SET process.governed_by_transaction = true,
+    process.transaction_propagation = $propagation
+RETURN 1 AS governs_set
+            ]]></cypher-governs>
+
+            <!-- ══════════════════════════════════════════════════════════════════════
+                 PHASE 4: METADATA & HYPEREDGE CANDIDATES
+                 ══════════════════════════════════════════════════════════════════════ -->
+
+            <cypher-set-relationship-metadata><![CDATA[
+CYPHER 25
+// Store relationship counts and hyperedge candidates
 MATCH (f:EntityDetail {file_path: $file_path, namespace: $ns})
 SET f.hyperedge_candidates = $hyperedge_candidates,
-    f.unresolved_imports = $unresolved_imports
-RETURN f.file_path
-            ]]></cypher-set-hyperedge-candidates>
+    f.unresolved_imports = $unresolved_imports,
+    f.relationship_counts = {
+        imports: $imports_count,
+        extends: $extends_count,
+        implements: $implements_count,
+        injects: $injects_count,
+        calls: $calls_count,
+        uses: $uses_count,
+        modifies: $modifies_count,
+        triggers: $triggers_count,
+        initiates: $initiates_count
+    },
+    f.relationships_created_at = datetime()
+RETURN f.file_path AS path, f.relationship_counts AS counts
+            ]]></cypher-set-relationship-metadata>
+
+            <!-- ══════════════════════════════════════════════════════════════════════
+                 EXECUTION GUIDANCE
+                 ══════════════════════════════════════════════════════════════════════ -->
+
+            <execution-order>
+                Execute queries in this order for each file:
+
+                1. STRUCTURAL (parallel-safe, no dependencies):
+                   - cypher-batch-imports
+                   - cypher-extends (if extends detected)
+                   - cypher-batch-implements (if implements detected)
+                   - cypher-batch-injects
+                   - cypher-tested-by (if test file)
+
+                2. BEHAVIORAL (depends on injected dependencies):
+                   - cypher-batch-performs (if Controller → Service)
+                   - cypher-batch-calls (if Service → Service)
+                   - cypher-batch-uses (if find/get/load calls)
+                   - cypher-batch-modifies (if save/update/delete calls)
+                   - cypher-batch-creates (if new/build calls)
+                   - cypher-batch-triggers (if publish detected)
+                   - cypher-batch-initiates (if @EventListener)
+                   - cypher-batch-configured-by (if @Value)
+
+                3. GOVERNANCE (annotation-based):
+                   - cypher-batch-validates (if @Valid)
+                   - cypher-constrains (if @PreAuthorize)
+                   - cypher-governs (if @Transactional)
+
+                4. METADATA:
+                   - cypher-set-relationship-metadata
+            </execution-order>
+
+            <method-detection-patterns>
+                Use these patterns to classify method calls:
+
+                | Pattern | Relationship | Example |
+                |---------|--------------|----------|
+                | find.* get.* load.* read.* fetch.* query.* search.* | USES | repository.findById() |
+                | save.* persist.* update.* merge.* delete.* remove.* | MODIFIES | repository.save() |
+                | create.* build.* construct.* | CREATES | Entity.builder().build() |
+                | process.* execute.* run.* perform.* handle.* | CALLS | service.processPayment() |
+                | publish.* emit.* fire.* dispatch.* send.* | TRIGGERS | publisher.publishEvent() |
+                | validate.* check.* verify.* assert.* | VALIDATES | validator.validate() |
+            </method-detection-patterns>
 
             <important-notes>
                 - Relationships can only be created to ALREADY INDEXED files
-                - Files indexed later may have IMPORTS pointing to this file
-                - Grothendieck synthesis can create additional cross-cutting relationships
-                - Hyperedges are created during synthesis phase (not here)
+                - Files indexed later will create reverse relationships when they're processed
+                - Use MERGE for idempotency (safe to re-run)
+                - Store method names in arrays (accumulate, don't overwrite)
+                - Hyperedges are created during Grothendieck synthesis (not here)
                 - If relationship creation fails, file is still COMPLETED (embeddings saved)
                   but log warning for manual review
+                - Expected: 5-20 relationships created per file on average
             </important-notes>
 
             <performance>
-                Per file: ~100-300ms for relationship queries (depends on import count)
+                Per file: ~200-500ms for all relationship queries
                 Batch processing via UNWIND is more efficient than individual queries
+                Expected relationships per file:
+                - IMPORTS: 5-15
+                - INJECTS: 2-5
+                - CALLS/USES/MODIFIES: 3-10
+                - Total: 10-30 edges per file
             </performance>
         </step>
 
