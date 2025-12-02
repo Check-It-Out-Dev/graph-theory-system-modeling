@@ -436,6 +436,118 @@ RETURN ft.status
                     - Retry logic: @Retryable with maxAttempts=3
                 </example>
             </behavioral-context-extraction>
+
+            <!-- RELATIONSHIP EXTRACTION (for graph edges) -->
+            <relationship-extraction>
+                <description>
+                    CRITICAL: Beyond capturing behavioral context as TEXT, you MUST also
+                    MATERIALIZE relationships as EDGES and HYPEREDGES in the graph.
+                    This creates the navigable dependency graph that powers system understanding.
+                </description>
+
+                <edge-types>
+                    | Relationship Type | Detection Pattern | Direction |
+                    |-------------------|-------------------|-----------|
+                    | IMPORTS | import statements, require(), @Import | source → target |
+                    | EXTENDS | extends ClassName, @Inheritance | child → parent |
+                    | IMPLEMENTS | implements InterfaceName | impl → interface |
+                    | CALLS | methodInvocation on injected dep | caller → callee |
+                    | INJECTS | @Autowired, constructor injection | consumer → provider |
+                    | CONFIGURED_BY | @Value, @ConfigurationProperties | bean → config |
+                    | TESTED_BY | @Test methods testing a class | test → subject |
+                    | PUBLISHES_TO | applicationEventPublisher.publish | publisher → event |
+                    | LISTENS_TO | @EventListener, @TransactionalEventListener | listener → event |
+                    | PERSISTS_TO | repository.save(), JPA cascade | service → entity |
+                </edge-types>
+
+                <hyperedge-types>
+                    | Hyperedge Type | Description | Connected Nodes |
+                    |----------------|-------------|-----------------|
+                    | TRANSACTION_BOUNDARY | Files within same @Transactional scope | Service + repos/services |
+                    | FEATURE_COHORT | Files implementing same feature | Controller + Service + Repo + Entity |
+                    | EVENT_FLOW | Event emission → consumption chain | Publisher + Event + Listeners |
+                    | SECURITY_DOMAIN | Files protected by same security rule | @PreAuthorize grouped |
+                    | STATE_MACHINE | Files participating in state transitions | Enum + state-changing Services |
+                </hyperedge-types>
+
+                <extraction-workflow>
+                    For EACH file being indexed, after writing EntityDetail:
+
+                    1. PARSE IMPORTS:
+                       - Java: import com.example.ClassName → resolve to file_path
+                       - TypeScript: import { X } from './path' → resolve relative path
+                       - Create: (thisFile)-[:IMPORTS {line: N}]->(importedFile)
+
+                    2. PARSE CLASS HIERARCHY:
+                       - extends ParentClass → (thisFile)-[:EXTENDS]->(parentFile)
+                       - implements Interface → (thisFile)-[:IMPLEMENTS]->(interfaceFile)
+
+                    3. PARSE DEPENDENCY INJECTION:
+                       - Constructor params, @Autowired fields
+                       - Resolve type to file_path
+                       - Create: (thisFile)-[:INJECTS {field: 'name'}]->(dependencyFile)
+
+                    4. PARSE METHOD CALLS (first-level):
+                       - Identify injected dependencies used in methods
+                       - Create: (thisFile)-[:CALLS {method: 'name'}]->(calleeFile)
+
+                    5. DETECT HYPEREDGE PARTICIPATION:
+                       - If @Transactional found: mark for TRANSACTION_BOUNDARY hyperedge
+                       - If @EventListener found: mark for EVENT_FLOW hyperedge
+                       - Store: hyperedge_candidates: ['TRANSACTION_BOUNDARY', 'EVENT_FLOW']
+
+                    Resolution: Query existing EntityDetail nodes to find target file_paths.
+                    Skip unresolved imports (external dependencies like Spring, java.util).
+                </extraction-workflow>
+
+                <cypher-create-import><![CDATA[
+CYPHER 25
+MATCH (source:EntityDetail {file_path: $source_path, namespace: $ns})
+MATCH (target:EntityDetail {namespace: $ns})
+WHERE target.file_path ENDS WITH $target_class_file
+MERGE (source)-[r:IMPORTS]->(target)
+SET r.import_statement = $import_text,
+    r.line_number = $line_number,
+    r.created_at = datetime()
+RETURN source.name AS from_file, target.name AS to_file
+                ]]></cypher-create-import>
+
+                <cypher-create-injects><![CDATA[
+CYPHER 25
+MATCH (consumer:EntityDetail {file_path: $consumer_path, namespace: $ns})
+MATCH (provider:EntityDetail {namespace: $ns})
+WHERE provider.file_path ENDS WITH $provider_class_file
+MERGE (consumer)-[r:INJECTS]->(provider)
+SET r.field_name = $field_name,
+    r.injection_type = $injection_type,
+    r.created_at = datetime()
+RETURN consumer.name, provider.name
+                ]]></cypher-create-injects>
+
+                <cypher-create-calls><![CDATA[
+CYPHER 25
+MATCH (caller:EntityDetail {file_path: $caller_path, namespace: $ns})
+MATCH (callee:EntityDetail {namespace: $ns})
+WHERE callee.file_path ENDS WITH $callee_class_file
+MERGE (caller)-[r:CALLS]->(callee)
+SET r.method_name = $method_name,
+    r.context = $call_context,
+    r.created_at = datetime()
+RETURN caller.name, callee.name
+                ]]></cypher-create-calls>
+
+                <resolution-strategy>
+                    1. QUALIFIED NAME (com.example.service.PaymentService):
+                       Query: MATCH (f:EntityDetail) WHERE f.file_path ENDS WITH 'PaymentService.java' RETURN f
+
+                    2. RELATIVE PATH (./utils/helper):
+                       Resolve relative to current file's directory
+
+                    3. UNRESOLVED:
+                       Skip edge creation (external dep or not yet indexed)
+                       Store in: unresolved_imports: ['dependency1', 'dependency2']
+                </resolution-strategy>
+            </relationship-extraction>
         </step>
 
         <!-- ─────────────────────────────────────────────────────────────────────────
@@ -581,6 +693,94 @@ RETURN f.file_path AS path,
                 3. Can be retried later (separate recovery process)
                 4. Continue to next file
             </on-failure>
+        </step>
+
+        <!-- ─────────────────────────────────────────────────────────────────────────
+             STEP 6B: CREATE RELATIONSHIP EDGES (CRITICAL - GRAPH CONNECTIVITY)
+             ───────────────────────────────────────────────────────────────────────── -->
+        <step id="6b" name="create-relationship-edges">
+            <description>
+                CRITICAL: After embeddings, MATERIALIZE the code relationships as graph edges.
+                This step creates the navigable dependency graph between files.
+
+                Without this step, the graph is just isolated nodes with embeddings.
+                WITH this step, the graph becomes a connected dependency network.
+            </description>
+
+            <workflow>
+                Using the file content analyzed in Step 4, create relationships:
+
+                1. FOR EACH import statement found:
+                   - Extract class name (e.g., "CampaignService" from "import ...CampaignService")
+                   - Query for target: MATCH (t:EntityDetail) WHERE t.file_path ENDS WITH 'CampaignService.java'
+                   - If found: CREATE (source)-[:IMPORTS]->(target)
+                   - If not found: Add to unresolved_imports property
+
+                2. FOR EACH constructor/field injection:
+                   - Identify injected type name
+                   - Query for provider file
+                   - CREATE (consumer)-[:INJECTS {field: 'fieldName'}]->(provider)
+
+                3. FOR EACH extends/implements:
+                   - CREATE (child)-[:EXTENDS]->(parent)
+                   - CREATE (implementor)-[:IMPLEMENTS]->(interface)
+
+                4. FOR EACH method call on injected dependency:
+                   - CREATE (caller)-[:CALLS {method: 'methodName'}]->(callee)
+
+                5. SET hyperedge_candidates property:
+                   - If @Transactional: add 'TRANSACTION_BOUNDARY'
+                   - If @EventListener: add 'EVENT_FLOW'
+                   - If @PreAuthorize: add 'SECURITY_DOMAIN'
+            </workflow>
+
+            <cypher-batch-imports><![CDATA[
+CYPHER 25
+UNWIND $imports AS imp
+MATCH (source:EntityDetail {file_path: $source_path, namespace: $ns})
+MATCH (target:EntityDetail {namespace: $ns})
+WHERE target.file_path ENDS WITH imp.target_file
+MERGE (source)-[r:IMPORTS]->(target)
+SET r.import_statement = imp.import_text,
+    r.line_number = imp.line_number,
+    r.created_at = datetime()
+RETURN count(r) AS imports_created
+            ]]></cypher-batch-imports>
+
+            <cypher-batch-injections><![CDATA[
+CYPHER 25
+UNWIND $injections AS inj
+MATCH (consumer:EntityDetail {file_path: $source_path, namespace: $ns})
+MATCH (provider:EntityDetail {namespace: $ns})
+WHERE provider.file_path ENDS WITH inj.provider_file
+MERGE (consumer)-[r:INJECTS]->(provider)
+SET r.field_name = inj.field_name,
+    r.injection_type = inj.injection_type,
+    r.created_at = datetime()
+RETURN count(r) AS injections_created
+            ]]></cypher-batch-injections>
+
+            <cypher-set-hyperedge-candidates><![CDATA[
+CYPHER 25
+MATCH (f:EntityDetail {file_path: $file_path, namespace: $ns})
+SET f.hyperedge_candidates = $hyperedge_candidates,
+    f.unresolved_imports = $unresolved_imports
+RETURN f.file_path
+            ]]></cypher-set-hyperedge-candidates>
+
+            <important-notes>
+                - Relationships can only be created to ALREADY INDEXED files
+                - Files indexed later may have IMPORTS pointing to this file
+                - Grothendieck synthesis can create additional cross-cutting relationships
+                - Hyperedges are created during synthesis phase (not here)
+                - If relationship creation fails, file is still COMPLETED (embeddings saved)
+                  but log warning for manual review
+            </important-notes>
+
+            <performance>
+                Per file: ~100-300ms for relationship queries (depends on import count)
+                Batch processing via UNWIND is more efficient than individual queries
+            </performance>
         </step>
 
         <!-- ─────────────────────────────────────────────────────────────────────────
@@ -1005,6 +1205,8 @@ Status: {GRACEFUL_EXIT | EMERGENCY_EXIT}
                 <directive>Include last_modified (DateTime) for each file</directive>
                 <directive>Set needs_structural = true (for Grothendieck agent)</directive>
                 <directive>Connect EntityDetail to SystemEntity via HAS_DETAIL</directive>
+                <directive>CREATE RELATIONSHIP EDGES: IMPORTS, INJECTS, EXTENDS, CALLS between files</directive>
+                <directive>SET hyperedge_candidates property for Grothendieck synthesis</directive>
                 <directive>Mark errors FAILED and continue to next file</directive>
                 <directive>Report progress every 25-50 files, then continue</directive>
                 <directive>Work until queue empty</directive>
@@ -1017,8 +1219,25 @@ Status: {GRACEFUL_EXIT | EMERGENCY_EXIT}
                 <directive>Crash on single file error (resilience is key)</directive>
                 <directive>Abandon work mid-processing (complete current file)</directive>
                 <directive>Process files without claiming first (concurrent safety)</directive>
+                <directive>Create ONLY nodes without relationships (graph must be CONNECTED)</directive>
             </never>
         </core-directives>
+
+        <success-criteria>
+            ✓ All files processed with semantic + behavioral embeddings (4096 dims each)
+            ✓ All files connected to SystemEntity via HAS_DETAIL
+            ✓ RELATIONSHIPS MATERIALIZED: IMPORTS, INJECTS, EXTENDS, CALLS edges created
+            ✓ hyperedge_candidates set for files with @Transactional, @EventListener, etc.
+            ✓ unresolved_imports captured for external dependencies
+            ✓ No orphaned EntityDetail nodes
+            ✓ Graph is CONNECTED - files link to their dependencies
+
+            CRITICAL: The graph is NOT just nodes with embeddings.
+            It is a CONNECTED dependency graph that enables:
+            - Impact analysis: "What files are affected by changes to X?"
+            - Call chains: "Trace the execution path from Controller to Repository"
+            - Dependency mapping: "What does this service depend on?"
+        </success-criteria>
     </activation>
 
 </agent>

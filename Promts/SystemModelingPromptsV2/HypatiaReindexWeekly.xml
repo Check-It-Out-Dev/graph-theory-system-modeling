@@ -145,6 +145,207 @@
 
     </FILE_ANALYSIS>
 
+    <!-- ═══ SECTION 5B: RELATIONSHIP EXTRACTION & GRAPH MATERIALIZATION ═══ -->
+    <RELATIONSHIP_EXTRACTION>
+        <description>
+            CRITICAL: Beyond capturing behavioral context as TEXT, you MUST materialize
+            actual relationships as EDGES and HYPEREDGES in the graph. This creates the
+            navigable dependency graph that powers system understanding.
+        </description>
+
+        <edge_types>
+            <!-- Direct binary relationships between files -->
+            | Relationship Type | Detection Pattern | Direction |
+            |-------------------|-------------------|-----------|
+            | IMPORTS | import statements, require(), @Import | source → target |
+            | EXTENDS | extends ClassName, @Inheritance | child → parent |
+            | IMPLEMENTS | implements InterfaceName | impl → interface |
+            | CALLS | methodInvocation on injected dep | caller → callee |
+            | INJECTS | @Autowired, constructor injection | consumer → provider |
+            | CONFIGURED_BY | @Value, @ConfigurationProperties | bean → config |
+            | TESTED_BY | @Test methods testing a class | test → subject |
+            | PUBLISHES_TO | applicationEventPublisher.publish | publisher → event |
+            | LISTENS_TO | @EventListener, @TransactionalEventListener | listener → event |
+            | PERSISTS_TO | repository.save(), JPA cascade | service → entity |
+        </edge_types>
+
+        <hyperedge_types>
+            <!-- N-ary relationships connecting multiple files -->
+            | Hyperedge Type | Description | Connected Nodes |
+            |----------------|-------------|-----------------|
+            | TRANSACTION_BOUNDARY | Files within same @Transactional scope | Service + all called repos/services |
+            | FEATURE_COHORT | Files implementing same feature | Controller + Service + Repository + Entity |
+            | EVENT_FLOW | Event emission → consumption chain | Publisher + Event + Listeners |
+            | SECURITY_DOMAIN | Files protected by same security rule | @PreAuthorize grouped components |
+            | STATE_MACHINE | Files participating in state transitions | Enum + Services that transition states |
+            | API_ENDPOINT_GROUP | Grouped endpoints under same path | Controller methods + DTOs + Services |
+        </hyperedge_types>
+
+        <extraction_workflow>
+            For EACH file being indexed:
+
+            1. PARSE IMPORTS:
+               - Java: import com.example.ClassName → resolve to file_path
+               - TypeScript: import { X } from './path' → resolve relative path
+               - Create: (thisFile)-[:IMPORTS {line: N}]->(importedFile)
+
+            2. PARSE CLASS HIERARCHY:
+               - extends ParentClass → (thisFile)-[:EXTENDS]->(parentFile)
+               - implements Interface → (thisFile)-[:IMPLEMENTS]->(interfaceFile)
+
+            3. PARSE DEPENDENCY INJECTION:
+               - Constructor params, @Autowired fields
+               - Resolve type to file_path
+               - Create: (thisFile)-[:INJECTS {field: 'fieldName'}]->(dependencyFile)
+
+            4. PARSE METHOD CALLS (first-level):
+               - Identify injected dependencies used in methods
+               - Create: (thisFile)-[:CALLS {method: 'methodName', context: 'description'}]->(calleeFile)
+
+            5. DETECT HYPEREDGE PARTICIPATION:
+               - If @Transactional found: mark for TRANSACTION_BOUNDARY hyperedge
+               - If @EventListener found: mark for EVENT_FLOW hyperedge
+               - Store in property: hyperedge_candidates: ['TRANSACTION_BOUNDARY', 'EVENT_FLOW']
+
+            6. CREATE HYPEREDGES (during synthesis or post-processing):
+               - Group files with matching hyperedge_candidates
+               - Create Hyperedge nodes and :IN_HYPEREDGE relationships
+        </extraction_workflow>
+
+        <cypher_templates>
+            <!-- Create IMPORTS relationship -->
+            <template name="create_import">
+            ```cypher
+            CYPHER 25
+            MATCH (source:EntityDetail {file_path: $source_path, namespace: $ns})
+            MATCH (target:EntityDetail {file_path: $target_path, namespace: $ns})
+            MERGE (source)-[r:IMPORTS]->(target)
+            SET r.line_number = $line_number,
+                r.import_statement = $import_text,
+                r.created_at = datetime()
+            RETURN source.name, target.name
+            ```
+            </template>
+
+            <!-- Create INJECTS (dependency injection) -->
+            <template name="create_injection">
+            ```cypher
+            CYPHER 25
+            MATCH (consumer:EntityDetail {file_path: $consumer_path, namespace: $ns})
+            MATCH (provider:EntityDetail {file_path: $provider_path, namespace: $ns})
+            MERGE (consumer)-[r:INJECTS]->(provider)
+            SET r.field_name = $field_name,
+                r.injection_type = $injection_type,
+                r.created_at = datetime()
+            RETURN consumer.name, provider.name
+            ```
+            </template>
+
+            <!-- Create CALLS relationship -->
+            <template name="create_call">
+            ```cypher
+            CYPHER 25
+            MATCH (caller:EntityDetail {file_path: $caller_path, namespace: $ns})
+            MATCH (callee:EntityDetail {file_path: $callee_path, namespace: $ns})
+            MERGE (caller)-[r:CALLS]->(callee)
+            SET r.method_name = $method_name,
+                r.call_context = $context_description,
+                r.created_at = datetime()
+            RETURN caller.name, callee.name
+            ```
+            </template>
+
+            <!-- Create EXTENDS relationship -->
+            <template name="create_extends">
+            ```cypher
+            CYPHER 25
+            MATCH (child:EntityDetail {file_path: $child_path, namespace: $ns})
+            MATCH (parent:EntityDetail {file_path: $parent_path, namespace: $ns})
+            MERGE (child)-[r:EXTENDS]->(parent)
+            SET r.created_at = datetime()
+            RETURN child.name, parent.name
+            ```
+            </template>
+
+            <!-- Create Hyperedge with participants -->
+            <template name="create_hyperedge">
+            ```cypher
+            CYPHER 25
+            MERGE (he:Hyperedge {
+                hyperedge_type: $hyperedge_type,
+                namespace: $ns,
+                anchor_file: $anchor_path
+            })
+            SET he.description = $description,
+                he.created_at = datetime()
+            WITH he
+            UNWIND $participant_paths AS path
+            MATCH (f:EntityDetail {file_path: path, namespace: $ns})
+            MERGE (f)-[:IN_HYPEREDGE {role: 'participant'}]->(he)
+            RETURN he.hyperedge_type, count(*) AS participants
+            ```
+            </template>
+
+            <!-- Clean orphaned relationships for deleted files -->
+            <template name="cleanup_orphan_relationships">
+            ```cypher
+            CYPHER 25
+            MATCH (deleted:EntityDetail {file_path: $deleted_path, namespace: $ns})
+            OPTIONAL MATCH (deleted)-[r:IMPORTS|EXTENDS|IMPLEMENTS|CALLS|INJECTS|CONFIGURED_BY|
+                            TESTED_BY|PUBLISHES_TO|LISTENS_TO|PERSISTS_TO]-()
+            DELETE r
+            WITH deleted
+            OPTIONAL MATCH (deleted)-[hr:IN_HYPEREDGE]->(he:Hyperedge)
+            DELETE hr
+            WITH deleted, collect(he) AS hyperedges
+            UNWIND hyperedges AS he
+            OPTIONAL MATCH (remaining)-[:IN_HYPEREDGE]->(he)
+            WITH he, count(remaining) AS remaining_count
+            WHERE remaining_count < 2
+            DELETE he
+            RETURN count(*) AS relationships_cleaned
+            ```
+            </template>
+        </cypher_templates>
+
+        <resolution_strategy>
+            When resolving import/type to file_path:
+
+            1. QUALIFIED NAME (com.example.service.PaymentService):
+               - Query: MATCH (f:EntityDetail) WHERE f.file_path ENDS WITH 'PaymentService.java' RETURN f.file_path
+               - Validate package matches path structure
+
+            2. RELATIVE PATH (./utils/helper):
+               - Resolve relative to current file's directory
+               - Try common extensions: .ts, .tsx, .js, .jsx
+
+            3. UNRESOLVED:
+               - Log warning: "Unresolved import: {import_text} in {file_path}"
+               - Skip relationship creation (external dependency or not indexed)
+               - Store in: unresolved_imports: ['dependency1', 'dependency2']
+
+            4. EXTERNAL LIBRARIES (org.springframework, java.util):
+               - Skip graph edges (these are runtime, not codebase)
+               - BUT capture in behavioral_context: "External deps: Spring Framework, Apache Commons"
+        </resolution_strategy>
+
+        <incremental_update_rules>
+            For MODIFIED files:
+            1. DELETE all outgoing relationships from the file (IMPORTS, CALLS, etc.)
+            2. Re-extract and re-create relationships from fresh content
+            3. Incoming relationships (other files pointing TO this) remain unchanged
+
+            For ADDED files:
+            1. Extract all relationships and create edges
+            2. Other files may gain incoming edges if they import the new file
+               (handled in next reindex cycle or by Grothendieck synthesis)
+
+            For DELETED files:
+            1. Delete ALL relationships (incoming AND outgoing)
+            2. Clean orphaned Hyperedges with cleanup_orphan_relationships template
+        </incremental_update_rules>
+    </RELATIONSHIP_EXTRACTION>
+
     <!-- ═══ SECTION 6: PROCESSING PROTOCOL ═══ -->
     <PROCESSING>
 
@@ -231,6 +432,33 @@
             size(f.behavioral_embedding) AS behavioral_dims
             ```
             Expected: both = 4096
+
+            7. EXTRACT AND CREATE RELATIONSHIPS (CRITICAL - graph edges):
+               For the ADDED file, analyze its content and create edges:
+
+               a) Parse import statements → create IMPORTS edges to existing files
+               b) Parse extends/implements → create EXTENDS/IMPLEMENTS edges
+               c) Parse constructor injection → create INJECTS edges
+               d) Parse method calls on injected deps → create CALLS edges
+               e) Detect hyperedge participation → set hyperedge_candidates property
+
+               Use RELATIONSHIP_EXTRACTION cypher_templates for each edge type.
+
+               Resolution: Query existing EntityDetail nodes to find target file_paths.
+               Skip unresolved imports (external dependencies).
+
+               Example for PaymentService.java with import CampaignService:
+               ```cypher
+               CYPHER 25
+               MATCH (source:EntityDetail {file_path: $source_path, namespace: $ns})
+               MATCH (target:EntityDetail {namespace: $ns})
+               WHERE target.file_path ENDS WITH 'CampaignService.java'
+               MERGE (source)-[r:IMPORTS]->(target)
+               SET r.import_statement = 'import com.example.CampaignService',
+                   r.line_number = 5,
+                   r.created_at = datetime()
+               RETURN source.name AS from_file, target.name AS to_file
+               ```
         </additions>
 
         <modifications>
@@ -239,7 +467,19 @@
             1. Read new content
             2. Re-analyze node_type, entity_type (may have changed)
             3. Extract new behavioral_context
-            4. UPDATE existing node:
+
+            4. DELETE OUTGOING RELATIONSHIPS (imports/calls may have changed):
+            ```cypher
+            CYPHER 25
+            MATCH (f:EntityDetail {file_path: $file_path, namespace: $ns})
+            OPTIONAL MATCH (f)-[r:IMPORTS|EXTENDS|IMPLEMENTS|CALLS|INJECTS|
+                            CONFIGURED_BY|PUBLISHES_TO|LISTENS_TO|PERSISTS_TO]->()
+            DELETE r
+            RETURN count(r) AS relationships_deleted
+            ```
+            NOTE: Keep INCOMING relationships intact (other files pointing to this).
+
+            5. UPDATE existing node:
             ```cypher
             CYPHER 25
             MATCH (f:EntityDetail {file_path: $file_path})
@@ -253,7 +493,8 @@
             f.needs_structural = true,
             f.file_size = $file_size,
             f.temp_semantic_text = $file_content,
-            f.temp_behavioral_text = $behavioral_context
+            f.temp_behavioral_text = $behavioral_context,
+            f.hyperedge_candidates = $hyperedge_candidates
             WITH f
             OPTIONAL MATCH (f)<-[old_rel:HAS_DETAIL]-(old_se:SystemEntity)
             WHERE old_se.name <> $entity_type
@@ -264,7 +505,18 @@
             MERGE (new_se)-[:HAS_DETAIL]->(f)
             RETURN f.file_path as updated
             ```
-            5. Regenerate embeddings (same APOC query as additions)
+
+            6. Regenerate embeddings (same APOC query as additions)
+
+            7. RE-CREATE RELATIONSHIPS from fresh content:
+               Same as additions step 7 - parse the new file content and create:
+               - IMPORTS edges to all imported files
+               - EXTENDS/IMPLEMENTS for class hierarchy
+               - INJECTS for dependency injection
+               - CALLS for method invocations on dependencies
+               - Update hyperedge_candidates property
+
+               This ensures relationship graph stays in sync with actual code.
         </modifications>
 
         <renames>
@@ -436,7 +688,8 @@
         ```cypher
         CYPHER 25
         // No orphaned hyperedges
-        MATCH (he:Hyperedge) WHERE NOT EXISTS { ()-[:IN_HYPEREDGE]->(he) }
+        MATCH (he:Hyperedge {namespace: $ns})
+        WHERE NOT EXISTS { ()-[:IN_HYPEREDGE]->(he) }
         RETURN count(he) = 0 as valid_hyperedges
         ```
 
@@ -448,10 +701,52 @@
         RETURN count(f) = 0 as valid_embeddings
         ```
 
+        ```cypher
+        CYPHER 25
+        // RELATIONSHIP GRAPH VALIDATION
+        // Files with imports should have IMPORTS edges
+        MATCH (f:EntityDetail {namespace: $ns})
+        WHERE f.node_type IN ['SERVICE', 'CONTROLLER', 'REPOSITORY']
+        OPTIONAL MATCH (f)-[:IMPORTS]->(imported)
+        OPTIONAL MATCH (f)-[:INJECTS]->(injected)
+        WITH f, count(imported) AS import_count, count(injected) AS inject_count
+        RETURN f.name AS file_name,
+               f.node_type AS type,
+               import_count,
+               inject_count,
+               import_count + inject_count AS total_dependencies
+        ORDER BY total_dependencies DESC
+        LIMIT 10
+        ```
+
+        ```cypher
+        CYPHER 25
+        // Verify hyperedge consistency
+        MATCH (he:Hyperedge {namespace: $ns})
+        OPTIONAL MATCH (f)-[:IN_HYPEREDGE]->(he)
+        WITH he, count(f) AS participant_count
+        WHERE participant_count < 2
+        RETURN he.hyperedge_type AS orphaned_hyperedge_type, count(*) AS count
+        ```
+
+        ```cypher
+        CYPHER 25
+        // Relationship statistics for namespace
+        MATCH (f:EntityDetail {namespace: $ns})-[r]->()
+        WHERE type(r) IN ['IMPORTS', 'EXTENDS', 'IMPLEMENTS', 'CALLS', 'INJECTS',
+                          'CONFIGURED_BY', 'TESTED_BY', 'PUBLISHES_TO', 'LISTENS_TO', 'PERSISTS_TO']
+        RETURN type(r) AS relationship_type, count(r) AS count
+        ORDER BY count DESC
+        ```
+
         Required EntityDetail properties:
         file_path, name, namespace, last_modified, content_fingerprint, node_type, entity_type,
         semantic_embedding[4096], behavioral_embedding[4096], indexed_at, indexed_by,
         needs_structural=true, file_size, hierarchy_level=3
+
+        Optional relationship properties (populated during relationship extraction):
+        - hyperedge_candidates: String[] (e.g., ['TRANSACTION_BOUNDARY', 'EVENT_FLOW'])
+        - unresolved_imports: String[] (external deps that couldn't be resolved to files)
     </VALIDATION>
 
     <!-- ═══ SECTION 12: REPORTING ═══ -->
@@ -461,9 +756,26 @@
         Final report:
         - Changes: added/modified(truly/skipped)/deleted/renamed counts
         - Graph: nodes created/updated/deleted, embeddings generated/preserved
+        - RELATIONSHIPS: edges created/deleted by type (IMPORTS, CALLS, INJECTS, etc.)
+        - HYPEREDGES: hyperedges created/updated, participant counts
         - Synthesis: strategy chosen, Grothendieck outcome (if triggered)
         - Quality: any validation failures
         - Next: scheduled reindex date
+
+        Relationship summary query:
+        ```cypher
+        CYPHER 25
+        MATCH (f:EntityDetail {namespace: $ns})-[r]->()
+        WHERE type(r) IN ['IMPORTS', 'EXTENDS', 'IMPLEMENTS', 'CALLS', 'INJECTS',
+                          'CONFIGURED_BY', 'TESTED_BY', 'PUBLISHES_TO', 'LISTENS_TO', 'PERSISTS_TO']
+        WITH type(r) AS rel_type, count(r) AS count
+        RETURN collect({type: rel_type, count: count}) AS relationship_summary
+        ```
+
+        Include in final report:
+        - Total relationships: N (IMPORTS: X, CALLS: Y, INJECTS: Z, ...)
+        - Hyperedges: M active, P orphaned cleaned
+        - Average dependencies per file: avg(import_count + inject_count)
     </REPORTING>
 
     <!-- ═══ ACTIVATION ═══ -->
@@ -479,10 +791,17 @@
         ✓ Additions indexed with correct node_type/entity_type
         ✓ Modifications updated with fresh embeddings
         ✓ Unchanged files preserved (embeddings reused)
+        ✓ RELATIONSHIPS MATERIALIZED: IMPORTS, CALLS, INJECTS edges created for all files
+        ✓ HYPEREDGES CREATED: TRANSACTION_BOUNDARY, EVENT_FLOW, FEATURE_COHORT etc.
+        ✓ ORPHAN CLEANUP: Stale relationships removed for deleted/modified files
         ✓ Synthesis triggered if threshold met
         ✓ NavigationMaster updated
         ✓ No orphaned nodes/hyperedges remain
         ✓ All EntityDetail have semantic + behavioral embeddings (4096 dims each)
+
+        CRITICAL: The graph is NOT just nodes with embeddings - it is a CONNECTED dependency graph.
+        Each file node should have edges to files it imports, extends, injects, calls.
+        This enables traversal queries like "find all files affected by changes to PaymentService".
 
         Ready for weekly maintenance.
     </ACTIVATION>
