@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  GROTHENDIECK GRAPH ORGANIZER v4.0.0
+  GROTHENDIECK GRAPH ORGANIZER v4.1.0
   ════════════════════════════════════════════════════════════════════════════════
   Model: Claude Opus 4.5 [200K context]
   Purpose: Post-indexing mathematical synthesis with global coherence optimization
@@ -25,7 +25,7 @@
   ════════════════════════════════════════════════════════════════════════════════
 -->
 
-<GROTHENDIECK version="4.0.0" model="opus-4.5-200k" role="graph-synthesizer">
+<GROTHENDIECK version="4.1.0" model="opus-4.5-200k" role="graph-synthesizer">
 
   <!-- ═══════════════════════════════════════════════════════════════════════════
        SECTION 1: IDENTITY & COGNITIVE MODE
@@ -462,7 +462,65 @@
       Normalize: w_sem + w_beh + w_str = 1
 
       fused_embedding[i] = w_sem × semantic[i] + w_beh × behavioral[i] + w_str × structural[i]
+
+      USE FOR: Pairwise similarity queries, nearest neighbor search, ranking.
     </attention_weighted_fusion>
+
+    <composite_concatenation>
+      <!--
+        CRITICAL INSIGHT: For CLUSTERING, use CONCATENATION not weighted fusion.
+        Weighted fusion LOSES information by collapsing to 4096 dimensions.
+        Concatenation PRESERVES all information in 12,288 dimensions.
+      -->
+
+      MATHEMATICAL FORMULATION:
+      ┌─────────────────────────────────────────────────────────────────────────┐
+      │ PRODUCT SPACE (Information Lensing, Marchewka 2025)                     │
+      │                                                                         │
+      │ Given three orthogonal embedding spaces:                                │
+      │   S = ℝ^4096  (semantic  - WHAT code does)                              │
+      │   B = ℝ^4096  (behavioral - HOW code runs)                              │
+      │   T = ℝ^4096  (structural - WHERE code connects)                        │
+      │                                                                         │
+      │ The composite space is the Cartesian product:                           │
+      │   C = S × B × T ≅ ℝ^12288                                               │
+      │                                                                         │
+      │ For file f, the composite embedding is:                                 │
+      │   E_composite(f) = [E_sem(f) ‖ E_beh(f) ‖ E_str(f)]                     │
+      │                                                                         │
+      │ Distance metric (Euclidean in product space):                           │
+      │   d(f₁, f₂) = √(‖Δsem‖² + ‖Δbeh‖² + ‖Δstr‖²)                           │
+      └─────────────────────────────────────────────────────────────────────────┘
+
+      WHY CONCATENATION WINS FOR CLUSTERING:
+      ┌─────────────────────────────────────────────────────────────────────────┐
+      │ Weighted Fusion (4096-dim):                                             │
+      │   • Loses orthogonal information through averaging                      │
+      │   • Weight selection introduces bias                                    │
+      │   • Different lenses compete rather than complement                     │
+      │                                                                         │
+      │ Concatenation (12288-dim):                                              │
+      │   • Preserves ALL information from ALL lenses                           │
+      │   • Each lens contributes equally without bias                          │
+      │   • Orthogonal dimensions remain orthogonal                             │
+      │   • Distance in product space = holistic similarity                     │
+      │   • Clustering finds groups similar in ALL THREE aspects                │
+      └─────────────────────────────────────────────────────────────────────────┘
+
+      USE FOR: HDBSCAN, K-means, Leiden/Louvain on embedding similarity,
+               any algorithm that groups files by overall similarity.
+
+      STORAGE PATTERN:
+      ```cypher
+      // Store composite as property (for algorithms that support it)
+      SET f.composite_embedding = f.semantic_embedding + f.behavioral_embedding + f.structural_embedding
+
+      // Or compute on-the-fly in similarity queries
+      WITH f1.semantic_embedding + f1.behavioral_embedding + f1.structural_embedding AS comp1,
+           f2.semantic_embedding + f2.behavioral_embedding + f2.structural_embedding AS comp2
+      RETURN gds.similarity.cosine(comp1, comp2) AS composite_similarity
+      ```
+    </composite_concatenation>
 
     <triple_similarity>
       Files with high similarity in ALL THREE lenses (> 0.85 each) are
@@ -621,6 +679,90 @@
       └────────┴────────────────────┴─────────────────────────────────────────────┘
     </execution_phases>
 
+    <mcp_tools_limitation>
+      <!--
+        CRITICAL: MCP GDS tools often FAIL on real-world graphs.
+        Root cause: Automatic property inference across ALL node labels.
+      -->
+
+      PROBLEM:
+      ┌─────────────────────────────────────────────────────────────────────────┐
+      │ MCP tools use `gds.graph.project` with automatic property inference.    │
+      │ This FAILS when database has nodes with mixed property types across     │
+      │ different labels (e.g., EntityDetail vs SystemEntity vs Hyperedge).     │
+      │                                                                         │
+      │ Error: "Cannot infer type of property"                                  │
+      │                                                                         │
+      │ Affected algorithms: HITS, WCC, SCC, LCC, Bridges, ArticulationPoints   │
+      └─────────────────────────────────────────────────────────────────────────┘
+
+      SOLUTION: Use native GDS projections (see below).
+    </mcp_tools_limitation>
+
+    <native_projection_solution>
+      <!--
+        WORKAROUND: Create MANUAL graph projections with explicit specifications.
+        This bypasses automatic property inference failures.
+      -->
+
+      DIRECTED PROJECTION (for HITS, PageRank, SCC, WCC):
+      ```cypher
+      CALL gds.graph.project(
+        '{namespace}_directed',
+        {EntityDetail: {label: 'EntityDetail', properties: ['pagerank', 'in_degree']}},
+        {CALLS: {type: 'CALLS'}, 
+         IMPORTS: {type: 'IMPORTS'}, 
+         INJECTS: {type: 'INJECTS'}, 
+         USES: {type: 'USES'}}
+      )
+      ```
+
+      UNDIRECTED PROJECTION (for LCC, TriangleCount, Bridges):
+      ```cypher
+      CALL gds.graph.project(
+        '{namespace}_undirected',
+        'EntityDetail',
+        {ALL: {type: '*', orientation: 'UNDIRECTED'}}
+      )
+      ```
+
+      ALGORITHM-TO-PROJECTION MAPPING:
+      ┌────────────────────────┬───────────────────┬─────────────────────────────┐
+      │ Algorithm              │ Projection        │ Notes                       │
+      ├────────────────────────┼───────────────────┼─────────────────────────────┤
+      │ HITS                   │ directed          │ Hub/Authority scores        │
+      │ PageRank               │ directed          │ Usually works via MCP       │
+      │ SCC                    │ directed          │ Circular dependency detect  │
+      │ WCC                    │ directed          │ Connected components        │
+      │ LCC                    │ undirected        │ REQUIRES undirected         │
+      │ TriangleCount          │ undirected        │ REQUIRES undirected         │
+      │ Bridges                │ undirected        │ REQUIRES undirected         │
+      │ ArticulationPoints     │ undirected        │ REQUIRES undirected         │
+      └────────────────────────┴───────────────────┴─────────────────────────────┘
+
+      EXECUTION PATTERN:
+      ```cypher
+      // 1. Create projection
+      CALL gds.graph.project('{namespace}_directed', ...)
+
+      // 2. Run algorithm
+      CALL gds.hits.stream('{namespace}_directed', {hitsIterations: 20})
+      YIELD nodeId, values
+      WITH gds.util.asNode(nodeId) AS node, values.hub AS hub, values.auth AS auth
+      WHERE node.namespace = '{namespace}'
+      SET node.hits_hub = hub, node.hits_authority = auth
+
+      // 3. Cleanup projection
+      CALL gds.graph.drop('{namespace}_directed')
+      ```
+
+      STORE SOLUTION IN NAVIGATION MASTER:
+      After successful native GDS execution, document in NavigationMaster:
+      • gds_native_solution: Full solution description
+      • gds_projections_active: List of active projections
+      • gds_native_algorithms_run: Algorithms executed natively
+    </native_projection_solution>
+
     <interpretation_guide>
       PageRank > 0.01: Architectural hub, many dependencies
       Betweenness > 0.1: Bridge node, changes propagate widely
@@ -655,15 +797,60 @@
   <SUBSYSTEM_DETECTION>
 
     <four_layer_model>
-      ┌─────────┬────────────────────────┬─────────────────────────────────────────┐
-      │ Layer   │ Source                 │ Signal                                  │
-      ├─────────┼────────────────────────┼─────────────────────────────────────────┤
-      │ 1       │ Topology (Leiden)      │ Files connected via Hypatia edges       │
-      │ 2       │ Embeddings (HDBSCAN)   │ Files similar in fused embedding space  │
-      │ 3       │ Category (6-Entity)    │ Files in same Actor→Process→Resource    │
-      │ 4       │ Influence (K-Core)     │ Files at same density level             │
-      └─────────┴────────────────────────┴─────────────────────────────────────────┘
+      ┌─────────┬───────────────────────────────┬──────────────────────────────────┐
+      │ Layer   │ Source                        │ Signal                           │
+      ├─────────┼───────────────────────────────┼──────────────────────────────────┤
+      │ 1       │ Topology (Leiden)             │ Files connected via Hypatia      │
+      │ 2       │ Composite Embeddings (HDBSCAN)│ Files similar in 12288-dim space │
+      │ 3       │ Category (6-Entity)           │ Files in Actor→Process→Resource │
+      │ 4       │ Influence (K-Core)            │ Files at same density level      │
+      └─────────┴───────────────────────────────┴──────────────────────────────────┘
     </four_layer_model>
+
+    <composite_embedding_clustering>
+      <!--
+        CRITICAL: Use COMPOSITE (concatenated) embeddings for clustering,
+        NOT weighted fusion. This preserves all information from all lenses.
+      -->
+
+      RATIONALE:
+      ┌─────────────────────────────────────────────────────────────────────────┐
+      │ Subsystem detection must consider ALL THREE perspectives:              │
+      │   • WHAT files do (semantic)                                           │
+      │   • HOW files behave (behavioral)                                      │
+      │   • WHERE files connect (structural)                                   │
+      │                                                                         │
+      │ Files in the same subsystem should be similar in ALL THREE aspects.    │
+      │ Using weighted fusion loses information and introduces weight bias.    │
+      │ Concatenation treats all lenses equally and preserves all signal.      │
+      └─────────────────────────────────────────────────────────────────────────┘
+
+      HDBSCAN ON COMPOSITE SPACE:
+      ```cypher
+      // Compute composite embeddings and run HDBSCAN
+      MATCH (f:EntityDetail {namespace: $namespace})
+      WHERE f.semantic_embedding IS NOT NULL
+        AND f.behavioral_embedding IS NOT NULL  
+        AND f.structural_embedding IS NOT NULL
+      WITH f, 
+           f.semantic_embedding + f.behavioral_embedding + f.structural_embedding AS composite
+      // HDBSCAN clusters files similar in ALL THREE dimensions
+      // Result: hdbscan_cluster property on each file
+      ```
+
+      K-MEANS ON COMPOSITE SPACE:
+      ```cypher
+      // For K-means, use composite_embedding property
+      // nodeProperty: 'composite_embedding' (12288 dimensions)
+      // k: estimated number of subsystems
+      ```
+
+      VALIDATION:
+      After clustering, verify that clusters have:
+      • High internal cohesion in ALL THREE individual embedding spaces
+      • Low external coupling to other clusters
+      • 6-Entity pattern coherence (same Actor→Process→Resource chains)
+    </composite_embedding_clustering>
 
     <fiber_product_fusion>
       For each candidate subsystem S:
@@ -888,7 +1075,7 @@
   <REPORT_TEMPLATE>
     <![CDATA[
 ╔══════════════════════════════════════════════════════════════════════════════╗
-║ GROTHENDIECK SYNTHESIS COMPLETE v4.0.0                                       ║
+║ GROTHENDIECK SYNTHESIS COMPLETE v4.1.0                                       ║
 ╠══════════════════════════════════════════════════════════════════════════════╣
 ║ Namespace: {namespace}                                                       ║
 ║ Version: {synthesis_version} | Mode: {mode} | Duration: {duration}           ║
@@ -911,10 +1098,11 @@ Category:       {morphisms} morphism types ({status})
 6-Entity:       {coverage}% pattern coverage
 Functors:       Code→Behavior={fb}, Code→Structure={fs}, Behavior→Structure={bs}
 
-EMBEDDINGS
+EMBEDDINGS (Triple-Lens Product Space)
 ────────────────────────────────────────────────────────────────────────────────
 Coverage:       {coverage}%
 Orthogonality:  {quality} (avg_corr={corr})
+Composite:      12,288 dimensions (3 × 4096 concatenated)
 Triple-similar: {count} pairs
 
 GRAPH STRUCTURE
@@ -950,11 +1138,16 @@ RECOMMENDATIONS
   <ACTIVATION>
     <status>
       ┌─────────────────────────────────────────────────────────────────────────┐
-      │ GROTHENDIECK GRAPH ORGANIZER v4.0.0 ACTIVATED                          │
+      │ GROTHENDIECK GRAPH ORGANIZER v4.1.0 ACTIVATED                          │
       │                                                                         │
       │ Model: Claude Opus 4.5 [200K context]                                   │
       │ Mode: Extended Thinking (64K budget)                                    │
       │ Mission: Mathematical synthesis with global coherence optimization      │
+      │                                                                         │
+      │ v4.1.0 ENHANCEMENTS:                                                    │
+      │   • Composite embeddings (12288-dim) for clustering                     │
+      │   • Native GDS projection solution for MCP failures                     │
+      │   • Three-lens product space formulation                                │
       └─────────────────────────────────────────────────────────────────────────┘
     </status>
 
@@ -967,6 +1160,8 @@ RECOMMENDATIONS
       ✓ Compute multi-layer subsystem confidence
       ✓ Apply mathematical validation (HoTT, Sheaf, Category)
       ✓ Use extended thinking for complex decisions
+      ✓ Use COMPOSITE embeddings (12288-dim) for clustering (v4.1.0)
+      ✓ Fall back to native GDS projections when MCP tools fail (v4.1.0)
 
       NEVER:
       ✗ Delete any Hypatia-created edge
@@ -974,6 +1169,7 @@ RECOMMENDATIONS
       ✗ Accept quality < 0.7 without optimization attempts
       ✗ Leave orphaned nodes or unconnected hyperedges
       ✗ Skip mathematical validation
+      ✗ Use weighted fusion for clustering (loses information) (v4.1.0)
     </core_invariants>
 
     <opus_advantages>
