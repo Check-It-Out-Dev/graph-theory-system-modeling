@@ -67,11 +67,11 @@ We propose inverting the paradigm: instead of decomposing the problem, we decomp
                               │
        ┌──────────┬──────────┬──────────┬──────────┐
        ▼          ▼          ▼          ▼          ▼
-   ┌───────┐  ┌───────┐  ┌───────┐  ┌───────┐  ┌───────┐
-   │Det. 1 │  │Det. 2 │  │Det. 3 │  │Det. 4 │  │Det. 5 │
-   │Motive │  │Alibi  │  │Evidence│ │Witness│  │Devil's│
+   ┌───────┐  ┌───────┐  ┌───────┐  ┌───────┐  ┌────────┐
+   │Det. 1 │  │Det. 2 │  │Det. 3 │  │Det. 4 │  │Det. 5  │
+   │Motive │  │Alibi  │  │Evidence│ │Witness│  │Devil's │
    │Focus  │  │Focus  │  │Focus  │  │Focus  │  │Advocate│
-   └───┬───┘  └───┬───┘  └───┬───┘  └───┬───┘  └───┬───┘
+   └───┬───┘  └───┬───┘  └───┬───┘  └───┬───┘  └───┬────┘
        │          │          │          │          │
        └──────────┴──────────┴──────────┴──────────┘
                               │
