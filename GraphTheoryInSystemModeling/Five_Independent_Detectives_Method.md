@@ -1030,5 +1030,9 @@ Structure your findings as:
 
 **Document Version**: 1.0
 **Author**: Norbert Marchewka
-**Date**: December 2025
+**Date**: December 21, 2025
 **License**: MIT
+
+---
+
+*Written 4 days before Christmas 🎄, when even detectives take a break.*
