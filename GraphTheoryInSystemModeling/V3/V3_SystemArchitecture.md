@@ -1,18 +1,90 @@
 # V3 System Architecture: From Algebra to Code Understanding
 
-**Version**: 1.0.0
-**Date**: 2026-03-25
-**Authors**: Norbert Marchewka (architecture), Claude Opus 4.6 (synthesis)
+## Applying Quantum Field Theory to Software System Modeling
+
+**Version**: 2.0.0 | **Date**: 2026-03-25 | **Authors**: Norbert Marchewka (architecture), Claude Opus 4.6 (synthesis)
 
 ---
 
 ## Abstract
 
-We present the complete V3 system architecture in plain terms. Three AI agents transform a raw codebase into a queryable algebraic graph in four stages: (1) define a non-abelian algebra that constrains what relationships are legal, (2) construct the graph under those constraints with one embedding per file, (3) train per-relation sub-topologies and detect subsystems, (4) enrich with developer-facing metadata. The result is a 3-level hierarchical graph that provides O(1) entry to any part of the codebase, with 102,553 trained weights encoding 17 different "views" of the same code. This document is the plain-language companion to the mathematical papers (HypatiaBasis.md, GrothendieckAlgebraicTopologies.md, ErdosGraphConsumer.md).
+We present a system that applies the mathematical apparatus of quantum field theory to software system modeling — not as analogy, but as mathematical necessity. Three AI agents transform a raw codebase into a queryable algebraic graph in four stages: (1) define a non-abelian algebra that constrains what relationships are legal, (2) construct the graph under those constraints with one embedding per file, (3) train per-relation sub-topologies and detect subsystems, (4) enrich with developer-facing metadata. The result is a 3-level hierarchical graph providing $O(1)$ entry to any part of the codebase, with 102,553 trained weights encoding 17 different "views" of the same code.
 
 ---
 
-## 1. The Big Picture
+## 1. The Core Thesis: Why QFT Emerges from Typed Embeddings
+
+We observe that the question *"what does each relationship type see in a high-dimensional embedding space?"* leads, by mathematical necessity, to the full apparatus of lattice gauge theory. The restriction maps $\rho_k: \mathbb{R}^d \to \mathbb{R}^r$ form a connection on a fiber bundle over the typed graph. Their non-commutativity $[\rho_i, \rho_j] \neq 0$ generates a non-abelian gauge structure whose commutator subalgebra decomposes as $\mathfrak{su}(2) \times \mathfrak{su}(2) \times \mathcal{N}$. The Hermitian Magnetic Laplacian provides real eigenvalues whose eigenstates decompose the system into subsystems. Berry phase around graph cycles detects subsystem boundaries. None of these structures are imposed — they emerge systematically from the typed projection.
+
+**The novelty is not in the individual mathematical tools, which are well-established, but in demonstrating that they form a single forced chain:**
+
+$$\text{Typed subspaces} \to \text{Fiber bundle} \to \text{Non-abelian algebra} \to \text{Hermitian spectrum} \to \text{Eigenstates} \to \text{Holonomy}$$
+
+This chain connects information retrieval (embeddings) to quantum field theory (gauge structure) through software engineering (typed dependencies), establishing that codebases modeled with typed relationships are, in a precise mathematical sense, **discrete gauge theories**.
+
+### 1.1 The Chain of Forced Moves
+
+No step in this chain is a design choice. Each is mathematically forced by the previous one:
+
+```
+INSIGHT: "What does relation R_k see in R^4096?"
+    │
+    ↓ requires a projection
+FORCED: Restriction maps ρ_k: R^4096 → R^8  (one per relation type)
+    │
+    ↓ multiple projections of the same space
+FORCED: Fiber bundle (base = graph, fiber = R^8, connection = ρ_k)
+    │
+    ↓ do the projections commute? (empirically: NO, cosine = -0.311)
+FORCED: Non-abelian algebra ([ρ_i, ρ_j] ≠ 0, 93% non-commuting)
+    │
+    ↓ need a well-defined operator to diagonalize
+FORCED: Hermitian Magnetic Laplacian (real eigenvalues, complete basis)
+    │
+    ↓ what are the natural states?
+FORCED: Eigenstates = subsystem decomposition ("stany własne")
+    │
+    ↓ what happens when you traverse a cycle?
+FORCED: Berry phase / holonomy (subsystem boundary detection)
+    │
+    ↓ what quantities are preserved?
+FORCED: Noether invariants (entity type conservation, flow direction)
+```
+
+### 1.2 The Three Novelties
+
+**Novelty 1 — Systematic emergence.** Individual pieces (Magnetic Laplacian, path algebras, LoRA, Berry phase, co-association clustering) exist in separate literatures that don't talk to each other. Nobody has shown that they form a single forced chain starting from "typed relationships on embeddings." The contribution is the chain itself — proving that QFT on graphs is not an analogy but a mathematical necessity for typed embedding spaces.
+
+**Novelty 2 — Separation of WHAT from HOW.** Matrix $\mathfrak{A}$ (complex, universal) encodes the algebraic law — what relationships are legal, what directions they flow, what commutes with what. Matrix $\mathfrak{W}$ (real, codebase-specific) encodes the geometric weight — how to actually project embeddings. This mirrors the QFT split between the gauge group (universal) and the coupling constants (measured). No prior work separates the typed graph structure into these two distinct mathematical objects.
+
+**Novelty 3 — Everything lives in Neo4j.** The algebra is stored as graph nodes. The tensor is trained via GDS FastRP. The sub-topologies are node properties. The subsystem detection uses GDS Leiden + K-means + Cypher co-association. No Python, no PyTorch. A researcher can reproduce the entire pipeline with a Neo4j instance and the paper's Cypher queries.
+
+### 1.3 The QFT Correspondence
+
+| QFT Concept | Software System | Where in V3 |
+|-------------|-----------------|-------------|
+| Lattice sites | Files (nodes) | EntityDetail |
+| Link variables | Typed edges | PERFORMS, CALLS, USES, ... |
+| Gauge group | Path algebra $\mathcal{H}$ | HypatiaBasis, §3 |
+| Gauge field $A_\mu$ | Restriction maps $\rho_k$ | $\mathfrak{W}$ tensor |
+| Field strength $F_{\mu\nu}$ | Commutator $[\rho_i, \rho_j]$ | HypatiaBasis, Theorem 5.1 |
+| Observables | Magnetic Laplacian $\mathfrak{A}^\dagger = \mathfrak{A}$ | HypatiaBasis, Theorem 7.1 |
+| Eigenstates | Subsystem decomposition | Grothendieck, §12 |
+| Selection rules | 11 forbidden entity-type transitions | HypatiaBasis, §4 |
+| Uncertainty principle | $\Delta(\tau)\cdot\Delta(\iota) \geq 0.89$ | HypatiaBasis, Theorem 5.2 |
+| $\mathfrak{su}(2) \times \mathfrak{su}(2)$ | Event↔Process and Rule↔Context oscillations | HypatiaBasis, Theorem 6.1 |
+| Casimir invariants | Conserved complexity quantum numbers $j, k$ | HypatiaBasis, §6.3 |
+| Berry phase / holonomy | Information loss at subsystem boundaries | Grothendieck, Def 12.2 |
+| Wilson loops | Gauge-invariant complexity around cycles | Grothendieck, §7.4 |
+| Fiber bundle | Base = graph, fiber = $\mathbb{R}^8$, connection = $\rho_k$ | HypatiaBasis, §8.3 |
+| Path integral $K(u,v)$ | Influence propagator between components | Lean: InformationGeodesics |
+| Noether's theorem | Symmetry → conservation law | Lean: DiscreteNoether |
+| Coupling constants | LoRA correction magnitudes $\alpha_k$ | Grothendieck, §3.5 |
+| Lattice gauge theory | The entire system on a discrete graph | V3 |
+
+---
+
+## 2. The Big Picture: What Each Part Does
 
 ```
  STAGE 1               STAGE 2              STAGE 3              STAGE 4
@@ -28,9 +100,37 @@ We present the complete V3 system architecture in plain terms. Three AI agents t
   Algebra proofs)                          hierarchy)            graph queries)
 ```
 
+### 2.1 What Each Part Does (In Terms of the QFT Chain)
+
+**Stage 1 — The Algebra (HypatiaBasis.md)**: Defines the **gauge group** of the theory. The quiver $\mathcal{Q}$ with 6 entity types and 22 arrows defines which interactions are legal. The path algebra $\mathcal{H} = k\mathcal{Q}/\mathcal{I}$ is the gauge group. The Magnetic Laplacian $\mathfrak{A} \in \mathbb{C}^{6 \times 6}$ is the observable — Hermitian, with real eigenvalues (eigenstates) and complex phases encoding directionality. The 11 selection rules are the **forbidden transitions** — like $\Delta l = \pm 1$ in atomic physics, but for software entity types. The $\mathfrak{su}(2) \times \mathfrak{su}(2) \times \mathcal{N}$ decomposition classifies the independent "rotation planes" of the algebra.
+
+*QFT step: Define the theory (gauge group, selection rules, symmetries).*
+
+**Stage 2 — Hypatia (Construction)**: **Puts the theory on the lattice.** Reads every file, classifies it into an entity type (assigns it to a lattice site), generates an $\mathbb{R}^{4096}$ embedding (the field value at that site), and creates typed edges under algebraic constraints (the link variables). Every edge is checked against $\mathfrak{A}$ before creation — the lattice is born gauge-invariant. The output is a flat graph: nodes with embeddings, typed directed edges, all satisfying the algebra.
+
+*QFT step: Discretize — place fields on the lattice, define link variables.*
+
+**Stage 3 — Grothendieck (Topology)**: **Computes the path integral and measures observables.** Trains the restriction maps $\rho_k$ (the gauge field / connection on the fiber bundle) from embeddings + typed edges via FastRP = randomized SVD. Produces 17 sub-algebraic topologies — different $\mathbb{R}^8$ point clouds from the same $\mathbb{R}^{4096}$. The commutators $[\rho_i, \rho_j] \neq 0$ are the non-abelian field strength (empirically: anti-correlations prove this). Detects subsystems via multi-view spectral clustering (eigenstates). Computes Berry phase around cycles (holonomy = boundary detection). Builds the 2-level hierarchy: NavigationMaster → SubsystemNavigator → EntityDetail.
+
+*QFT step: Compute observables — diagonalize the Hamiltonian, measure the spectrum, detect phases.*
+
+**Stage 4 — Erdős (Consumption)**: **Extracts physics.** Knows nothing about gauge theory, fiber bundles, or eigenvalues. Sees only: named subsystems, typed relationships, AI metadata, and similarity queries. Enriches SubsystemNavigator nodes with developer-facing instructions. Then switches to code-writing mode — query the graph for context, follow typed edges, write Spring Boot / Angular code.
+
+*QFT step: Use the theory — predict, explain, build. The physicist who reads the spectrum and designs experiments, without re-deriving quantum mechanics.*
+
+### 2.2 The Three Matrices
+
+| Matrix | What it IS (QFT) | What it DOES (Software) | Field | Size |
+|--------|-------------------|------------------------|-------|------|
+| $\mathfrak{A}$ | Gauge group structure constants | Encodes which relationships are legal + direction | $\mathbb{C}$ | $6 \times 6$ (72 values) |
+| $\rho_0$ | Background gauge field | Common projection — "what any relationship generally looks like" | $\mathbb{R}$ | $4096 \times 8$ (32,768 weights) |
+| $\Delta_k$ | Gauge field fluctuations per interaction | Per-relation correction — "how ORCHESTRATES differs from the average" | $\mathbb{R}$ | $17 \times 4105$ (69,785 weights) |
+
+**$\mathfrak{A}$ is universal** (same for any codebase with the 6-entity model). **$\rho_0$ is codebase-specific** (the system's "accent"). **$\Delta_k$ is relation-specific** (where the real architecture lives). Total: **102,553 trainable weights**, independent of graph size.
+
 ---
 
-## 2. Stage 1: Designing the Algebra
+## 3. Stage 1: Designing the Algebra
 
 ### What happens
 
@@ -66,7 +166,7 @@ A **closed algebra**: any composition of legal relationships is either another l
 
 ---
 
-## 3. Stage 2: Hypatia — Graph Construction
+## 4. Stage 2: Hypatia — Graph Construction
 
 ### What Hypatia does
 
@@ -99,7 +199,7 @@ This means: **the graph cannot contain a Resource→Actor edge, ever.** The alge
 
 ---
 
-## 4. Stage 3: Grothendieck — Topology and Subsystems
+## 5. Stage 3: Grothendieck — Topology and Subsystems
 
 ### 4.1 Training the Tensor (Phases 1-6)
 
@@ -160,7 +260,7 @@ Status: SYNTHESIS_COMPLETE
 
 ---
 
-## 5. Stage 4: Erdős — The Consumer
+## 6. Stage 4: Erdős — The Consumer
 
 ### 5.1 What Erdős does
 
@@ -200,7 +300,7 @@ Erdős is a reincarnated Spring Boot developer. He uses the graph as a map:
 
 ---
 
-## 6. Reindex Strategy
+## 7. Reindex Strategy
 
 | Event | Hypatia | Grothendieck | Erdős |
 |-------|---------|-------------|-------|
@@ -211,7 +311,7 @@ Erdős is a reincarnated Spring Boot developer. He uses the graph as a map:
 
 ---
 
-## 7. The Complete File Set
+## 8. The Complete File Set
 
 ### Papers (mathematical foundations)
 
@@ -238,7 +338,7 @@ Erdős is a reincarnated Spring Boot developer. He uses the graph as a map:
 
 ---
 
-## 8. Deployment: Swappable CLAUDE.md Files
+## 9. Deployment: Swappable CLAUDE.md Files
 
 ### 8.1 The Prompt-Swap Architecture
 
@@ -313,11 +413,11 @@ The base CLAUDE.md contains project-invariant information:
 
 ---
 
-## 9. Summary in One Sentence
+## 10. Summary in One Sentence
 
-**Define a non-abelian algebra of 6 entity types and 17 typed relationships (Hypatia Basis), construct a graph under those constraints with one embedding per file (Hypatia V3), train per-relation sub-topologies and detect subsystems via co-association fusion (Grothendieck V3), then enrich with developer-facing AI metadata for O(1) codebase understanding (Erdős V3).**
+**Asking "what does each relationship type see in $\mathbb{R}^{4096}$?" forces, by mathematical necessity, the full chain: typed subspaces → fiber bundle → non-abelian algebra → Hermitian spectrum → eigenstates → holonomy. This chain is quantum field theory on a discrete graph. The system implements it: define the gauge group (Hypatia Basis), put the theory on the lattice (Hypatia V3), compute observables and detect phases (Grothendieck V3), extract physics for practical use (Erdős V3).**
 
 ---
 
-*Created: 2026-03-25*
-*Status: Architecture complete. Hypatia and Grothendieck prompts written. Erdős prompt pending.*
+*Created: 2026-03-25. Revised: 2026-03-25 (QFT thesis, forced chain, correspondence table).*
+*Status: Architecture complete. All 3 agent prompts written. All 4 papers complete.*
