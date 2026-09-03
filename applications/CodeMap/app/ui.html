@@ -1,0 +1,236 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CodeMap</title>
+<style>
+:root{
+  --bg:#0e1116; --panel:#151922; --panel2:#1b212b; --line:#262d38;
+  --text:#fbf9f4; --dim:#98a2b0; --accent:#ff5a36; --dsl:#fcd34d;
+  --ok:#6ee7b7; --warn:#e8a44d; --err:#f87171; --api:#c4b5fd; --big:#4fd6c0;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);
+  font:15px/1.55 -apple-system,"Segoe UI",system-ui,sans-serif;
+  display:flex;flex-direction:column;height:100vh}
+code,.mono{font-family:"JetBrains Mono",ui-monospace,Consolas,"Cascadia Mono",monospace}
+
+header{display:flex;align-items:center;gap:1rem;padding:.7rem 1.2rem;
+  border-bottom:1px solid var(--line);background:var(--panel)}
+header h1{font-size:1.02rem;margin:0;letter-spacing:.4px}
+header h1 b{color:var(--accent);font-weight:600}
+.chips{display:flex;gap:.45rem;margin-left:auto;flex-wrap:wrap}
+.chip{font-size:.72rem;padding:.18rem .55rem;border-radius:99px;
+  border:1px solid var(--line);color:var(--dim);white-space:nowrap}
+.chip.on{color:var(--ok);border-color:rgba(110,231,183,.35)}
+.chip.off{color:var(--dim)}
+.chip.api{color:var(--api);border-color:rgba(196,181,253,.35)}
+
+#stream{flex:1;overflow-y:auto;padding:1.2rem;scroll-behavior:smooth}
+.wrap{max-width:960px;margin:0 auto}
+.msg{margin:.8rem 0;animation:in .18s ease-out}
+@keyframes in{from{opacity:0;transform:translateY(4px)}to{opacity:1}}
+.q{max-width:75%;margin-left:auto;background:#2b1d17;border:1px solid #55311f;
+  padding:.55rem .9rem;border-radius:14px 14px 4px 14px;white-space:pre-wrap}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+  padding:.8rem 1rem;white-space:pre-wrap;overflow-x:auto}
+.card .tag{display:inline-block;font-size:.68rem;letter-spacing:.8px;
+  padding:.1rem .5rem;border-radius:4px;margin-bottom:.45rem;font-weight:600}
+.tag.cache{background:#12312a;color:var(--ok)}
+.tag.model{background:#12312a;color:var(--ok)}
+.tag.l1{background:#2a2433;color:#c9a7e8}
+.tag.step{background:#33290f;color:var(--dsl)}
+.tag.api{background:rgba(167,139,250,.16);color:var(--api)}
+.tag.big{background:rgba(79,214,192,.14);color:var(--big)}
+.tag.err{background:#3a1a1a;color:var(--err)}
+.chip.big{color:var(--big);border-color:rgba(79,214,192,.35)}
+.digs{margin:.15rem 0 .3rem 1rem;font-size:.74rem;color:var(--dim);white-space:pre-wrap}
+.dsl{color:var(--dsl)}
+.dim{color:var(--dim)}
+.traj{margin:.3rem 0 .1rem;padding-left:.2rem;border-left:2px solid var(--line)}
+.traj div{padding:.1rem .6rem;color:var(--dim)}
+.traj .mono{color:var(--dsl)}
+.ans{margin-top:.55rem}
+pre.mm{background:var(--panel2);border:1px solid var(--line);border-radius:8px;
+  padding:.7rem;margin:.5rem 0 0;font-size:.82rem;color:#9fd4e8;overflow-x:auto}
+.affs{margin-top:.6rem;display:flex;gap:.4rem;flex-wrap:wrap}
+.aff{font-size:.78rem;padding:.22rem .6rem;border-radius:7px;cursor:pointer;
+  background:var(--panel2);border:1px solid var(--line);color:var(--accent)}
+.aff:hover{border-color:var(--accent)}
+.offer{margin-top:.7rem;background:rgba(167,139,250,.08);border:1px solid rgba(196,181,253,.3);
+  border-radius:10px;padding:.7rem .9rem}
+.offer .oh{color:var(--api);font-weight:600;font-size:.8rem;letter-spacing:.6px}
+.offer select,.offer button{font:inherit;font-size:.8rem;border-radius:7px;
+  border:1px solid rgba(196,181,253,.3);background:var(--panel2);color:var(--text);
+  padding:.28rem .6rem;margin:.45rem .35rem 0 0;cursor:pointer}
+.offer button.use{background:#372a66;color:#e2dcff}
+.offer button.use:hover{background:#443481}
+.offer button:disabled{opacity:.45;cursor:wait}
+.think{color:var(--dim);font-style:italic}
+.think::after{content:'…';animation:dots 1.2s steps(4,end) infinite}
+@keyframes dots{0%{content:''}33%{content:'.'}66%{content:'..'}100%{content:'...'}}
+
+footer{padding: .8rem 1.2rem 1rem;border-top:1px solid var(--line);background:var(--panel)}
+.bar{max-width:960px;margin:0 auto;display:flex;gap:.5rem}
+#q{flex:1;padding:.65rem .9rem;border-radius:10px;border:1px solid var(--line);
+  background:var(--panel2);color:var(--text);font:inherit;outline:none}
+#q:focus{border-color:var(--accent)}
+#go{padding:.65rem 1.3rem;border-radius:10px;border:0;cursor:pointer;
+  background:var(--accent);color:#fff;font-weight:700}
+#go:hover{filter:brightness(1.1)}
+.hint{max-width:960px;margin:.45rem auto 0;font-size:.72rem;color:var(--dim)}
+</style>
+
+<header>
+  <h1><b>Code</b>Map <span class="dim">· navigator v1</span></h1>
+  <div class="chips" id="chips"><span class="chip">connecting…</span></div>
+</header>
+
+<div id="stream"><div class="wrap" id="log"></div></div>
+
+<footer>
+  <div class="bar">
+    <input id="q" autofocus
+      placeholder="Ask about the code — or type CMDSL: map(), impact(UserRepository.java)…">
+    <select id="nav" title="navigator"
+      style="font:inherit;font-size:.8rem;border-radius:10px;border:1px solid var(--line);
+             background:var(--panel2);color:var(--text);padding:.3rem .5rem">
+      <option value="auto">4B navigator</option>
+    </select>
+    <button id="go" onclick="go()">ask</button>
+  </div>
+  <div class="hint">cache → local 4B navigator → your consent → API. The 80B tier is local too: graph-native Cypher, nothing leaves your machine.</div>
+</footer>
+
+<script>
+const log = document.getElementById('log'), q = document.getElementById('q'),
+      stream = document.getElementById('stream');
+q.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+
+function esc(s){ return String(s ?? '').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+function el(html, cls){ const d = document.createElement('div');
+  d.className = 'msg ' + (cls || ''); d.innerHTML = html; log.appendChild(d);
+  stream.scrollTop = stream.scrollHeight; return d; }
+function affs(list){ return (list||[]).length
+  ? `<div class="affs">${list.map(a=>`<span class="aff mono" onclick="step('${esc(a)}')">${esc(a)}</span>`).join('')}</div>` : ''; }
+function prose(t){
+  t = String(t ?? '');
+  const m = t.match(/```mermaid\n([\s\S]*?)```/);
+  if (m) return esc(t.slice(0, m.index)) + `<pre class="mm">${esc(m[1])}</pre>` + esc(t.slice(m.index + m[0].length));
+  return esc(t);
+}
+
+async function status(){
+  try {
+    const s = await (await fetch('/status')).json();
+    document.getElementById('chips').innerHTML =
+      `<span class="chip on">pack · ${s.entities} files</span>` +
+      `<span class="chip ${s.local_model?'on':'off'}">local model ${s.local_model?'ready':'absent'}</span>` +
+      `<span class="chip ${s.big_model?'big':'off'}">big local ${s.big_model?'ready':'absent'}</span>` +
+      `<span class="chip ${s.api_tier?'api':'off'}">API tier ${s.api_tier?'ready':'no key'}</span>` +
+      `<span class="chip">frozen ${esc(s.frozen)}</span>`;
+    window._api = s.api_tier; window._big = s.big_model; window._bigName = s.big_name;
+    if (s.big_model && !document.querySelector('#nav option[value="big"]')){
+      const o = document.createElement('option');
+      o.value = 'big'; o.textContent = '80B graph-native';
+      document.getElementById('nav').appendChild(o);
+    }
+  } catch { document.getElementById('chips').innerHTML = '<span class="chip off">server offline</span>'; }
+}
+status();
+
+function render(r, thinking){
+  if (thinking) thinking.remove();
+  if (r.error) return el(`<div class="card"><span class="tag err">ERROR</span>\n${esc(r.error)}</div>`);
+  let inner = '';
+  if (r.protocol === 'cache')
+    inner = `<span class="tag cache">CACHE · ${esc(r.id)} · ${r.score}</span><div class="ans">${prose(r.answer)}</div>`;
+  else if (r.protocol === 'model'){
+    inner = `<span class="tag model">LOCAL MODEL · ${r.steps} step${r.steps>1?'s':''}</span>` +
+      `<div class="traj">${r.trajectory.map(t=>`<div><span class="mono">${esc(t.length>110?t.slice(0,110)+'…':t)}</span></div>`).join('')}</div>`;
+    if (r.terminal === 'answer') inner += `<div class="ans">${prose(r.text)}</div>`;
+    else if (r.terminal === 'pass') inner += `<div class="ans dim">The navigator declines (honestly): ${esc(r.text)}</div>`;
+    else inner += `<div class="ans dim">loop ${esc(r.terminal)}</div>`;
+    if (r.escalation_offer) inner += offerCard(r.escalation_offer);
+  }
+  else if (r.protocol === 'big'){
+    inner = `<span class="tag big">LOCAL 80B · graph-native · ${r.steps} step${r.steps>1?'s':''} · ${esc(r.seconds)}s</span>` +
+      `<div class="traj">${(r.results||[]).map(x=>`<div><span class="mono">${esc(x.dsl.length>150?x.dsl.slice(0,150)+'…':x.dsl)}</span><div class="digs">${esc(x.digest.length>260?x.digest.slice(0,260)+'…':x.digest)}</div></div>`).join('')}</div>`;
+    if (r.terminal === 'answer') inner += `<div class="ans">${prose(r.text)}</div>`;
+    else if (r.terminal === 'pass') inner += `<div class="ans dim">The 80B declines (honestly): ${esc(r.text)}</div>`;
+    else inner += `<div class="ans dim">loop ${esc(r.terminal)}</div>`;
+  }
+  else if (r.protocol === 'descend'){
+    inner = `<span class="tag l1">L1 MAP · cache miss ${r.cache?.score ?? ''}</span>` +
+      `<div class="ans">${esc(r.l1.summary || '')}\n\n${esc(r.l1.index || '')}</div>`;
+    r.affordances = r.l1.affordances;
+  }
+  else if (r.kind === 'answer') inner = `<span class="tag model">ANSWER</span><div class="ans">${prose(r.text)}</div>`;
+  else if (r.kind === 'pass') inner = `<span class="tag model">PASS</span><div class="ans dim">${esc(r.reason)}</div>`;
+  else inner = `<span class="tag step">${esc((r.dsl||'result'))}</span>\n` + esc(JSON.stringify(r, null, 1).slice(0, 2200));
+  el(`<div class="card">${inner}${affs(r.affordances)}</div>`);
+}
+
+function offerCard(o){
+  const big = window._big
+    ? `<button class="use" style="background:#124a42;color:#a9f0e2"
+         onclick="retryBig('${o.offer_id}')">retry with local 80B — private, free</button>` : '';
+  const opts = (window._api
+    ? `<select id="m_${o.offer_id}">
+         <option value="default">Claude Sonnet (default)</option>
+         <option value="budget">Claude Haiku (budget)</option>
+         <option value="deep">Claude Opus (deep)</option>
+         <option value="reasoning">Claude Sonnet 4.5 · extended thinking</option></select>
+       <button class="use" onclick="escalate('${o.offer_id}')">use API model</button>`
+    : `<span class="dim" style="font-size:.78rem">API tier off — add ANTHROPIC_API_KEY to .env to enable</span>`)
+    + big + `<button onclick="this.closest('.offer').remove()">keep local</button>`;
+  window['_offer_' + o.offer_id] = o;
+  return `<div class="offer" id="o_${o.offer_id}"><span class="oh">ESCALATION · ${esc(o.reason_category)}</span>
+<span class="dim" style="font-size:.8rem">${esc(o.advice)}</span>
+${opts}</div>`;
+}
+
+async function retryBig(oid){
+  const o = window['_offer_' + oid], box = document.getElementById('o_' + oid);
+  box.querySelectorAll('button,select').forEach(x => x.disabled = true);
+  const t = el(`<div class="think">the local 80B walks the graph natively</div>`);
+  const r = await post('/escalate', {q: o.question, target: 'big'});
+  t.remove();
+  if (r.error){ el(`<div class="card"><span class="tag err">80B</span>\n${esc(r.error)}</div>`); return; }
+  render(r);
+  box.remove();
+}
+
+async function escalate(oid){
+  const o = window['_offer_' + oid], box = document.getElementById('o_' + oid);
+  const model = document.getElementById('m_' + oid)?.value || 'default';
+  box.querySelectorAll('button,select').forEach(x => x.disabled = true);
+  const t = el(`<div class="think">asking the API model (${esc(model)})</div>`);
+  const r = await post('/escalate', {q: o.question, offer: o, model});
+  t.remove();
+  if (r.error){ el(`<div class="card"><span class="tag err">API</span>\n${esc(r.error)}</div>`); return; }
+  const apiTraj = (r.trajectory||[]).length
+    ? `<div class="traj">${r.trajectory.map(t=>`<div><span class="mono">${esc(t)}</span></div>`).join('')}</div>` : '';
+  el(`<div class="card"><span class="tag api">API NAVIGATOR · ${esc(r.model)}${r.steps?` · ${r.steps} tool call${r.steps>1?'s':''}`:''}</span>${apiTraj}<div class="ans">${prose(r.answer)}</div>
+<span class="dim" style="font-size:.72rem">tokens: ${r.usage?.input_tokens ?? '?'} in / ${r.usage?.output_tokens ?? '?'} out</span></div>`);
+  box.remove();
+}
+
+async function post(path, obj){
+  const r = await fetch(path, {method:'POST', body: JSON.stringify(obj)});
+  return r.json();
+}
+async function step(dsl){
+  el(`<div class="q mono">${esc(dsl)}</div>`);
+  const t = el(`<div class="think">executing</div>`);
+  render(await post('/step', {dsl}), t);
+}
+async function go(){
+  const v = q.value.trim(); if (!v) return; q.value = '';
+  if (/^[a-z]+\(.*\)$/.test(v)) return step(v);
+  el(`<div class="q">${esc(v)}</div>`);
+  const tier = document.getElementById('nav').value;
+  const t = el(`<div class="think">${tier === 'big'
+    ? 'the local 80B walks the graph natively' : 'navigating the graph'}</div>`);
+  render(await post('/ask', tier === 'big' ? {q: v, tier: 'big'} : {q: v}), t);
+}
+</script>

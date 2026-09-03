@@ -444,7 +444,8 @@ RETURN config.name AS config_source, config.file_path
 
     <query name="Test coverage for a file">
 CYPHER 25
-MATCH (test:EntityDetail)-[:TESTED_BY]->(f:EntityDetail {name: $file_name})
+// Direction: subject -[:TESTED_BY]-> test (V3 canon: ANY -> Ru)
+MATCH (f:EntityDetail {name: $file_name})-[:TESTED_BY]->(test:EntityDetail)
 RETURN test.name AS test_file, test.file_path
     </query>
 

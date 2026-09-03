@@ -1,5 +1,32 @@
 # 🚀 Advanced AI Prompt Engineering & System Modeling Toolkit
 
+## ⚡ Which prompt is current (2026-09-02, post meet-quotient promotion)
+
+The rule of this repository: superseded artifacts get a banner and stay in place —
+supersession, never erasure. Measured claims trace to Neo4j `V3Lab` findings
+F1–F107 and `GraphTheoryInSystemModeling/V3/experiments/`.
+
+| prompt | role | status |
+| --- | --- | --- |
+| `V5/HypatiaV5_agent.md` | indexer — triple-socket lenses, spec-by-artifact (`embeddings-service/embed_sockets.py` IS the socket spec), golden-fixture conformance, hyperedge seeding | **CURRENT** |
+| `V4/GrothendieckGraphOrganizer_V4.xml` (v4.1) | organizer — content view ∧ cohort-fiber view, **MEET-QUOTIENT v2** fusion (promoted: 0.3738 held-out modularity, 18/20 vs both parents), acceptance battery, nuisance controls, refuted-list | **CURRENT** |
+| `V4/HypatiaV4_agent.md` | — | superseded by V5 (prose socket spec forked across parallel agents, F83) |
+| `V3/GrothendieckGraphOrganizer_V3.xml` | — | superseded by v4.1 (its Phases 7/9/10 are refuted — see the banner in `GraphTheoryInSystemModeling/V3/GrothendieckAlgebraicTopologies.md`) |
+| `SystemModelingPromptsV2/*` | — | historical; the triple-lens product space it specified was built and refuted for ranking (F90); its hyperedge taxonomy survives as commit-cohort fibers (F102) |
+| `Opus4.1_GlobalSynthesis.xml` | — | superseded (its `mathematical_score` double-counts entity coverage, F45) |
+
+**Papers**: start at `V3_MathematicalFoundations.md` **§0 (map of results)**; the audit is
+`V3_ResearchAudit_2026-09.md`; `GrothendieckAlgebraicTopologies.md` carries a banner listing
+exactly which of its claims fell. **Part 2 is designed**: see
+`GraphTheoryInSystemModeling/V3/GrothendieckPart2_Design.md` — curation of the v4 candidates
+(C1 dossiers → C2 keep/merge/split/retype/rename with the 332-pair shortlist as work queue →
+C3 internal layer/flow organisation → C4 navigation clues, GraphRAG-style → C5 tokens-to-answer
+gate). Research verdict: the 3-level NavigationMaster is independently convergent with the C4
+model (humans) and GraphRAG community reports (AI); part 2 adopts their disciplines
+(one-question-per-level, 5–9 fan-out, bottom-up reports) on the existing skeleton.
+
+---
+
 ## 📋 Overview
 
 This repository contains cutting-edge prompt engineering templates and educational resources for GPT-5, Claude Opus 4.1, and Claude Sonnet 4 models. These prompts implement sophisticated analytical frameworks, graph theory-based cognitive architectures, and advanced reasoning techniques for complex problem-solving and system modeling.

@@ -105,7 +105,9 @@
       EXTENDS:     ANY -> ANY   (class inheritance)
       IMPLEMENTS:  ANY -> ANY   (interface implementation)
       INJECTS:     ANY -> ANY   (dependency injection)
-      TESTED_BY:   ANY -> Ru    (test covers production code)
+      TESTED_BY:   ANY -> Ru    (production -> its test; reads "S is TESTED_BY T".
+                                 Direction is SUBJECT -> TEST, never test -> subject.
+                                 V2 graphs used the reverse — V3 canon is this one.)
     </structural_arrows>
 
     <selection_rules>
@@ -167,6 +169,7 @@
       *Entity.java, *Model.java, @Entity                 -> ENTITY
       *Config.java, *Configuration.java, @Configuration   -> CONFIG
       *Security*.java, @EnableWebSecurity                 -> SECURITY
+      *Validator.java, ConstraintValidator impl           -> SECURITY (validators are Rules)
       *DTO.java, *Request.java, *Response.java            -> DTO
       *Test.java, *Tests.java, *IT.java, @Test            -> TEST
       *Util.java, *Utils.java, *Helper.java               -> UTIL
@@ -452,7 +455,9 @@ RETURN completed, failed
            - Parse "extends" keyword -> EXTENDS edge
            - Parse "implements" keyword -> IMPLEMENTS edges
            - Parse constructor parameters / @Autowired -> INJECTS edges
-           - If test file: match to subject via naming convention -> TESTED_BY
+           - If test file T: find its subject S via naming convention, then create
+             (S)-[:TESTED_BY]->(T). The file being processed is the TARGET here,
+             never the source — see the TESTED_BY query below.
 
            BEHAVIORAL EXTRACTION (method call analysis):
            - Identify injected dependencies (constructor params, @Autowired fields)
@@ -474,7 +479,9 @@ RETURN completed, failed
 
            ADDITIONAL EXTRACTION:
            - Controller accessing Repository directly -> ACCESSES
-           - @EventListener subscription -> SUBSCRIBES_TO
+           - @EventListener on an Actor-classified file -> SUBSCRIBES_TO (A -> E);
+             on a Process-classified file the same annotation is INITIATES (E -> P),
+             already covered above — do not emit both for one listener
            - Event affecting entity -> AFFECTS
            - Event scoped to profile -> OCCURS_IN
            - Config scoping rule -> SCOPES
@@ -621,6 +628,19 @@ WHERE src.entity_type = 'Rule'
 MATCH (tgt:EntityDetail {namespace: $ns})
 WHERE tgt.file_path ENDS WITH e.target_file AND tgt.entity_type = 'Resource'
 MERGE (src)-[r:VALIDATES]->(tgt)
+SET r.created_at = datetime()
+RETURN count(r) AS created
+        </cypher>
+
+        TESTED_BY (structural: subject ANY -> test Ru; the file being processed IS the test):
+        <cypher>
+CYPHER 25
+UNWIND $subjects AS s
+MATCH (test:EntityDetail {file_path: $source_path, namespace: $ns})
+WHERE test.entity_type = 'Rule'
+MATCH (subject:EntityDetail {namespace: $ns})
+WHERE subject.file_path ENDS WITH s.subject_file
+MERGE (subject)-[r:TESTED_BY]->(test)
 SET r.created_at = datetime()
 RETURN count(r) AS created
         </cypher>

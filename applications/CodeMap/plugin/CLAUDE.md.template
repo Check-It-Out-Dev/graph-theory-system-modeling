@@ -1,0 +1,73 @@
+# CodeMap — operating system prompt (CLAUDE.md template for plugin users)
+
+Drop this into the project where you run the CodeMap agents. It is the operating system the
+pipeline assumes: the laws below were each earned by a real incident during CodeMap's own
+construction — they are scar tissue, not style. Keep this file static (cache-friendly);
+per-run state lives in the graph and the task list, never here.
+
+## The pipeline
+
+**Hypatia** perceives (indexes files into a typed graph with three embedding lenses) →
+**Grothendieck** structures (measures a candidate partition, then judges it into curated
+subsystems with auditable decisions) → **Erdős** understands (per-subsystem organisation +
+the L1/L2/L3 AI-navigation notes a small model can traverse) → **pack** (export to the
+embedded runtime DB, verified by fingerprinted gold questions). **Conductor** oversees: it
+sequences, gate-checks and judges — it never does the work.
+
+Run order is law. Stages never run concurrently on one namespace. Monthly delta re-runs use
+each agent's MODE delta; full re-runs only on >10% churn or a measured acceptance drop.
+
+## The ten laws (each with the incident that earned it)
+
+1. **The script is the spec.** Prose specs fork: three competent agents compiled one
+   paragraph into three incompatible vector spaces. Frozen artifacts + byte-conformance
+   before scale.
+2. **Verify every write by a follow-up read.** A bulk write once returned success and
+   changed nothing. The write's return value is not evidence; the re-read is.
+3. **Measurement is sealed from judgement.** The partition's metrics are written with
+   provenance BEFORE curation opinions exist; judgement annotates, never edits. Nobody
+   grades their own work — verdicts come from an agent that did none of it.
+4. **Supersession, never erasure.** Old facts stay queryable; new facts link SUPERSEDED_BY.
+   The one exception: accidental writes (see law 7).
+5. **Every claim in a stored clue traces to a source** (a dossier field, a decision, an
+   executed query). The runtime model cannot detect drift between clue and graph, so drift
+   must not exist. Where evidence ends, the clue says "not recorded" — intent/rationale is
+   the #1 hard question precisely because code alone cannot answer it.
+6. **Provenance tags on everything** (version, generator, date, content-stable sha256 —
+   never a process-salted hash). Tags are what make law 7 possible.
+7. **Accidental-write recovery is provenance-first surgery**: identify by tag, delete
+   surgically, verify counts by read. A script side-effect once flooded a curated layer of
+   92 verified objects with 1253 raw ones; the source tag was the only reason recovery took
+   one query instead of a rebuild.
+8. **Conflicts halt before running.** When an instruction says never-touch-X and the frozen
+   script will touch X, the conflict IS the report. Improvising a resolution mid-run is how
+   layers get contaminated.
+9. **Convention checks need ≥8 diverse samples.** A fingerprint convention "verified" on 3
+   files was wrong (all three ended in a newline) and falsely flagged 337 files.
+10. **Never index credential material.** Building embeddings for key stores or service
+    accounts means POSTing secrets to a remote service. Refuse and record.
+
+## Remedies table (symptom → move)
+
+| symptom | move |
+|---|---|
+| report says done, numbers feel off | re-read the graph yourself; graph wins; stage re-runs |
+| a curated layer's count jumped | source-tag census; surgical delete; verify by read |
+| an agent wants to "improve" a frozen artifact | halt; the main agent changes artifacts, once, for a measured reason |
+| a defect found mid-corpus | record it; fix at the next FULL run — partial fixes fork the space |
+| answers confidently wrong from cache | check the invalidation stamps (`depends_on_subsystems`); traverse-on-doubt is the default |
+| two runs in a row produce nothing new | idle the loop; surface the rationale; don't manufacture work |
+| model skips the graph tools | the entry protocol is mandated, not offered — 58% silent-skip is the measured default when optional |
+
+## Auto-improvement
+
+Each agent manual ends with an append-only, dated **learnings ledger**. Incidents graduate
+to entries (Conductor's only write privilege besides reports); entries are law on the next
+run; versions do not bump for ledger appends. The pipeline gets better by remembering, not
+by rewriting.
+
+## Escalation to the human
+
+Two-option questions with the numbers attached — never open-ended. Things only the human
+decides: credential handling, space-forking re-embeds, wholesale re-partitions, anything
+that would delete history.

@@ -21,6 +21,50 @@ This repository presents a mathematical approach to creating living documentatio
 
 **Why It Works**: As explained in [Appendix A](./GraphTheoryInSystemModeling/Appendix_A_Mathematical_Bridge.md), transformers are differential geometry machines that need algebraic structure to operate optimally. By providing this structure through graphs, we achieve a 73% reduction in AI hallucinations—the same principle that makes XML-structured prompts more effective than unstructured text. This isn't luck; it's mathematics.
 
+## Applications: CodeMap — the theory, shipped
+
+**[`applications/CodeMap/`](./applications/CodeMap/)** is the working embodiment of this
+research: a desktop-class app where the knowledge graph IS the intelligence and a small
+local model (4B, GGUF, plain CPU) merely navigates it through a 13-verb DSL. One command
+after cloning (`python codemap.py up`) boots the engine, the model sidecar and a browser
+UI; recurring questions are served from a curated cache; the model honestly abstains
+beyond its graph and offers — only with the user's consent — an escalation to a Claude
+API model.
+
+Measured, not promised: execution accuracy **0→0.98** across four training rounds
+(~$25 of GPU total), answers in ~3 s on a laptop CPU, abstention 1.0 with evidence,
+projected **10–20× cost reduction** vs frontier-only assistants for a 5-person team.
+The full methodology — open-book selection SFT, vocabulary-constrained decoding,
+preference polish, the eval ladder with execution-fingerprint judges — is written up
+as an educational document with the equations in
+[`applications/CodeMap/docs/04-training-story.md`](./applications/CodeMap/docs/04-training-story.md).
+A companion measurement — how far *untrained* open models get on the same graph
+by prompt alone (the Cypher-anchor and step-budget ladder, 0.031 -> 0.246, and why
+route-referees undercount foreign models) — is recorded in
+[`applications/CodeMap/docs/06-prompt-transfer-findings.md`](./applications/CodeMap/docs/06-prompt-transfer-findings.md).
+
+**License-clean end to end:** since 2026 the entire authoring stack runs on
+**LadybugDB (MIT)** — no copyleft graph database anywhere; the migration was accepted
+by byte-identical gold answers across engines, and the full from-scratch regeneration
+procedure is documented in
+[`applications/CodeMap/docs/05-regen-runbook.md`](./applications/CodeMap/docs/05-regen-runbook.md).
+Watch it work: the 90-second film plays on the live demo page,
+<https://checkitout.app/> (self-hosted capture — every frame is a real run).
+Windows users get everything as **one 22 MB installer** that fetches the
+navigator model itself, SHA-256 verified:
+[`codemap-setup-1.2.0.exe`](https://storage.waw.cloud.ovh.net/v1/AUTH_62ce8c0b4d874faa89fb3e086832f1a6/downloads/codemap/codemap-setup-1.2.0.exe)
+(checksums beside it; clone-and-run stays one command).
+
+**Sister repositories** — the platform this mathematics models is published
+alongside it: [`checkitout-frontend`](https://github.com/Check-It-Out-Dev/checkitout-frontend)
+(Angular, the demo build behind checkitout.app) and
+[`checkitout-backend`](https://github.com/Check-It-Out-Dev/checkitout-backend)
+(Spring Boot / Java 21, the OpenAPI source of truth).
+
+The NavigationMaster hierarchy, the 6-entity behavioral pattern, the tri-lens
+embeddings and the hyperedge cohorts described in the papers below are exactly the
+structures CodeMap's pack carries — this folder is where the mathematics earns its keep.
+
 ## Research Papers
 
 The methodology is documented across six core research papers, two theoretical foundations, and a mathematical appendix in the `GraphTheoryInSystemModeling/` directory:

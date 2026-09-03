@@ -1,0 +1,1903 @@
+{
+ "summary": {
+  "model": "Qwen3-30B-A3B-Instruct-2507-Q4_K_M.gguf",
+  "grammar": "off",
+  "n": {
+   "total": 104,
+   "answerable": 65,
+   "unanswerable": 19
+  },
+  "task_success": {
+   "answerable": 0.1692,
+   "gold_fp_hit": 0.2769,
+   "pass_on_unanswerable": 0.1579
+  },
+  "terminals": {
+   "answer": 44,
+   "pass": 15,
+   "stall": 40,
+   "invalid": 5
+  },
+  "steps": {
+   "mean": 5,
+   "p50": 6.0
+  },
+  "seconds_p50": 8.95,
+  "backtrack_rate": 0.5962,
+  "wall_minutes": 19.9
+ },
+ "rows": [
+  {
+   "id": "BE01",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": true,
+   "success": true,
+   "seconds": 12.83,
+   "traj": [
+    "find(PaymentsDisabledBootGuard)",
+    "enter(11)",
+    "spine(11)",
+    "read(PaymentsDisabledBootGuard.java)",
+    "read(PaymentsDisabledBootGuard.java)",
+    "answer(\"PaymentsDisabledBootGuard is a boot guard that prevents the application from booting when payments are disabled. It stops the app from booting during startup if the payment system is flagged as disabled, ensuring that payment-dependent services do not initialize. This check occurs early in the boot process, before any payment-related components are activated.\")"
+   ],
+   "answer": "PaymentsDisabledBootGuard is a boot guard that prevents the application from booting when payments are disabled. It stops the app from booting during startup if the payment system is flagged as disabled, ensuring that payment-dependent services do not initialize. This check occurs early in the boot process, before any payment-related components are activated."
+  },
+  {
+   "id": "BE02",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 16.21,
+   "traj": [
+    "map()",
+    "enter(11)",
+    "spine(11)",
+    "find(cron)",
+    "find(cron)",
+    "answer(\"The backend runs the following cron jobs: AnonymousConsentCleanupCronJob.java, ConsentEnforcementCronJob.java, NoConsentAccountCleanupCronJob.java, InvoiceRetryCronJob.java, SubscriptionPeriodProcessorCronJob.java, and TermsGraceProcessorCronJob.java (all in subsystem 11); DeferredDeletionCronJob.java (sub 5); EmailCronJob.java (sub 12).\")"
+   ],
+   "answer": "The backend runs the following cron jobs: AnonymousConsentCleanupCronJob.java, ConsentEnforcementCronJob.java, NoConsentAccountCleanupCronJob.java, InvoiceRetryCronJob.java, SubscriptionPeriodProcessorCronJob.java, and TermsGraceProcessorCronJob.java (all in subsystem 11); DeferredDeletionCronJob.java (sub 5); EmailCronJob.java (sub 12)."
+  },
+  {
+   "id": "BE03",
+   "status": "EXECUTED",
+   "terminal": "invalid",
+   "steps": 4,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 32.33,
+   "traj": [
+    "map()",
+    "find(dev-lite)",
+    "find(e2e)",
+    "answer(\"Spring profiles and their usage: dev-lite (sub 3) for lightweight development; e2e (sub 3) for end-to-end testing, used in features like account-activation-e2e.feature, notification-e2e.feature, subscription-e2e.feature.\");"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "BE04",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 4,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 21.39,
+   "traj": [
+    "map()",
+    "enter(11)",
+    "find(SubscriptionPlan)",
+    "answer(\"The system models subscription plans through SubscriptionPlan.java and SubscriptionPlanRepository.java in subsystem 11 (Subscriptions, payments & consent), and statuses via status enums in the same subsystem, particularly through the Status enums and OpenAPI contract layer (sub 16).\")"
+   ],
+   "answer": "The system models subscription plans through SubscriptionPlan.java and SubscriptionPlanRepository.java in subsystem 11 (Subscriptions, payments & consent), and statuses via status enums in the same subsystem, particularly through the Status enums and OpenAPI contract layer (sub 16)."
+  },
+  {
+   "id": "BE05",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 5,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 8.65,
+   "traj": [
+    "find(Fakturownia)",
+    "enter(11)",
+    "spine(11)",
+    "flow(FakturowniaAdapter.java, 1)",
+    "answer(\"The backend integrates with Fakturownia via FakturowniaAdapter.java, which implements the InvoicingPort interface and imports FakturowniaCreateRequest.java and FakturowniaInvoiceResponse.java for request/response handling. The integration is part of the invoicing flow within subsystem 11, which manages Stripe payments, retries, and consent enforcement.\")"
+   ],
+   "answer": "The backend integrates with Fakturownia via FakturowniaAdapter.java, which implements the InvoicingPort interface and imports FakturowniaCreateRequest.java and FakturowniaInvoiceResponse.java for request/response handling. The integration is part of the invoicing flow within subsystem 11, which manages Stripe payments, retries, and consent enforcement."
+  },
+  {
+   "id": "BE06",
+   "status": "EXECUTED",
+   "terminal": "invalid",
+   "steps": 4,
+   "backtracks": 0,
+   "gold_fp_hit": true,
+   "success": false,
+   "seconds": 5.24,
+   "traj": [
+    "find(ConsentEnforcementFilter)",
+    "enter(11)",
+    "flow(ConsentEnforcementFilter.java)",
+    "answer(\"ConsentEnforcementFilter blocks access to user data and legal documents for users without valid consent; it constrains UserCacheService and LegalDocumentService, ensuring only authorized users can proceed.\");"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "BE07",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 6,
+   "backtracks": 0,
+   "gold_fp_hit": true,
+   "success": true,
+   "seconds": 34.3,
+   "traj": [
+    "find(rate)",
+    "find(RateLimit)",
+    "find(RateLimitConfiguration)",
+    "enter(3)",
+    "spine(3)",
+    "answer(\"API rate limits are enforced and configured in subsystem 3 ('Rate limits & runtime config'), primarily through FirebaseRateLimitConfiguration.java, GdprRateLimitProperties.java, and RateLimit.java. The core logic is driven by the spine: CucumberSpringConfig.java, RateLimitProfile.java, and RateLimit.java, with enforcement handled by GdprCompliantRateLimiterService.java and DynamicRateLimit.java. Configuration is loaded via Spring profiles (application-*.yml) and tested via Cucumber integration tests.\")"
+   ],
+   "answer": "API rate limits are enforced and configured in subsystem 3 ('Rate limits & runtime config'), primarily through FirebaseRateLimitConfiguration.java, GdprRateLimitProperties.java, and RateLimit.java. The core logic is driven by the spine: CucumberSpringConfig.java, RateLimitProfile.java, and RateLimit.java, with enforcement handled by GdprCompliantRateLimiterService.java and DynamicRateLimit.java. Configuration is loaded via Spring profiles (application-*.yml) and tested via Cucumber integration tests."
+  },
+  {
+   "id": "BE08",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 4,
+   "backtracks": 0,
+   "gold_fp_hit": true,
+   "success": true,
+   "seconds": 8.3,
+   "traj": [
+    "find(StepUp)",
+    "enter(9)",
+    "flow(StepUpAuthController.java)",
+    "answer(\"Step-up authentication is a security mechanism that requires additional verification (e.g., MFA) during an ongoing session to access sensitive actions or data. Endpoints requiring it are exposed via StepUpAuthController.java, which handles requests through StepUpRequestDto.java and StepUpVerifyDto.java, and returns responses via StepUpCheckResponse.java and StepUpTokenResponse.java. The flow is managed by StepUpAuthService.java, with the controller acting as the entry point for step-up challenges.\")"
+   ],
+   "answer": "Step-up authentication is a security mechanism that requires additional verification (e.g., MFA) during an ongoing session to access sensitive actions or data. Endpoints requiring it are exposed via StepUpAuthController.java, which handles requests through StepUpRequestDto.java and StepUpVerifyDto.java, and returns responses via StepUpCheckResponse.java and StepUpTokenResponse.java. The flow is managed by StepUpAuthService.java, with the controller acting as the entry point for step-up challenges."
+  },
+  {
+   "id": "BE09",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 3,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 3.39,
+   "traj": [
+    "find(AdminCascadeDeleteController)",
+    "flow(AdminCascadeDeleteController.java)",
+    "answer(\"AdminCascadeDeleteController cascades deletes through AdminCascadeDeleteService; it imports AuthenticationTranslatableException and ValidationTranslatableException for error handling.\")"
+   ],
+   "answer": "AdminCascadeDeleteController cascades deletes through AdminCascadeDeleteService; it imports AuthenticationTranslatableException and ValidationTranslatableException for error handling."
+  },
+  {
+   "id": "BE10",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 5,
+   "backtracks": 1,
+   "gold_fp_hit": true,
+   "success": true,
+   "seconds": 5.76,
+   "traj": [
+    "find(Instagram)",
+    "enter(5)",
+    "enter(5)",
+    "flow(InstagramCallbackController.java)",
+    "answer(\"The Instagram OAuth callback is handled in InstagramCallbackController.java, which imports DataDeletionResponse, DeletionStatusResponse, and PendingDataDeletionRequest, and interacts with PendingDataDeletionRequestRepository.\")"
+   ],
+   "answer": "The Instagram OAuth callback is handled in InstagramCallbackController.java, which imports DataDeletionResponse, DeletionStatusResponse, and PendingDataDeletionRequest, and interacts with PendingDataDeletionRequestRepository."
+  },
+  {
+   "id": "BE11",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 2,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 4.24,
+   "traj": [
+    "find(LegalDocument)",
+    "enter(11)",
+    "find(LegalDocumentVersion)",
+    "find(LegalDocumentVersion)",
+    "find(LegalDocumentVersion)",
+    "spine(11)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "BE12",
+   "status": "EXECUTED",
+   "terminal": "pass",
+   "steps": 3,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 2.59,
+   "traj": [
+    "find(backend)",
+    "find(Backend)",
+    "pass(\"No exact match found for 'backend' or 'Backend' in the codebase; no further context to determine supported languages for messages and emails.\")"
+   ],
+   "answer": "No exact match found for 'backend' or 'Backend' in the codebase; no further context to determine supported languages for messages and emails."
+  },
+  {
+   "id": "BE13",
+   "status": "CONTENT_POINTER",
+   "terminal": "answer",
+   "steps": 4,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 18.93,
+   "traj": [
+    "map()",
+    "enter(11)",
+    "spine(11)",
+    "answer(\"To set up the local database from scratch, focus on the Subscriptions, payments & consent subsystem (sub 11), which manages core payment and user data. The entry point is UserRepository.java (141 external in-edges), which is central to user and subscription state. Use the spine(11) path to trace the critical dependency chain: StripeService.java (handles Stripe lifecycle and webhooks), ConsentService.java (manages consent enforcement), and LegalConsentService.java (for legal document tracking). Ensure the database schema matches the entities in UserRepository.java and UserType.java. Initialize the database via the payments boot guard (likely a startup initializer) and verify the Fakturownia port for invoicing is configured. Run the lifecycle crons to seed retryable invoicing and subscription states. Use the dev-lite Spring profile (from [3]) for local setup.\")"
+   ],
+   "answer": "To set up the local database from scratch, focus on the Subscriptions, payments & consent subsystem (sub 11), which manages core payment and user data. The entry point is UserRepository.java (141 external in-edges), which is central to user and subscription state. Use the spine(11) path to trace the critical dependency chain: StripeService.java (handles Stripe lifecycle and webhooks), ConsentService.java (manages consent enforcement), and LegalConsentService.java (for legal document tracking). Ensure the database schema matches the entities in UserRepository.java and UserType.java. Initialize "
+  },
+  {
+   "id": "BE14",
+   "status": "CONTENT_POINTER",
+   "terminal": "answer",
+   "steps": 2,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 8.02,
+   "traj": [
+    "cache(\"What did the 2026-09 pentest find and what was fixed?\")",
+    "answer(\"The 2026-09 pentest found 11 issues. Fixed on greenfield: SSRF StorageUrlValidator (3.1), IDOR getUserByUserId (3.7), Vimeo allowlist (3.5), SecureRandom ticket refs + IP rate-limit (3.3/3.2), nginx single-source headers (3.10/3.11). Accepted by design: flat-admin (3.6/3.9). Deferred: Angular 22 (3.4), nonce CSP (3.8).\")"
+   ],
+   "answer": "The 2026-09 pentest found 11 issues. Fixed on greenfield: SSRF StorageUrlValidator (3.1), IDOR getUserByUserId (3.7), Vimeo allowlist (3.5), SecureRandom ticket refs + IP rate-limit (3.3/3.2), nginx single-source headers (3.10/3.11). Accepted by design: flat-admin (3.6/3.9). Deferred: Angular 22 (3.4), nonce CSP (3.8)."
+  },
+  {
+   "id": "BE15",
+   "status": "CONTENT_POINTER",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 3.03,
+   "traj": [
+    "find(uploaded_files)",
+    "find(uploaded)",
+    "find(Storage)",
+    "find(StorageCleanup)",
+    "find(StorageCleanupStrategy)",
+    "find(StorageService)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "BE16",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 2,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 4.7,
+   "traj": [
+    "cache(\"What happens end-to-end when a company upgrades its subscription plan?\")",
+    "answer(\"End-to-end upgrade path: DTO -> SubscriptionService validates plan transition -> StripeService updates Stripe subscription -> webhook confirms -> SubscriptionEvent recorded, BillingPeriod rolled, campaign quota re-derived from new plan. 12 downstream files involved in 1 hop; 28 typed steps in SubscriptionService.java.\")"
+   ],
+   "answer": "End-to-end upgrade path: DTO -> SubscriptionService validates plan transition -> StripeService updates Stripe subscription -> webhook confirms -> SubscriptionEvent recorded, BillingPeriod rolled, campaign quota re-derived from new plan. 12 downstream files involved in 1 hop; 28 typed steps in SubscriptionService.java."
+  },
+  {
+   "id": "BE17",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 3.14,
+   "traj": [
+    "find(InvoiceCreation)",
+    "find(InvoiceCreationService)",
+    "find(InvoiceCreationService)",
+    "find(InvoiceCreationHandler)",
+    "find(InvoiceCreationRetry)",
+    "find(InvoiceCreationFailed)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "BE18",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 2,
+   "gold_fp_hit": true,
+   "success": false,
+   "seconds": 9.52,
+   "traj": [
+    "map()",
+    "find(ServletFilter)",
+    "find(ServletFilter)",
+    "find(Filter)",
+    "find(ServletFilter)",
+    "find(FilterRegistrationConfiguration)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "BE19",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 11.55,
+   "traj": [
+    "map()",
+    "enter(11)",
+    "spine(11)",
+    "find(trial)",
+    "find(TrialExpiryNotifierCronJob.java)",
+    "enter(11)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "BE20",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 4.06,
+   "traj": [
+    "find(cron)",
+    "find(CronJob)",
+    "find(CronJobScheduler)",
+    "find(CronJobScheduler)",
+    "find(CronJobLock)",
+    "find(CronJobLockManager)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "BE21",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 3,
+   "backtracks": 0,
+   "gold_fp_hit": true,
+   "success": true,
+   "seconds": 8.65,
+   "traj": [
+    "cache(\"How does publishing a new terms version force existing users to re-consent?\")",
+    "flow(TermsGraceProcessorCronJob.java)",
+    "answer(\"Publishing a new terms version triggers a grace window; the TermsGraceProcessorCronJob advances the state as the window expires, and the ConsentEnforcementFilter blocks users who haven't re-consented. The frontend re-consent modal is activated by response headers. The flow from TermsGraceProcessorCronJob.java involves 2 hops: it accesses, imports, and injects AppPaymentsProperties.java, and imports SubscriptionService.java, with 13 downstream files impacted across 9 imports, 9 injections, and 7 uses.\")"
+   ],
+   "answer": "Publishing a new terms version triggers a grace window; the TermsGraceProcessorCronJob advances the state as the window expires, and the ConsentEnforcementFilter blocks users who haven't re-consented. The frontend re-consent modal is activated by response headers. The flow from TermsGraceProcessorCronJob.java involves 2 hops: it accesses, imports, and injects AppPaymentsProperties.java, and imports SubscriptionService.java, with 13 downstream files impacted across 9 imports, 9 injections, and 7 uses."
+  },
+  {
+   "id": "BE22",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 5,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 6.87,
+   "traj": [
+    "find(Redis)",
+    "flow(RedisUserCache.java)",
+    "flow(RedisUserCache.java)",
+    "flow(RedisRateLimiterService.java)",
+    "answer(\"Features that degrade if Redis is unavailable include user session caching (via RedisUserCache.java), rate limiting (via RedisRateLimiterService.java), and geolocation data caching (via RedisGeoLocationCache.java). The failure of Redis impacts user experience through reduced performance and availability of these services.\")"
+   ],
+   "answer": "Features that degrade if Redis is unavailable include user session caching (via RedisUserCache.java), rate limiting (via RedisRateLimiterService.java), and geolocation data caching (via RedisGeoLocationCache.java). The failure of Redis impacts user experience through reduced performance and availability of these services."
+  },
+  {
+   "id": "BE23",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 3.39,
+   "traj": [
+    "find(BanUserUseCase)",
+    "find(BanUserUseCase.java)",
+    "find(BanUserUseCase)",
+    "find(BanUser)",
+    "find(BanUserHandler)",
+    "find(BanUserCommand)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "BE24",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 4.91,
+   "traj": [
+    "find(campaigns)",
+    "find(Plan)",
+    "find(SubscriptionPlan)",
+    "enter(11)",
+    "spine(11)",
+    "find(SubscriptionPlan)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "BE25",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 11.61,
+   "traj": [
+    "cache(\"How are GDPR account deletion requests executed and with what delay?\")",
+    "map()",
+    "enter(5)",
+    "spine(5)",
+    "read(InstagramService.java (8 ext in-edges))",
+    "read(InstagramService.java)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "BE26",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 18.53,
+   "traj": [
+    "find(GeoIP)",
+    "enter(3)",
+    "find(GeoIP)",
+    "flow(GeoIpStorageService.java)",
+    "flow(GeoIpStorageService.java, 1)",
+    "answer(\"GeoIpStorageService.java consumes GeoIP data and interacts with GDPR consent through its dependencies on ResourceNotFoundException.java and StorageTranslatableException.java, which handle error propagation; however, no explicit GDPR consent logic is visible in the flow.\")"
+   ],
+   "answer": "GeoIpStorageService.java consumes GeoIP data and interacts with GDPR consent through its dependencies on ResourceNotFoundException.java and StorageTranslatableException.java, which handle error propagation; however, no explicit GDPR consent logic is visible in the flow."
+  },
+  {
+   "id": "BE27",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 6,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 16.11,
+   "traj": [
+    "map()",
+    "enter(12)",
+    "spine(12)",
+    "find(EmailFrequency.java)",
+    "read(EmailFrequency.java (8 ext in-edges))",
+    "answer(\"An influencer's application changing status triggers a domain event (e.g., AccountActivatedEvent) that flows through the NotificationService via the @TransactionalEventListener pattern. This event is processed by the notification system in subsystem 12, which checks email frequency preferences (EmailFrequency.java) and dispatches a notification. The flow is governed by the spine of subsystem 12, where NotificationService acts as the central hub, orchestrating the event handling and notification generation.\")"
+   ],
+   "answer": "An influencer's application changing status triggers a domain event (e.g., AccountActivatedEvent) that flows through the NotificationService via the @TransactionalEventListener pattern. This event is processed by the notification system in subsystem 12, which checks email frequency preferences (EmailFrequency.java) and dispatches a notification. The flow is governed by the spine of subsystem 12, where NotificationService acts as the central hub, orchestrating the event handling and notification generation."
+  },
+  {
+   "id": "BE28",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 5,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 9.48,
+   "traj": [
+    "find(cron)",
+    "enter(12)",
+    "flow(EmailCronJob.java)",
+    "flow(NotificationEmailService.java)",
+    "answer(\"The language for a transactional email sent by the cron job EmailCronJob.java is determined by the Notification entity's language field, which is processed by NotificationEmailService.java. The flow shows that EmailCronJob.java injects and performs actions on NotificationEmailService.java, which in turn imports Notification.java, where language context is likely managed. The actual language selection logic resides within the Notification entity or its associated services, as inferred from the dependency chain and the service's role in handling email content.\")"
+   ],
+   "answer": "The language for a transactional email sent by the cron job EmailCronJob.java is determined by the Notification entity's language field, which is processed by NotificationEmailService.java. The flow shows that EmailCronJob.java injects and performs actions on NotificationEmailService.java, which in turn imports Notification.java, where language context is likely managed. The actual language selection logic resides within the Notification entity or its associated services, as inferred from the dependency chain and the service's role in handling email content."
+  },
+  {
+   "id": "BE29",
+   "status": "COVERAGE_GAP",
+   "terminal": "answer",
+   "steps": 3,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 2.64,
+   "traj": [
+    "find(credentials)",
+    "find(credential)",
+    "answer(\"GoogleCredentialsProvider.java (sub 3); CredentialsServiceUnitTest.java (sub 8) contain credentials that must never reach a public release.\")"
+   ],
+   "answer": "GoogleCredentialsProvider.java (sub 3); CredentialsServiceUnitTest.java (sub 8) contain credentials that must never reach a public release."
+  },
+  {
+   "id": "BE30",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 5,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 19.19,
+   "traj": [
+    "map()",
+    "find(Stripe)",
+    "enter(11)",
+    "spine(11)",
+    "answer(\"The backend can refuse to start after restoring a production database dump due to missing or misconfigured Stripe integration settings, as the payments boot guard in subsystem 11 (Subscriptions, payments & consent) relies on StripeService.java and its dependencies. The spine(11) reveals that StripeService.java is a critical hub with high IDF (2.89), and the system's startup depends on proper configuration from StripeConfig.java and StripeProperties.java. If the restored database lacks valid Stripe webhook secrets or test/live mode settings, the boot guard fails, blocking startup. Additionally, the high fan-in of UserRepository.java (141 external in-edges) suggests that user data integrity is required for payment lifecycle initialization, and missing or corrupted user records may also prevent startup.\")"
+   ],
+   "answer": "The backend can refuse to start after restoring a production database dump due to missing or misconfigured Stripe integration settings, as the payments boot guard in subsystem 11 (Subscriptions, payments & consent) relies on StripeService.java and its dependencies. The spine(11) reveals that StripeService.java is a critical hub with high IDF (2.89), and the system's startup depends on proper configuration from StripeConfig.java and StripeProperties.java. If the restored database lacks valid Stripe webhook secrets or test/live mode settings, the boot guard fails, blocking startup. Additionally,"
+  },
+  {
+   "id": "BE31",
+   "status": "EXECUTED",
+   "terminal": "pass",
+   "steps": 5,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 11.54,
+   "traj": [
+    "map()",
+    "enter(4)",
+    "spine(4)",
+    "read(PermissionUtils.java (68 ext in-edges))",
+    "pass(\"The file 'PermissionUtils.java' could not be read due to a system error; no further analysis possible.\")"
+   ],
+   "answer": "The file 'PermissionUtils.java' could not be read due to a system error; no further analysis possible."
+  },
+  {
+   "id": "BE32",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 4.22,
+   "traj": [
+    "find(token)",
+    "find(JwtAuthenticationFilterStaleTokenUnitTest.java)",
+    "find(JwtAuthenticationFilter)",
+    "find(JwtAuthenticationFilter)",
+    "find(JwtAuthenticationFilter.java)",
+    "flow(JwtAuthenticationFilter.java)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "BE33",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 6,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 9.28,
+   "traj": [
+    "find(Account)",
+    "find(NoConsentAccountCleanupCronJob.java)",
+    "enter(11)",
+    "spine(11)",
+    "flow(NoConsentAccountCleanupCronJob.java, 1)",
+    "answer(\"Accounts vanish a few days after registration due to the NoConsentAccountCleanupCronJob.java, which runs periodically and removes accounts that lack consent. It interacts with LegalConsentService.java to check consent status, and if no consent is present, it triggers account deletion. This process is automated and requires no admin action.\")"
+   ],
+   "answer": "Accounts vanish a few days after registration due to the NoConsentAccountCleanupCronJob.java, which runs periodically and removes accounts that lack consent. It interacts with LegalConsentService.java to check consent status, and if no consent is present, it triggers account deletion. This process is automated and requires no admin action."
+  },
+  {
+   "id": "BE34",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 11.0,
+   "traj": [
+    "find(Fakturownia)",
+    "enter(11)",
+    "spine(11)",
+    "find(Fakturownia)",
+    "flow(FakturowniaAdapter.java, 2)",
+    "answer(\"The invoice appears in the accounting system days after payment success due to the FakturowniaAdapter's integration with the invoicing port, which likely uses asynchronous processing or retry mechanisms. The FakturowniaAdapter.java implements InvoicingPort.java and imports FakturowniaCreateRequest.java and FakturowniaInvoiceResponse.java, indicating a delayed, event-driven flow with potential queuing or batch processing. The spine(11) shows this subsystem handles retries and lifecycle crons, supporting delayed invoice creation.\")"
+   ],
+   "answer": "The invoice appears in the accounting system days after payment success due to the FakturowniaAdapter's integration with the invoicing port, which likely uses asynchronous processing or retry mechanisms. The FakturowniaAdapter.java implements InvoicingPort.java and imports FakturowniaCreateRequest.java and FakturowniaInvoiceResponse.java, indicating a delayed, event-driven flow with potential queuing or batch processing. The spine(11) shows this subsystem handles retries and lifecycle crons, supporting delayed invoice creation."
+  },
+  {
+   "id": "BE35",
+   "status": "CONTENT_POINTER",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 4.71,
+   "traj": [
+    "find(cron)",
+    "find(cron)",
+    "find(DeferredDeletionCronJob.java)",
+    "impact(DeferredDeletionCronJob.java)",
+    "enter(5)",
+    "spine(5)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "BE36",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 2,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 9.73,
+   "traj": [
+    "map()",
+    "find(logging)",
+    "find(logging)",
+    "find(LoggingConfiguration.java)",
+    "flow(LoggingConfiguration.java)",
+    "find(LoggingConfiguration.java)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "BE37",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": true,
+   "success": false,
+   "seconds": 5.42,
+   "traj": [
+    "find(attachment)",
+    "enter(15)",
+    "find(StorageUrlValidator)",
+    "enter(3)",
+    "spine(3)",
+    "find(StorageUrlValidator)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "FE01",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 9.27,
+   "traj": [
+    "map()",
+    "find(RouteTable)",
+    "find(RouteTable.java)",
+    "find(RouteTable)",
+    "find(OpenAPI)",
+    "flow(OpenApiConfig.java)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "FE02",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 5,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 6.11,
+   "traj": [
+    "find(\"sign-in screen\")",
+    "find(\"sign-in\")",
+    "enter(17)",
+    "enter(170)",
+    "answer(\"The sign-in screen component is defined in sub 170, specifically in sign-in.component.html, sign-in.component.ts, sign-in.component.scss, sign-in.component.spec.ts, and sign-in.fixture.ts.\")"
+   ],
+   "answer": "The sign-in screen component is defined in sub 170, specifically in sign-in.component.html, sign-in.component.ts, sign-in.component.scss, sign-in.component.spec.ts, and sign-in.fixture.ts."
+  },
+  {
+   "id": "FE03",
+   "status": "CONTENT_POINTER",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 3,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 3.51,
+   "traj": [
+    "find(translation)",
+    "find(TranslationService)",
+    "find(TranslationService)",
+    "find(translation)",
+    "find(translation)",
+    "impact(TranslationService.java)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "FE04",
+   "status": "CONTENT_POINTER",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 2,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 3.7,
+   "traj": [
+    "find(languages)",
+    "find(language)",
+    "find(AppLanguageFilter.java)",
+    "enter(7)",
+    "find(AppLanguageFilter.java)",
+    "find(AppLanguageFilter.java)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "FE05",
+   "status": "CONTENT_POINTER",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 3.53,
+   "traj": [
+    "find(Polish)",
+    "find(English)",
+    "find(language)",
+    "find(AppLanguageFilter.java)",
+    "enter(7)",
+    "find(AppLanguageFilter.java)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "FE06",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 4.76,
+   "traj": [
+    "find(401)",
+    "enter(9)",
+    "spine(9)",
+    "flow(UserPreferencesRepository.java (33 ext in-edges),1)",
+    "find(sign-in redirect)",
+    "find(sign_in_redirect)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "FE07",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 2,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 3.73,
+   "traj": [
+    "find(StepUpInterceptor)",
+    "find(StepUp)",
+    "find(StepUpInterceptor)",
+    "find(StepUpToken)",
+    "find(StepUpTokenInterceptor)",
+    "find(StepUpTokenInterceptor)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "FE08",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 4,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 8.85,
+   "traj": [
+    "find(Interceptor)",
+    "find(Interceptor)",
+    "flow(RateLimitInterceptor.java)",
+    "answer(\"The HTTP interceptors run in the order they are registered in the application's interceptor chain. The RateLimitInterceptor.java is part of this chain and depends on GdprCompliantRateLimiterService, RateLimitProperties, and HashingUtil. The order matters because each interceptor can modify the request or response, and subsequent interceptors may rely on changes made by earlier ones. For example, rate limiting must be enforced before other logic that might be affected by excessive requests. The sequence diagram shows the dependencies but not the execution order; the actual order is determined by the framework's registration mechanism.\")"
+   ],
+   "answer": "The HTTP interceptors run in the order they are registered in the application's interceptor chain. The RateLimitInterceptor.java is part of this chain and depends on GdprCompliantRateLimiterService, RateLimitProperties, and HashingUtil. The order matters because each interceptor can modify the request or response, and subsequent interceptors may rely on changes made by earlier ones. For example, rate limiting must be enforced before other logic that might be affected by excessive requests. The sequence diagram shows the dependencies but not the execution order; the actual order is determined b"
+  },
+  {
+   "id": "FE09",
+   "status": "COVERAGE_GAP",
+   "terminal": "pass",
+   "steps": 6,
+   "backtracks": 3,
+   "gold_fp_hit": false,
+   "success": true,
+   "seconds": 5.22,
+   "traj": [
+    "find(MultiSelectRelationField)",
+    "find(MultiSelectRelationField)",
+    "find(MultiSelect)",
+    "find(MultiSelect)",
+    "find(MultiSelect)",
+    "pass(\"No relevant entity found in the code graph for 'MultiSelectRelationField' or 'MultiSelect'; cannot determine why multi-select relation fields arrive as empty objects without additional context or code evidence.\")"
+   ],
+   "answer": "No relevant entity found in the code graph for 'MultiSelectRelationField' or 'MultiSelect'; cannot determine why multi-select relation fields arrive as empty objects without additional context or code evidence."
+  },
+  {
+   "id": "FE10",
+   "status": "COVERAGE_GAP",
+   "terminal": "answer",
+   "steps": 5,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 6.84,
+   "traj": [
+    "find(authentication)",
+    "enter(7)",
+    "find(JwtAuthenticationFilter.java)",
+    "flow(JwtAuthenticationFilter.java)",
+    "answer(\"The client authenticates API requests via JWT tokens processed by JwtAuthenticationFilter.java, which relies on UserCacheService and SessionSecurityService for validation and session management; tokens are not stored in the browser but are sent in each request's Authorization header, with filtering and validation handled through dependency chains in sub 7.\")"
+   ],
+   "answer": "The client authenticates API requests via JWT tokens processed by JwtAuthenticationFilter.java, which relies on UserCacheService and SessionSecurityService for validation and session management; tokens are not stored in the browser but are sent in each request's Authorization header, with filtering and validation handled through dependency chains in sub 7."
+  },
+  {
+   "id": "FE11",
+   "status": "EXECUTED",
+   "terminal": "pass",
+   "steps": 4,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 2.51,
+   "traj": [
+    "find(\"API client\")",
+    "find(\"api client\")",
+    "find(\"ApiClient\")",
+    "pass(\"No results found for 'API client' or 'ApiClient' in the codebase\")"
+   ],
+   "answer": "No results found for 'API client' or 'ApiClient' in the codebase"
+  },
+  {
+   "id": "FE12",
+   "status": "CONTENT_POINTER",
+   "terminal": "pass",
+   "steps": 4,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": true,
+   "seconds": 2.82,
+   "traj": [
+    "find(backend)",
+    "find(schema)",
+    "find(backend_schema)",
+    "pass(\"No relevant entity found in the codebase for 'backend', 'schema', or 'backend_schema' to determine API client regeneration steps.\")"
+   ],
+   "answer": "No relevant entity found in the codebase for 'backend', 'schema', or 'backend_schema' to determine API client regeneration steps."
+  },
+  {
+   "id": "FE13",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 11.62,
+   "traj": [
+    "find(NIP)",
+    "enter(11)",
+    "find(NIP)",
+    "spine(11)",
+    "flow(NipLookupRequest.java)",
+    "answer(\"The NIP company-lookup onboarding screen uses the NipLookupRequest service and the generated API endpoint defined in NipLookupRequest.java, which is part of subsystem 11 (Subscriptions, payments & consent).\")"
+   ],
+   "answer": "The NIP company-lookup onboarding screen uses the NipLookupRequest service and the generated API endpoint defined in NipLookupRequest.java, which is part of subsystem 11 (Subscriptions, payments & consent)."
+  },
+  {
+   "id": "FE14",
+   "status": "CONTENT_POINTER",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 4.1,
+   "traj": [
+    "find(public)",
+    "find(PublicProfileDto)",
+    "find(PublicProfileDto)",
+    "find(PublicProfileMapping)",
+    "enter(4)",
+    "spine(4)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "FE15",
+   "status": "EXECUTED",
+   "terminal": "pass",
+   "steps": 4,
+   "backtracks": 0,
+   "gold_fp_hit": true,
+   "success": false,
+   "seconds": 8.81,
+   "traj": [
+    "map()",
+    "find(\"technical-survey\")",
+    "find(technical_survey)",
+    "pass(\"The term 'technical-survey' does not appear in any file or subsystem name in the current context.\")"
+   ],
+   "answer": "The term 'technical-survey' does not appear in any file or subsystem name in the current context."
+  },
+  {
+   "id": "FE16",
+   "status": "CONTENT_POINTER",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 2,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 4.17,
+   "traj": [
+    "find(legacy)",
+    "find(redirect)",
+    "enter(17)",
+    "flow(location-redirect.service.ts)",
+    "flow(location-redirect.service.ts)",
+    "flow(location-redirect.service.ts)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "FE17",
+   "status": "EXECUTED",
+   "terminal": "pass",
+   "steps": 4,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 2.67,
+   "traj": [
+    "find(UserSettingsTabs)",
+    "find(UserSettings)",
+    "find(UserSettingsTab)",
+    "pass(\"No exact matches found for UserSettingsTabs, UserSettings, or UserSettingsTab in the codebase.\")"
+   ],
+   "answer": "No exact matches found for UserSettingsTabs, UserSettings, or UserSettingsTab in the codebase."
+  },
+  {
+   "id": "FE18",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 10.83,
+   "traj": [
+    "map()",
+    "enter(17)",
+    "enter(177)",
+    "enter(177)",
+    "find(title)",
+    "find(seo-title.strategy.ts)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "FE19",
+   "status": "EXECUTED",
+   "terminal": "pass",
+   "steps": 4,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 4.04,
+   "traj": [
+    "find(visual)",
+    "find(visualparity)",
+    "find(visual_parity)",
+    "pass(\"No results found for visual, visualparity, or visual_parity; no matching entities in the codebase.\")"
+   ],
+   "answer": "No results found for visual, visualparity, or visual_parity; no matching entities in the codebase."
+  },
+  {
+   "id": "FE20",
+   "status": "CONTENT_POINTER",
+   "terminal": "pass",
+   "steps": 5,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": true,
+   "seconds": 3.8,
+   "traj": [
+    "find(Playwright)",
+    "find(PlaywrightDevice)",
+    "find(Playwright)",
+    "find(playwright)",
+    "pass(\"No results found for 'Playwright', 'PlaywrightDevice', or 'playwright' in the codebase; no further identifiers available to query.\")"
+   ],
+   "answer": "No results found for 'Playwright', 'PlaywrightDevice', or 'playwright' in the codebase; no further identifiers available to query."
+  },
+  {
+   "id": "FE21",
+   "status": "EXECUTED",
+   "terminal": "pass",
+   "steps": 4,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 3.7,
+   "traj": [
+    "find(BDD)",
+    "find(bdd)",
+    "find(bdd-tier)",
+    "pass(\"No exact match found for 'BDD', 'bdd', or 'bdd-tier' in the codebase; consider checking for alternative naming like 'bdd-tier', 'BDDLayer', or 'BDDTest'\")"
+   ],
+   "answer": "No exact match found for 'BDD', 'bdd', or 'bdd-tier' in the codebase; consider checking for alternative naming like 'bdd-tier', 'BDDLayer', or 'BDDTest"
+  },
+  {
+   "id": "FE22",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 11.59,
+   "traj": [
+    "map()",
+    "find(Fakturownia)",
+    "find(fakturownia-sim.component.ts)",
+    "enter(17)",
+    "enter(178)",
+    "spine(178)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "FE23",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 6,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 11.83,
+   "traj": [
+    "find(e2e)",
+    "enter(11)",
+    "find(Firebase)",
+    "find(FirebaseLoginRequest.java)",
+    "flow(FirebaseLoginRequest.java,1)",
+    "answer(\"e2e tests obtain a real logged-in session via Firebase authentication flows, as seen in FirebaseLoginRequest.java (sub 8); when Firebase secrets are absent, authentication fails silently due to missing config in FirebaseAuthConfig.java (sub 6), blocking session creation.\")"
+   ],
+   "answer": "e2e tests obtain a real logged-in session via Firebase authentication flows, as seen in FirebaseLoginRequest.java (sub 8); when Firebase secrets are absent, authentication fails silently due to missing config in FirebaseAuthConfig.java (sub 6), blocking session creation."
+  },
+  {
+   "id": "FE24",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 4.7,
+   "traj": [
+    "find(__sandbox)",
+    "find(sandbox)",
+    "enter(17)",
+    "enter(170)",
+    "find(sandbox.routes.ts)",
+    "enter(17)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "FE25",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 6.0,
+   "traj": [
+    "find(demo)",
+    "enter(17)",
+    "enter(170)",
+    "flow(auth-api.service.ts (14 ext in-edges),1)",
+    "flow(auth-api.service.ts, 1)",
+    "flow(demo.interceptor.ts, 1)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "FE26",
+   "status": "EXECUTED",
+   "terminal": "pass",
+   "steps": 5,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 11.71,
+   "traj": [
+    "map()",
+    "enter(10)",
+    "spine(10)",
+    "read(User.java (154 ext in-edges))",
+    "pass(\"The file User.java cannot be read directly in this context; its content is not available in the code graph.\")"
+   ],
+   "answer": "The file User.java cannot be read directly in this context; its content is not available in the code graph."
+  },
+  {
+   "id": "FE27",
+   "status": "CONTENT_POINTER",
+   "terminal": "answer",
+   "steps": 2,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 4.06,
+   "traj": [
+    "cache(\"Why are clicks made right after first paint not lost before the app becomes interactive?\")",
+    "answer(\"Clicks made right after first paint are not lost because they are captured and replayed once listeners attach, via provideClientHydration(withEventReplay()). This ensures early interactions are preserved until the app becomes interactive.\")"
+   ],
+   "answer": "Clicks made right after first paint are not lost because they are captured and replayed once listeners attach, via provideClientHydration(withEventReplay()). This ensures early interactions are preserved until the app becomes interactive."
+  },
+  {
+   "id": "FE28",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 9.05,
+   "traj": [
+    "find(consent)",
+    "find(email-verification)",
+    "find(email_verification)",
+    "find(email_verification_banner)",
+    "find(email_verification_banner)",
+    "find(emailVerification)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "FE29",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 5,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 15.73,
+   "traj": [
+    "map()",
+    "enter(3)",
+    "spine(3)",
+    "read(RateLimit.java (30 ext in-edges))",
+    "answer(\"Rate-limit handling is implemented in the RateLimit.java file within subsystem [3] Rate limits & runtime config. It feeds the UI state through the Angular frontend, specifically via the FE plan, billing & consent module ([174]), which handles subscription and consent screens, and the FE auth, 2FA & interceptors module ([170]), which manages authentication flows and interceptors that may trigger rate-limit-related UI states such as throttling or access denial messages.\")"
+   ],
+   "answer": "Rate-limit handling is implemented in the RateLimit.java file within subsystem [3] Rate limits & runtime config. It feeds the UI state through the Angular frontend, specifically via the FE plan, billing & consent module ([174]), which handles subscription and consent screens, and the FE auth, 2FA & interceptors module ([170]), which manages authentication flows and interceptors that may trigger rate-limit-related UI states such as throttling or access denial messages."
+  },
+  {
+   "id": "FE30",
+   "status": "CONTENT_POINTER",
+   "terminal": "answer",
+   "steps": 2,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 5.42,
+   "traj": [
+    "cache(\"What static checks run as part of check:full before a commit lands?\")",
+    "answer(\"check:full includes check:no-legacy-ui; check:api-wrappers; check:i18n-parity; check:visual-fixture-coverage; lint-staged; typecheck; build:check (ng build, strictTemplates); jest — the pre-commit floor, ~17s clean. Source: package.json check:* scripts.\")"
+   ],
+   "answer": "check:full includes check:no-legacy-ui; check:api-wrappers; check:i18n-parity; check:visual-fixture-coverage; lint-staged; typecheck; build:check (ng build, strictTemplates); jest — the pre-commit floor, ~17s clean. Source: package.json check:* scripts."
+  },
+  {
+   "id": "FE31",
+   "status": "EXECUTED",
+   "terminal": "pass",
+   "steps": 1,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 1.82,
+   "traj": [
+    "pass(\"The question is about user experience for a non-existent URL, which is outside the codebase's scope and cannot be answered by code graph analysis.\")"
+   ],
+   "answer": "The question is about user experience for a non-existent URL, which is outside the codebase's scope and cannot be answered by code graph analysis."
+  },
+  {
+   "id": "FE32",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": true,
+   "success": false,
+   "seconds": 9.5,
+   "traj": [
+    "map()",
+    "find(authenticated pages)",
+    "find(auth)",
+    "find(authenticated)",
+    "find(layout)",
+    "find(layout)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "FE33",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 5.13,
+   "traj": [
+    "find(billing)",
+    "enter(11)",
+    "spine(11)",
+    "find(StripeService.java)",
+    "find(StripeService.java)",
+    "flow(StripeService.java,1)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "FE34",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 6,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 18.4,
+   "traj": [
+    "map()",
+    "enter(4)",
+    "spine(4)",
+    "flow(PermissionUtils.java (68 ext in-edges), 1)",
+    "flow(PermissionUtils.java, 1)",
+    "answer(\"User-facing flows under collaborations from browsing campaigns to reviewing submitted content include: browsing opportunities (via PartnershipOpportunity), applying to campaigns (via AppliedOpportunity), and reviewing submitted content (via UserManagementService and related entities). The flow starts with PermissionUtils.java, which imports and injects dependencies across PartnershipOpportunity, AppliedOpportunity, User, and AccountStatus, enabling access control and data flow through the collaboration lifecycle. Key components: PartnershipOpportunity (campaigns), AppliedOpportunity (applications), and UserManagementService (review workflows).\")"
+   ],
+   "answer": "User-facing flows under collaborations from browsing campaigns to reviewing submitted content include: browsing opportunities (via PartnershipOpportunity), applying to campaigns (via AppliedOpportunity), and reviewing submitted content (via UserManagementService and related entities). The flow starts with PermissionUtils.java, which imports and injects dependencies across PartnershipOpportunity, AppliedOpportunity, User, and AccountStatus, enabling access control and data flow through the collaboration lifecycle. Key components: PartnershipOpportunity (campaigns), AppliedOpportunity (applicati"
+  },
+  {
+   "id": "GR01",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 3,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 7.93,
+   "traj": [
+    "find(UserRepository.java)",
+    "impact(UserRepository.java)",
+    "answer(\"79 files depend on UserRepository.java; top dependents: ActiveCooperationService.java; AddressService.java; AdminCascadeDeleteServiceImpl.java; AppliedOpportunityContentService.java; AppliedOpportunityStatusHistoryService.java; EmailChangeService.java; EmailVerificationService.java; FirebaseAuthPr...; affected subsystems: 0, 1, 10, 11, 12, 15, 3, 4, 5, 6, 7, 8, 9\")"
+   ],
+   "answer": "79 files depend on UserRepository.java; top dependents: ActiveCooperationService.java; AddressService.java; AdminCascadeDeleteServiceImpl.java; AppliedOpportunityContentService.java; AppliedOpportunityStatusHistoryService.java; EmailChangeService.java; EmailVerificationService.java; FirebaseAuthPr...; affected subsystems: 0, 1, 10, 11, 12, 15, 3, 4, 5, 6, 7, 8, 9"
+  },
+  {
+   "id": "GR02",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 2,
+   "backtracks": 0,
+   "gold_fp_hit": true,
+   "success": true,
+   "seconds": 4.35,
+   "traj": [
+    "impact(AccountStatus.java)",
+    "answer(\"49 dependency edges point at AccountStatus.java; heaviest: AccountActivatedEvent.java, InMemoryUserCache.java, RedisUserCache.java, TestAuthController.java, EmailChangeService.java, EmailVerificationService.java, InstagramDataDeletionService.java, OAuthCallbackService.java\")"
+   ],
+   "answer": "49 dependency edges point at AccountStatus.java; heaviest: AccountActivatedEvent.java, InMemoryUserCache.java, RedisUserCache.java, TestAuthController.java, EmailChangeService.java, EmailVerificationService.java, InstagramDataDeletionService.java, OAuthCallbackService.java"
+  },
+  {
+   "id": "GR03",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 42.9,
+   "traj": [
+    "map()",
+    "enter(11)",
+    "find(StripeService)",
+    "flow(StripeService.java)",
+    "enter(11)",
+    "spine(11)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "GR04",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 10.18,
+   "traj": [
+    "map()",
+    "find(cross-boundary coupling)",
+    "find(cross-boundary)",
+    "find(cross-boundary coupling)",
+    "seam(11, 177)",
+    "enter(11)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "GR05",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 5,
+   "backtracks": 1,
+   "gold_fp_hit": true,
+   "success": true,
+   "seconds": 18.29,
+   "traj": [
+    "map()",
+    "seam(17, 18)",
+    "enter(17)",
+    "seam(17, 18)",
+    "answer(\"The boundary node between the greenfield FE (17) and the generated API (18) is [177] FE shell, i18n & generated client, which serves as the central seam with 147 external in-edges and is the sole point of integration for the generated OpenAPI client.\")"
+   ],
+   "answer": "The boundary node between the greenfield FE (17) and the generated API (18) is [177] FE shell, i18n & generated client, which serves as the central seam with 147 external in-edges and is the sole point of integration for the generated OpenAPI client."
+  },
+  {
+   "id": "GR06",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 12.87,
+   "traj": [
+    "map()",
+    "seam(11, 10)",
+    "seam(11, 10)",
+    "seam(11, 201)",
+    "seam(11, 12)",
+    "seam(11, 3)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "GR07",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 9.07,
+   "traj": [
+    "map()",
+    "find(dependency)",
+    "find(dependency injection)",
+    "find(\"dependency injection\")",
+    "find(\"dependency injection\")",
+    "find(\"DI\")"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "GR08",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 5,
+   "backtracks": 0,
+   "gold_fp_hit": true,
+   "success": true,
+   "seconds": 18.62,
+   "traj": [
+    "map()",
+    "enter(11)",
+    "spine(11)",
+    "read(UserRepository.java (141 ext in-edges))",
+    "answer(\"The minimal reading path to understand the subscription/consent subsystem (sub 11) is: UserRepository.java → UserType.java → LegalConsentService.java → ConsentService.java → StripeService.java, following the spine of the subsystem. These nodes form the core dependency chain responsible for user data, consent enforcement, and Stripe payment lifecycle. The entry point UserRepository.java has 141 external in-edges, indicating high integration; UserType.java (48 in-edges) governs user roles; LegalConsentService.java (18 in-edges) manages consent logic; ConsentService.java orchestrates consent flows; and StripeService.java handles payment processing and webhooks.\")"
+   ],
+   "answer": "The minimal reading path to understand the subscription/consent subsystem (sub 11) is: UserRepository.java → UserType.java → LegalConsentService.java → ConsentService.java → StripeService.java, following the spine of the subsystem. These nodes form the core dependency chain responsible for user data, consent enforcement, and Stripe payment lifecycle. The entry point UserRepository.java has 141 external in-edges, indicating high integration; UserType.java (48 in-edges) governs user roles; LegalConsentService.java (18 in-edges) manages consent logic; ConsentService.java orchestrates consent flow"
+  },
+  {
+   "id": "GR09",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 31.3,
+   "traj": [
+    "map()",
+    "enter(17)",
+    "enter(177)",
+    "enter(177)",
+    "enter(170)",
+    "answer(\"Entry points of subsystem 17 are: [177] FE shell, i18n & generated client (main.ts/main.server.ts), [170] FE auth, 2FA & interceptors (sign-in/up, step-up, 2FA), [171] FE opportunities & applications (opportunity browsing, applications), [172] FE onboarding survey (onboarding flow), [174] FE plan, billing & consent (plan/billing screens), [175] FE support & help centre (support ticket screens), [178] FE demo mode (demo interceptor). The root actors are: the OpenAPI client (`api`) with 147 external in-edges, the shell bootstrap (`main.ts`), and the auth interceptor chain, which orchestrates sign-in, step-up, and 2FA flows.\")"
+   ],
+   "answer": "Entry points of subsystem 17 are: [177] FE shell, i18n & generated client (main.ts/main.server.ts), [170] FE auth, 2FA & interceptors (sign-in/up, step-up, 2FA), [171] FE opportunities & applications (opportunity browsing, applications), [172] FE onboarding survey (onboarding flow), [174] FE plan, billing & consent (plan/billing screens), [175] FE support & help centre (support ticket screens), [178] FE demo mode (demo interceptor). The root actors are: the OpenAPI client (`api`) with 147 external in-edges, the shell bootstrap (`main.ts`), and the auth interceptor chain, which orchestrates sig"
+  },
+  {
+   "id": "GR10",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 5,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 6.68,
+   "traj": [
+    "find(consent)",
+    "enter(11)",
+    "flow(ConsentController.java, 1)",
+    "flow(ConsentController.java, 1)",
+    "answer(\"ConsentController.java touches consent data and uses services: ResourceNotFoundException, ValidationTranslatableException, RateLimit, RateLimitKeyType, RateLimitProfile, and ConsentService; the flow is documented in the mermaid sequence diagram.\")"
+   ],
+   "answer": "ConsentController.java touches consent data and uses services: ResourceNotFoundException, ValidationTranslatableException, RateLimit, RateLimitKeyType, RateLimitProfile, and ConsentService; the flow is documented in the mermaid sequence diagram."
+  },
+  {
+   "id": "GR11",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 6.23,
+   "traj": [
+    "find(cron)",
+    "flow(AnonymousConsentCleanupCronJob.java)",
+    "flow(AnonymousConsentCleanupCronJob.java)",
+    "flow(ConsentEnforcementCronJob.java)",
+    "flow(NoConsentAccountCleanupCronJob.java)",
+    "flow(SubscriptionPeriodProcessorCronJob.java)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "GR12",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 5,
+   "backtracks": 1,
+   "gold_fp_hit": true,
+   "success": true,
+   "seconds": 14.41,
+   "traj": [
+    "map()",
+    "enter(13)",
+    "seam(4, 13)",
+    "seam(4, 13)",
+    "answer(\"Subsystems 4 and 13 are connected via a seam with 718 edges; the test-only subsystem 13 validates the production subsystem 4 (Partnership opportunity lifecycle), as evidenced by the 60.3% coupling of the integration-test suite in sub-13 pointing to sub-4.\")"
+   ],
+   "answer": "Subsystems 4 and 13 are connected via a seam with 718 edges; the test-only subsystem 13 validates the production subsystem 4 (Partnership opportunity lifecycle), as evidenced by the 60.3% coupling of the integration-test suite in sub-13 pointing to sub-4."
+  },
+  {
+   "id": "GR13",
+   "status": "EXECUTED",
+   "terminal": "pass",
+   "steps": 3,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 8.64,
+   "traj": [
+    "map()",
+    "find(test)",
+    "pass(\"No subsystems with zero dedicated test coupling found; all subsystems have at least one test file.\")"
+   ],
+   "answer": "No subsystems with zero dedicated test coupling found; all subsystems have at least one test file."
+  },
+  {
+   "id": "GR14",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 2,
+   "backtracks": 0,
+   "gold_fp_hit": true,
+   "success": true,
+   "seconds": 2.36,
+   "traj": [
+    "cohort(address.service.ts)",
+    "answer(\"The files that co-participate in hyperedges with address.service.ts are: addresses.component.ts; layout.component.ts\")"
+   ],
+   "answer": "The files that co-participate in hyperedges with address.service.ts are: addresses.component.ts; layout.component.ts"
+  },
+  {
+   "id": "GR15",
+   "status": "CONTENT_POINTER",
+   "terminal": "answer",
+   "steps": 6,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 21.19,
+   "traj": [
+    "map()",
+    "seam(17, 177)",
+    "enter(17)",
+    "enter(177)",
+    "spine(177)",
+    "answer(\"The natural cut line for splitting MEGA subsystem 17 is between [177] FE shell, i18n & generated client and its children, as [177] acts as the central hub with 147 external in-edges (mainly via the `api` node), and all siblings depend on it. The spine of [177] shows it as the core orchestrator, with `notification-center.service.ts` as the primary hub (idf: 2.862). Splitting here preserves cohesion in children like [172] (onboarding survey, cohesion 1.000) and [174] (billing, with cross-repo affinity to [11]), while isolating shared concerns in [177].\")"
+   ],
+   "answer": "The natural cut line for splitting MEGA subsystem 17 is between [177] FE shell, i18n & generated client and its children, as [177] acts as the central hub with 147 external in-edges (mainly via the `api` node), and all siblings depend on it. The spine of [177] shows it as the core orchestrator, with `notification-center.service.ts` as the primary hub (idf: 2.862). Splitting here preserves cohesion in children like [172] (onboarding survey, cohesion 1.000) and [174] (billing, with cross-repo affinity to [11]), while isolating shared concerns in [177]."
+  },
+  {
+   "id": "GR16",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 14.08,
+   "traj": [
+    "map()",
+    "find(11)",
+    "find(Subscriptions)",
+    "find(SubscriptionService)",
+    "find(SubscriptionService)",
+    "seam(11, 10)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "GR17",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 4,
+   "backtracks": 1,
+   "gold_fp_hit": true,
+   "success": true,
+   "seconds": 41.18,
+   "traj": [
+    "map()",
+    "seam(11,7)",
+    "seam(11,7)",
+    "answer(\"Subscriptions (11) depends on Logging/Exceptions (7) via 51 IMPORTS, 4 INJECTS, 3 VALIDATES, and 3 EXTENDS edges; the primary direction is from 7 to 11, indicating that 7 is a foundational layer consumed by 11.\")"
+   ],
+   "answer": "Subscriptions (11) depends on Logging/Exceptions (7) via 51 IMPORTS, 4 INJECTS, 3 VALIDATES, and 3 EXTENDS edges; the primary direction is from 7 to 11, indicating that 7 is a foundational layer consumed by 11."
+  },
+  {
+   "id": "GR18",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 2,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 9.95,
+   "traj": [
+    "map()",
+    "find(Authentication)",
+    "find(Authentication)",
+    "find(authentication)",
+    "find(Authentication)",
+    "enter(203)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "GR19",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 10.72,
+   "traj": [
+    "map()",
+    "find(\"TOTP/step-up subsystem\")",
+    "find(\"step-up\")",
+    "find(\"step-up-auth.feature\")",
+    "enter(9)",
+    "spine(9)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "GR20",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 50.12,
+   "traj": [
+    "map()",
+    "enter(5)",
+    "spine(5)",
+    "read(AdminCascadeDeleteService.java)",
+    "enter(5)",
+    "flow(AdminCascadeDeleteService.java)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "GR21",
+   "status": "EXECUTED",
+   "terminal": "pass",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 40.68,
+   "traj": [
+    "map()",
+    "enter(11)",
+    "enter(11)",
+    "spine(11)",
+    "read(UserRepository.java (141 ext in-edges))",
+    "pass(\"Cannot read file content directly; no file body available in the graph\")"
+   ],
+   "answer": "Cannot read file content directly; no file body available in the graph"
+  },
+  {
+   "id": "GR22",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 10.44,
+   "traj": [
+    "map()",
+    "find(Event)",
+    "find(Event)",
+    "flow(SubscriptionEvent.java)",
+    "flow(InvoiceCreatedEvent.java)",
+    "find(SubscriptionEvent.java)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "GR23",
+   "status": "EXECUTED",
+   "terminal": "invalid",
+   "steps": 6,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 13.16,
+   "traj": [
+    "map()",
+    "find(application-*.yml)",
+    "find(\"application-*.yml\")",
+    "find(\"application.yml\")",
+    "enter(3)",
+    "answer(\"The config file 'application.yml' in subsystem [3] (Rate limits & runtime config) influences the most subsystems, with 44 external in-edges from CucumberSpringConfig.java and 31 from RateLimitProfile.java, making it a central configuration hub with high fan-in across the platform.\");"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "GR24",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 5,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 12.45,
+   "traj": [
+    "map()",
+    "find(UserRepository.java)",
+    "enter(11)",
+    "spine(11)",
+    "answer(\"UserRepository.java (141 external in-edges) would disconnect the subsystem if removed, as it is the primary entry point with the highest fan-in and is part of the spine of subsystem 11.\")"
+   ],
+   "answer": "UserRepository.java (141 external in-edges) would disconnect the subsystem if removed, as it is the primary entry point with the highest fan-in and is part of the spine of subsystem 11."
+  },
+  {
+   "id": "GR25",
+   "status": "EXECUTED",
+   "terminal": "invalid",
+   "steps": 2,
+   "backtracks": 0,
+   "gold_fp_hit": true,
+   "success": false,
+   "seconds": 34.44,
+   "traj": [
+    "map()",
+    "answer(\"Subsystems overview: [11] Subscriptions, payments & consent (208 files), entry: UserRepository.java; [10] User identity & token exchange (39 files), entry: User entity; [12] Notifications & domain events (36 files), entry: notification entities; [3] Rate limits & runtime config (129 files), entry: Spring profiles; [7] LAYER Translatable exceptions & logging (52 files), entry: exception hierarchy; [0] User preferences & geo distance (27 files), entry: preference entities; [2] LAYER Social connection data model (15 files), entry: UserSocialConnection; [16] LAYER Status enums & OpenAPI contract (12 files), entry: status enums; [9] Auth journeys & BDD harness (103 files), entry: auth flows; [6] Two-factor auth & user cache (51 files), entry: UserCacheService; [8] Validation, crypto & query specs (49 files), entry: SpecificationBuilder; [5] Account deletion & Instagram sync (48 files), entry: AdminCascadeDeleteServiceImpl.java; [15] Support tickets & attachments (35 files), entry: ticket entities; [1] Address resolution & storage (18 files), entry: address entities; [14] FAQ content & categories (15 files), entry: FAQ entities; [177] FE shell, i18n & generated client (74 files), entry: bootstrap; [170] FE auth, 2FA & interceptors (69 files), entry: sign-in/up; [173] LAYER FE fixtures & E2E harness (67 files), entry: sandbox fixtures; [176] FE profile, settings & admin (52 files), entry: profile; [171] FE opportunities & applications (43 files), entry: opportunity browsing; [172] FE onboarding survey (42 files), entry: onboarding survey; [174] FE plan, billing & consent (23 files), entry: plan and billing screens; [175] FE support & help centre (20 files), entry: support ticket; [178] FE demo mode (16 files), entry: demo interceptor; [4] Partnership opportunity lifecycle (172 files), entry: PermissionUtils.java\");"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "GR26",
+   "status": "CONTENT_POINTER",
+   "terminal": "answer",
+   "steps": 4,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 15.03,
+   "traj": [
+    "map()",
+    "enter(11)",
+    "spine(11)",
+    "answer(\"The subscription and consent code remained merged within subsystem [11] 'Subscriptions, payments & consent' across reindexes, as evidenced by the spine(11) showing a unified dependency chain centered on StripeService.java and ConsentService.java, with no indication of separation. The legal and consent logic (LegalConsentService.java) and user type enforcement (UserType.java) are deeply interwoven in the spine, confirming integration. No external seams or splits were detected in the subsystem's dependency graph.\")"
+   ],
+   "answer": "The subscription and consent code remained merged within subsystem [11] 'Subscriptions, payments & consent' across reindexes, as evidenced by the spine(11) showing a unified dependency chain centered on StripeService.java and ConsentService.java, with no indication of separation. The legal and consent logic (LegalConsentService.java) and user type enforcement (UserType.java) are deeply interwoven in the spine, confirming integration. No external seams or splits were detected in the subsystem's dependency graph."
+  },
+  {
+   "id": "GR27",
+   "status": "EXECUTED",
+   "terminal": "invalid",
+   "steps": 3,
+   "backtracks": 0,
+   "gold_fp_hit": true,
+   "success": false,
+   "seconds": 7.94,
+   "traj": [
+    "find(UserSocialConnectionRepository)",
+    "impact(UserSocialConnectionRepository.java)",
+    "answer(\"16 dependency edges point at UserSocialConnectionRepository.java; heaviest dependents: AppliedOpportunityService.java, InstagramDataDeletionService.java, InstagramDeauthorizationService.java, OAuthCallbackService.java, RegistrationService.java, AuthService.java, TestAuthController.java, UserSocialConnectionService.java; the area is owned by subsystems: 0, 10, 4, 5, 6, 9\");"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "GR28",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 5,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 5.16,
+   "traj": [
+    "find(subscription)",
+    "flow(SubscriptionEvent.java)",
+    "flow(SubscriptionEvent.java)",
+    "flow(SubscriptionNotificationEvent.java)",
+    "answer(\"The subscription lifecycle triggers email/notifications via SubscriptionNotificationEvent.java, which affects NotificationType.java and User.java, initiating flows for notification creation and user impact.\")"
+   ],
+   "answer": "The subscription lifecycle triggers email/notifications via SubscriptionNotificationEvent.java, which affects NotificationType.java and User.java, initiating flows for notification creation and user impact."
+  },
+  {
+   "id": "GR29",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 2,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 11.5,
+   "traj": [
+    "map()",
+    "answer(\"The files with the highest in-degree system-wide are: User.java (154 external in-edges) in [10] User identity & token exchange, and UserRepository.java (141 external in-edges) in [11] Subscriptions, payments & consent. The most imported node in the estate is User.java, with the highest fan-in across the system.\")"
+   ],
+   "answer": "The files with the highest in-degree system-wide are: User.java (154 external in-edges) in [10] User identity & token exchange, and UserRepository.java (141 external in-edges) in [11] Subscriptions, payments & consent. The most imported node in the estate is User.java, with the highest fan-in across the system."
+  },
+  {
+   "id": "GR30",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 11.56,
+   "traj": [
+    "map()",
+    "find(CORS)",
+    "find(CORS)",
+    "seam(7,11)",
+    "enter(7)",
+    "seam(11, 7)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "GR31",
+   "status": "EXECUTED",
+   "terminal": "pass",
+   "steps": 5,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 10.88,
+   "traj": [
+    "map()",
+    "find(\"shared\")",
+    "find(\"resources\")",
+    "find(\"contention\")",
+    "pass(\"No direct matches found for 'resources', 'shared', or 'contention' in the context; the query requires identifying shared resources across processes, but no such entities are explicitly named or linked in the provided results.\")"
+   ],
+   "answer": "No direct matches found for 'resources', 'shared', or 'contention' in the context; the query requires identifying shared resources across processes, but no such entities are explicitly named or linked in the provided results."
+  },
+  {
+   "id": "GR32",
+   "status": "CONTENT_POINTER",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 51.19,
+   "traj": [
+    "map()",
+    "enter(17)",
+    "enter(173)",
+    "spine(173)",
+    "read(sandbox-host.component.ts (actor root))",
+    "find(sandbox-host.component.ts)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "GR33",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 15.36,
+   "traj": [
+    "map()",
+    "enter(11)",
+    "flow(UserRepository.java (141 ext in-edges), 3)",
+    "flow(UserRepository.java, 3)",
+    "flow(UserRepository.java, 3)",
+    "answer(\"From UserRepository.java, the flow within 3 hops reaches: BaseRepository.java, User.java, Address.java, UpdaterTracking.java, and UserRepositoryCustom.java. These are the immediate and indirect dependencies in the call chain, with no public controller directly involved. No public controller is reachable within 3 hops from payment resources via this path.\")"
+   ],
+   "answer": "From UserRepository.java, the flow within 3 hops reaches: BaseRepository.java, User.java, Address.java, UpdaterTracking.java, and UserRepositoryCustom.java. These are the immediate and indirect dependencies in the call chain, with no public controller directly involved. No public controller is reachable within 3 hops from payment resources via this path."
+  }
+ ]
+}

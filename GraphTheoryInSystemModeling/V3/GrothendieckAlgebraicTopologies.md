@@ -1,3 +1,17 @@
+ > **STATUS (2026-09-02): PARTIALLY SUPERSEDED — read with `V3_MathematicalFoundations.md` §0.**
+> This document specifies the training construction (§3) whose outputs (`rho0`, `proj_*`) remain the
+> substrate of everything downstream — that part stands. The following claims made here were later
+> **refuted by measurement** and must not be cited as results: α_k as a real-vs-virtual separator
+> (§4.4 — tracks edge sparsity; note §4.4 and the V3 prompt also define its direction oppositely);
+> the −0.311 PERFORMS/TRIGGERS anti-correlation as proof of non-abelian structure (abstract, §9 —
+> does not reproduce); Berry-phase / holonomy boundary detection (§7.5, §12.6 — rests on a rotation
+> model class that loses to a one-parameter scalar on all 34 signatures); the ℝ¹³⁶ composite as the
+> clustering representation (§12.2 — predicts co-change worse than the single base projection at
+> every width tested); fine-grained co-association fusion as specified in §12.5 (resolution
+> knife-edge; the promoted successor is MEET-QUOTIENT v2, Grothendieck prompt v4.1 phase 6).
+> The measured replacement pipeline lives in `Promts/V4/GrothendieckGraphOrganizer_V4.xml` (v4.1)
+> and the evidence trail in `V3Lab` findings F1–F107.
+
 # Grothendieck V3: Training Algebraic Topologies from Embeddings and Typed Edges
 
 ## Per-Relation Restriction Maps via Graph-Native Randomized SVD

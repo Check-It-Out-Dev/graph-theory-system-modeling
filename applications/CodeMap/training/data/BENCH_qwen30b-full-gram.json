@@ -1,0 +1,1961 @@
+{
+ "summary": {
+  "model": "Qwen3-30B-A3B-Instruct-2507-Q4_K_M.gguf",
+  "grammar": "on",
+  "n": {
+   "total": 104,
+   "answerable": 65,
+   "unanswerable": 19
+  },
+  "task_success": {
+   "answerable": 0.0923,
+   "gold_fp_hit": 0.1846,
+   "pass_on_unanswerable": 0.2105
+  },
+  "terminals": {
+   "answer": 15,
+   "pass": 13,
+   "stall": 75,
+   "invalid": 1
+  },
+  "steps": {
+   "mean": 5.56,
+   "p50": 6.0
+  },
+  "seconds_p50": 6.53,
+  "backtrack_rate": 1.2115,
+  "wall_minutes": 13.7
+ },
+ "rows": [
+  {
+   "id": "BE01",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 3,
+   "gold_fp_hit": true,
+   "success": false,
+   "seconds": 8.28,
+   "traj": [
+    "find(PaymentsDisabledBootGuard)",
+    "enter(11)",
+    "enter(11)",
+    "find(PaymentsDisabledBootGuard)",
+    "enter(11)",
+    "impact(PaymentsDisabledBootGuard.java)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "BE02",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 3,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 11.22,
+   "traj": [
+    "map()",
+    "find(cron)",
+    "find(cron)",
+    "enter(11)",
+    "enter(11)",
+    "find(cron)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "BE03",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 5,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 4.55,
+   "traj": [
+    "find(dev-lite)",
+    "find(e2e)",
+    "find(no-redis)",
+    "find(prod-standalone)",
+    "answer(\"dev-lite: development with minimal dependencies; e2e: end-to-end testing; no-redis: runs without Redis; prod-standalone: production mode with standalone services\")"
+   ],
+   "answer": "dev-lite: development with minimal dependencies; e2e: end-to-end testing; no-redis: runs without Redis; prod-standalone: production mode with standalone services"
+  },
+  {
+   "id": "BE04",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 4,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 11.74,
+   "traj": [
+    "map()",
+    "enter(11)",
+    "find(SubscriptionPlan)",
+    "answer(\"The system models subscription plans through SubscriptionPlan.java and SubscriptionPlanRepository.java, and statuses via status enums in the [16] LAYER Status enums & OpenAPI contract (12 files), which includes compensation enums and i18n message bundles used across 12 consumers.\")"
+   ],
+   "answer": "The system models subscription plans through SubscriptionPlan.java and SubscriptionPlanRepository.java, and statuses via status enums in the [16] LAYER Status enums & OpenAPI contract (12 files), which includes compensation enums and i18n message bundles used across 12 consumers."
+  },
+  {
+   "id": "BE05",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 11.15,
+   "traj": [
+    "find(Fakturownia)",
+    "enter(11)",
+    "impact(FakturowniaAdapter.java)",
+    "read(FakturowniaAdapter.java)",
+    "read(FakturowniaAdapter.java)",
+    "answer(\"The backend integrates with Fakturownia via FakturowniaAdapter.java, which acts as a port for invoicing operations. It interacts with FakturowniaCreateRequest.java for request modeling and FakturowniaInvoiceResponse.java for response handling. Configuration is managed through FakturowniaConfig.java and FakturowniaProperties.java. Integration and unit tests validate the adapter's behavior. The adapter is part of the 'Subscriptions, payments & consent' subsystem (sub 11), which handles invoicing with retry logic and is tied to the payment lifecycle.\")"
+   ],
+   "answer": "The backend integrates with Fakturownia via FakturowniaAdapter.java, which acts as a port for invoicing operations. It interacts with FakturowniaCreateRequest.java for request modeling and FakturowniaInvoiceResponse.java for response handling. Configuration is managed through FakturowniaConfig.java and FakturowniaProperties.java. Integration and unit tests validate the adapter's behavior. The adapter is part of the 'Subscriptions, payments & consent' subsystem (sub 11), which handles invoicing with retry logic and is tied to the payment lifecycle."
+  },
+  {
+   "id": "BE06",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 5,
+   "backtracks": 0,
+   "gold_fp_hit": true,
+   "success": true,
+   "seconds": 6.25,
+   "traj": [
+    "find(ConsentEnforcementFilter)",
+    "enter(11)",
+    "impact(ConsentEnforcementFilter.java)",
+    "read(ConsentEnforcementFilter.java)",
+    "answer(\"ConsentEnforcementFilter blocks access to protected resources for users who lack proper consent; it enforces consent requirements for API endpoints within the Subscriptions, payments & consent subsystem (sub 11).\")"
+   ],
+   "answer": "ConsentEnforcementFilter blocks access to protected resources for users who lack proper consent; it enforces consent requirements for API endpoints within the Subscriptions, payments & consent subsystem (sub 11)."
+  },
+  {
+   "id": "BE07",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 2,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 10.82,
+   "traj": [
+    "map()",
+    "find(\"rate limits\")",
+    "enter(3)",
+    "enter(3)",
+    "impact(RateLimitProfile.java)",
+    "enter(3)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "BE08",
+   "status": "EXECUTED",
+   "terminal": "pass",
+   "steps": 3,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 2.3,
+   "traj": [
+    "find(step-up authentication)",
+    "find(step_up_authentication)",
+    "pass(\"No exact match found for 'step-up authentication' or 'step_up_authentication' in the codebase.\")"
+   ],
+   "answer": "No exact match found for 'step-up authentication' or 'step_up_authentication' in the codebase."
+  },
+  {
+   "id": "BE09",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 5,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 5.79,
+   "traj": [
+    "find(AdminCascadeDeleteController)",
+    "enter(5)",
+    "impact(AdminCascadeDeleteServiceImpl.java)",
+    "read(AdminCascadeDeleteServiceImpl.java)",
+    "answer(\"AdminCascadeDeleteController cascades deletion of user accounts and their associated Instagram sync data, as managed by AdminCascadeDeleteServiceImpl.java, which orchestrates deletion across 17 files and integrates with the Instagram OAuth service.\")"
+   ],
+   "answer": "AdminCascadeDeleteController cascades deletion of user accounts and their associated Instagram sync data, as managed by AdminCascadeDeleteServiceImpl.java, which orchestrates deletion across 17 files and integrates with the Instagram OAuth service."
+  },
+  {
+   "id": "BE10",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 3,
+   "gold_fp_hit": true,
+   "success": false,
+   "seconds": 4.66,
+   "traj": [
+    "find(Instagram)",
+    "enter(5)",
+    "enter(5)",
+    "enter(5)",
+    "find(InstagramCallbackController)",
+    "enter(5)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "BE11",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 2,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 4.27,
+   "traj": [
+    "find(legal)",
+    "enter(11)",
+    "enter(11)",
+    "find(legal documents)",
+    "find(legal_document)",
+    "find(legal_document)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "BE12",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 3.06,
+   "traj": [
+    "find(\"backend\")",
+    "find(\"messages\")",
+    "find(\"emails\")",
+    "find(\"language\")",
+    "find(\"properties\")",
+    "find(\"properties\")"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "BE13",
+   "status": "CONTENT_POINTER",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 10.09,
+   "traj": [
+    "map()",
+    "find(database)",
+    "enter(3)",
+    "find(LocalDatabaseInitializer.java)",
+    "impact(LocalDatabaseInitializer.java)",
+    "read(LocalDatabaseInitializer.java)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "BE14",
+   "status": "CONTENT_POINTER",
+   "terminal": "pass",
+   "steps": 2,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": true,
+   "seconds": 1.4,
+   "traj": [
+    "find(pentest)",
+    "pass(no results for \"pentest\" in the context)"
+   ],
+   "answer": "no results for \"pentest\" in the context"
+  },
+  {
+   "id": "BE15",
+   "status": "CONTENT_POINTER",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 2,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 3.41,
+   "traj": [
+    "find(uploaded)",
+    "find(files)",
+    "enter(9)",
+    "find(DeleteFilesRequest)",
+    "find(DeleteFilesRequest)",
+    "find(DeleteFilesRequest)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "BE16",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 3,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 11.75,
+   "traj": [
+    "map()",
+    "enter(11)",
+    "enter(11)",
+    "enter(11)",
+    "enter(11)",
+    "find(Subscriptions)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "BE17",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 5.63,
+   "traj": [
+    "find(Fakturownia)",
+    "enter(11)",
+    "impact(FakturowniaAdapter.java)",
+    "read(FakturowniaAdapter.java)",
+    "enter(11)",
+    "find(cron)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "BE18",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 2,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 8.89,
+   "traj": [
+    "map()",
+    "find(servlet)",
+    "find(filter)",
+    "find(servlet filter)",
+    "find(servlet filter)",
+    "find(servlet filter)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "BE19",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 2,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 11.01,
+   "traj": [
+    "map()",
+    "find(trial)",
+    "enter(11)",
+    "find(TrialExpiryNotifierCronJob)",
+    "enter(11)",
+    "enter(11)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "BE20",
+   "status": "EXECUTED",
+   "terminal": "pass",
+   "steps": 5,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 3.52,
+   "traj": [
+    "find(cron)",
+    "find(cron job locking)",
+    "find(cron job locking)",
+    "find(cron job synchronization)",
+    "pass(\"No explicit mechanism for preventing duplicate cron job execution found in the codebase.\")"
+   ],
+   "answer": "No explicit mechanism for preventing duplicate cron job execution found in the codebase."
+  },
+  {
+   "id": "BE21",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 2,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 5.36,
+   "traj": [
+    "find(terms)",
+    "enter(11)",
+    "impact(TermsVersion.java)",
+    "enter(11)",
+    "find(TermsGraceProcessorCronJob)",
+    "find(TermsGraceProcessorCronJob)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "BE22",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 4.74,
+   "traj": [
+    "find(Redis)",
+    "impact(RedisUserCache.java)",
+    "impact(RedisUserCache.java, 1)",
+    "find(RedisUserCache.java)",
+    "enter(6)",
+    "impact(UserCacheService.java)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "BE23",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 2,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 2.94,
+   "traj": [
+    "find(banning)",
+    "find(user)",
+    "find(api)",
+    "find(api access)",
+    "find(api access)",
+    "find(api)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "BE24",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 6,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 6.43,
+   "traj": [
+    "find(campaigns)",
+    "find(plan)",
+    "enter(11)",
+    "impact(SubscriptionPlan.java)",
+    "read(SubscriptionPlan.java)",
+    "answer(\"The number of campaigns a company can create is limited by the plan through the SubscriptionPlan.java entity, which defines plan-specific campaign limits; open SubscriptionPlan.java for exact constraints.\")"
+   ],
+   "answer": "The number of campaigns a company can create is limited by the plan through the SubscriptionPlan.java entity, which defines plan-specific campaign limits; open SubscriptionPlan.java for exact constraints."
+  },
+  {
+   "id": "BE25",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 5.34,
+   "traj": [
+    "find(GDPR)",
+    "enter(3)",
+    "find(GeoLocationGdprController)",
+    "enter(3)",
+    "find(GeoLocationGdprService)",
+    "impact(GeoLocationGdprService.java)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "BE26",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 5.12,
+   "traj": [
+    "find(GeoIP)",
+    "enter(3)",
+    "find(GDPR)",
+    "impact(GeoIpAdminController.java)",
+    "read(GeoIpAdminController.java)",
+    "find(GeoIP)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "BE27",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 10.46,
+   "traj": [
+    "map()",
+    "find(notifications)",
+    "enter(12)",
+    "find(AccountActivatedEvent)",
+    "impact(AccountActivatedEvent.java)",
+    "enter(10)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "BE28",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": true,
+   "success": false,
+   "seconds": 5.09,
+   "traj": [
+    "find(cron)",
+    "enter(12)",
+    "enter(12)",
+    "find(EmailCronJob)",
+    "impact(EmailCronJob.java)",
+    "read(EmailCronJob.java)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "BE29",
+   "status": "COVERAGE_GAP",
+   "terminal": "answer",
+   "steps": 4,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 2.79,
+   "traj": [
+    "find(credentials)",
+    "impact(GoogleCredentialsProvider.java)",
+    "find(credential)",
+    "answer(\"GoogleCredentialsProvider.java; CredentialsServiceUnitTest.java\")"
+   ],
+   "answer": "GoogleCredentialsProvider.java; CredentialsServiceUnitTest.java"
+  },
+  {
+   "id": "BE30",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 8.54,
+   "traj": [
+    "map()",
+    "find(production database dump)",
+    "find(production)",
+    "find(backend)",
+    "find(backend startup)",
+    "find(backend startup)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "BE31",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 5,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 11.2,
+   "traj": [
+    "find(campaign)",
+    "impact(CampaignLimitService.java)",
+    "enter(11)",
+    "impact(CampaignLimitService.java, 2)",
+    "answer(\"The company may be unable to create new campaigns due to a campaign limit enforcement mechanism in CampaignLimitService.java, which is part of the Subscriptions, payments & consent subsystem (sub 11). This service is heavily depended upon by critical components like PartnershipOpportunityService and SubscriptionServiceIntegrationTestBase, suggesting it governs campaign creation limits. A sudden failure or threshold breach in this service—possibly triggered by a backend state change, such as a payment or subscription status update—could block new campaign creation even without code changes. Reviewing CampaignLimitService.java and its integration with Fakturownia (invoicing) and Stripe (payments) may reveal the root cause.\")"
+   ],
+   "answer": "The company may be unable to create new campaigns due to a campaign limit enforcement mechanism in CampaignLimitService.java, which is part of the Subscriptions, payments & consent subsystem (sub 11). This service is heavily depended upon by critical components like PartnershipOpportunityService and SubscriptionServiceIntegrationTestBase, suggesting it governs campaign creation limits. A sudden failure or threshold breach in this service—possibly triggered by a backend state change, such as a payment or subscription status update—could block new campaign creation even without code changes. Rev"
+  },
+  {
+   "id": "BE32",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 4.04,
+   "traj": [
+    "find(login token)",
+    "find(token)",
+    "find(JwtAuthenticationFilterStaleTokenUnitTest)",
+    "find(JwtAuthenticationFilter)",
+    "enter(7)",
+    "find(JwtAuthenticationFilter)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "BE33",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 5.04,
+   "traj": [
+    "find(accounts)",
+    "impact(AccountStatus.java)",
+    "enter(11)",
+    "enter(11)",
+    "find(cron)",
+    "find(DeferredDeletionCronJob)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "BE34",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 5.34,
+   "traj": [
+    "find(Fakturownia)",
+    "enter(11)",
+    "find(FakturowniaAdapter)",
+    "impact(FakturowniaAdapter.java)",
+    "read(FakturowniaAdapter.java)",
+    "read(FakturowniaAdapter.java)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "BE35",
+   "status": "CONTENT_POINTER",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 3,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 3.44,
+   "traj": [
+    "find(cron)",
+    "find(admin)",
+    "find(AdminSaveService)",
+    "find(AdminSaveService)",
+    "find(AdminSaveService)",
+    "find(AdminSaveService)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "BE36",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 3,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 9.77,
+   "traj": [
+    "map()",
+    "find(log)",
+    "find(logging)",
+    "find(log)",
+    "find(logging)",
+    "find(log)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "BE37",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 0,
+   "gold_fp_hit": true,
+   "success": false,
+   "seconds": 4.37,
+   "traj": [
+    "find(attachment)",
+    "find(host)",
+    "enter(15)",
+    "find(StorageUrlValidator)",
+    "enter(3)",
+    "impact(StorageUrlValidator.java)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "FE01",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 5.36,
+   "traj": [
+    "find(routes)",
+    "enter(17)",
+    "enter(170)",
+    "enter(171)",
+    "enter(172)",
+    "enter(173)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "FE02",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 5,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 6.35,
+   "traj": [
+    "find(\"sign-in screen\")",
+    "find(\"sign-in\")",
+    "enter(17)",
+    "enter(170)",
+    "answer(\"The sign-in screen component is defined in sign-in.component.html, sign-in.component.ts, sign-in.component.scss, sign-in.component.spec.ts, and sign-in.fixture.ts within the FE auth, 2FA & interceptors subsystem (sub 170).\")"
+   ],
+   "answer": "The sign-in screen component is defined in sign-in.component.html, sign-in.component.ts, sign-in.component.scss, sign-in.component.spec.ts, and sign-in.fixture.ts within the FE auth, 2FA & interceptors subsystem (sub 170)."
+  },
+  {
+   "id": "FE03",
+   "status": "CONTENT_POINTER",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 3,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 2.4,
+   "traj": [
+    "find(translated)",
+    "find(translation)",
+    "find(string)",
+    "find(string)",
+    "find(string)",
+    "find(string)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "FE04",
+   "status": "CONTENT_POINTER",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 2,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 3.58,
+   "traj": [
+    "find(languages)",
+    "find(language)",
+    "find(AppLanguageFilter)",
+    "enter(7)",
+    "find(AppLanguageFilter)",
+    "find(AppLanguageFilter)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "FE05",
+   "status": "CONTENT_POINTER",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 3.03,
+   "traj": [
+    "find(Polish)",
+    "find(English)",
+    "find(language)",
+    "find(AppLanguageFilter)",
+    "impact(AppLanguageFilter.java)",
+    "read(AppLanguageFilter.java)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "FE06",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 2,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 4.15,
+   "traj": [
+    "find(cron)",
+    "find(sign-in)",
+    "find(\"401\")",
+    "enter(9)",
+    "find(\"401\")",
+    "find(\"401\")"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "FE07",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 4,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 3.38,
+   "traj": [
+    "find(X-Step-Up-Token)",
+    "find(StepUpTokenInterceptor)",
+    "find(StepUpTokenInterceptor)",
+    "find(StepUpTokenInterceptor)",
+    "find(StepUpTokenInterceptor)",
+    "find(StepUpTokenInterceptor)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "FE08",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 2,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 10.65,
+   "traj": [
+    "map()",
+    "find(interceptors)",
+    "find(Interceptor)",
+    "enter(170)",
+    "enter(170)",
+    "enter(170)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "FE09",
+   "status": "COVERAGE_GAP",
+   "terminal": "pass",
+   "steps": 3,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": true,
+   "seconds": 2.11,
+   "traj": [
+    "find(multi-select)",
+    "find(\"multi-select\")",
+    "pass(\"No results found for 'multi-select' or similar terms in the current context.\")"
+   ],
+   "answer": "No results found for 'multi-select' or similar terms in the current context."
+  },
+  {
+   "id": "FE10",
+   "status": "COVERAGE_GAP",
+   "terminal": "answer",
+   "steps": 6,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 10.67,
+   "traj": [
+    "find(authentication)",
+    "enter(7)",
+    "find(JwtAuthenticationFilter)",
+    "impact(JwtAuthenticationFilter.java)",
+    "read(JwtAuthenticationFilter.java)",
+    "answer(\"The client authenticates API requests via JWT tokens processed by JwtAuthenticationFilter.java, which is part of the authentication layer (sub 7). Since no token is stored in the browser, the client must re-authenticate via a login flow to obtain a new token, which is then sent in subsequent requests in the Authorization header. The filter validates the JWT signature and claims, and if valid, establishes the security context. No token persistence in the browser implies the client must manage token lifecycle externally, likely through a login endpoint that returns a new JWT upon successful authentication.\")"
+   ],
+   "answer": "The client authenticates API requests via JWT tokens processed by JwtAuthenticationFilter.java, which is part of the authentication layer (sub 7). Since no token is stored in the browser, the client must re-authenticate via a login flow to obtain a new token, which is then sent in subsequent requests in the Authorization header. The filter validates the JWT signature and claims, and if valid, establishes the security context. No token persistence in the browser implies the client must manage token lifecycle externally, likely through a login endpoint that returns a new JWT upon successful auth"
+  },
+  {
+   "id": "FE11",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 11.08,
+   "traj": [
+    "map()",
+    "enter(177)",
+    "impact(api)",
+    "find(api)",
+    "enter(16)",
+    "find(OpenApiConfig.java)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "FE12",
+   "status": "CONTENT_POINTER",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 2,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 10.03,
+   "traj": [
+    "map()",
+    "find(api)",
+    "enter(16)",
+    "find(OpenAPI)",
+    "find(OpenAPI)",
+    "enter(16)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "FE13",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 4.61,
+   "traj": [
+    "find(NIP)",
+    "enter(11)",
+    "enter(11)",
+    "find(registry lookup)",
+    "find(registry)",
+    "find(\"registry lookup\")"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "FE14",
+   "status": "CONTENT_POINTER",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 3.01,
+   "traj": [
+    "find(marketing)",
+    "find(public)",
+    "find(screen)",
+    "find(page)",
+    "find(marketing-page)",
+    "find(marketing_page)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "FE15",
+   "status": "EXECUTED",
+   "terminal": "pass",
+   "steps": 3,
+   "backtracks": 0,
+   "gold_fp_hit": true,
+   "success": false,
+   "seconds": 2.49,
+   "traj": [
+    "find(\"technical-survey\")",
+    "find(technical)",
+    "pass(\"No visible term 'technical-survey' or 'technical' in the current context to proceed with finding the section or its chapter pages.\")"
+   ],
+   "answer": "No visible term 'technical-survey' or 'technical' in the current context to proceed with finding the section or its chapter pages."
+  },
+  {
+   "id": "FE16",
+   "status": "CONTENT_POINTER",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 4.17,
+   "traj": [
+    "find(legacy)",
+    "find(redirect)",
+    "enter(17)",
+    "enter(170)",
+    "find(redirect)",
+    "find(location-redirect.service.ts)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "FE17",
+   "status": "EXECUTED",
+   "terminal": "pass",
+   "steps": 5,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 2.74,
+   "traj": [
+    "find(user settings tabs)",
+    "find(userSettingsTabs)",
+    "find(userSettings)",
+    "find(userSettingsTab)",
+    "pass(\"No exact match found for user settings tabs in the codebase\")"
+   ],
+   "answer": "No exact match found for user settings tabs in the codebase"
+  },
+  {
+   "id": "FE18",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 9.49,
+   "traj": [
+    "map()",
+    "find(\"browser tab title\")",
+    "find(\"tab title\")",
+    "find(\"title\")",
+    "enter(17)",
+    "enter(177)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "FE19",
+   "status": "EXECUTED",
+   "terminal": "pass",
+   "steps": 4,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 2.9,
+   "traj": [
+    "find(\"visual parity tests\")",
+    "find(\"visual parity\")",
+    "find(\"visual\")",
+    "pass(\"No results found for 'visual parity tests', 'visual parity', or 'visual' in the current context.\")"
+   ],
+   "answer": "No results found for 'visual parity tests', 'visual parity', or 'visual' in the current context."
+  },
+  {
+   "id": "FE20",
+   "status": "CONTENT_POINTER",
+   "terminal": "pass",
+   "steps": 4,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": true,
+   "seconds": 2.45,
+   "traj": [
+    "find(Playwright)",
+    "find(playwright)",
+    "find(playwright)",
+    "pass(\"No results found for 'playwright' or 'Playwright' in the current context.\")"
+   ],
+   "answer": "No results found for 'playwright' or 'Playwright' in the current context."
+  },
+  {
+   "id": "FE21",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 3,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 8.46,
+   "traj": [
+    "map()",
+    "find(BDD)",
+    "find(BDD harness)",
+    "find(BDD harness)",
+    "find(BDD harness)",
+    "find(BDD harness)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "FE22",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 10.91,
+   "traj": [
+    "map()",
+    "find(Fakturownia)",
+    "enter(11)",
+    "find(Fakturownia)",
+    "find(fakturownia-sim.component.ts)",
+    "enter(17)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "FE23",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 5.13,
+   "traj": [
+    "find(e2e)",
+    "enter(11)",
+    "find(Firebase)",
+    "impact(FirebaseService.java)",
+    "enter(10)",
+    "find(FirebaseLoginRequest)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "FE24",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 5.74,
+   "traj": [
+    "find(sandbox)",
+    "enter(17)",
+    "enter(170)",
+    "enter(171)",
+    "enter(172)",
+    "enter(173)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "FE25",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 4.9,
+   "traj": [
+    "find(demo)",
+    "enter(17)",
+    "enter(170)",
+    "find(demo.interceptor.ts)",
+    "impact(demo.interceptor.ts)",
+    "read(demo.interceptor.ts)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "FE26",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 10.64,
+   "traj": [
+    "map()",
+    "find(auth)",
+    "enter(9)",
+    "find(authentication)",
+    "enter(7)",
+    "enter(9)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "FE27",
+   "status": "CONTENT_POINTER",
+   "terminal": "pass",
+   "steps": 4,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": true,
+   "seconds": 3.05,
+   "traj": [
+    "find(clicks)",
+    "find(paint)",
+    "find(\"first paint\")",
+    "pass(\"No results found for 'clicks', 'paint', or 'first paint' in the current context; cannot determine why clicks post-first-paint are not lost.\")"
+   ],
+   "answer": "No results found for 'clicks', 'paint', or 'first paint' in the current context; cannot determine why clicks post-first-paint are not lost."
+  },
+  {
+   "id": "FE28",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 3.35,
+   "traj": [
+    "find(consent)",
+    "find(email-verification)",
+    "find(verification)",
+    "find(response headers)",
+    "find(response)",
+    "find(response headers)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "FE29",
+   "status": "EXECUTED",
+   "terminal": "pass",
+   "steps": 4,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 2.42,
+   "traj": [
+    "find(429)",
+    "find(rate_limit)",
+    "find(rate_limit)",
+    "pass(\"No results found for '429' or 'rate_limit' in the current context\")"
+   ],
+   "answer": "No results found for '429' or 'rate_limit' in the current context"
+  },
+  {
+   "id": "FE30",
+   "status": "CONTENT_POINTER",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 2,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 15.24,
+   "traj": [
+    "cache(question)",
+    "map()",
+    "map()",
+    "find(check:full)",
+    "find(check)",
+    "find(check)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "FE31",
+   "status": "EXECUTED",
+   "terminal": "pass",
+   "steps": 4,
+   "backtracks": 2,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 3.22,
+   "traj": [
+    "find(404)",
+    "find(404)",
+    "find(404)",
+    "pass(\"No results found for '404' in the codebase; the system may not contain explicit 404 handling logic or error page definitions.\")"
+   ],
+   "answer": "No results found for '404' in the codebase; the system may not contain explicit 404 handling logic or error page definitions."
+  },
+  {
+   "id": "FE32",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": true,
+   "success": false,
+   "seconds": 4.42,
+   "traj": [
+    "find(layout)",
+    "find(auth-layout)",
+    "enter(17)",
+    "enter(170)",
+    "find(auth-layout)",
+    "find(notification bell)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "FE33",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 5.03,
+   "traj": [
+    "find(billing)",
+    "enter(17)",
+    "enter(170)",
+    "find(auth-api.service.ts)",
+    "impact(auth-api.service.ts)",
+    "enter(170)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "FE34",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 2,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 9.28,
+   "traj": [
+    "map()",
+    "find(collaborations)",
+    "find(campaigns)",
+    "find(collaborations)",
+    "find(campaigns)",
+    "enter(4)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "GR01",
+   "status": "EXECUTED",
+   "terminal": "invalid",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 43.39,
+   "traj": [
+    "map()",
+    "enter(11)",
+    "impact(UserRepository.java)",
+    "impact(UserRepository.java, 1)",
+    "impact(UserRepository.java, 1)",
+    "answer(\"79 files depend on UserRepository.java across 13 subsystems: [0] User preferences & geo distance; [1] Address resolution & storage; [10] User identity & token exchange; [11] Subscriptions, payments & consent (entry point); [12] Notifications & domain events; [15] Support tickets & attachments; [3] Rate limits & runtime config; [4] Partnership opportunity lifecycle; [5] Account deletion & Instagram sync; [6] Two-factor auth & user cache; [7] LAYER Translatable exceptions & logging; [8] Validation, crypto & query specs; [9] Auth journeys & BDD harness. Top dependents: ActiveCooperationService.java, AddressService.java, AdminCascadeDeleteServiceImpl.java, AppliedOpportunityContentService.java, AppliedOpportunityStatusHistoryService.java, EmailChangeService.java, EmailVerificationService.java, FirebaseAuthProvider.java, FakturowniaInvoiceService.java, PaymentService.java, SubscriptionService.java, UserConsentService.java, UserIdentityService.java, UserPreferenceService.java, UserTokenService.java, UserService.java, UserValidationService.java, UserVerificationService.java, UserWebhookService.java, UserWithConsentService.java, UserWithPreferencesService.java, UserWithTokenService.java, UserWithVerificationService.java, UserWithWebhookService.java, UserWithConsentAndPreferencesService.java, UserWithConsentAndTokenService.java, UserWithConsentAndVerificationService.java, UserWithConsentAndWebhookService.java, UserWithPreferencesAndTokenService.java, UserWithPreferencesAndVerificationService.java, UserWithPreferencesAndWebhookService.java, UserWithTokenAndVerificationService.java, UserWithTokenAndWebhookService.java, UserWithVerificationAndWebhookService.java, UserWithConsentAndPreferencesAndTokenService.java, UserWithConsentAndPreferencesAndVerificationService.java, UserWithConsentAndPreferencesAndWebhookService.java, UserWithConsentAndTokenAndVerificationService.java, UserWithConsentAndTokenAndWebhookService.java, UserWithConsentAndVerificationAndWebhookService.java, UserWithPreferencesAndTokenAndVerificationService.java, UserWithPreferencesAndTokenAndWebhookService.java, UserWithPreferencesAndVerificationAndWebhookService.java, UserWithTokenAndVerificationAndWebhookService.java, UserWithConsentAndPreferencesAndTokenAndVerificationService.java, UserWithConsentAndPreferencesAndTokenAndWebhookService.java, UserWithConsentAndPreferencesAndVerificationAndWebhookService.java, UserWithConsentAndTokenAndVerificationAndWebhookService.java, UserWithPreferencesAndTokenAndVerificationAndWebhookService.java, UserWithConsentAndPreferencesAndTokenAndVerificationAndWebhookService"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "GR02",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 4,
+   "backtracks": 0,
+   "gold_fp_hit": true,
+   "success": true,
+   "seconds": 9.05,
+   "traj": [
+    "impact(AccountStatus.java)",
+    "enter(0)",
+    "enter(10)",
+    "answer(\"49 dependents rely on AccountStatus.java; top impacted files: AccountActivatedEvent.java, InMemoryUserCache.java, RedisUserCache.java, TestAuthController.java, EmailChangeService.java, EmailVerificationService.java, InstagramDataDeletionService.java, OAuthCallbackService.java; key subsystems affected: 0 (User preferences & geo distance), 10 (User identity & token exchange), 11, 12, 3, 4, 5, 6, 7, 8, 9\")"
+   ],
+   "answer": "49 dependents rely on AccountStatus.java; top impacted files: AccountActivatedEvent.java, InMemoryUserCache.java, RedisUserCache.java, TestAuthController.java, EmailChangeService.java, EmailVerificationService.java, InstagramDataDeletionService.java, OAuthCallbackService.java; key subsystems affected: 0 (User preferences & geo distance), 10 (User identity & token exchange), 11, 12, 3, 4, 5, 6, 7, 8, 9"
+  },
+  {
+   "id": "GR03",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": true,
+   "success": true,
+   "seconds": 12.53,
+   "traj": [
+    "map()",
+    "find(StripeService)",
+    "enter(11)",
+    "impact(StripeService.java)",
+    "enter(11)",
+    "answer(\"Subsystems that reach StripeService: [11] Subscriptions, payments & consent (edge type: dependency); no other subsystems directly reach StripeService.\")"
+   ],
+   "answer": "Subsystems that reach StripeService: [11] Subscriptions, payments & consent (edge type: dependency); no other subsystems directly reach StripeService."
+  },
+  {
+   "id": "GR04",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 2,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 9.97,
+   "traj": [
+    "map()",
+    "find(cross-boundary coupling)",
+    "find(coupling)",
+    "enter(11)",
+    "enter(11)",
+    "enter(11)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "GR05",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 2,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 11.54,
+   "traj": [
+    "map()",
+    "enter(17)",
+    "enter(177)",
+    "enter(177)",
+    "enter(177)",
+    "find(api)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "GR06",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 1,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 9.07,
+   "traj": [
+    "map()",
+    "find(ALGEBRA_VIOLATION)",
+    "find(layer)",
+    "find(layer_algebra_violation)",
+    "find(layer_algebra)",
+    "find(layer_algebra_violation)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "GR07",
+   "status": "EXECUTED",
+   "terminal": "pass",
+   "steps": 5,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 9.28,
+   "traj": [
+    "map()",
+    "find(dependency injection)",
+    "find(injection)",
+    "find(dependency)",
+    "pass(\"No explicit mentions of 'dependency injection', 'injection', or 'dependency' found in the graph; cannot determine if DI crosses subsystem boundaries.\")"
+   ],
+   "answer": "No explicit mentions of 'dependency injection', 'injection', or 'dependency' found in the graph; cannot determine if DI crosses subsystem boundaries."
+  },
+  {
+   "id": "GR08",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 4,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 11.41,
+   "traj": [
+    "map()",
+    "enter(11)",
+    "enter(11)",
+    "enter(11)",
+    "enter(11)",
+    "enter(11)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "GR09",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 3,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 11.8,
+   "traj": [
+    "map()",
+    "enter(17)",
+    "enter(177)",
+    "enter(177)",
+    "enter(177)",
+    "enter(177)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "GR10",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 4.79,
+   "traj": [
+    "find(consent)",
+    "enter(11)",
+    "impact(ConsentController.java)",
+    "read(ConsentController.java)",
+    "find(ConsentController)",
+    "impact(ConsentController.java, 1)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "GR11",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 2,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 5.47,
+   "traj": [
+    "find(cron)",
+    "impact(AnonymousConsentCleanupCronJob.java)",
+    "enter(11)",
+    "enter(11)",
+    "enter(11)",
+    "find(UserRepository.java)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "GR12",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 9.53,
+   "traj": [
+    "map()",
+    "enter(11)",
+    "find(13)",
+    "find(test-only)",
+    "find(test)",
+    "find(test-only subsystem)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "GR13",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 4,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 9.82,
+   "traj": [
+    "map()",
+    "find(test)",
+    "find(test)",
+    "find(test)",
+    "find(test)",
+    "find(test)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "GR14",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 2,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 6.35,
+   "traj": [
+    "find(address.service.ts)",
+    "impact(address.service.ts)",
+    "cohort(server-transloco-loader.ts)",
+    "enter(176)",
+    "enter(176)",
+    "enter(176)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "GR15",
+   "status": "CONTENT_POINTER",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 10.16,
+   "traj": [
+    "map()",
+    "enter(17)",
+    "enter(177)",
+    "find(MEGA)",
+    "find(MEGA subsystem)",
+    "find(MEGA subsystem 17)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "GR16",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 3,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 10.37,
+   "traj": [
+    "map()",
+    "find(Billing)",
+    "find(Subscriptions)",
+    "find(Subscriptions)",
+    "find(Subscriptions)",
+    "find(Subscriptions)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "GR17",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 2,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 6.62,
+   "traj": [
+    "enter(11)",
+    "enter(7)",
+    "impact(SubscriptionService.java, 1)",
+    "impact(SubscriptionService.java, 1)",
+    "find(SubscriptionService.java)",
+    "enter(11)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "GR18",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 10.96,
+   "traj": [
+    "map()",
+    "find(Authentication)",
+    "enter(203)",
+    "enter(9)",
+    "enter(6)",
+    "enter(8)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "GR19",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 10.83,
+   "traj": [
+    "map()",
+    "find(TOTP/step-up)",
+    "find(TOTP)",
+    "enter(6)",
+    "impact(UserCacheService.java)",
+    "impact(UserCacheService.java, 1)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "GR20",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 2,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 11.46,
+   "traj": [
+    "map()",
+    "enter(5)",
+    "enter(5)",
+    "spine(5)",
+    "read(AdminCascadeDeleteService.java)",
+    "read(AdminCascadeDeleteService.java)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "GR21",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 4,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 11.85,
+   "traj": [
+    "map()",
+    "enter(11)",
+    "enter(11)",
+    "enter(11)",
+    "enter(11)",
+    "enter(11)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "GR22",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 4,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 9.88,
+   "traj": [
+    "map()",
+    "find(Event)",
+    "find(Event)",
+    "find(Event)",
+    "find(Event)",
+    "find(Event)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "GR23",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 4,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 9.63,
+   "traj": [
+    "map()",
+    "find(config)",
+    "find(config)",
+    "find(config)",
+    "find(config)",
+    "find(config)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "GR24",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 4,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 8.62,
+   "traj": [
+    "map()",
+    "find(Entry)",
+    "find(Entry)",
+    "find(Entry)",
+    "find(Entry)",
+    "find(Entry)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "GR25",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 2,
+   "backtracks": 0,
+   "gold_fp_hit": true,
+   "success": true,
+   "seconds": 34.11,
+   "traj": [
+    "map()",
+    "answer(\"Subsystems overview: [11] Subscriptions, payments & consent (208 files), entry: UserRepository.java; [10] User identity & token exchange (39 files), entry: User entity; [12] Notifications & domain events (36 files), entry: notification entities; [3] Rate limits & runtime config (129 files), entry: Spring profiles; [7] LAYER Translatable exceptions & logging (52 files), entry: exception hierarchy; [0] User preferences & geo distance (27 files), entry: preference entities; [2] LAYER Social connection data model (15 files), entry: UserSocialConnection; [16] LAYER Status enums & OpenAPI contract (12 files), entry: status enums; [9] Auth journeys & BDD harness (103 files), entry: auth flows; [6] Two-factor auth & user cache (51 files), entry: UserCacheService; [8] Validation, crypto & query specs (49 files), entry: SpecificationBuilder; [5] Account deletion & Instagram sync (48 files), entry: AdminCascadeDeleteServiceImpl.java; [15] Support tickets & attachments (35 files), entry: ticket entities; [1] Address resolution & storage (18 files), entry: address entities; [14] FAQ content & categories (15 files), entry: FAQ entities; [177] FE shell, i18n & generated client (74 files), entry: bootstrap; [170] FE auth, 2FA & interceptors (69 files), entry: sign-in/up; [173] LAYER FE fixtures & E2E harness (67 files), entry: sandbox fixtures; [176] FE profile, settings & admin (52 files), entry: profile; [171] FE opportunities & applications (43 files), entry: opportunity browsing; [172] FE onboarding survey (42 files), entry: onboarding survey; [174] FE plan, billing & consent (23 files), entry: plan and billing screens; [175] FE support & help centre (20 files), entry: support ticket screens; [178] FE demo mode (16 files), entry: demo interceptor; [4] Partnership opportunity lifecycle (172 files), entry: PermissionUtils.java.\")"
+   ],
+   "answer": "Subsystems overview: [11] Subscriptions, payments & consent (208 files), entry: UserRepository.java; [10] User identity & token exchange (39 files), entry: User entity; [12] Notifications & domain events (36 files), entry: notification entities; [3] Rate limits & runtime config (129 files), entry: Spring profiles; [7] LAYER Translatable exceptions & logging (52 files), entry: exception hierarchy; [0] User preferences & geo distance (27 files), entry: preference entities; [2] LAYER Social connection data model (15 files), entry: UserSocialConnection; [16] LAYER Status enums & OpenAPI contract ("
+  },
+  {
+   "id": "GR26",
+   "status": "CONTENT_POINTER",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 11.47,
+   "traj": [
+    "map()",
+    "find(consent)",
+    "enter(11)",
+    "find(subscription)",
+    "impact(SubscriptionPeriodProcessorCronJob.java,1)",
+    "find(SubscriptionPeriodProcessorCronJob.java)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "GR27",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 5,
+   "backtracks": 1,
+   "gold_fp_hit": true,
+   "success": true,
+   "seconds": 10.17,
+   "traj": [
+    "find(UserSocialConnectionRepository)",
+    "impact(UserSocialConnectionRepository.java)",
+    "enter(0)",
+    "enter(0)",
+    "answer(\"16 dependents rely on UserSocialConnectionRepository.java; the owning subsystems are 0 (User preferences & geo distance), 10, 4, 5, 6, and 9; top dependents include AppliedOpportunityService.java, InstagramDataDeletionService.java, InstagramDeauthorizationService.java, OAuthCallbackService.java, RegistrationService.java, AuthService.java, TestAuthController.java, and UserSocialConnectionService.java; subsystem 0 is responsible for user preference entities + repositories, geo lookup utilities, and shared util rules, with high external consumption (0.94) and 27 files.\")"
+   ],
+   "answer": "16 dependents rely on UserSocialConnectionRepository.java; the owning subsystems are 0 (User preferences & geo distance), 10, 4, 5, 6, and 9; top dependents include AppliedOpportunityService.java, InstagramDataDeletionService.java, InstagramDeauthorizationService.java, OAuthCallbackService.java, RegistrationService.java, AuthService.java, TestAuthController.java, and UserSocialConnectionService.java; subsystem 0 is responsible for user preference entities + repositories, geo lookup utilities, and shared util rules, with high external consumption (0.94) and 27 files."
+  },
+  {
+   "id": "GR28",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 11.0,
+   "traj": [
+    "map()",
+    "enter(11)",
+    "find(subscription)",
+    "flow(SubscriptionEvent.java, 1)",
+    "find(notification)",
+    "find(SubscriptionNotificationEvent.java)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "GR29",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 2,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 11.26,
+   "traj": [
+    "map()",
+    "enter(10)",
+    "enter(10)",
+    "enter(10)",
+    "find(User.java)",
+    "impact(User.java)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "GR30",
+   "status": "EXECUTED",
+   "terminal": "answer",
+   "steps": 5,
+   "backtracks": 0,
+   "gold_fp_hit": true,
+   "success": true,
+   "seconds": 11.96,
+   "traj": [
+    "map()",
+    "find(CORS)",
+    "enter(7)",
+    "impact(CorsProperties.java)",
+    "answer(\"A CORS configuration change would touch subsystem 7 (Translatable exceptions & logging), as CorsProperties.java is imported by 6 dependents within this subsystem, including WebSecurityConfiguration.java and CorsLoggingFilter.java, which are key to CORS handling.\")"
+   ],
+   "answer": "A CORS configuration change would touch subsystem 7 (Translatable exceptions & logging), as CorsProperties.java is imported by 6 dependents within this subsystem, including WebSecurityConfiguration.java and CorsLoggingFilter.java, which are key to CORS handling."
+  },
+  {
+   "id": "GR31",
+   "status": "EXECUTED",
+   "terminal": "pass",
+   "steps": 3,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 1.55,
+   "traj": [
+    "find(contention)",
+    "find(shared)",
+    "pass(no explicit shared resources or contention points found in the context)"
+   ],
+   "answer": "no explicit shared resources or contention points found in the context"
+  },
+  {
+   "id": "GR32",
+   "status": "CONTENT_POINTER",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 2,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 11.35,
+   "traj": [
+    "map()",
+    "enter(17)",
+    "enter(173)",
+    "enter(173)",
+    "find(sandbox)",
+    "find(sandbox)"
+   ],
+   "answer": ""
+  },
+  {
+   "id": "GR33",
+   "status": "EXECUTED",
+   "terminal": "stall",
+   "steps": 6,
+   "backtracks": 0,
+   "gold_fp_hit": false,
+   "success": false,
+   "seconds": 10.66,
+   "traj": [
+    "map()",
+    "enter(11)",
+    "find(payment)",
+    "find(public)",
+    "find(PublicConfigController.java)",
+    "impact(PublicConfigController.java, 3)"
+   ],
+   "answer": ""
+  }
+ ]
+}
