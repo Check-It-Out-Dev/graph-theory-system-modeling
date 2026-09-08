@@ -1,471 +1,190 @@
-# Graph Theory System Modeling: Living Documentation Through Mathematical Discovery
+# Graph Theory System Modeling — living documentation as a typed knowledge graph
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+**A software system modelled as a graph a person and an AI agent can both navigate, and the
+tooling built on it: prompt contracts, retrieval and reranking servers, a small local model
+that abstains when the answer is not in the graph, and the harness that measures all of it.**
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![Papers](https://img.shields.io/badge/Research-8%20papers%20%2B%20appendix-green)](./GraphTheoryInSystemModeling)
+[![CodeMap](https://img.shields.io/badge/CodeMap-4B%20navigator%20·%20exec%20accuracy%200.98-blue)](./applications/CodeMap)
 [![Neo4j Community](https://img.shields.io/badge/Neo4j-Community%20Edition-008CC1?logo=neo4j)](https://neo4j.com/download-center/#community)
-[![Papers](https://img.shields.io/badge/Research-8%20Papers%20%2B%20Appendix-green)](./GraphTheoryInSystemModeling)
-[![Free Research](https://img.shields.io/badge/Cost-FREE%20Educational%20Content-brightgreen)](./LICENSE)
 
-## 📢 Important Notice: Free Educational Content
+▶ **[checkitout.app/technical-survey/engineering](https://checkitout.app/technical-survey/engineering#graph-topology)** —
+the graph of a real system, drawn from its data, with the cost of an answer measured against
+grep-and-read · **[the 90-second film](https://checkitout.app/codemap)** — every frame a real run.
 
-**This research and implementation methodology is provided completely FREE as educational content.** The author, Norbert Marchewka, shares this work as a contribution to the developer community under the MIT License.
+## What this is
 
-**Consulting Services**: Please note that the author cannot provide paid consulting services for this methodology due to employment obligations with an IT services company. However, all knowledge needed for implementation is freely available in this repository, including complete theoretical foundations, working implementation code, step-by-step guides, and real-world examples.
+Documentation that is discovered rather than written: a codebase is indexed into a graph with a
+three-level topology (one NavigationMaster → entity navigators → concrete implementations), every
+subsystem is read through six behavioural roles (Controller, Configuration, Security,
+Implementation, Diagnostics, Lifecycle), and the graph is what a developer or an agent queries
+instead of reading everything. The economics are the point: retrieving *k* hops from a graph costs
+O(k); pushing a codebase through a context window costs O(n) attention with documented degradation
+in the middle, and it costs it again on every question.
 
-**Questions & Support**: For questions, please use public forums (GitHub Issues, Stack Overflow, social media) where answers can benefit the entire community.
+It was built while building **[checkItOut](https://checkitout.app)** — an influencer-marketing
+marketplace with Stripe billing and Polish e-invoicing that ran in production — and it is the
+reason one person could keep a system that size navigable. Both halves of the platform are public
+and are the case study for everything here.
 
-## Overview
+## Run it
 
-This repository presents a mathematical approach to creating living documentation for software systems. By applying graph theory, Homotopy Type Theory (HoTT), and the Friendship Theorem, we transform static codebases into queryable knowledge graphs that serve both human developers and AI agents.
+**CodeMap — the theory, shipped.** One command after cloning boots the graph engine, the local
+model sidecar and a browser UI:
 
-**Key Innovation**: Documentation that lives with the code, discovered through mathematical principles rather than manually maintained.
+```bash
+cd applications/CodeMap
+python codemap.py up        # `python codemap.py check` verifies the pack and the model without starting anything
+```
 
-**Why It Works**: As explained in [Appendix A](./GraphTheoryInSystemModeling/Appendix_A_Mathematical_Bridge.md), transformers are differential geometry machines that need algebraic structure to operate optimally. By providing this structure through graphs, we achieve a 73% reduction in AI hallucinations—the same principle that makes XML-structured prompts more effective than unstructured text. This isn't luck; it's mathematics.
+A 4B model (GGUF, plain CPU) navigates a precomputed graph pack through a 13-verb DSL; recurring
+questions come from a curated cache; when the answer is not in the graph the model **abstains** and
+offers — only with the user's consent — an escalation to a Claude API model. Windows users can take
+the [22 MB installer](https://storage.waw.cloud.ovh.net/v1/AUTH_62ce8c0b4d874faa89fb3e086832f1a6/downloads/codemap/codemap-setup-1.2.0.exe)
+(checksums beside it; it fetches the model itself, SHA-256 verified). The app's own README:
+[applications/CodeMap/README.md](./applications/CodeMap/README.md).
 
-## Proven on a production system, not a toy
+**The MCP servers.** Retrieval and reranking as services an agent can call:
+[`McpServerForEmbeddings/`](./McpServerForEmbeddings/) and
+[`McpServerForReranking/`](./McpServerForReranking/) (Python, `pytest` in each), with the
+deployable variants under [`services/`](./services/) (Modal apps for the embedding and reranking
+models) and the graph-embedding pipeline in [`embeddings-service/`](./embeddings-service/).
 
-The method was not designed in the abstract and then illustrated. It was built while
-building **[checkItOut](https://checkitout.app)** — a live influencer-marketing
-marketplace with Stripe billing and Polish e-invoicing — and it is the reason one person
-could keep a system that size navigable.
+**Your own codebase.** [Paper 3](./GraphTheoryInSystemModeling/03_Living_Documentation_How_To_Start_For_Free.md)
+is the step-by-step guide on Neo4j Community Edition; the indexing and organising agents are the
+prompt contracts in [`Promts/`](./Promts/); requirements and the team-adoption path are in
+[docs/FAQ.md](./docs/FAQ.md) and [DEVELOPMENT_SETUP.md](./DEVELOPMENT_SETUP.md).
 
-Both halves of that platform are public, MIT, and are the case study for everything below:
+## Testing — how an AI system gets tested here
 
-| Repository | What it is, and what it shows about the method |
-| :-- | :-- |
-| **[checkitout-backend](https://github.com/Check-It-Out-Dev/checkitout-backend)** | Spring Boot on Java 21: 40 entities, 50 controllers, a 34-file Cucumber corpus, and an OpenAPI contract generated from a server that actually boots. Modelled here with the 3-level NavigationMaster topology and the six-entity lens. |
-| **[checkitout-frontend](https://github.com/Check-It-Out-Dev/checkitout-frontend)** | Angular 22, a greenfield rewrite of the legacy client, with 1,820 tests across nine tiers and a client generated from the backend's contract. |
-| **[checkitout.app](https://checkitout.app)** | The running product, and a five-chapter technical survey of how it was built — including the chapter on graph-assisted development. |
+Most of this repository is the machinery that makes an LLM-backed system something you can write
+assertions against:
 
-The screenshots in
-[`Real_Example_Documentation_On_Demands_Screenshots_And_Generated_Documentation/`](./Real_Example_Documentation_On_Demands_Screenshots_And_Generated_Documentation/)
-and
-[`Real_Example_New_Feature_Seat_Model_Screenshots/`](./Real_Example_New_Feature_Seat_Model_Screenshots/)
-are from that work: an agent inside a 200k context window reconstructing the architecture
-from the graph — which files exist, which events they raise, what depends on what — and
-then using it to place a new feature. The economics are the point. Retrieving k hops from a
-graph costs O(k); pushing a codebase through a context window costs O(n) attention with
-documented degradation in the middle, and it costs it again on every question.
+| What | How it is tested | Where |
+| :-- | :-- | :-- |
+| **The two MCP servers** | 29 pytest tests between them, their own `pytest.ini`; retrieval and reranking as code that can fail a build | [`McpServerForEmbeddings/tests`](./McpServerForEmbeddings/tests), [`McpServerForReranking/tests`](./McpServerForReranking/tests) |
+| **The navigator model** | An evaluation ladder with **execution-fingerprint judges**: an answer is compared with what the engine actually executes, never with an opinion about the text. Execution accuracy **0 → 0.98** across four training rounds (~$25 of GPU); abstention **1.0** on out-of-graph questions, with evidence | [`applications/CodeMap/training/eval_harness.py`](./applications/CodeMap/training/eval_harness.py), [`eval/q`](./applications/CodeMap/eval/q) — question bank, gold answers |
+| **Untrained open models on the same graph** | The prompt-transfer ladder (Cypher anchors, step budgets): 0.031 → 0.246 by prompt alone, and why route-referees undercount foreign models | [`docs/06-prompt-transfer-findings.md`](./applications/CodeMap/docs/06-prompt-transfer-findings.md) |
+| **The graph engine migration** | Neo4j → LadybugDB (MIT) accepted by **byte-identical gold answers across engines**; the from-scratch regeneration is a runbook | [`docs/05-regen-runbook.md`](./applications/CodeMap/docs/05-regen-runbook.md) |
+| **The prompts** | Written as XML contracts — 24 documents across five generations (V2–V5) — so an agent's behaviour has a specification to evaluate against | [`Promts/`](./Promts/) |
+| **The partition itself** | Co-change evidence and lens gates over the V3 graph, as scripts with recorded evidence | [`papers/V3/experiments/`](./papers/V3/experiments/) |
 
-## The tooling, and why an SDET should care
+The training method — open-book selection SFT, vocabulary-constrained decoding, preference
+polish — is written up with the equations in
+[docs/04-training-story.md](./applications/CodeMap/docs/04-training-story.md).
 
-This repository is not only theory. It contains the day-to-day machinery that made the
-above workable, and most of it is directly relevant to anyone whose job is now to **test AI
-systems** rather than only systems written by people:
-
-- **[`Promts/`](./Promts/)** — 24 documents across five generations (V2 through V5):
-  system prompts as XML contracts
-  (`ClaudeCode_ErdosOrchestrator_SystemPrompt.xml`, `Opus4.1_DeepModeling.xml`,
-  `GPT5_ClineDebugger.xml`) and full prompt-engineering guides for the Claude and GPT-5
-  families. A prompt written as a structured contract is a prompt you can evaluate against,
-  which is the whole problem with testing an LLM-backed feature.
-- **[`McpServerForEmbeddings/`](./McpServerForEmbeddings/)** and
-  **[`McpServerForReranking/`](./McpServerForReranking/)** — two MCP servers, in Python,
-  with **29 tests between them** and their own pytest configuration. Retrieval and
-  reranking as services an agent can call, and as code that can fail a build.
-- **[`embeddings-service/`](./embeddings-service/)** — the graph-embedding pipeline:
-  delta extraction, hyperedge emission, an embedding server. This is what makes a graph
-  answer a question in the shape a model can use.
-- **[`applications/CodeMap/`](./applications/CodeMap/)** — a 4B model, running locally on
-  CPU, that navigates the graph through a 13-verb DSL and **abstains** when the answer is
-  not in it. An oracle that knows the boundary of its own knowledge is a testable oracle.
-
-## Applications: CodeMap — the theory, shipped
-
-**[`applications/CodeMap/`](./applications/CodeMap/)** is the working embodiment of this
-research: a desktop-class app where the knowledge graph IS the intelligence and a small
-local model (4B, GGUF, plain CPU) merely navigates it through a 13-verb DSL. One command
-after cloning (`python codemap.py up`) boots the engine, the model sidecar and a browser
-UI; recurring questions are served from a curated cache; the model honestly abstains
-beyond its graph and offers — only with the user's consent — an escalation to a Claude
-API model.
-
-Measured, not promised: execution accuracy **0→0.98** across four training rounds
-(~$25 of GPU total), answers in ~3 s on a laptop CPU, abstention 1.0 with evidence,
-projected **10–20× cost reduction** vs frontier-only assistants for a 5-person team.
-The full methodology — open-book selection SFT, vocabulary-constrained decoding,
-preference polish, the eval ladder with execution-fingerprint judges — is written up
-as an educational document with the equations in
-[`applications/CodeMap/docs/04-training-story.md`](./applications/CodeMap/docs/04-training-story.md).
-A companion measurement — how far *untrained* open models get on the same graph
-by prompt alone (the Cypher-anchor and step-budget ladder, 0.031 -> 0.246, and why
-route-referees undercount foreign models) — is recorded in
-[`applications/CodeMap/docs/06-prompt-transfer-findings.md`](./applications/CodeMap/docs/06-prompt-transfer-findings.md).
-
-**License-clean end to end:** since 2026 the entire authoring stack runs on
-**LadybugDB (MIT)** — no copyleft graph database anywhere; the migration was accepted
-by byte-identical gold answers across engines, and the full from-scratch regeneration
-procedure is documented in
-[`applications/CodeMap/docs/05-regen-runbook.md`](./applications/CodeMap/docs/05-regen-runbook.md).
-Watch it work: the 90-second film plays on the live demo page,
-<https://checkitout.app/> (self-hosted capture — every frame is a real run).
-Windows users get everything as **one 22 MB installer** that fetches the
-navigator model itself, SHA-256 verified:
-[`codemap-setup-1.2.0.exe`](https://storage.waw.cloud.ovh.net/v1/AUTH_62ce8c0b4d874faa89fb3e086832f1a6/downloads/codemap/codemap-setup-1.2.0.exe)
-(checksums beside it; clone-and-run stays one command).
-
-**Sister repositories** — the platform this mathematics models is published
-alongside it: [`checkitout-frontend`](https://github.com/Check-It-Out-Dev/checkitout-frontend)
-(Angular, the demo build behind checkitout.app) and
-[`checkitout-backend`](https://github.com/Check-It-Out-Dev/checkitout-backend)
-(Spring Boot / Java 21, the OpenAPI source of truth).
-
-The NavigationMaster hierarchy, the 6-entity behavioral pattern, the tri-lens
-embeddings and the hyperedge cohorts described in the papers below are exactly the
-structures CodeMap's pack carries — this folder is where the mathematics earns its keep.
-
-## Research Papers
-
-The methodology is documented across six core research papers, two theoretical foundations, and a mathematical appendix in the `GraphTheoryInSystemModeling/` directory:
-
-### Core Papers
-
-1. **[HoTT and Graph Theory Foundations](./GraphTheoryInSystemModeling/01_Living_Documentation_HoTT_Graph_Theory.md)** - How HoTT bootstraps initial clustering (20→7 modules)
-2. **[Deep Behavioral Modeling](./GraphTheoryInSystemModeling/02_Living_Documentation_Deep_Modeling.md)** - The 6-entity pattern for understanding file relationships
-3. **[Getting Started with Neo4j Community](./GraphTheoryInSystemModeling/03_Living_Documentation_How_To_Start_For_Free.md)** - Practical implementation guide
-4. **[Real-Time Documentation](./GraphTheoryInSystemModeling/04_Living_Documentation_On_Demand_Real_Example.md)** - CheckItOut platform case study
-5. **[AI-Driven Architecture Design](./GraphTheoryInSystemModeling/05_Living_Documentation_How_To_Add_Seat_Model_Real_Example.md)** - Seat licensing feature design
-6. **[Win-Win for Teams and AI Providers](./GraphTheoryInSystemModeling/06_Living_Documentation_Win_Win_For_Customers_And_AI_Providers.md)** - Business and technical benefits
-
-### Theoretical Foundations
-
-7. **[Chromatic Numbers in Dependency Resolution](./GraphTheoryInSystemModeling/ChromaticNumbersInSystemModeling.md)** - Graph coloring for Maven conflicts (χ(G) determines minimum exclusions)
-8. **[Erdős-Lagrangian Unification](./GraphTheoryInSystemModeling/ErdosLagrangianUnification.md)** - Mathematical equivalence between collaboration distance and action principles
-
-### Mathematical Foundation
-
-**[Appendix A: The Mathematical Bridge](./GraphTheoryInSystemModeling/Appendix_A_Mathematical_Bridge.md)** - Why providing algebraic structure through graphs reduces LLM hallucinations by 73%
-
-This appendix reveals the profound mathematical connection: transformers are differential geometry engines operating on typed manifolds, and graphs provide the precise algebraic substrate they require. Just as XML tags help Claude understand structure, graphs provide the mathematical scaffolding transformers inherently expect. Supported by extensive research showing GraphRAG outperforming vector RAG by 3.4x and achieving 87% accuracy on complex queries.
-
-## Architecture
-
-### Two-Stage Discovery Process
+## Architecture — the method
 
 ```mermaid
 graph LR
-    A[Codebase] -->|HoTT/Embeddings| B[20 Candidates]
-    B -->|Manual Merge| C[7 Business Modules]
-    C -->|Graph Theory| D[NavigationMaster]
-    D -->|6-Entity Pattern| E[Behavioral Understanding]
+    A[Codebase] -->|HoTT / embeddings| B[20 candidates]
+    B -->|manual merge| C[7 business modules]
+    C -->|graph theory| D[NavigationMaster]
+    D -->|6-entity pattern| E[Behavioural understanding]
 ```
 
-### Key Components
+- **NavigationMaster** — the hub node, after the Friendship Theorem: O(1) entry, at most two hops
+  to any component, one canonical starting point for a person and for an agent.
+- **The six-entity lens** — every subsystem read as Controller, Configuration, Security,
+  Implementation, Diagnostics, Lifecycle; argued from R(3,3)=6 in Paper 2.
+- **Typed relationships** — TRIGGERS, ORCHESTRATES, PROTECTS, VALIDATES, CONFIGURES, DEPENDS_ON and
+  their kin carry the *why*, so impact analysis is a query before a change, not a search after an
+  incident.
+- **Structure for the model** — [Appendix A](./GraphTheoryInSystemModeling/Appendix_A_Mathematical_Bridge.md)
+  argues why algebraic structure through graphs reduces hallucination (the case study's 35 % → 9 %),
+  the same reason structured prompts outperform prose.
 
-- **7 Business Modules**: Domain-specific (e.g., security, partnership, configuration, rate limiting)
-- **6-Entity Pattern**: Universal framework for file relationships (Controller, Configuration, Security, Implementation, Diagnostics, Lifecycle)
-- **NavigationMaster**: Central hub providing O(1) access to all components
-- **20+ Behavioral Relationships**: Discovered connections between entities
+**The papers**, in reading order, under [`GraphTheoryInSystemModeling/`](./GraphTheoryInSystemModeling/):
+[1 · HoTT and graph-theory foundations](./GraphTheoryInSystemModeling/01_Living_Documentation_HoTT_Graph_Theory.md) ·
+[2 · Deep behavioural modelling](./GraphTheoryInSystemModeling/02_Living_Documentation_Deep_Modeling.md) ·
+[3 · Getting started for free](./GraphTheoryInSystemModeling/03_Living_Documentation_How_To_Start_For_Free.md) ·
+[4 · Documentation on demand, a real example](./GraphTheoryInSystemModeling/04_Living_Documentation_On_Demand_Real_Example.md) ·
+[5 · Adding a feature (seat model), a real example](./GraphTheoryInSystemModeling/05_Living_Documentation_How_To_Add_Seat_Model_Real_Example.md) ·
+[6 · Win-win for teams and AI providers](./GraphTheoryInSystemModeling/06_Living_Documentation_Win_Win_For_Customers_And_AI_Providers.md) ·
+[Chromatic numbers in dependency resolution](./GraphTheoryInSystemModeling/ChromaticNumbersInSystemModeling.md) ·
+[Erdős–Lagrangian unification](./GraphTheoryInSystemModeling/ErdosLagrangianUnification.md) ·
+[Appendix A · the mathematical bridge](./GraphTheoryInSystemModeling/Appendix_A_Mathematical_Bridge.md).
+The V3 research arc — the tri-lens embeddings, the Magnetic Laplacian, Leiden communities, and the
+claims later withdrawn — is under [`papers/V3/`](./papers/V3/) and [`WorkingNotes/`](./WorkingNotes/).
 
-## Technology Stack
-
-### For Team Adoption (Production)
-
-- **Graph Database**: Neo4j Community Edition 5.x (GPLv3)
-  - Used as internal developer tool
-  - No node/relationship limits
-  - Free for internal use
-  
-- **Vector Embeddings**: Computed separately via:
-  - Local models (Sentence-Transformers, CodeBERT)
-  - OpenAI API (optional, for higher quality)
-  - Stored as properties in Neo4j nodes
-
-- **AI Assistance**: 
-  - Claude (Anthropic) for initial discovery
-  - Local LLMs for ongoing analysis
-
-### For Research & Development (Author's Initial Phase)
-
-**Important Note**: The initial discovery and research was conducted by Norbert Marchewka (CheckItOut architect) using:
-- Neo4j Desktop Enterprise Edition (personal evaluation license)
-- Native Neo4j vector embeddings (Enterprise feature)
-- Single-user research environment (not shared with team)
-
-This Enterprise trial usage was:
-- Limited to one researcher's computer
-- Used for initial pattern discovery and validation
-- Fully compliant with Neo4j's evaluation terms
-- **Not deployed or shared with other developers**
-
-### For Team Adoption (Current/Future State)
-
-Team-wide deployment uses exclusively:
-- Neo4j Community Edition (GPLv3)
-- **Separate** embedding generation service
-- Shared infrastructure for all developers
-- No Enterprise features required or used
-
-## Implementation Requirements
-
-### Minimum Setup
-- Neo4j Community Edition 5.x
-- Python 3.8+ with sentence-transformers
-- 8GB RAM minimum
-- ~2GB disk space per million LOC
-
-### Recommended Setup
-- 16GB+ RAM
-- GPU for faster embeddings (optional)
-- Docker for Neo4j deployment
-
-## Getting Started
-
-### 1. Install Neo4j Community Edition
-
-```bash
-# Using Docker (recommended for teams)
-docker run -d \
-    --name neo4j \
-    -p 7474:7474 -p 7687:7687 \
-    -v $HOME/neo4j/data:/data \
-    -e NEO4J_AUTH=neo4j/your-password \
-    neo4j:5-community
-```
-
-### 2. Generate Vector Embeddings
-
-```python
-# Separate embedding generation (not in Neo4j)
-from sentence_transformers import SentenceTransformer
-
-model = SentenceTransformer('all-MiniLM-L6-v2')
-embeddings = model.encode(code_text)
-# Store embeddings as properties in Neo4j nodes
-```
-
-### 3. Build Knowledge Graph
-
-See [Paper 3](./GraphTheoryInSystemModeling/03_Living_Documentation_How_To_Start_For_Free.md) for detailed implementation guide.
-
-## Real-World Examples
-
-See actual screenshots and documentation generated from production systems:
-
-### Documentation On-Demand Example
+**The case study.** [checkitout-backend](https://github.com/Check-It-Out-Dev/checkitout-backend)
+(Spring Boot on Java 21: 38 entities, 50 controllers, a 34-file Cucumber corpus, an OpenAPI contract
+taken from a server that booted) is modelled with the topology and the lens above;
+[checkitout-frontend](https://github.com/Check-It-Out-Dev/checkitout-frontend) (Angular 22, 1,884
+tests across nine tiers as measured there on 2026-09-08) generates its client from that contract.
+The screenshots in
 [`Real_Example_Documentation_On_Demands_Screenshots_And_Generated_Documentation/`](./Real_Example_Documentation_On_Demands_Screenshots_And_Generated_Documentation/)
-- Live generation of architecture documentation
-- Query-driven discovery of system components
-- AI-generated insights from graph traversal
-- Screenshots showing Neo4j queries and results
+and [`Real_Example_New_Feature_Seat_Model_Screenshots/`](./Real_Example_New_Feature_Seat_Model_Screenshots/)
+are from that work: an agent inside a 200k context window reconstructing the architecture from the
+graph — which files exist, which events they raise, what depends on what — and then using it to
+place a new feature. The author's own account of the mathematics is in
+[docs/AUTHORS-NOTE.md](./docs/AUTHORS-NOTE.md).
 
-### New Feature Implementation (Seat Model)
-[`Real_Example_New_Feature_Seat_Model_Screenshots/`](./Real_Example_New_Feature_Seat_Model_Screenshots/)
-- Step-by-step feature design using graph insights
-- Impact analysis across system modules
-- AI-assisted code generation from graph patterns
-- Visual journey from concept to implementation
+## Evaluation — present, and what comes next
 
-## Performance Metrics
+This is where the work continues. Dated 2026-09. ✅ built · 🟡 under way · ⬜ designed.
 
-Based on CheckItOut platform (426 Java files):
+|     | What | Detail |
+| :-- | :-- | :-- |
+| ✅ | **Prompts as contracts** | 24 XML/markdown contracts across five generations; an agent has a specification, so its output has something to be measured against |
+| ✅ | **Execution-fingerprint oracles** | The eval ladder compares answers with execution, not with a judge's opinion of the text; gold answers are byte-identical across two graph engines |
+| ✅ | **Abstention as a tested property** | The navigator abstains at 1.0 on out-of-graph questions — an oracle that knows the boundary of its knowledge is one you can write assertions against |
+| ✅ | **SFT/DPO training with its own evaluation** | Four rounds, 0 → 0.98 execution accuracy, the harness and the data generators in `training/` |
+| 🟡 | **Prompt and model evaluation as a CI gate** | The question bank with expected answers runs on every prompt or model change; a regression in execution accuracy or abstention fails the build the way a red test does |
+| 🟡 | **Measuring the quality of an AI system in production** | Three rates on real traffic: answers grounded in the graph, abstentions, and drift between the graph version and the model version; sampled and judged with the same execution oracles |
+| ⬜ | **Evaluation at scale** | The same ladders sharded across ephemeral runners alongside the platform's test suites, reports aggregated with them |
+| ⬜ | **More languages** | The indexing agents are Java-first; TypeScript is the next corpus |
 
-- **Initial Processing**: 10-20 files/minute (reading), 5-10 files/minute (semantic analysis)
-- **Query Performance**: <50ms for 3-hop traversals
-- **AI Hallucination Reduction**: 73% (from 35% to 9%)
-- **Developer Productivity**: 30-40% improvement
-- **Onboarding Time**: 2-3 days (vs 2-3 weeks traditional)
+## The rest of the estate
 
-## Use Cases
+Three repositories and a running site, and each answers the question the previous one raises.
 
-1. **Living Documentation**: Queries replace static docs
-2. **AI Context Generation**: Accurate context for coding assistants
-3. **Architecture Discovery**: Reveal hidden patterns
-4. **Impact Analysis**: Understand change propagation
-5. **New Developer Onboarding**: Interactive system exploration
+| If you are wondering | Go here |
+| :-- | :-- |
+| "Does it work on something real?" | **[checkitout.app/technical-survey/engineering](https://checkitout.app/technical-survey/engineering)** — the estate in one screen, the graph drawn from the real data, what is under way |
+| "Is the test strategy backed by code?" | **[checkitout-frontend](https://github.com/Check-It-Out-Dev/checkitout-frontend)** — nine test tiers, fifteen gates, every published number measured and gated |
+| "Is the other side of the seam real?" | **[checkitout-backend](https://github.com/Check-It-Out-Dev/checkitout-backend)** — the business rules, the contract, the Cucumber corpus |
 
-## Author's Note on Mathematical Foundations
-
-### On the Nature of This Work
-
-This repository represents a convergence of advanced mathematics and empirical engineering that I must acknowledge upfront: **I cannot fully explain why this works as well as it does.**
-
-What I can tell you is what happened:
-
-- I collaborated with Claude Opus 4.1 across numerous multi-context-window research sessions, treating it as a "PhD in applied mathematics"
-- We explored Homotopy Type Theory (HoTT), Category Theory, Sheaf Theory, Vector Embeddings, and Topos Theory
-- We applied the 6-entity pattern and Friendship Theorem from graph theory
-- We iterated through ~30 context windows with Claude Sonnet 4 for indexing plus 3-4 with Opus 4.1 for organization
-- We tested, refined, and validated against real production system
-
-But here's my honest position: I trusted mathematics that exists "out there" - mathematical principles discovered by brilliant minds over centuries. I asked an AI with deep mathematical knowledge to apply these principles to software architecture. Through iterative feedback loops and extensive testing, we arrived at something that works remarkably well.
-
-**This is not false modesty** - it's intellectual honesty. The mathematical frameworks we employed (HoTT for clustering, graph theory for navigation, category theory for relationships) have depths I don't fully grasp. What I did was more akin to skilled engineering application than mathematical discovery.
-
-While I cannot provide rigorous proofs for every mathematical principle employed (such as why transformers benefit from algebraic structure or the deep implications of R(3,3)=6 in entity pattern formation), I can offer:
-
-- Working implementation that delivers measurable results
-- Practical guidance on applying these patterns
-- Honest documentation of what works and what doesn't
-- A framework that bridges mathematical theory and engineering practice
-
-I believe this transparency strengthens rather than weakens the work. Science progresses not just through complete understanding but also through empirical discoveries that work before we fully understand why. The steam engine preceded thermodynamics. Aspirin worked decades before we understood its mechanism.
-
-This system works. The mathematics behind it is sound (validated by experts far more knowledgeable than myself). The implementation is practical and reproducible. That it emerges from a collaboration between human engineering intuition and AI mathematical knowledge makes it no less valuable.
-
-If you choose to implement this approach, you're not following the work of someone who claims to understand all the mathematics involved. You're following someone who found a way to make profound mathematical principles practically applicable to software engineering, with the help of AI that could navigate mathematical spaces I could only glimpse.
-
-## Frequently Asked Questions
-
-### What is Homotopy Type Theory (HoTT) in this context?
-
-Homotopy Type Theory is a mathematical framework that treats types as topological spaces. In our implementation, HoTT enabled the initial clustering of code files into architectural boundaries by analyzing type relationships as geometric structures. This allowed us to identify 20 initial subsystem candidates, which were then consolidated into 7 architectural modules through domain expertise.
-
-### What is the 6-Entity Pattern?
-
-The 6-entity pattern is a universal framework for understanding behavioral relationships between files within any subsystem. Our analysis revealed that files consistently organize into six functional roles:
-- **Controller**: Orchestration and external interfaces
-- **Configuration**: Settings and parameters
-- **Security**: Authentication and authorization
-- **Implementation**: Core business logic
-- **Diagnostics**: Monitoring and observability
-- **Lifecycle**: State management and temporal coordination
-
-This pattern emerges from Ramsey theory (R(3,3)=6) and provides a consistent lens for understanding file relationships.
-
-### What is NavigationMaster?
-
-NavigationMaster is the central hub node in our graph architecture, inspired by the Friendship Theorem from graph theory. It provides:
-- O(1) access to any system component
-- Maximum 2-hop distance to any node
-- Betweenness centrality of 1.0
-- A canonical entry point for both human queries and AI agents
-
-### Why Neo4j for this implementation?
-
-Neo4j's graph database model naturally represents code relationships that are cumbersome in relational databases. A simple dependency query that might require multiple JOINs in SQL becomes a straightforward pattern match in Cypher. The Community Edition provides sufficient capabilities for internal development tools while remaining free and legally compliant.
-
-### Can this be implemented without deep mathematical understanding?
-
-Yes. While the theoretical foundations involve advanced mathematics, the implementation is straightforward:
-1. Install Neo4j Community Edition
-2. Run the provided indexing scripts
-3. Execute Cypher queries to explore your codebase
-4. Use the graph to answer architectural questions
-
-The mathematical principles are embedded in the approach; understanding them deeply is not required for practical application.
-
-### What are the key mathematical measures used?
-
-- **Chromatic Numbers**: Determine minimum dependency exclusions needed in conflict resolution
-- **Betweenness Centrality**: Identify critical path components in system architecture
-- **PageRank**: Measure component importance based on dependency networks
-- **Vector Embeddings**: Enable semantic similarity searches across codebase
-- **Cohomology Classes**: H^0 measures connected components (should equal 1 for complete systems), H^1 detects missing feedback loops, H^2 identifies architectural voids
-- **Sheaf Cohomology**: Validates local-to-global consistency in system properties, ensuring that local behaviors compose correctly into global system behavior
-- **Homology Groups**: Track structural features that persist across different scales of the system, identifying invariant architectural patterns
-
-These measures work together to reveal patterns, validate completeness, and ensure consistency across the system's architecture. The mathematical framework guarantees that our graph representation captures both local relationships and global structure accurately.
-
-## Legal Compliance
-
-This project uses:
-- **Neo4j Community Edition** as an internal developer tool (GPLv3 compliant)
-- **Open source embedding models** (Apache 2.0/MIT licensed)
-- **Optional commercial APIs** with proper licensing
-
-**Important**: This implementation is for internal team use. The GPLv3 license of Neo4j Community Edition allows unlimited internal use without distribution.
-
-## Repository Structure
+## Repository structure
 
 ```
 graph-theory-system-modeling/
-├── GraphTheoryInSystemModeling/      # Research papers (1-8 + Appendix A)
-│   ├── 01_Living_Documentation_HoTT_Graph_Theory.md
-│   ├── 02_Living_Documentation_Deep_Modeling.md
-│   ├── 03_Living_Documentation_How_To_Start_For_Free.md
-│   ├── 04_Living_Documentation_On_Demand_Real_Example.md
-│   ├── 05_Living_Documentation_How_To_Add_Seat_Model_Real_Example.md
-│   ├── 06_Living_Documentation_Win_Win_For_Customers_And_AI_Providers.md
-│   ├── ChromaticNumbersInSystemModeling.md  # Theoretical foundation
-│   ├── ErdosLagrangianUnification.md        # Theoretical foundation
-│   └── Appendix_A_Mathematical_Bridge.md    # Mathematical foundations
-├── Real_Example_Documentation_On_Demands_Screenshots_And_Generated_Documentation/
-│   ├── Documentation_On_Demand.md
-│   └── Documentation_On_Demand_01-08.png    # Screenshots
-├── Real_Example_New_Feature_Seat_Model_Screenshots/
-│   └── New_feeature_01-12.png              # Screenshots
-├── implementation/                    # Code samples (coming soon)
-│   ├── discovery/                    # File discovery scripts
-│   ├── embeddings/                   # Embedding generation
-│   ├── neo4j/                       # Graph creation queries
-│   └── queries/                     # Common Cypher patterns
-├── LICENSE                           # MIT License
-└── README.md                         # This file
+├── GraphTheoryInSystemModeling/   the papers (1–6), two theoretical foundations, Appendix A
+├── papers/V3/                     the V3 research arc and its experiments (co-change, lens gates, partition)
+├── applications/CodeMap/          the app: engine, navigator model, DSL, eval, training, installer, docs
+├── McpServerForEmbeddings/        MCP server — embeddings (Python, pytest)
+├── McpServerForReranking/         MCP server — reranking (Python, pytest)
+├── services/                      embeddings-mcp, reranker-mcp, Modal apps
+├── embeddings-service/            the graph-embedding pipeline: delta extraction, hyperedges, embedding server
+├── Promts/                        24 prompt contracts across five generations, and two prompt-engineering guides
+├── Real_Example_*/                screenshots from the checkItOut case study
+├── WorkingNotes/                  the tri-lens pipeline notes and other working documents
+├── docs/                          FAQ, the author's note
+├── AUTHORS_DECLARATION.md · COMPLIANCE.md · DEVELOPMENT_SETUP.md · CHANGELOG.md · LICENSE
 ```
 
-## Contributing
+## Licence, compliance, citation
 
-We welcome contributions! Areas of interest:
-- Language-specific analyzers (beyond Java)
-- Alternative embedding models
-- Query optimization patterns
-- Integration with other graph databases
-
-Please read our contribution guidelines before submitting PRs.
-
-## Citation
-
-If you use this methodology in your research, please cite:
+MIT for the research, the documentation and the code — see [LICENSE](./LICENSE). Neo4j Community
+Edition is GPLv3 and is used as an internal tool, which its licence permits; the CodeMap
+authoring stack has run on LadybugDB (MIT) since 2026. The research-phase and team-phase tool
+usage is declared in [AUTHORS_DECLARATION.md](./AUTHORS_DECLARATION.md) and
+[COMPLIANCE.md](./COMPLIANCE.md). Claude is a product of Anthropic.
 
 ```bibtex
-@article{marchewka2025living,
-  title={Living Documentation Through Graph Theory and HoTT},
-  author={Marchewka, Norbert},
-  journal={GitHub Repository},
-  year={2025},
-  url={https://github.com/yourusername/graph-theory-system-modeling}
+@misc{marchewka2025living,
+  title  = {Living Documentation Through Graph Theory and HoTT},
+  author = {Marchewka, Norbert},
+  year   = {2025},
+  url    = {https://github.com/Check-It-Out-Dev/graph-theory-system-modeling}
 }
 ```
 
-## Acknowledgments
+## Contact
 
-- Neo4j team for the excellent Community Edition
-- Anthropic for Claude AI assistance during research
-- The CheckItOut team for being the best team
-
-## Disclaimer
-
-This research documents a transition from personal research to team deployment:
-- **Research Phase**: Neo4j Desktop Enterprise (with native embeddings) used by Norbert Marchewka only
-- **Team Phase**: Neo4j Community Edition (with separate embeddings) for all developers
-
-See [AUTHOR'S DECLARATION](AUTHORS_DECLARATION.md) for complete details on this transition.
-
-Vector embeddings for team deployment are computed separately using open-source or properly licensed models. Claude is a product of Anthropic. All usage described complies with respective licenses and terms of service.
-
-## License
-
-This project's research, documentation, and implementation code are licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-Note: Neo4j Community Edition itself is licensed under GPLv3. Our usage as an internal tool complies with GPLv3 terms.
-
-## Contact & Support
-
-**Author**: Norbert Marchewka  
-**Email**: norbert_marchewka@checkitout.app  
-**LinkedIn**: https://www.linkedin.com/in/norbert-marchewka-292377129/  
-
-### Getting Help
-
-- **GitHub Issues**: Best place for technical questions (public benefit)
-- **Social Media**: Tag me for discussions and success stories  
-- **Educational Requests**: Happy to create additional public content
-- **Commercial Support**: Not available from the author (employment restrictions)
-  - Community resources and independent consultants can provide paid support
-  - Everything needed for implementation is freely available in this repository
-
-### Contributing to the Community
-
-This is a community project! Contributions are welcome:
-- Bug fixes and improvements
-- Additional language support  
-- Success stories and case studies
-- Educational content and tutorials
-
-All contributions remain under MIT license for community benefit.
-
----
-
-*Transforming code into living, queryable knowledge graphs through mathematical discovery.*
-
-**🎁 This educational content is and will always remain FREE. Knowledge should be accessible to all.**
+**Norbert Marchewka** · [LinkedIn](https://www.linkedin.com/in/norbert-marchewka-292377129/) ·
+norbert_marchewka@checkitout.app. Questions go to public GitHub issues, where the answer helps
+everyone; the author does not offer paid consulting on this method. Contributions are welcome and
+stay under MIT — language analysers beyond Java, embedding models, query patterns, other graph
+databases.
