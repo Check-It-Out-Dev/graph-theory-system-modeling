@@ -29,7 +29,7 @@ class TestSettings:
         assert settings.device == "cpu"
         assert settings.torch_dtype == "float32"
         assert settings.max_length == 8192
-        assert settings.batch_size == 8
+        assert settings.batch_size == 1
         assert settings.default_top_k == 10
         assert settings.log_level == "INFO"
     
@@ -120,9 +120,10 @@ class TestEngineWithMockedModel:
     def test_get_model_info_loaded(self, mocked_engine):
         """Test model info when loaded."""
         # Setup mock
-        mocked_engine._model.parameters.return_value = [
+        # The engine calls next(model.parameters()) more than once, so every call needs a fresh iterator.
+        mocked_engine._model.parameters.side_effect = lambda: iter([
             MagicMock(numel=lambda: 1000, device="cpu", dtype="float32")
-        ]
+        ])
         
         info = mocked_engine.get_model_info()
         
