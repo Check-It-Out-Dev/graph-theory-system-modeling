@@ -104,6 +104,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          set -o pipefail
           mkdir -p site && rm -rf site/.git
           STARTED_AT=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" --jq .run_started_at)
           DURATION=$(( $(date +%s) - $(date -d "$STARTED_AT" +%s) ))
