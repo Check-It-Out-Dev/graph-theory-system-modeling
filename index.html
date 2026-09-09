@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Quality dashboard</title>
+<meta name="description" content="Test results, trends, flaky tests and reports of the latest CI run, measured from the run's own artifacts.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;500;600&family=Instrument+Serif&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="mast">
+  <a class="mast__repo" id="repoLink" href="https://github.com/Check-It-Out-Dev">Check-It-Out-Dev</a>
+  <nav class="mast__nav" aria-label="Page">
+    <a href="#tiers">Latest run</a>
+    <a href="#flaky">Flaky tests</a>
+    <a href="#reports">Reports</a>
+    <a id="actionsLink" href="https://github.com/Check-It-Out-Dev">Workflow runs</a>
+  </nav>
+</header>
+
+<main id="app">
+  <section class="verdict">
+    <h1 class="verdict__text" id="verdict">Reading the latest run…</h1>
+    <p class="verdict__meta" id="verdictMeta"></p>
+  </section>
+
+  <section class="ribbon" id="ribbonSection" aria-labelledby="ribbonTitle">
+    <h2 class="sr-only" id="ribbonTitle">The last thirty runs</h2>
+    <div class="ribbon__bars" id="ribbon" role="list"></div>
+    <p class="ribbon__caption" id="ribbonCaption">The last thirty runs, newest on the right. Colour is the outcome, height is how long the run took. Point at a bar to read the run.</p>
+  </section>
+
+  <section class="tiles" id="tiles" aria-label="Key figures"></section>
+
+  <section class="grid2">
+    <div id="tiers"></div>
+    <div id="k6"></div>
+  </section>
+
+  <section id="flaky"></section>
+
+  <section id="reports"></section>
+</main>
+
+<footer class="foot" id="foot"></footer>
+<noscript><p class="foot">This page reads quality-metrics.json with JavaScript. The file itself is readable without it.</p></noscript>
+<script src="dashboard.js"></script>
+</body>
+</html>
