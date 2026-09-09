@@ -9,10 +9,11 @@ import pytest
 from unittest.mock import MagicMock, patch
 
 from qwen3_reranker_mcp.config import Settings, get_settings, reload_settings
+from dataclasses import asdict
+
 from qwen3_reranker_mcp.reranker_engine import (
     RerankerEngine,
-    RerankResult,
-    SingleScoreResult,
+    ScoreResult,
     BatchScoreResult,
 )
 
@@ -76,8 +77,8 @@ class TestResultDataClasses:
     """Tests for result data classes."""
     
     def test_single_score_result(self):
-        """Test SingleScoreResult structure."""
-        result = SingleScoreResult(
+        """Test ScoreResult structure."""
+        result = ScoreResult(
             score=0.85,
             query="What is AI?",
             document="Artificial intelligence is...",
@@ -85,34 +86,20 @@ class TestResultDataClasses:
         
         assert result.score == 0.85
         assert result.query == "What is AI?"
-        assert "score" in result.as_dict
+        assert asdict(result)["score"] == 0.85
     
     def test_batch_score_result(self):
         """Test BatchScoreResult structure."""
         result = BatchScoreResult(
             scores=[0.8, 0.3],
             pairs=[("q1", "d1"), ("q2", "d2")],
-            num_pairs=2,
+            symmetric=False,
         )
         
         assert len(result.scores) == 2
-        assert result.num_pairs == 2
+        assert len(result.pairs) == 2
+        assert result.symmetric is False
     
-    def test_rerank_result(self):
-        """Test RerankResult structure."""
-        result = RerankResult(
-            scores=[0.9, 0.7, 0.5],
-            indices=[2, 0, 1],
-            documents=["doc2", "doc0", "doc1"],
-            query="test query",
-            num_documents=3,
-            top_k=3,
-        )
-        
-        assert len(result.scores) == 3
-        assert result.scores[0] == 0.9
-        assert result.indices[0] == 2
-        assert result.query == "test query"
 
 
 class TestEngineWithMockedModel:
