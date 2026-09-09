@@ -17,6 +17,8 @@
   --flaky-soft: #fdecc8;
   --fail: #b83a1f;
   --fail-soft: #ffd9cf;
+  --incomplete: #64748b;
+  --incomplete-soft: #e2e8f0;
   --skip: #8a8f9c;
   --skip-soft: #e6e6e9;
   --empty: #efeae0;
@@ -39,6 +41,8 @@
     --flaky-soft: #3d2c06;
     --fail: #ff8f72;
     --fail-soft: #47190f;
+    --incomplete: #94a3b8;
+    --incomplete-soft: #1e293b;
     --skip: #8791a5;
     --skip-soft: #26304a;
     --empty: #1c2740;
@@ -61,6 +65,8 @@
   --flaky-soft: #3d2c06;
   --fail: #ff8f72;
   --fail-soft: #47190f;
+  --incomplete: #94a3b8;
+  --incomplete-soft: #1e293b;
   --skip: #8791a5;
   --skip-soft: #26304a;
   --empty: #1c2740;
@@ -129,6 +135,8 @@ a:hover { text-decoration-thickness: 2px; }
 }
 .bar--pass { background: var(--pass); }
 .bar--flaky { background: var(--flaky); }
+/* A run that did not finish: grey, because neither green nor red would be true of it. */
+.bar--incomplete { background: var(--incomplete); }
 .bar--fail { background: var(--fail); }
 .bar--empty { height: 8%; }
 .ribbon__bars:hover .bar:not(:hover):not(.bar--empty) { opacity: 0.55; }

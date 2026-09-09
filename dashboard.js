@@ -26,7 +26,9 @@
     const m = Math.floor(s / 60);
     return m ? `${m} min ${s % 60} s` : `${s} s`;
   };
-  const outcome = (r) => (r.failed > 0 ? 'fail' : r.flaky > 0 ? 'flaky' : 'pass');
+  // `incomplete` outranks the counts: a run that did not finish has no honest pass/fail to show.
+  const outcome = (r) => (r.status === 'incomplete' ? 'incomplete' : r.failed > 0 ? 'fail' : r.flaky > 0 ? 'flaky' : 'pass');
+  const clean = (r) => r.status !== 'incomplete' && !(r.failed > 0);
 
   const TIER_LABELS = {
     jest: 'Unit (Jest)',
@@ -132,7 +134,8 @@
     const t = m.tests, r = m.run;
     const scored = t.passed + t.failed + t.flaky;
     let text;
-    if (t.failed > 0) text = `${n(t.failed)} of ${n(scored)} tests failed on ${r.branch}, run ${r.number}.`;
+    if (r.status === 'incomplete') text = `Run ${r.number} on ${r.branch} did not finish: ${n(t.passed)} of ${n(scored)} tests reported, the rest never ran.`;
+    else if (t.failed > 0) text = `${n(t.failed)} of ${n(scored)} tests failed on ${r.branch}, run ${r.number}.`;
     else if (t.flaky > 0) text = `${n(t.passed)} of ${n(scored)} tests passed on ${r.branch}, run ${r.number}: ${word(t.flaky)} flaky, none failed.`;
     else text = `All ${n(t.passed)} tests passed on ${r.branch}, run ${r.number}.`;
     $('verdict').textContent = text;
@@ -140,14 +143,16 @@
     const parts = [`Started ${when(r.startedAt)}, took ${dur(r.durationSec)}.`];
     if (t.skipped) parts.push(`${cap(word(t.skipped))} skipped.`);
     // Streak: this run first, then history newest-first, counting runs with nothing failed.
-    const runs = [{ run: r.number, failed: t.failed }, ...history.filter((h) => h.run !== r.number).reverse()];
-    if (t.failed > 0) {
+    const runs = [{ run: r.number, failed: t.failed, status: r.status }, ...history.filter((h) => h.run !== r.number).reverse()];
+    if (r.status === 'incomplete') {
+      parts.push('An unfinished run breaks the streak: it is neither green nor red.');
+    } else if (t.failed > 0) {
       let green = 0;
-      for (const h of runs.slice(1)) { if (h.failed > 0) break; green++; }
+      for (const h of runs.slice(1)) { if (!clean(h)) break; green++; }
       if (green) parts.push(`The first red run after ${word(green)} green ${green === 1 ? 'one' : 'ones'}.`);
     } else {
       let streak = 0;
-      for (const h of runs) { if (h.failed > 0) break; streak++; }
+      for (const h of runs) { if (!clean(h)) break; streak++; }
       if (streak >= 2) parts.push(`${cap(ordinal(streak))} green run in a row.`);
       else if (runs.length > 1) parts.push('First green run after a failure.');
     }
@@ -166,7 +171,9 @@
     const slowest = Math.max(...runs.map((h) => h.durationSec || 0), 1);
     for (const h of runs) {
       const height = 25 + 75 * Math.max(0, Math.min(1, (h.durationSec || 0) / slowest));
-      const label = `Run ${h.run}, ${when(h.at)}: ${n(h.passed)} passed, ${h.flaky} flaky, ${h.failed} failed, ${dur(h.durationSec)}.`;
+      const label = h.status === 'incomplete'
+        ? `Run ${h.run}, ${when(h.at)}: did not finish; ${n(h.passed)} passed before it stopped.`
+        : `Run ${h.run}, ${when(h.at)}: ${n(h.passed)} passed, ${h.flaky} flaky, ${h.failed} failed, ${dur(h.durationSec)}.`;
       const bar = el(h.id ? 'a' : 'span', {
         class: `bar bar--${outcome(h)}`,
         style: `height:${height.toFixed(0)}%`,
@@ -347,9 +354,12 @@
         fetch(`${BASE}/metrics/history.jsonl`, { cache: 'no-cache' }).then((r) => (r.ok ? r.text() : '')).then(parseJsonl).catch(() => []),
       ]);
       const repoUrl = renderMast(m);
-      renderVerdict(m, history);
-      renderRibbon(history, repoUrl);
-      renderTiles(m, history);
+      // One site, several workflows, and run numbers that restart per workflow: the trend and the streak
+      // only mean something within one workflow's own series.
+      const mine = history.filter((h) => !h.workflow || !m.run.workflow || h.workflow === m.run.workflow);
+      renderVerdict(m, mine);
+      renderRibbon(mine, repoUrl);
+      renderTiles(m, mine);
       renderTiers(m);
       renderK6(m);
       renderFlaky(m);
