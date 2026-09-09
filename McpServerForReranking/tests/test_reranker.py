@@ -140,16 +140,7 @@ class TestEngineWithMockedModel:
 class TestInputValidation:
     """Tests for input validation."""
     
-    def test_empty_documents_raises(self):
-        """Test that empty documents list raises error."""
-        engine = RerankerEngine()
-        engine._is_loaded = True
-        engine._model = MagicMock()
-        engine._tokenizer = MagicMock()
-        
-        with pytest.raises(ValueError, match="documents cannot be empty"):
-            engine.rerank(query="test", documents=[])
-    
+
     def test_empty_pairs_returns_empty(self):
         """Test that empty pairs list returns empty result."""
         engine = RerankerEngine()
@@ -157,9 +148,9 @@ class TestInputValidation:
         engine._model = MagicMock()
         engine._tokenizer = MagicMock()
         
-        result = engine.score_pairs([])
-        assert result.num_pairs == 0
+        result = engine.score_batch([])
         assert result.scores == []
+        assert result.pairs == []
 
 
 @pytest.mark.slow
@@ -205,32 +196,16 @@ class TestIntegration:
         # Relevant should score higher than irrelevant
         assert result_relevant.score > result_irrelevant.score
     
-    def test_score_pairs_batch(self, engine):
+    def test_score_batch(self, engine):
         """Test batch pair scoring."""
-        result = engine.score_pairs([
+        result = engine.score_batch([
             ("What is AI?", "Artificial intelligence is the simulation of human intelligence."),
             ("What is AI?", "Pizza is a delicious Italian food."),
-        ])
+        ], symmetric=False)
         
         assert len(result.scores) == 2
         # First pair should score higher (more relevant)
         assert result.scores[0] > result.scores[1]
-    
-    def test_rerank_basic(self, engine):
-        """Test basic reranking functionality."""
-        result = engine.rerank(
-            query="What is machine learning?",
-            documents=[
-                "Machine learning is a subset of AI that enables systems to learn.",
-                "The weather today is sunny and warm.",
-                "Deep learning uses neural networks with many layers.",
-            ],
-            top_k=2,
-        )
-        
-        assert len(result.scores) == 2
-        assert all(0 <= s <= 1 for s in result.scores)
-        assert result.scores[0] >= result.scores[1]  # Sorted descending
     
     def test_information_lensing_workflow(self, engine):
         """
