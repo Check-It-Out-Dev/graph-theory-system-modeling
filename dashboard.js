@@ -12,18 +12,44 @@
   // innerHTML, so it was never XSS; it was worse in a quieter way -- a believable dashboard on the
   // real URL showing figures somebody else wrote.
   //
-  // So: a relative path on this origin, or nothing. No scheme, no protocol-relative //host, no
-  // traversal out of the site.
+  // So: a relative path on this origin, or nothing. An ALLOW-list, not a deny-list -- enumerating
+  // what is forbidden means being right about every way to write an absolute URL; enumerating what
+  // is permitted means being right once. A segment of unreserved characters cannot carry a scheme
+  // (no `:` in the class), cannot begin a protocol-relative reference or an absolute path (both
+  // need an empty first segment, and `+` requires one character), and `..` is refused by name.
+  const SAFE_SEGMENT = /^[A-Za-z0-9._~-]+$/;
   const BASE = (() => {
-    const raw = (params.get('data') || '.').replace(/\/$/, '');
-    const looksAbsolute = /^[a-z][a-z0-9+.-]*:/i.test(raw) || raw.startsWith('//') || raw.startsWith('/');
-    const climbs = raw.split('/').includes('..');
-    if (looksAbsolute || climbs) {
+    const raw = (params.get('data') || '.').replace(/\/+$/, '');
+    const segments = raw.split('/');
+    const safe = segments.length > 0 && segments.every((s) => s !== '..' && SAFE_SEGMENT.test(s));
+    if (!safe) {
       console.warn('dashboard: ignoring ?data=%s — only a relative path on this origin is read', raw);
       return '.';
     }
     return raw;
   })();
+
+  /**
+   * The URL of one of this report's own files. The origin is not checked here — it cannot be
+   * written in the first place.
+   *
+   * The allow-list above constrains the input, and an earlier version then compared the resolved
+   * URL's origin against this one. Comparing is weaker than not being able to differ: this builds
+   * from `location.href` and assigns only the PATHNAME, from segments that have already passed the
+   * allow-list. There is no expression here in which a scheme, a host or a port could appear, so
+   * the fetch is same-origin by construction rather than by inspection, and `..` cannot travel up
+   * because a segment equal to `..` never reaches this array.
+   */
+  const SEGMENTS = BASE === '.' ? [] : BASE.split('/');
+  function reportUrl(file) {
+    const url = new URL(location.href);
+    url.search = '';
+    url.hash = '';
+    // everything up to and including this page's own directory, then our own segments
+    const dir = url.pathname.replace(/[^/]*$/, '');
+    url.pathname = dir + [...SEGMENTS, ...file.split('/')].join('/');
+    return url.href;
+  }
   const WINDOW = 30;
   const FLAKY_WINDOW = 10;
 
@@ -412,8 +438,8 @@
     if (r.k6) items.push(['k6 summaries', 'One per runner, HTML and JSON', r.k6]);
     if (r.lighthouse) items.push(['Lighthouse report', 'Performance, accessibility, best practices, SEO', r.lighthouse]);
     items.push(['Workflow run on GitHub', `${m.run.workflow}, run ${m.run.number}`, m.run.url]);
-    items.push(['quality-metrics.json', 'The data behind this page', `${BASE}/quality-metrics.json`]);
-    items.push(['metrics/history.jsonl', 'One line per run, never pruned', `${BASE}/metrics/history.jsonl`]);
+    items.push(['quality-metrics.json', 'The data behind this page', reportUrl('quality-metrics.json')]);
+    items.push(['metrics/history.jsonl', 'One line per run, never pruned', reportUrl('metrics/history.jsonl')]);
     box.append(el('ul', { class: 'reports' }, items.map(([title, sub, href]) => el('li', {}, el('a', { href, text: title }), el('small', { text: sub })))));
     if (r.allure) box.append(el('p', { class: 'note' }, 'The newest Allure report is always at ', el('a', { href: r.allure.replace(/\d+\/?$/, 'latest/'), text: 'allure/latest' }), '.'));
     return repoUrl;
@@ -436,14 +462,14 @@
     $('verdictMeta').textContent = 'The first workflow run writes quality-metrics.json next to this page; until then there is nothing to measure.';
     $('ribbonSection').hidden = true;
     $('tiles').hidden = true;
-    $('foot').textContent = `Could not read ${BASE}/quality-metrics.json (${err && err.message ? err.message : err}).`;
+    $('foot').textContent = `Could not read ${reportUrl('quality-metrics.json')} (${err && err.message ? err.message : err}).`;
   }
 
   async function main() {
     try {
       const [m, history] = await Promise.all([
-        fetch(`${BASE}/quality-metrics.json`, { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)))),
-        fetch(`${BASE}/metrics/history.jsonl`, { cache: 'no-cache' }).then((r) => (r.ok ? r.text() : '')).then(parseJsonl).catch(() => []),
+        fetch(reportUrl('quality-metrics.json'), { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)))),
+        fetch(reportUrl('metrics/history.jsonl'), { cache: 'no-cache' }).then((r) => (r.ok ? r.text() : '')).then(parseJsonl).catch(() => []),
       ]);
       const repoUrl = renderMast(m);
       // One site, several workflows, and run numbers that restart per workflow: the trend and the streak
