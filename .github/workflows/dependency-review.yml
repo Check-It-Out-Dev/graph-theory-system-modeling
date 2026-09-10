@@ -1,0 +1,43 @@
+# What a pull request brings in with it.
+#
+# CodeQL is NOT here on purpose. The organisation's security configuration enables CodeQL **default
+# setup**, which analyses actions, java-kotlin, javascript-typescript and python on the `extended` query
+# suite and reports weekly and on every push. An advanced setup in a workflow file cannot coexist with
+# it: GitHub refuses the SARIF outright - "configurations cannot be processed when the default setup is
+# enabled" - so a CodeQL job here would be permanently red while adding nothing. Its findings are under
+# Security, Code scanning.
+#
+# Dependency review is the piece default setup does not do: it compares the dependency manifests of the
+# base and the head of a pull request and fails when the difference introduces a known advisory. It
+# needs a base and a head, so it only makes sense on a pull request.
+#
+# The reason any of this exists: on 2026-09-09 a live credential was found in the backend's Cucumber
+# corpus, in 54 files, because nothing in the estate was looking. Secret scanning and push protection
+# are enabled alongside this.
+name: dependency-review
+
+on:
+  pull_request:
+
+concurrency:
+  group: dependency-review-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  dependency-review:
+    name: Dependency review
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/dependency-review-action@v5
+        with:
+          # A pull request may not introduce a dependency with a known high-severity advisory.
+          fail-on-severity: high
+          comment-summary-in-pr: on-failure
