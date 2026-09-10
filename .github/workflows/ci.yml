@@ -116,7 +116,11 @@ jobs:
         with:
           repository: Check-It-Out-Dev/checkitout-frontend
           path: frontend
-          sparse-checkout: tools/ci
+          # tools/lib too: the shared scripts import the ordering comparator from it, and a
+          # checkout of tools/ci alone fails at import time with ERR_MODULE_NOT_FOUND.
+          sparse-checkout: |
+            tools/ci
+            tools/lib
       - uses: actions/download-artifact@v7
         with:
           path: results
