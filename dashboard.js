@@ -6,7 +6,24 @@
   'use strict';
 
   const params = new URLSearchParams(location.search);
-  const BASE = (params.get('data') || '.').replace(/\/$/, '');
+  // `?data=` exists so one Pages site can show another directory's report -- a run subfolder, say.
+  // It was taken as given, which meant a crafted link made this page fetch its numbers from any
+  // origin at all and present them as this project's (jssecurity:S8476). Nothing here renders with
+  // innerHTML, so it was never XSS; it was worse in a quieter way -- a believable dashboard on the
+  // real URL showing figures somebody else wrote.
+  //
+  // So: a relative path on this origin, or nothing. No scheme, no protocol-relative //host, no
+  // traversal out of the site.
+  const BASE = (() => {
+    const raw = (params.get('data') || '.').replace(/\/$/, '');
+    const looksAbsolute = /^[a-z][a-z0-9+.-]*:/i.test(raw) || raw.startsWith('//') || raw.startsWith('/');
+    const climbs = raw.split('/').includes('..');
+    if (looksAbsolute || climbs) {
+      console.warn('dashboard: ignoring ?data=%s — only a relative path on this origin is read', raw);
+      return '.';
+    }
+    return raw;
+  })();
   const WINDOW = 30;
   const FLAKY_WINDOW = 10;
 
