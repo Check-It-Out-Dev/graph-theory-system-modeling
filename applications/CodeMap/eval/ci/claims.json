@@ -1,0 +1,49 @@
+{
+ "_": [
+  "Every evaluation figure this repository publishes, tied to the artifact that supports it.",
+  "A gated claim names a file, the literal text as the document writes it, the frozen run it",
+  "came from and the metric inside it; the test asserts the text is still in the document AND",
+  "that the artifact, re-scored today, still rounds to it at the claim's own precision.",
+  "An ungated claim names why no artifact backs it. Both kinds are declared: the point of the",
+  "manifest is that a number cannot quietly exist without one."
+ ],
+ "gated": [
+  {"doc": "docs/06-prompt-transfer-findings.md", "text": "| bare guard (verbs + contract) | 0.031 |", "run": "qwen30b-full-nogram", "metric": "rate.answerable", "value": 0.031},
+  {"doc": "docs/06-prompt-transfer-findings.md", "text": "| + GBNF grammar | 0.092 |", "run": "qwen30b-full-gram", "metric": "rate.answerable", "value": 0.092},
+  {"doc": "docs/06-prompt-transfer-findings.md", "text": "| + **Cypher-analogy anchor** | 0.169 |", "run": "qwen30b-full-cypher", "metric": "rate.answerable", "value": 0.169},
+  {"doc": "docs/06-prompt-transfer-findings.md", "text": "| + **step-budget awareness** | **0.246** |", "run": "qwen30b-full-budget", "metric": "rate.answerable", "value": 0.246},
+  {"doc": "docs/06-prompt-transfer-findings.md", "text": "73/104 stalls", "run": "qwen30b-full-nogram", "metric": "terminals.stall", "value": 73},
+  {"doc": "docs/06-prompt-transfer-findings.md", "text": "73/104 stalls", "run": "qwen30b-full-nogram", "metric": "n.total", "value": 104},
+  {"doc": "docs/06-prompt-transfer-findings.md", "text": "invalid outputs 8 → 1", "run": "qwen30b-full-nogram", "metric": "terminals.invalid", "value": 8},
+  {"doc": "docs/06-prompt-transfer-findings.md", "text": "invalid outputs 8 → 1", "run": "qwen30b-full-gram", "metric": "terminals.invalid", "value": 1},
+  {"doc": "docs/06-prompt-transfer-findings.md", "text": "stalls 73 → **0**", "run": "qwen30b-full-budget", "metric": "terminals.stall", "value": 0},
+  {"doc": "docs/06-prompt-transfer-findings.md", "text": "pass-on-unanswerable 0.58", "run": "qwen80b-full-budget", "metric": "rate.pass_on_unanswerable", "value": 0.58},
+  {"doc": "docs/06-prompt-transfer-findings.md", "text": "| route success (65 canonical) | 0.246 | 0.154 |", "run": "qwen80b-full-budget", "metric": "rate.answerable", "value": 0.246},
+  {"doc": "docs/06-prompt-transfer-findings.md", "text": "| route success (65 canonical) | 0.246 | 0.154 |", "run": "qwen80b-native2", "metric": "rate.answerable", "value": 0.154},
+  {"doc": "docs/06-prompt-transfer-findings.md", "text": "| pass-on-unanswerable | 0.58 | **0.74** |", "run": "qwen80b-full-budget", "metric": "rate.pass_on_unanswerable", "value": 0.58},
+  {"doc": "docs/06-prompt-transfer-findings.md", "text": "| pass-on-unanswerable | 0.58 | **0.74** |", "run": "qwen80b-native2", "metric": "rate.pass_on_unanswerable", "value": 0.74},
+  {"doc": "docs/06-prompt-transfer-findings.md", "text": "| number F1 p50 (content) | 0.31 | **0.40** |", "run": "qwen80b-native2", "metric": "content.number_f1_p50", "value": 0.40},
+  {"doc": "docs/06-prompt-transfer-findings.md", "text": "| entity F1 mean (content) | 0.31 | 0.27 |", "run": "qwen80b-native2", "metric": "content.f1_mean", "value": 0.27},
+  {"doc": "docs/06-prompt-transfer-findings.md", "text": "| solid grounding | 0.92 | 0.92 |", "run": "qwen80b-native2", "metric": "content.solid_rate", "value": 0.92},
+  {"doc": "docs/06-prompt-transfer-findings.md", "text": "| backtrack rate | 0.17 | **0.07** |", "run": "qwen80b-full-budget", "metric": "backtrack_rate", "value": 0.17},
+  {"doc": "docs/06-prompt-transfer-findings.md", "text": "| backtrack rate | 0.17 | **0.07** |", "run": "qwen80b-native2", "metric": "backtrack_rate", "value": 0.07},
+  {"doc": "docs/06-prompt-transfer-findings.md", "text": "| sessions using cypher | — | 0.28 |", "run": "qwen80b-native2", "metric": "cypher.sessions_using", "value": 0.28},
+  {"doc": "docs/06-prompt-transfer-findings.md", "text": "(49 → 35 answers scored)", "run": "qwen80b-native2", "metric": "n.answered_with_gold", "value": 35},
+  {"doc": "docs/06-prompt-transfer-findings.md", "text": "narration invalids 12 → 5", "run": "qwen80b-native", "metric": "terminals.invalid", "value": 12},
+  {"doc": "docs/06-prompt-transfer-findings.md", "text": "narration invalids 12 → 5", "run": "qwen80b-native2", "metric": "terminals.invalid", "value": 5},
+  {"doc": "docs/06-prompt-transfer-findings.md", "text": "stalls 11 → 8", "run": "qwen80b-native", "metric": "terminals.stall", "value": 11},
+  {"doc": "docs/06-prompt-transfer-findings.md", "text": "stalls 11 → 8", "run": "qwen80b-native2", "metric": "terminals.stall", "value": 8},
+  {"doc": "docs/06-prompt-transfer-findings.md", "text": "104-question ladder", "run": "qwen80b-native2", "metric": "n.total", "value": 104}
+ ],
+ "uncited": [
+  {"run": "qwen80b-full-cypher", "reason": "the 80B's cypher-anchor rung, kept as the before half of the recency-slot iteration; the findings document tabulates the 30B ladder and the 80B budget-versus-native comparison, so this run is data rather than a claim"},
+  {"run": "qwen80b-full-cypher2", "reason": "the same rung after the one-action rule moved to the end of the prompt; kept for the same reason as its predecessor and cited by no table"}
+ ],
+ "ungated": [
+  {"doc": "docs/06-prompt-transfer-findings.md", "text": "The trained 4B holds **0.9752**", "reason": "the trained navigator's test snapshot is not in the repository; the checkpoint that produced it is a 2.5 GB GGUF held outside git"},
+  {"doc": "docs/06-prompt-transfer-findings.md", "text": "an F1 p50 of 0.40 with 49% solid groundings, versus 0.25 and 40% for", "reason": "content referee run post-hoc over the prompt-only answers; the promptonly harness writes no content fields, so its output is not one of the committed artifacts"},
+  {"doc": "docs/06-prompt-transfer-findings.md", "text": "| number F1 p50 (content) | 0.31 |", "reason": "the budget rung's content column comes from the same post-hoc referee as above, not from BENCH_qwen80b-full-budget.json, whose rows carry no content fields"},
+  {"doc": "training/PIPELINE.md", "text": "GATE TABLE", "reason": "the r2.2 gate table was measured on the model's own decontaminated test snapshot (276 stratified rows); neither the snapshot nor the checkpoint is in the repository"},
+  {"doc": "training/PIPELINE.md", "text": "104 AUTONOMOUS multi-step sessions", "reason": "the loop-tier measurement wrote LOOP_r22_cpu.json, which is not committed; the frozen runs that ARE committed are the prompt-transfer ladder"}
+ ]
+}
