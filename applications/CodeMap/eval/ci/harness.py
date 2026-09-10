@@ -23,6 +23,7 @@ Usage:
 """
 
 import argparse
+import ast
 import hashlib
 import json
 import os
@@ -275,6 +276,55 @@ def big_tier_verbs():
     start = text.index("ACTIONS - respond")
     block = text[start:text.index("NATIVE QUERY:", start)]
     return {m.group(1) for m in re.finditer(r"^\s{2,}([a-z]+)\(", block, re.M)}
+
+
+# ------------------------------------------------------------- the sibling suites
+
+REPO = os.path.dirname(os.path.dirname(CODEMAP))
+MCP_PACKAGES = ("McpServerForEmbeddings", "McpServerForReranking")
+
+
+def mcp_test_counts():
+    """Test functions in the two MCP suites, and how many of them CI actually runs.
+
+    Counted from the source rather than from a run, because this gate installs neither
+    package. A `slow` or `integration` marker keeps a test out of CI, and the marker can sit
+    on the test OR on the class around it -- the reranking suite marks a whole
+    ``TestIntegration`` class, which is why counting decorators on functions alone reports
+    four tests that never run.
+    """
+    total = in_ci = 0
+    for package in MCP_PACKAGES:
+        tests_dir = os.path.join(REPO, package, "tests")
+        for name in sorted(os.listdir(tests_dir)):
+            if not name.endswith(".py"):
+                continue
+            tree = ast.parse(open(os.path.join(tests_dir, name), encoding="utf-8").read())
+            for node in ast.walk(tree):
+                if isinstance(node, ast.ClassDef):
+                    excluded = _excluded(node)
+                    for child in node.body:
+                        if _is_test(child):
+                            total += 1
+                            in_ci += not (excluded or _excluded(child))
+                elif _is_test(node) and _toplevel(tree, node):
+                    total += 1
+                    in_ci += not _excluded(node)
+    return total, in_ci
+
+
+def _is_test(node):
+    return (isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+            and node.name.startswith("test_"))
+
+
+def _excluded(node):
+    return any(m in ast.unparse(d) for d in node.decorator_list
+               for m in ("mark.slow", "mark.integration"))
+
+
+def _toplevel(tree, node):
+    return node in tree.body
 
 
 # ------------------------------------------------------------------------- reporting

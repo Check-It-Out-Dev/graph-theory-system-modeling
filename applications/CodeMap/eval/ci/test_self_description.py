@@ -49,3 +49,20 @@ def test_the_check_count_is_what_both_documents_say():
     for path in (TOP_README, THIS_README):
         assert f"{collected} checks" in _text(path), (
             f"{os.path.basename(path)} does not say {collected} checks --- this run collected that many")
+
+
+def test_the_sibling_mcp_suites_are_counted_as_the_readme_counts_them():
+    """The repository README's testing table speaks for suites this gate does not run.
+
+    It said 29 for a long time; there are 26 test functions, and CI runs 22 of them because
+    a whole class in the reranking suite is marked `slow` and `integration`. Nothing was
+    checking, so counting them here is cheaper than the next person believing the wrong
+    number -- and it costs no install, because the count comes from the source.
+    """
+    total, in_ci = harness.mcp_test_counts()
+    text = _text(TOP_README)
+    assert f"{total} pytest tests between them" in text, (
+        f"the two MCP suites hold {total} test functions; the README says otherwise")
+    assert f"{in_ci} of which run in CI" in text, (
+        f"CI runs {in_ci} of them (the rest carry a slow or integration marker); "
+        "the README says otherwise")

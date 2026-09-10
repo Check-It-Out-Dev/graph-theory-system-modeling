@@ -1,6 +1,6 @@
 # The evaluation gate — model and prompt evaluation on a runner with no GPU
 
-`python -m pytest applications/CodeMap/eval/ci` · 111 checks · 0.2 s · no model, no GPU, no
+`python -m pytest applications/CodeMap/eval/ci` · 112 checks · 0.2 s · no model, no GPU, no
 network, no credential.
 
 ## The problem this solves
@@ -59,7 +59,7 @@ stood. The gate makes that trade visible: change the grammar and the artifacts m
 re-scored or retired, deliberately.
 
 **Corpus integrity and published numbers** (`test_corpus_integrity.py`,
-`test_published_numbers.py`). A benchmark number means "this model, on these questions".
+`test_published_numbers.py`, `test_self_description.py`). A benchmark number means "this model, on these questions".
 Nothing forces the runs and `eval/q/mfq_all.jsonl` to stay the same corpus, and a question
 quietly re-classified would leave every published rate intact and every published rate wrong.
 So every run is checked question for question against the bank. Then `claims.json` ties each
@@ -85,7 +85,7 @@ prevent.
 
 ## Proof that the gate fires
 
-A gate that has never been red is a claim, not evidence. Six deliberate breakages, each
+A gate that has never been red is a claim, not evidence. Seven deliberate breakages, each
 restored afterwards:
 
 | mutation | caught by |
@@ -96,6 +96,7 @@ restored afterwards:
 | a published number is edited | `test_the_document_still_says_it` |
 | a question is re-classified | `test_the_run_scored_this_bank_question_for_question`, `test_the_unanswerable_stratum_is_the_bank_s_own` |
 | this README's own step count goes stale | `test_the_recorded_step_count_is_what_both_documents_say` |
+| a sibling suite's markers change, so CI silently runs a different number of tests | `test_the_sibling_mcp_suites_are_counted_as_the_readme_counts_them` |
 
 ## Running it
 
