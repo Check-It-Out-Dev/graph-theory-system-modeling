@@ -1,6 +1,6 @@
 # The evaluation gate — model and prompt evaluation on a runner with no GPU
 
-`python -m pytest applications/CodeMap/eval/ci` · 112 checks · 0.2 s · no model, no GPU, no
+`python -m pytest applications/CodeMap/eval/ci` · 113 checks · 0.2 s · no model, no GPU, no
 network, no credential.
 
 ## The problem this solves

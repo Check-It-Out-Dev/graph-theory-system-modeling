@@ -59,3 +59,33 @@ def test_the_rejected_steps_are_still_rejected_for_stated_reasons():
                    for c, n in counts.items() if c != "ok")
     assert rejected > 0, (
         "no recorded step is rejected any more --- the suite has stopped testing the grammar")
+
+
+def test_parsing_a_long_whitespace_run_stays_cheap():
+    """The parser sees whatever the model emits, so its worst case is the model's to choose.
+
+    ``^\s*([a-z]+)\s*\(\s*(.*?)\s*\)\s*$`` under ``re.S`` gave the engine two ways to
+    account for every space around the arguments --- ``\s*`` or the dot --- and it backtracked
+    through the combinations. Measured before the fix: 500 spaces took 28 ms, 1,000 took 218 ms,
+    2,000 took 1.7 s and 4,000 took 13.4 s, and 30,000 did not finish inside five minutes
+    (py/polynomial-redos). Stripping the whitespace before matching leaves one parse for any
+    input; the same measurements are 0.013, 0.020, 0.023 and 0.029 ms.
+
+    The bound below is three orders of magnitude above the fixed cost and three below the old
+    one, so it says "not exponential" without being a benchmark that fails on a loaded runner.
+    """
+    import time
+
+    from dsl import ParseError, parse
+
+    worst = "find(" + " " * 4000
+    started = time.perf_counter()
+    try:
+        parse(worst)
+    except ParseError:
+        pass
+    elapsed_ms = (time.perf_counter() - started) * 1000
+
+    assert elapsed_ms < 100, (
+        f"parsing 4,000 spaces took {elapsed_ms:.0f} ms; the pre-fix pattern took 13,405 ms and "
+        "grew faster than the input. Something has reintroduced an ambiguous whitespace match.")

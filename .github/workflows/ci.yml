@@ -142,7 +142,9 @@ jobs:
             --junit 'results/junit-McpServerForReranking/*.xml:reranker-mcp' \
             --junit 'results/junit-eval-gate/*.xml:eval-gate' | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Publish
-        uses: peaceiris/actions-gh-pages@v4
+        # Pinned to the commit v4 pointed at: a tag is a moving reference, and this action
+        # runs with a token that can write to the Pages branch (actions/unpinned-tag).
+        uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453  # v4.0.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: site

@@ -8,7 +8,12 @@ VERBS = {
     "map": 0, "enter": 1, "find": 1, "impact": (1, 2), "flow": (1, 2), "seam": 2,
     "cohort": 1, "spine": 1, "health": 1, "read": 1, "cache": 1, "answer": 1, "pass": 1,
 }
-_RX = re.compile(r"^\s*([a-z]+)\s*\(\s*(.*?)\s*\)\s*$", re.S)
+# The whitespace is stripped before matching rather than inside the pattern. `\s*(.*?)\s*`
+# with re.S lets `.` match spaces too, so the engine has two ways to account for every space
+# around the arguments and backtracks through them -- polynomial in the length of the run
+# (py/polynomial-redos, and the model is what supplies these strings). Stripping first leaves
+# one parse for any input, and the recorded corpus says the verdicts are identical.
+_RX = re.compile(r"^([a-z]+)\s*\((.*)\)$", re.S)
 
 
 class ParseError(Exception):
@@ -16,10 +21,10 @@ class ParseError(Exception):
 
 
 def parse(expr):
-    m = _RX.match(expr or "")
+    m = _RX.match((expr or "").strip())
     if not m:
         raise ParseError(f"not a CMDSL expression: {expr!r} — form: verb(args)")
-    verb, raw = m.group(1), m.group(2)
+    verb, raw = m.group(1), m.group(2).strip()
     if verb not in VERBS:
         raise ParseError(f"unknown verb '{verb}' — verbs: {', '.join(sorted(VERBS))}")
     args = [] if raw == "" else [a.strip().strip('"\'') for a in _split(raw)]

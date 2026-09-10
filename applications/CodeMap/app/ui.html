@@ -105,13 +105,33 @@ footer{padding: .8rem 1.2rem 1rem;border-top:1px solid var(--line);background:va
 const log = document.getElementById('log'), q = document.getElementById('q'),
       stream = document.getElementById('stream');
 q.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+// One listener for every affordance there will ever be, reading the value as data rather than
+// re-parsing it as source. textContent, not the attribute, so nothing is decoded twice.
+log.addEventListener('click', e => {
+  const chip = e.target.closest('.aff[data-aff]');
+  if (chip) step(chip.getAttribute('data-aff'));
+});
+// The offer buttons carried the same shape -- an id interpolated into an onclick -- and were not
+// flagged only because an offer id happens to look harmless. It comes from the same engine as
+// everything else here, so it is read as data too.
+log.addEventListener('click', e => {
+  const retry = e.target.closest('[data-retry-big]');
+  if (retry) { retryBig(retry.getAttribute('data-retry-big')); return; }
+  const esc_ = e.target.closest('[data-escalate]');
+  if (esc_) escalate(esc_.getAttribute('data-escalate'));
+});
 
 function esc(s){ return String(s ?? '').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
 function el(html, cls){ const d = document.createElement('div');
   d.className = 'msg ' + (cls || ''); d.innerHTML = html; log.appendChild(d);
   stream.scrollTop = stream.scrollHeight; return d; }
+// The affordance carries its expression in a data attribute and one delegated listener reads it.
+// It used to be built into an onclick, where esc() could not help: the browser decodes HTML entities
+// in an attribute before JavaScript ever parses it, so an affordance containing an apostrophe closed
+// the string and everything after it was code (js/incomplete-html-attribute-sanitization). These
+// strings come back from the engine, which gets them from a repository someone else may have written.
 function affs(list){ return (list||[]).length
-  ? `<div class="affs">${list.map(a=>`<span class="aff mono" onclick="step('${esc(a)}')">${esc(a)}</span>`).join('')}</div>` : ''; }
+  ? `<div class="affs">${list.map(a=>`<span class="aff mono" data-aff="${esc(a)}">${esc(a)}</span>`).join('')}</div>` : ''; }
 function prose(t){
   t = String(t ?? '');
   const m = t.match(/```mermaid\n([\s\S]*?)```/);
@@ -173,14 +193,14 @@ function render(r, thinking){
 function offerCard(o){
   const big = window._big
     ? `<button class="use" style="background:#124a42;color:#a9f0e2"
-         onclick="retryBig('${o.offer_id}')">retry with local 80B — private, free</button>` : '';
+         data-retry-big="${esc(o.offer_id)}">retry with local 80B — private, free</button>` : '';
   const opts = (window._api
     ? `<select id="m_${o.offer_id}">
          <option value="default">Claude Sonnet (default)</option>
          <option value="budget">Claude Haiku (budget)</option>
          <option value="deep">Claude Opus (deep)</option>
          <option value="reasoning">Claude Sonnet 4.5 · extended thinking</option></select>
-       <button class="use" onclick="escalate('${o.offer_id}')">use API model</button>`
+       <button class="use" data-escalate="${esc(o.offer_id)}">use API model</button>`
     : `<span class="dim" style="font-size:.78rem">API tier off — add ANTHROPIC_API_KEY to .env to enable</span>`)
     + big + `<button onclick="this.closest('.offer').remove()">keep local</button>`;
   window['_offer_' + o.offer_id] = o;

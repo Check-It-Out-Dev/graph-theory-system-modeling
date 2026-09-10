@@ -122,7 +122,11 @@ def create_embeddings() -> tuple[Response, int]:
         try:
             req = EmbeddingRequest(**data)
         except ValueError as e:
-            return jsonify({"error": {"message": str(e), "type": "invalid_request_error"}}), 422
+            # The exception text carries field paths and internal type names; the caller gets told
+            # what it needs and the detail goes to the log (py/stack-trace-exposure).
+            logger.warning("Rejected an embedding request: %s", e)
+            return jsonify({"error": {"message": "Request body is not a valid embedding request",
+                                      "type": "invalid_request_error"}}), 422
         
         # Normalize input to list
         texts = req.input if isinstance(req.input, list) else [req.input]
@@ -167,11 +171,14 @@ def create_embeddings() -> tuple[Response, int]:
         return jsonify(response), 200
         
     except ValueError as e:
-        logger.warning(f"Validation error: {e}")
-        return jsonify({"error": {"message": str(e), "type": "invalid_request_error"}}), 422
-    except Exception as e:
-        logger.exception(f"Embedding generation failed: {e}")
-        return jsonify({"error": {"message": f"Internal error: {str(e)}", "type": "server_error"}}), 500
+        logger.warning("Validation error: %s", e)
+        return jsonify({"error": {"message": "Request rejected by validation",
+                                  "type": "invalid_request_error"}}), 422
+    except Exception:
+        # logger.exception keeps the traceback where it belongs. Returning str(e) to the caller
+        # hands out model paths, tensor shapes and CUDA device details for free.
+        logger.exception("Embedding generation failed")
+        return jsonify({"error": {"message": "Internal error", "type": "server_error"}}), 500
 
 
 @app.route('/v1/models', methods=['GET'])
