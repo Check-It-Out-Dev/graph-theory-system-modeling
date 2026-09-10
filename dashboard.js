@@ -221,6 +221,17 @@
       const low = Math.min(l.performance, l.accessibility, l.bestPractices, l.seo);
       tiles.append(tile(String(l.performance), 'Lighthouse performance', low >= 90 ? 'pass' : low >= 75 ? 'flaky' : 'fail', series('lhPerformance')));
     }
+    if (m.mutation) {
+      const mu = m.mutation;
+      const floor = mu.floor ?? 60;
+      tiles.append(tile(`${mu.score.toFixed(1)} %`, 'Mutation score, test quality',
+        mu.score >= floor + 10 ? 'pass' : mu.score >= floor ? 'flaky' : 'fail', series('mutationScore')));
+    }
+    if (m.security) {
+      const s = m.security;
+      tiles.append(tile(String(s.total), 'Security findings this run',
+        s.error ? 'fail' : s.warning ? 'flaky' : 'pass', series('securityFindings')));
+    }
   }
 
   function renderTiers(m) {
@@ -280,6 +291,70 @@
       ],
     }));
     box.append(table([{ text: 'Journey' }, { text: 'p95', num: true }, { text: 'p99', num: true }, { text: 'Budget', num: true }], rows, { label: 'k6 journeys' }));
+  }
+
+  // Mutation and security are the two "over time" questions the tiles can only answer with one number.
+  // Both cards say what the number means, because a score nobody can interpret is a score nobody acts on.
+  function renderMutation(m) {
+    const box = $('mutation');
+    if (!box) return;
+    box.replaceChildren();
+    if (!m.mutation) return;
+    const mu = m.mutation;
+    box.append(el('h2', { text: 'Test quality' }));
+    box.append(el('p', {
+      class: 'lede',
+      text:
+        'Coverage says a line ran; this says something checked the result. The code is changed on ' +
+        'purpose and the score is the share of those changes the tests noticed.',
+    }));
+    const row = (label, value, note, tone) => ({
+      cells: [
+        { text: label },
+        { num: true, node: tone ? el('span', { class: `tone-${tone}`, text: value }) : undefined, text: tone ? undefined : value },
+        { text: note },
+      ],
+    });
+    const floor = mu.floor ?? 60;
+    const rows = [
+      row('Mutation score', `${mu.score.toFixed(2)} %`, 'everything in scope',
+        mu.score >= floor + 10 ? 'pass' : mu.score >= floor ? 'flaky' : 'fail'),
+    ];
+    if (mu.coveredScore != null) {
+      rows.push(row('On code the tests reach', `${mu.coveredScore.toFixed(2)} %`, 'how good the tests that exist are'));
+    }
+    if (mu.mutants != null) rows.push(row('Mutants', n(mu.mutants), 'deliberate defects introduced'));
+    if (mu.survived != null) rows.push(row('Survived', n(mu.survived), 'ran, and nothing failed'));
+    if (mu.classesWithNoUnitTest) {
+      rows.push(row('Classes with no unit test', n(mu.classesWithNoUnitTest), 'a coverage gap, not a weak test'));
+    }
+    if (mu.floor != null) rows.push(row('Floor', `${mu.floor} %`, 'a ratchet; raised, never lowered'));
+    box.append(table([{ text: 'Measure' }, { text: 'Value', num: true }, { text: 'What it means' }], rows, { label: 'Mutation testing' }));
+  }
+
+  function renderSecurity(m) {
+    const box = $('security');
+    if (!box) return;
+    box.replaceChildren();
+    if (!m.security) return;
+    const s = m.security;
+    box.append(el('h2', { text: 'Security quality' }));
+    box.append(el('p', {
+      class: 'lede',
+      text:
+        `What the scanners found in this run, read from their own SARIF across ${n(s.scans)} ` +
+        `${s.scans === 1 ? 'scan' : 'scans'}. A tool that ran and found nothing is listed at zero, so a ` +
+        'scanner going quiet is visible rather than invisible.',
+    }));
+    const rows = [
+      { cells: [{ text: 'Errors' }, { num: true, node: el('span', { class: s.error ? 'tone-fail' : 'tone-pass', text: n(s.error) }) }, { text: 'the ones that matter' }] },
+      { cells: [{ text: 'Warnings' }, { num: true, node: el('span', { class: s.warning ? 'tone-flaky' : 'tone-pass', text: n(s.warning) }) }, { text: '' }] },
+      { cells: [{ text: 'Notes' }, { num: true, text: n(s.note) }, { text: '' }] },
+    ];
+    for (const [tool, count] of Object.entries(s.tools || {})) {
+      rows.push({ cells: [{ text: tool }, { num: true, text: n(count) }, { text: count ? 'findings' : 'ran, found nothing' }] });
+    }
+    box.append(table([{ text: 'Source' }, { text: 'Count', num: true }, { text: '' }], rows, { label: 'Security findings' }));
   }
 
   function renderFlaky(m) {
@@ -362,6 +437,8 @@
       renderTiles(m, mine);
       renderTiers(m);
       renderK6(m);
+      renderMutation(m);
+      renderSecurity(m);
       renderFlaky(m);
       renderReports(m, repoUrl);
       renderFoot(m, repoUrl);
