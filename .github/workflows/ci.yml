@@ -85,7 +85,9 @@ jobs:
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6
         with:
           python-version: "3.12"
-      - run: python -m pip install pytest
+      # Pinned: the gate replays frozen artifacts and must give the same verdict a year from
+      # now. A floating pytest is the one input that could change the answer (sonar S8544).
+      - run: python -m pip install pytest==9.1.1
       - name: Re-score the frozen model runs
         working-directory: applications/CodeMap/eval/ci
         run: python -m pytest -q --junitxml=junit.xml
