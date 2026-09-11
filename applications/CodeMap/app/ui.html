@@ -121,7 +121,13 @@ log.addEventListener('click', e => {
   if (esc_) escalate(esc_.getAttribute('data-escalate'));
 });
 
-function esc(s){ return String(s ?? '').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+// Quotes are in this list because esc() is used inside attributes as often as in text, and the two
+// need different escapes. `data-aff="${esc(a)}"` with only &<> escaped ends at the first double
+// quote in the value, and what follows it is parsed as further attributes -- one onmouseover and
+// the page is running someone else's code. These strings come back from the engine, which read them
+// out of a repository this tool was pointed at, so "someone else" is the ordinary case rather than
+// the adversarial one (CodeQL js/incomplete-html-attribute-sanitization).
+function esc(s){ return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function el(html, cls){ const d = document.createElement('div');
   d.className = 'msg ' + (cls || ''); d.innerHTML = html; log.appendChild(d);
   stream.scrollTop = stream.scrollHeight; return d; }
