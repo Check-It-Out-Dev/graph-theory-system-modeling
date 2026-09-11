@@ -27,6 +27,14 @@ def jload(v):
     return json.loads(v) if v is not None else None
 
 
+def at_claim(measured, claimed, places=3):
+    """A published figure is a claim at a stated precision, so compare it at that precision.
+    `measured == 0.176` asks a float question the claim never made, and the analyser is
+    right to say so (sonar python:S1244); the gate's contract has always been that the
+    number still rounds to what was written."""
+    return abs(measured - claimed) < 0.5 * 10 ** -places
+
+
 def main():
     doss = {}
     for f in os.listdir(DOSS):
@@ -131,7 +139,7 @@ def main():
 
     d = doss[172]
     check("G8 claim [172] '14 internal edges and ZERO edges to any sibling'",
-          d["edges_internal"] == 14 and d["edges_external"] == 0 and d["external_ratio"] == 0.0,
+          d["edges_internal"] == 14 and d["edges_external"] == 0 and at_claim(d["external_ratio"], 0.0),
           f"dossier edges_internal={d['edges_internal']}, edges_external={d['edges_external']}")
 
     h173 = [hmap[(173, n)] for n in members[173]]
@@ -139,7 +147,7 @@ def main():
           sum(1 for h in h173 if h is not None) == 7 and len(h173) == 67,
           f"measured {sum(1 for h in h173 if h is not None)} of {len(h173)}")
 
-    check("G10 claim [173] '85% Resource purity'", doss[173]["purity"] == 0.851,
+    check("G10 claim [173] '85% Resource purity'", at_claim(doss[173]["purity"], 0.851),
           f"dossier purity={doss[173]['purity']}, flag {doss[173]['flags']}")
 
     ep177 = {e["name"]: e["ext_in"] for e in doss[177]["entry_points"]}
@@ -191,7 +199,7 @@ def main():
 
     d = doss[178]
     check("G19 claim [178] '16 files, three external edges, ext 0.176'",
-          d["size"] == 16 and d["edges_external"] == 3 and d["external_ratio"] == 0.176,
+          d["size"] == 16 and d["edges_external"] == 3 and at_claim(d["external_ratio"], 0.176),
           f"dossier size={d['size']}, edges_external={d['edges_external']}, ext={d['external_ratio']}")
 
     h2set = set().union(*(members[x] for x in roots)) if roots else set()

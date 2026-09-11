@@ -87,7 +87,7 @@ def fastrp(driver, graph, ratio, prop, rel_filter=None):
             "randomSeed": 42,
             "mutateProperty": prop,
         }
-        if ratio == 0.0:                     # GDS rejects featureProperties at ratio 0
+        if abs(ratio) < 1e-12:               # GDS rejects featureProperties at ratio 0
             cfg.pop("featureProperties"); cfg.pop("propertyRatio")
         s.run(f"CALL gds.fastRP.mutate('{name}', $c)", c=cfg)
         rows = list(s.run(

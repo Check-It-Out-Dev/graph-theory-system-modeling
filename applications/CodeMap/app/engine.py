@@ -18,6 +18,16 @@ def _tok(s):
     return set(re.findall(r"[a-z0-9]{3,}", s.lower()))
 
 
+def _jlist(value):
+    """entry_points and spines arrive either as JSON text or already parsed -- either way,
+    a list. Written once because it was written three times, and because the inline form
+    left the analyser narrowing the else-branch to a literal `[]` and calling every slice
+    of it an IndexError (sonar pythonbugs:S6466)."""
+    if isinstance(value, str):
+        value = json.loads(value)
+    return list(value or [])
+
+
 class Engine:
     def __init__(self, use_ladybug=True):
         self.ents = list(csv.DictReader(open(os.path.join(PACK, "entities.csv"), encoding="utf-8")))
@@ -80,7 +90,7 @@ class Engine:
                                   for k in kids],
                         affordances=[f"enter({k['sub_id']})" for k in kids][:9])
         aff = [f"spine({sub})"]
-        for ep in (json.loads(n.get("entry_points", "[]")) if isinstance(n.get("entry_points"), str) else n.get("entry_points") or [])[:3]:
+        for ep in _jlist(n.get("entry_points"))[:3]:
             aff += [f"impact({ep})", f"flow({ep},1)"]
         return dict(kind="l2", sub=sub, name=n.get("name"), summary=n.get("ai_summary"),
                     responsibilities=n.get("responsibilities"), caveats=n.get("caveats"),
@@ -175,10 +185,8 @@ class Engine:
     def spine(self, sub):
         sub = self._sub(sub)
         n = self.l2[sub]
-        sp = n.get("spines")
-        sp = json.loads(sp) if isinstance(sp, str) else (sp or [])
-        eps = n.get("entry_points")
-        eps = json.loads(eps) if isinstance(eps, str) else (eps or [])
+        sp = _jlist(n.get("spines"))
+        eps = _jlist(n.get("entry_points"))
         return dict(kind="spine", sub=sub, entry_points=eps[:5], spines=sp,
                     affordances=[f"read({e})" for e in eps[:3]])
 

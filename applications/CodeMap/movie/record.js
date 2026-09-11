@@ -19,7 +19,7 @@ const Q_ESC = 'why was HMAC chosen over JWT for the consent cookies?';
 const CHROME = [
   'C:/Users/Norbert/AppData/Local/ms-playwright/chromium-1217/chrome-win64/chrome.exe',
   'C:/Users/Norbert/AppData/Local/ms-playwright/chromium-1217/chrome-win/chrome.exe',
-].find(fs.existsSync);
+].find((exe) => fs.existsSync(exe));
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const marks = {};

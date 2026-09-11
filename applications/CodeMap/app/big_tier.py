@@ -222,7 +222,7 @@ def run_cypher(engine, stmt):
 def clean_action(raw):
     """Liberal-decoding tolerance (bench-proven): fences, labels, bullets ->
     the one action line; multi-line answer()/pass() bodies collapse to one."""
-    txt = re.sub(r"^```[a-z]*\n?|```$", "", (raw or "").strip(), flags=re.M).strip()
+    txt = re.sub(r"(?:^```[a-z]*\n?)|(?:```$)", "", (raw or "").strip(), flags=re.M).strip()
     lines = txt.splitlines()
     for i, line in enumerate(lines):
         line = line.strip().lstrip("-*> ").strip()

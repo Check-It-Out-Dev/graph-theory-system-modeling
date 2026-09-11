@@ -89,7 +89,7 @@ def clean_line(gen):
     Multi-line answer(...)/pass(...) bodies are collapsed to one line — big
     instructs love newline lists; the referee never sees the difference."""
     txt = gen.strip()
-    txt = re.sub(r"^```[a-z]*\n?|```$", "", txt, flags=re.M).strip()
+    txt = re.sub(r"(?:^```[a-z]*\n?)|(?:```$)", "", txt, flags=re.M).strip()
     lines = txt.splitlines()
     for i, line in enumerate(lines):
         line = line.strip().lstrip("-*> ").strip()
