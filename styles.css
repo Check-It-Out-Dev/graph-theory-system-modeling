@@ -19,7 +19,12 @@
   --fail-soft: #ffd9cf;
   --incomplete: #64748b;
   --incomplete-soft: #e2e8f0;
-  --skip: #8a8f9c;
+  /* 5.1:1 on --bg. #8a8f9c reads as a quieter grey but lands at 3.2:1, which axe caught in the
+     tier table's skipped column: a number nobody can read is not muted, it is missing. Measured
+     against --bg rather than --surface, which is the tighter of the two and the one the table sits
+     on; the first attempt at #6e7382 cleared white and missed --bg by 0.005. Still the quietest
+     tone in the table next to --ink. */
+  --skip: #656a79;
   --skip-soft: #e6e6e9;
   --empty: #efeae0;
   --focus: #1e3a8a;
