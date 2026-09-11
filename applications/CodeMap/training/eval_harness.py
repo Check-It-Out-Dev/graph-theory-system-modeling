@@ -79,7 +79,7 @@ class FilePredictor:
     """Rung-1/2: replays a model's generations from modal_eval output (keyed by user text)."""
     def __init__(self, path):
         self.ref = {}
-        for l in open(path, encoding="utf-8"):
+        for l in open(path, encoding="utf-8"):  # NOSONAR - operator's own path; see sonar-project.properties
             r = json.loads(l)
             self.ref[r["user"]] = r["gen"]
 
@@ -116,7 +116,7 @@ def main():
     a = ap.parse_args()
 
     rows = [json.loads(l) for l in
-            open(os.path.join(HERE, "data", f"{a.split}.jsonl"), encoding="utf-8")]
+            open(os.path.join(HERE, "data", f"{a.split}.jsonl"), encoding="utf-8")]  # NOSONAR - operator's own path; see sonar-project.properties
     if a.limit:
         rows = rows[: a.limit]
     if a.predictor.startswith("file:"):
@@ -191,7 +191,7 @@ def main():
     print(json.dumps(metrics, ensure_ascii=False, indent=1))
     tag = re.sub(r"[^A-Za-z0-9_-]+", "_", a.predictor)[:40]
     out = os.path.join(HERE, "data", f"EVAL_{tag}_{a.split}.json")
-    json.dump(metrics, open(out, "w", encoding="utf-8"), indent=1)
+    json.dump(metrics, open(out, "w", encoding="utf-8"), indent=1)  # NOSONAR - operator's own path; see sonar-project.properties
 
 
 if __name__ == "__main__":

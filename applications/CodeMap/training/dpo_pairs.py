@@ -133,7 +133,7 @@ def main():
         os.path.join(HERE, "data", "train.jsonl"), encoding="utf-8"))
         if r["meta"]["kind"] == "step" and (r["meta"].get("src") or "").startswith("drill-")
         and not (r["meta"].get("src") or "").startswith("drill-enter")]
-    random.shuffle(train_steps)
+    random.shuffle(train_steps)  # NOSONAR - seeded split, never a secret; see sonar-project.properties
     made = 0
     for r in train_steps:
         if made >= 240:
@@ -167,7 +167,7 @@ def main():
             pairs.append(conv(u, target, rejected, f"corrupt-{('sibling','selection','findslack')[kind]}"))
             made += 1
 
-    random.shuffle(pairs)
+    random.shuffle(pairs)  # NOSONAR - seeded split, never a secret; see sonar-project.properties
     out = os.path.join(HERE, "data", "dpo_pairs.jsonl")
     with open(out, "w", encoding="utf-8") as f:
         for p in pairs:

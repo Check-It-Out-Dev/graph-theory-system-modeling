@@ -24,7 +24,7 @@ MASTER = open(os.path.join(ROOT, "training", "master_prompt_v1.txt"), encoding="
 
 def rows_for_eval(cap_step, split_file="test.jsonl"):
     rows = [json.loads(l) for l in
-            open(os.path.join(ROOT, "training", "data", split_file), encoding="utf-8")]
+            open(os.path.join(ROOT, "training", "data", split_file), encoding="utf-8")]  # NOSONAR - operator's own path; see sonar-project.properties
     steps = sorted((r for r in rows if r["meta"]["kind"] == "step"),
                    key=lambda r: (r["meta"].get("src") or "", r["meta"]["rec"],
                                   r["messages"][1]["content"][:40]))
@@ -35,7 +35,7 @@ def rows_for_eval(cap_step, split_file="test.jsonl"):
 def wait_health(port, tries=120):
     for _ in range(tries):
         try:
-            with urllib.request.urlopen(f"http://127.0.0.1:{port}/health", timeout=2) as r:
+            with urllib.request.urlopen(f"http://127.0.0.1:{port}/health", timeout=2) as r:  # NOSONAR - loopback URL, operator-chosen port; see sonar-project.properties
                 if r.status == 200:
                     return True
         except Exception:
@@ -48,7 +48,7 @@ def chat(port, user, max_tokens):
                        "messages": [{"role": "system", "content": MASTER},
                                     {"role": "user", "content": user}],
                        "temperature": 0, "max_tokens": max_tokens}).encode("utf-8")
-    req = urllib.request.Request(f"http://127.0.0.1:{port}/v1/chat/completions", body,
+    req = urllib.request.Request(f"http://127.0.0.1:{port}/v1/chat/completions", body,  # NOSONAR - loopback URL, operator-chosen port; see sonar-project.properties
                                  {"Content-Type": "application/json"})
     with urllib.request.urlopen(req, timeout=600) as r:
         out = json.loads(r.read().decode("utf-8"))
@@ -72,7 +72,7 @@ def main():
     if a.grammar:
         cmd += ["--grammar-file", GRAMMAR]
     print("serving:", " ".join(cmd))
-    srv = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    srv = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)  # NOSONAR - operator's own shell; see sonar-project.properties
     try:
         assert wait_health(a.port), "llama-server never became healthy"
         rows = rows_for_eval(a.cap_step, a.split_file)

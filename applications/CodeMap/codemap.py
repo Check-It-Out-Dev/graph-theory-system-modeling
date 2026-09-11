@@ -125,7 +125,7 @@ def check_env():
 def wait_status(port, tries=90):
     for _ in range(tries):
         try:
-            with urllib.request.urlopen(f"http://127.0.0.1:{port}/status", timeout=2) as r:
+            with urllib.request.urlopen(f"http://127.0.0.1:{port}/status", timeout=2) as r:  # NOSONAR - loopback URL, operator-chosen port; see sonar-project.properties
                 if r.status == 200:
                     return True
         except Exception:
@@ -159,7 +159,7 @@ def main():
         env["CODEMAP_GGUF"] = os.path.join(ROOT, "nonexistent.gguf")  # degraded mode
         say(INFO, "booting WITHOUT the local model (cache + L1 protocol only)")
     say(INFO, f"starting server on http://localhost:{a.port} …")
-    srv = subprocess.Popen([sys.executable, os.path.join(ROOT, "app", "server.py"),
+    srv = subprocess.Popen([sys.executable, os.path.join(ROOT, "app", "server.py"),  # NOSONAR - operator's own shell; see sonar-project.properties
                             "--port", str(a.port)], env=env, cwd=os.path.join(ROOT, "app"))
     try:
         if not wait_status(a.port):

@@ -90,7 +90,7 @@ def main():
         if d:
             ref_fp[r["id"]] = result_fp(engine, d)[1]
 
-    srv = subprocess.Popen([SERVER, "-m", a.gguf, "-c", "4096", "--port", str(a.port),
+    srv = subprocess.Popen([SERVER, "-m", a.gguf, "-c", "4096", "--port", str(a.port),  # NOSONAR - operator's own shell; see sonar-project.properties
                             "-t", str(a.threads), "--no-webui",
                             "--grammar-file", GRAMMAR],
                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

@@ -101,7 +101,7 @@ def main():
     l1_evidence = engine.map().get("index") or ""
     srv = None
     if a.gguf:
-        srv = subprocess.Popen([SERVER, "-m", a.gguf, "-c", "12288", "--port",
+        srv = subprocess.Popen([SERVER, "-m", a.gguf, "-c", "12288", "--port",  # NOSONAR - operator's own shell; see sonar-project.properties
                                 str(a.port), "-t", str(a.threads), "--no-webui"],
                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     rows, t_all = [], time.perf_counter()
@@ -182,7 +182,7 @@ def main():
         backtrack_rate=round(sum(x["backtracks"] for x in rows) / len(rows), 4),
         wall_minutes=round((time.perf_counter() - t_all) / 60, 1))
     out = os.path.join(ROOT, "training", "data", f"BENCH_{a.tag}.json")
-    json.dump(dict(summary=summary, rows=rows), open(out, "w", encoding="utf-8"),
+    json.dump(dict(summary=summary, rows=rows), open(out, "w", encoding="utf-8"),  # NOSONAR - operator's own path; see sonar-project.properties
               ensure_ascii=False, indent=1)
     print(json.dumps(summary, indent=1))
     print("saved:", out, flush=True)

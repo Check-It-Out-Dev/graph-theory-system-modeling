@@ -108,7 +108,7 @@ def chat(port, system, user, max_tokens):
     body = json.dumps({"model": "bench", "temperature": 0, "max_tokens": max_tokens,
                        "messages": [{"role": "system", "content": system},
                                     {"role": "user", "content": user}]}).encode()
-    req = urllib.request.Request(f"http://127.0.0.1:{port}/v1/chat/completions", body,
+    req = urllib.request.Request(f"http://127.0.0.1:{port}/v1/chat/completions", body,  # NOSONAR - loopback URL, operator-chosen port; see sonar-project.properties
                                  {"Content-Type": "application/json"})
     with urllib.request.urlopen(req, timeout=900) as r:
         out = json.loads(r.read().decode("utf-8"))
@@ -170,7 +170,7 @@ def main():
            "-t", str(a.threads), "--no-webui"]
     if a.grammar == "on":
         cmd += ["--grammar-file", GRAMMAR]
-    srv = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    srv = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)  # NOSONAR - operator's own shell; see sonar-project.properties
     rows, t_all = [], time.perf_counter()
     try:
         assert wait_health(a.port, tries=300), "llama-server never became healthy"
@@ -210,7 +210,7 @@ def main():
         backtrack_rate=round(sum(x["backtracks"] for x in rows) / len(rows), 4),
         wall_minutes=round((time.perf_counter() - t_all) / 60, 1))
     out = os.path.join(ROOT, "training", "data", f"BENCH_{a.tag}.json")
-    json.dump(dict(summary=summary, rows=rows), open(out, "w", encoding="utf-8"),
+    json.dump(dict(summary=summary, rows=rows), open(out, "w", encoding="utf-8"),  # NOSONAR - operator's own path; see sonar-project.properties
               ensure_ascii=False, indent=1)
     print(json.dumps(summary, indent=1))
     print("saved:", out, flush=True)

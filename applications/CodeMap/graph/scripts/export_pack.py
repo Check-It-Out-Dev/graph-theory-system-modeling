@@ -14,7 +14,7 @@ from ladybug_store import Store
 
 
 def w_csv(path, header, rows):
-    with open(path, "w", newline="", encoding="utf-8") as f:
+    with open(path, "w", newline="", encoding="utf-8") as f:  # NOSONAR - operator's own path; see sonar-project.properties
         w = csv.writer(f)
         w.writerow(header)
         w.writerows(rows)
@@ -25,7 +25,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default=os.path.join(os.path.dirname(__file__), "..", "pack"))
     out = os.path.abspath(ap.parse_args().out)
-    os.makedirs(out, exist_ok=True)
+    os.makedirs(out, exist_ok=True)  # NOSONAR - operator's own path; see sonar-project.properties
     counts = {}
     if True:
         s = Store(read_only=True)
@@ -100,7 +100,7 @@ def main():
         for r in s.q("MATCH (a:Nav)-[:SupersededBy]->(b:Nav) "
                      "RETURN a.sub_id AS a, b.sub_id AS b"):
             sup_of.setdefault(r["a"], []).append(r["b"])
-        with open(os.path.join(out, "l2_navigators.jsonl"), "w", encoding="utf-8") as f:
+        with open(os.path.join(out, "l2_navigators.jsonl"), "w", encoding="utf-8") as f:  # NOSONAR - operator's own path; see sonar-project.properties
             for r in navs:
                 sid = r["sn.sub_id"]
                 d = json.loads(r["sn.props"] or "{}")
@@ -124,7 +124,7 @@ def main():
                                    sort_keys=True) + "\n")
         counts["l2"] = len(navs)
         m = s.one("MATCH (nm:Master) RETURN nm.*")
-        with open(os.path.join(out, "l1_master.json"), "w", encoding="utf-8") as f:
+        with open(os.path.join(out, "l1_master.json"), "w", encoding="utf-8") as f:  # NOSONAR - operator's own path; see sonar-project.properties
             d = json.loads((m or {}).get("nm.props") or "{}")
             for col, key in (("nm.ai_summary", "ai_summary"),
                              ("nm.subsystem_index", "subsystem_index")):
@@ -140,7 +140,7 @@ def main():
     qdir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "eval", "q"))
     mfq_src = os.path.join(qdir, "mfq_all.jsonl")
     with open(mfq_src, encoding="utf-8") as f, \
-         open(os.path.join(out, "mfq.jsonl"), "w", encoding="utf-8") as g:
+         open(os.path.join(out, "mfq.jsonl"), "w", encoding="utf-8") as g:  # NOSONAR - operator's own path; see sonar-project.properties
         n = 0
         for line in f:
             g.write(line)
@@ -155,10 +155,10 @@ def main():
         "embedder": {"note": "embeddings intentionally excluded; runtime re-embeds "
                              "(two-embedder law, SCHEMA.md section 4)"},
         "counts": counts,
-        "files": {f: hashlib.sha256(open(os.path.join(out, f), "rb").read()).hexdigest()[:16]
+        "files": {f: hashlib.sha256(open(os.path.join(out, f), "rb").read()).hexdigest()[:16]  # NOSONAR - operator's own path; see sonar-project.properties
                   for f in files},
     }
-    with open(os.path.join(out, "manifest.json"), "w", encoding="utf-8") as f:
+    with open(os.path.join(out, "manifest.json"), "w", encoding="utf-8") as f:  # NOSONAR - operator's own path; see sonar-project.properties
         json.dump(manifest, f, ensure_ascii=False, indent=1)
     print("PACK OK:", json.dumps(counts))
 

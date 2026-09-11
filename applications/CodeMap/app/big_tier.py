@@ -254,7 +254,7 @@ def chat(port, system, user, max_tokens, timeout=900):
                        "max_tokens": max_tokens,
                        "messages": [{"role": "system", "content": system},
                                     {"role": "user", "content": user}]}).encode()
-    req = urllib.request.Request(f"http://127.0.0.1:{port}/v1/chat/completions",
+    req = urllib.request.Request(f"http://127.0.0.1:{port}/v1/chat/completions",  # NOSONAR - loopback URL, operator-chosen port; see sonar-project.properties
                                  body, {"Content-Type": "application/json"})
     with urllib.request.urlopen(req, timeout=timeout) as r:
         out = json.loads(r.read().decode("utf-8"))

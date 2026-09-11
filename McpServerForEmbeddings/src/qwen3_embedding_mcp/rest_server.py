@@ -35,7 +35,7 @@ from .config import (
 logger = logging.getLogger(__name__)
 
 # Flask application
-app = Flask(__name__)
+app = Flask(__name__)  # NOSONAR - no cookie, no session; see sonar-project.properties
 
 
 # =============================================================================

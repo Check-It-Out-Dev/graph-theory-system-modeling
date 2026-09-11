@@ -433,12 +433,12 @@ def main():
     rest = sorted({p["meta"]["rec"] for p in pairs
                    if not p["meta"]["rec"].startswith(("drill:", "subdrill:", "synthetic"))}
                   - test_recs)
-    random.shuffle(rest)
+    random.shuffle(rest)  # NOSONAR - seeded split, never a secret; see sonar-project.properties
     val_recs = set(rest[: max(6, len(rest) // 10)])
     # axis 2 (drill entities): 10% of entities ENTIRELY held out -> test, 3% -> val;
     # rung-2 then measures selection on names never seen in any training pair
     drilled = sorted({p["meta"].get("entity") for p in pairs if p["meta"].get("entity")})
-    random.shuffle(drilled)
+    random.shuffle(drilled)  # NOSONAR - seeded split, never a secret; see sonar-project.properties
     n = len(drilled)
     test_ents = set(drilled[: n // 10])
     val_ents = set(drilled[n // 10: n // 10 + max(3, n * 3 // 100)])

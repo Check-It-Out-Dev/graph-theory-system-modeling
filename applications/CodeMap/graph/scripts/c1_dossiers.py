@@ -79,7 +79,7 @@ def main():
     ap.add_argument("--out", default=os.path.join(os.path.dirname(__file__), "..", "dossiers"))
     ap.add_argument("--curated", action="store_true")
     out_dir = os.path.abspath(ap.parse_args().out)
-    os.makedirs(out_dir, exist_ok=True)
+    os.makedirs(out_dir, exist_ok=True)  # NOSONAR - operator's own path; see sonar-project.properties
 
     curated = "--curated" in os.sys.argv if hasattr(os, "sys") else False
     import sys as _sys
@@ -225,9 +225,9 @@ def main():
             "disagreement_pairs": None,
             "disagreement_note": "332-pair shortlist not persisted as artifact; regenerate for C2 queue",
         }
-        with open(os.path.join(out_dir, f"subsystem_{k}.json"), "w", encoding="utf-8") as f:
+        with open(os.path.join(out_dir, f"subsystem_{k}.json"), "w", encoding="utf-8") as f:  # NOSONAR - operator's own path; see sonar-project.properties
             json.dump(d, f, ensure_ascii=False, indent=1)
-        with open(os.path.join(out_dir, f"subsystem_{k}.md"), "w", encoding="utf-8") as f:
+        with open(os.path.join(out_dir, f"subsystem_{k}.md"), "w", encoding="utf-8") as f:  # NOSONAR - operator's own path; see sonar-project.properties
             f.write(f"# Subsystem {k} — dossier\n\n"
                     f"size {n} ({d['share']:.1%}) · dominant {dom} {purity:.0%} · "
                     f"ext-ratio {d['external_ratio']} · flags: {', '.join(flags) or 'none'}\n\n"
@@ -243,7 +243,7 @@ def main():
                            d["external_ratio"], ",".join(flags) or "—",
                            ", ".join(d["top_terms"][:3])))
 
-    with open(os.path.join(out_dir, "INDEX.md"), "w", encoding="utf-8") as f:
+    with open(os.path.join(out_dir, "INDEX.md"), "w", encoding="utf-8") as f:  # NOSONAR - operator's own path; see sonar-project.properties
         f.write("# C1 dossiers — index (CheckItOutV3, v4 partition)\n\n"
                 "| sub | n | share | dominant | purity | ext | flags | top terms |\n"
                 "|---|---|---|---|---|---|---|---|\n")

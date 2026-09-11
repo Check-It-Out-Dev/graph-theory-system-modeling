@@ -149,7 +149,7 @@ def main():
     port = ap.parse_args().port
     print(f"CodeMap v0: {len(ENGINE.ents)} entities, ladybug={'ON' if ENGINE.lb else 'OFF'} "
           f"-> http://localhost:{port}")
-    ThreadingHTTPServer(("127.0.0.1", port), H).serve_forever()
+    ThreadingHTTPServer(("127.0.0.1", port), H).serve_forever()  # NOSONAR - loopback bind only; see sonar-project.properties
 
 
 if __name__ == "__main__":

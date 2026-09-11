@@ -80,7 +80,7 @@ def train():
     import random
     random.seed(7)
     rows = [json.loads(l) for l in open("/data/val.jsonl", encoding="utf-8")]
-    for r in random.sample(rows, min(5, len(rows))):
+    for r in random.sample(rows, min(5, len(rows))):  # NOSONAR - seeded split, never a secret; see sonar-project.properties
         prompt = tok.apply_chat_template(r["messages"][:2], tokenize=False,
                                          add_generation_prompt=True)
         ids = tok(prompt, return_tensors="pt").to(merged.device)

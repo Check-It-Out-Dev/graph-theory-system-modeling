@@ -58,7 +58,7 @@ def main():
         p = a.db or DEFAULT_DB
         for f in (p, p + ".wal"):
             if os.path.exists(f):
-                os.remove(f)
+                os.remove(f)  # NOSONAR - operator's own path; see sonar-project.properties
     s = Store(a.db).init_schema()
     global _STORE
     _STORE = s
