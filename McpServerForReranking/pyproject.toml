@@ -62,6 +62,19 @@ Issues = "https://github.com/NorbertMarchewka/qwen3-reranker-mcp/issues"
 [project.scripts]
 qwen3-reranker-mcp = "qwen3_reranker_mcp:main"
 
+# uv only. pip ignores every [tool.*] table, so this changes nothing about
+# `pip install -e ".[dev]"`, which is how CI installs this package -- and CI reaches the CPU wheels
+# through PIP_EXTRA_INDEX_URL. Naming the same index here is what makes uv.lock describe the
+# environment the tests actually run in: without it uv resolves torch from PyPI, whose Linux wheel
+# is the CUDA build, and the lock would document a resolution nobody installs.
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/qwen3_reranker_mcp"]
 
