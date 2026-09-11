@@ -1,0 +1,78 @@
+# SonarQube Cloud analysis for the graph repository.
+#
+# WHY THIS EXISTS, given that SonarCloud was already analysing this repository.
+#
+# It was doing it in Automatic Analysis mode, which reads the repository directly and takes no
+# configuration from it beyond a couple of path settings. On 2026-09-11 the repository gained a
+# sonar-project.properties recording which of the 40 reported vulnerabilities do not apply here
+# and why -- 28 of them the LLM-supplied-CLI-argument rules firing on offline research scripts
+# whose arguments come from the person who owns the machine. The next automatic analysis ignored
+# every one of those decisions, because Automatic Analysis does not read
+# sonar.issue.ignore.multicriteria. Measured, not assumed: analysis 19:40:07Z ran ten seconds
+# after the commit that added the file and still reported the same findings.
+#
+# A scanner run does read it. Submitting one also turns Automatic Analysis off by itself, which is
+# what makes this repository match the other two in the estate: the same tool, the same gate, and
+# the exclusions under review in the repository rather than clicked away in a web UI.
+#
+# ONE THING THE OWNER HAS TO DO, once: add SONAR_TOKEN to this repository's secrets
+# (Settings -> Secrets and variables -> Actions). The token is the same kind the backend and
+# frontend repositories already have; generate it at sonarcloud.io under My Account -> Security.
+# Until then this workflow skips with a message instead of failing, so landing it costs nothing.
+name: sonar
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: sonar-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  analysis:
+    name: SonarQube Cloud
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5
+        with:
+          # Sonar measures new code against a baseline and attributes issues to authors; a shallow
+          # clone leaves it guessing at both.
+          fetch-depth: 0
+
+      - name: Not configured yet
+        if: env.SONAR_TOKEN == ''
+        run: |
+          {
+            echo "### SonarQube Cloud is not configured for this repository"
+            echo
+            echo "No \`SONAR_TOKEN\` secret, so the analysis was skipped rather than failed."
+            echo "See the header of \`.github/workflows/sonar.yml\` for the one step that enables it."
+            echo "Until it is set, this repository is analysed in Automatic Analysis mode, which"
+            echo "does not read the exemptions recorded in \`sonar-project.properties\`."
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+
+      # Python needs no compilation step for Sonar, so there is nothing to build first. Everything
+      # the analyser needs -- sources, tests, the exemptions and their reasons -- is in the
+      # repository and in sonar-project.properties.
+      - name: Analyse, and wait for the gate's verdict
+        if: env.SONAR_TOKEN != ''
+        uses: SonarSource/sonarqube-scan-action@22918119ff8e1ca75a623e15c8296b6ea4fbe28f  # v8.2.1
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          # `qualitygate.wait` is what makes this a gate rather than an upload: without it the
+          # action submits the analysis and exits 0 whatever SonarCloud then decides.
+          args: >
+            -Dsonar.qualitygate.wait=true
+            -Dsonar.qualitygate.timeout=600
