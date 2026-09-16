@@ -1,0 +1,233 @@
+{
+ "__inputs": [
+  {
+   "description": "",
+   "label": "Prometheus",
+   "name": "DS_PROMETHEUS",
+   "pluginId": "prometheus",
+   "pluginName": "Prometheus",
+   "type": "datasource"
+  }
+ ],
+ "__requires": [],
+ "annotations": {
+  "list": [
+   {
+    "builtIn": 1,
+    "datasource": {
+     "type": "grafana",
+     "uid": "-- Grafana --"
+    },
+    "enable": true,
+    "hide": true,
+    "iconColor": "rgba(0, 211, 255, 1)",
+    "name": "Annotations & Alerts",
+    "type": "dashboard"
+   },
+   {
+    "datasource": {
+     "type": "grafana",
+     "uid": "-- Grafana --"
+    },
+    "enable": true,
+    "hide": false,
+    "iconColor": "#F2CC0C",
+    "name": "prompt promotions",
+    "target": {
+     "limit": 100,
+     "matchAny": true,
+     "tags": [
+      "codemap",
+      "promotion"
+     ],
+     "type": "tags"
+    }
+   }
+  ]
+ },
+ "description": "What an answer costs, in credits (relative units, no currency). Public.",
+ "editable": false,
+ "graphTooltip": 1,
+ "links": [
+  {
+   "targetBlank": true,
+   "title": "CodeMap Remote — the design",
+   "type": "link",
+   "url": "https://github.com/Check-It-Out-Dev/graph-theory-system-modeling/blob/main/applications/CodeMap/docs/07-ai-quality-governance.md"
+  }
+ ],
+ "panels": [
+  {
+   "collapsed": false,
+   "gridPos": {
+    "h": 1,
+    "w": 24,
+    "x": 0,
+    "y": 0
+   },
+   "id": 1,
+   "panels": [],
+   "title": "The card",
+   "type": "row"
+  },
+  {
+   "fieldConfig": {
+    "defaults": {},
+    "overrides": []
+   },
+   "gridPos": {
+    "h": 12,
+    "w": 12,
+    "x": 0,
+    "y": 1
+   },
+   "id": 2,
+   "options": {
+    "content": "### Credit rate card (no currency)\n\nRelative units, no currency anywhere. 1 credit = 10k Sonnet-input-equivalent tokens. Rates mirror the RATIOS the vendor publishes between models (Opus 5x Sonnet; output 5x input), so a credit means the same thing on every dashboard whatever the vendor charges this month. Cache reads weigh a tenth, cache creation a quarter more, as the vendor ratios do.\n\n| tier | credits per 1k input | per 1k output |\n|---|---|---|\n| faq | 0.0 | 0.0 |\n| engine | 0.0 | 0.0 |\n| search | 0.05 | 0.0 |\n| nav-sonnet | 0.3 | 1.5 |\n| nav-opus | 1.5 | 7.5 |\n| none | 0.0 | 0.0 |\n| cache read | x0.1 of input | |\n| cache creation | x1.25 of input | |\n| search_call (flat) | 2.0 | |\n| engine_step (flat) | 0.0 | |\n| faq_hit (flat) | 0.0 | |\n\nA navigator answer costs 20–30 credits; a FAQ hit and an engine step cost nothing; a semantic search costs 2.",
+    "mode": "markdown"
+   },
+   "title": "Rate card",
+   "type": "text"
+  },
+  {
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROMETHEUS}"
+   },
+   "fieldConfig": {
+    "defaults": {},
+    "overrides": []
+   },
+   "gridPos": {
+    "h": 6,
+    "w": 6,
+    "x": 12,
+    "y": 1
+   },
+   "id": 3,
+   "options": {
+    "colorMode": "value",
+    "graphMode": "none",
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ],
+     "fields": "",
+     "values": false
+    }
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "${DS_PROMETHEUS}"
+     },
+     "expr": "codemap_quality_credits_per_answer",
+     "legendFormat": "per answer",
+     "refId": "A"
+    }
+   ],
+   "title": "Credits per answer (last night)",
+   "type": "stat"
+  },
+  {
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROMETHEUS}"
+   },
+   "fieldConfig": {
+    "defaults": {},
+    "overrides": []
+   },
+   "gridPos": {
+    "h": 6,
+    "w": 6,
+    "x": 18,
+    "y": 1
+   },
+   "id": 4,
+   "options": {
+    "colorMode": "value",
+    "graphMode": "none",
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ],
+     "fields": "",
+     "values": false
+    }
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "${DS_PROMETHEUS}"
+     },
+     "expr": "codemap_quality_credits_per_correct_answer",
+     "legendFormat": "per correct",
+     "refId": "A"
+    }
+   ],
+   "title": "Credits per CORRECT answer",
+   "type": "stat"
+  },
+  {
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROMETHEUS}"
+   },
+   "fieldConfig": {
+    "defaults": {},
+    "overrides": []
+   },
+   "gridPos": {
+    "h": 6,
+    "w": 12,
+    "x": 0,
+    "y": 13
+   },
+   "id": 5,
+   "options": {
+    "displayMode": "gradient",
+    "orientation": "horizontal",
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ],
+     "fields": "",
+     "values": false
+    }
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "${DS_PROMETHEUS}"
+     },
+     "expr": "sum by (tier) (max_over_time(codemap_credits_total[$__range]))",
+     "legendFormat": "{{tier}}",
+     "refId": "A"
+    }
+   ],
+   "title": "Credits by tier",
+   "type": "bargauge"
+  }
+ ],
+ "refresh": "5m",
+ "schemaVersion": 39,
+ "tags": [
+  "codemap",
+  "public"
+ ],
+ "templating": {
+  "list": []
+ },
+ "time": {
+  "from": "now-14d",
+  "to": "now"
+ },
+ "timezone": "utc",
+ "title": "CodeMap · Credit rate card",
+ "uid": "codemap-credit-rate-card",
+ "version": 1
+}

@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The graph pack as a GitHub Release (`pack-1.0.0`): `tools/pack/build_release.py` + `fetch_pack.py` (sha256-verified); CI fetches it and runs the engine check and the remote suites (S5)
 - Hosted on the demo VPS at codemap.checkitout.app: Dockerfile, compose, nginx vhost, `tools/deploy.sh`, dispatch-only `deploy-codemap.yml`; pack reload without restart (`POST /admin/reload` + Releases poll); the active prompt built from template + pack + notes (S6)
 - Six synthetic users (`eval/humans/`): role files, bank slices, 30 off-distribution probes, the deterministic night runner with seeded no-CodeMap baselines, Claude Code OTEL to Grafana Cloud, `.claude/agents/` copies; first live conversation recorded (S7)
+- Six public Grafana Cloud dashboards as code (`observability/grafana/`, builder + lint + provision, public URLs in `public-urls.md`) (S10)
 
 ## [1.0.0] - 2025-09-16
 

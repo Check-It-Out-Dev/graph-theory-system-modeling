@@ -1,0 +1,313 @@
+{
+ "__inputs": [
+  {
+   "description": "",
+   "label": "Prometheus",
+   "name": "DS_PROMETHEUS",
+   "pluginId": "prometheus",
+   "pluginName": "Prometheus",
+   "type": "datasource"
+  }
+ ],
+ "__requires": [],
+ "annotations": {
+  "list": [
+   {
+    "builtIn": 1,
+    "datasource": {
+     "type": "grafana",
+     "uid": "-- Grafana --"
+    },
+    "enable": true,
+    "hide": true,
+    "iconColor": "rgba(0, 211, 255, 1)",
+    "name": "Annotations & Alerts",
+    "type": "dashboard"
+   },
+   {
+    "datasource": {
+     "type": "grafana",
+     "uid": "-- Grafana --"
+    },
+    "enable": true,
+    "hide": false,
+    "iconColor": "#F2CC0C",
+    "name": "prompt promotions",
+    "target": {
+     "limit": 100,
+     "matchAny": true,
+     "tags": [
+      "codemap",
+      "promotion"
+     ],
+     "type": "tags"
+    }
+   }
+  ]
+ },
+ "description": "Judge calibration and the rates the README claims, night by night; prompt promotions as annotations. Public.",
+ "editable": false,
+ "graphTooltip": 1,
+ "links": [
+  {
+   "targetBlank": true,
+   "title": "CodeMap Remote — the design",
+   "type": "link",
+   "url": "https://github.com/Check-It-Out-Dev/graph-theory-system-modeling/blob/main/applications/CodeMap/docs/07-ai-quality-governance.md"
+  }
+ ],
+ "panels": [
+  {
+   "collapsed": false,
+   "gridPos": {
+    "h": 1,
+    "w": 24,
+    "x": 0,
+    "y": 0
+   },
+   "id": 1,
+   "panels": [],
+   "title": "Is the judge worth believing?",
+   "type": "row"
+  },
+  {
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROMETHEUS}"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "custom": {
+      "fillOpacity": 8,
+      "lineWidth": 2,
+      "spanNulls": true
+     }
+    },
+    "overrides": [
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "κ oracle (gate 0.6)"
+      },
+      "properties": [
+       {
+        "id": "thresholds",
+        "value": {
+         "mode": "absolute",
+         "steps": [
+          {
+           "color": "red",
+           "value": null
+          },
+          {
+           "color": "green",
+           "value": 0.6
+          }
+         ]
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "gridPos": {
+    "h": 8,
+    "w": 12,
+    "x": 0,
+    "y": 1
+   },
+   "id": 2,
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom",
+     "showLegend": true
+    }
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "${DS_PROMETHEUS}"
+     },
+     "expr": "codemap_quality_judge_kappa{key=\"oracle\"}",
+     "legendFormat": "κ oracle (gate 0.6)",
+     "refId": "A"
+    },
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "${DS_PROMETHEUS}"
+     },
+     "expr": "codemap_quality_judge_kappa{key=\"human\"}",
+     "legendFormat": "κ users",
+     "refId": "B"
+    },
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "${DS_PROMETHEUS}"
+     },
+     "expr": "codemap_quality_judge_kappa{key=\"anchor_now\"}",
+     "legendFormat": "κ anchors",
+     "refId": "C"
+    }
+   ],
+   "title": "Cohen's κ: judge vs oracle · judge vs users",
+   "type": "timeseries"
+  },
+  {
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROMETHEUS}"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "custom": {
+      "fillOpacity": 8,
+      "lineWidth": 2,
+      "spanNulls": true
+     }
+    },
+    "overrides": []
+   },
+   "gridPos": {
+    "h": 8,
+    "w": 12,
+    "x": 12,
+    "y": 1
+   },
+   "id": 3,
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom",
+     "showLegend": true
+    }
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "${DS_PROMETHEUS}"
+     },
+     "expr": "codemap_quality_judge_agreement",
+     "legendFormat": "agreement",
+     "refId": "A"
+    },
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "${DS_PROMETHEUS}"
+     },
+     "expr": "codemap_quality_disputes_total",
+     "legendFormat": "disputes",
+     "refId": "B"
+    }
+   ],
+   "title": "Cross-family agreement (Claude judge vs Qwen reranker) · disputes",
+   "type": "timeseries"
+  },
+  {
+   "collapsed": false,
+   "gridPos": {
+    "h": 1,
+    "w": 24,
+    "x": 0,
+    "y": 9
+   },
+   "id": 4,
+   "panels": [],
+   "title": "The rates",
+   "type": "row"
+  },
+  {
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROMETHEUS}"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "custom": {
+      "fillOpacity": 8,
+      "lineWidth": 2,
+      "spanNulls": true
+     },
+     "unit": "percentunit"
+    },
+    "overrides": []
+   },
+   "gridPos": {
+    "h": 9,
+    "w": 24,
+    "x": 0,
+    "y": 10
+   },
+   "id": 5,
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom",
+     "showLegend": true
+    }
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "${DS_PROMETHEUS}"
+     },
+     "expr": "codemap_quality_grounded_rate",
+     "legendFormat": "grounded",
+     "refId": "A"
+    },
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "${DS_PROMETHEUS}"
+     },
+     "expr": "codemap_quality_correct_rate",
+     "legendFormat": "correct",
+     "refId": "B"
+    },
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "${DS_PROMETHEUS}"
+     },
+     "expr": "codemap_quality_helpful_rate",
+     "legendFormat": "helpful",
+     "refId": "C"
+    },
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "${DS_PROMETHEUS}"
+     },
+     "expr": "codemap_quality_rating_ge4_rate",
+     "legendFormat": "rating ≥4",
+     "refId": "D"
+    }
+   ],
+   "title": "Grounded · correct · helpful · rating ≥4",
+   "type": "timeseries"
+  }
+ ],
+ "refresh": "5m",
+ "schemaVersion": 39,
+ "tags": [
+  "codemap",
+  "public"
+ ],
+ "templating": {
+  "list": []
+ },
+ "time": {
+  "from": "now-14d",
+  "to": "now"
+ },
+ "timezone": "utc",
+ "title": "CodeMap · Quality over time",
+ "uid": "codemap-quality-over-time",
+ "version": 1
+}

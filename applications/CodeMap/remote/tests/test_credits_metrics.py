@@ -38,7 +38,7 @@ class RateCardTests(unittest.TestCase):
     def test_no_currency_anywhere(self):
         text = open(os.path.join(R, "remote", "credits.json"), encoding="utf-8").read().lower()
         for word in ("usd", "$", "eur", "pln", "price", "cost"):
-            self.assertNotIn(word, text.replace("list-price ratios", ""))
+            self.assertNotIn(word, text)
 
     def test_rate_card_table_is_markdown(self):
         tbl = self.card.table()
