@@ -14,13 +14,13 @@ table{border-collapse:collapse;width:100%;font-size:14px}.tablewrap{overflow-x:a
 footer{margin-top:40px;color:var(--muted);font-size:13px}
 </style></head><body>
 <h1>CodeMap Remote — measuring prompt quality in an AI system</h1>
-<p class='muted'>Every number on this page is recomputed from an artifact committed in <a href='https://github.com/Check-It-Out-Dev/graph-theory-system-modeling'>the repository</a>: nightly quality runs, judge calibrations, the personas' nights, partition decisions with their drift, and prompt-optimisation runs. No model runs to build it. Built 2026-09-16T15:45:13Z. The live counterpart is the set of public Grafana Cloud dashboards below; the served MCP is <code>https://codemap.checkitout.app/mcp</code>.</p>
+<p class='muted'>Every number on this page is recomputed from an artifact committed in <a href='https://github.com/Check-It-Out-Dev/graph-theory-system-modeling'>the repository</a>: nightly quality runs, judge calibrations, the personas' nights, partition decisions with their drift, and prompt-optimisation runs. No model runs to build it. Built 2026-09-16T17:09:05Z. The live counterpart is the set of public Grafana Cloud dashboards below; the served MCP is <code>https://codemap.checkitout.app/mcp</code>.</p>
 <h2>The latest night — 2026-09-17</h2>
 <div class='grid'>
 <div class='card'><h3>Grounded answers</h3><div class='big ok'>87 %</div><div class='muted'>judge ≥ 4 on grounding, share of judged answers</div></div>
 <div class='card'><h3>Correct answers</h3><div class='big ok'>78 %</div><div class='muted'>judge ≥ 4 on correctness</div></div>
 <div class='card'><h3>Mean rating</h3><div class='big info'>4.2</div><div class='muted'>personas rate after verifying a pointer; unverified ratings cap at 3</div></div>
-<div class='card'><h3>Judge κ vs oracle</h3><div class='big warn'>-0.28</div><div class='muted'>Cohen&#x27;s κ of the judge&#x27;s &#x27;located&#x27; against the execution oracle (gate 0.6)</div></div>
+<div class='card'><h3>Judge κ vs oracle</h3><div class='big warn'>-0.14</div><div class='muted'>Cohen&#x27;s κ of the judge&#x27;s &#x27;located&#x27; against the execution oracle (gate 0.6)</div></div>
 <div class='card'><h3>Credits per correct answer</h3><div class='big info'>17.5</div><div class='muted'>credits are relative units, never currency</div></div>
 <div class='card'><h3>Version drift</h3><div class='big warn'>11 %</div><div class='muted'>bank rows answering differently after the last pack decision, not invalidated on purpose</div></div>
 <div class='card'><h3>Answers judged</h3><div class='big info'>54</div><div class='muted'>58 asks, 11 misses reported, 0 budget refusals</div></div>
@@ -64,6 +64,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
 <h2>The graph follows the code — decisions on the pull request</h2>
 <div class='tablewrap'><table><tr><th>pack</th><th>repo @ head</th><th>decision</th><th>by</th><th class='n'>placed</th><th>new subsystems</th><th class='n'>FAQ invalidated</th><th class='n'>drift</th><th>reclued</th></tr>
 <tr><td><code>1.0.1</code></td><td>backend @ <code>ff43730</code></td><td><span class='tag ok'>accept</span></td><td>RamzesX</td><td class='n'>7</td><td>JUnit test-execution harness</td><td class='n'>10</td><td class='n'>6/55 (11 %)</td><td>—</td></tr>
+<tr><td><code>1.1.0</code></td><td>backend+frontend @ <code>ff43730</code></td><td><span class='tag ok'>accept</span></td><td>RamzesX</td><td class='n'>174</td><td>codemap-trajectory-viewer</td><td class='n'>12</td><td class='n'>17/54 (31 %)</td><td>0, 3, 4, 6, 8, 9, 10, 11, 16, 170, 171, 174, 175, 176, 178, 205, 206</td></tr>
 </table></div>
 <h2>The prompt improves on request — GEPA runs</h2>
 <div class='tablewrap'><table><tr><th>run</th><th>mode</th><th>where</th><th class='n'>seed (val)</th><th class='n'>best (val)</th><th class='n'>candidates</th><th class='n'>metric calls</th><th>outcome</th></tr>
