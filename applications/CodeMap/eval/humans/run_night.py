@@ -200,6 +200,8 @@ def run(args, runner=None, http=None, env=None):
     env = env if env is not None else os.environ
     cfg = load_personas()
     bank, probes = load_bank()
+    if getattr(args, "baseline_share", None) is not None:
+        cfg = dict(cfg, baseline_share=args.baseline_share)
     convs = plan(args.date, cfg, bank, probes, args.seed, args.persona, args.limit, args.haiku_only)
     url = env.get("CODEMAP_URL", "http://127.0.0.1:7345")
     token = env.get("CODEMAP_TOKEN", "")
@@ -316,6 +318,7 @@ def main(argv=None):
     ap.add_argument("--limit", type=int, default=None, help="conversations per persona")
     ap.add_argument("--haiku-only", action="store_true")
     ap.add_argument("--max-credits", type=float, default=3000)
+    ap.add_argument("--baseline-share", type=float, default=None, help="override personas.json baseline_share (the pair campaign uses 0.5)")
     ap.add_argument("--max-turns", type=int, default=24)
     ap.add_argument("--timeout", type=int, default=900)
     ap.add_argument("--dry-run", action="store_true")

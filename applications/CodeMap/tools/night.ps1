@@ -7,7 +7,9 @@ param(
     [string]$Date = (Get-Date).ToUniversalTime().ToString("yyyy-MM-dd"),
     [switch]$NoPush,
     [switch]$HaikuOnly,
-    [int]$MaxCredits = 3000
+    [int]$MaxCredits = 3000,
+    [double]$BaselineShare = 0.5,
+    [int]$BankPass = 24
 )
 $ErrorActionPreference = "Stop"
 $env:PYTHONUTF8 = "1"; $env:PYTHONIOENCODING = "utf-8"
@@ -31,9 +33,14 @@ New-Item -ItemType Directory -Force -Path "eval\humans\runs", "eval\judge\runs",
 "[$(Get-Date -Format s)] night $Date starts" | Tee-Object -FilePath $log -Append
 
 # 1. the personas (the runner syncs the miss backlog and refuses to overrun the caps)
-$args = @("eval\humans\run_night.py", "--date", $Date, "--max-credits", "$MaxCredits")
+$args = @("eval\humans\run_night.py", "--date", $Date, "--max-credits", "$MaxCredits", "--baseline-share", "$BaselineShare")
 if ($HaikuOnly) { $args += "--haiku-only" }
 python @args 2>&1 | Tee-Object -FilePath $log -Append
+
+# 1b. the bank pass: exact bank questions and probes as the judge user, so the night's own κ rests on enough oracle rows
+if ($BankPass -gt 0) {
+    python eval\judge\bank_pass.py --url $env:CODEMAP_URL --token $env:CODEMAP_TOKEN --user judge --n $BankPass --probes 6 --seed ([int]$Date.Replace("-", "") % 1000) 2>&1 | Tee-Object -FilePath $log -Append
+}
 
 # 2. the night's events from the VPS (the server's artifact of record), then the judge
 $hdr = @{ Authorization = "Bearer $env:CODEMAP_TOKEN"; "X-CodeMap-Admin" = $env:CODEMAP_ADMIN_TOKEN }

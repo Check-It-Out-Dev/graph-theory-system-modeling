@@ -173,7 +173,7 @@ class SeedJoinTests(unittest.TestCase):
         rows = judge.rows_from_events([ev], bank, [], humans=None)
         self.assertEqual((rows[0]["kind"], rows[0]["oracle"]["has"]), (None, False))
         rows = judge.rows_from_events([ev], bank, [], humans=humans)
-        self.assertEqual((rows[0]["kind"], rows[0]["qid"], rows[0]["oracle"]), ("bank", "BE01", {"has": True, "success": True}))
+        self.assertEqual((rows[0]["kind"], rows[0]["qid"], rows[0]["oracle"]["has"], rows[0]["oracle"]["success"], rows[0]["oracle"]["answered"]), ("bank", "BE01", True, True, True))
 
 
 if __name__ == "__main__":

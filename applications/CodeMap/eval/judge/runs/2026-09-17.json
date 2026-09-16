@@ -11,13 +11,14 @@
   "calibrated": false,
   "gate": 0.6,
   "kappa_human": -0.0842,
-  "kappa_oracle": -0.2791,
+  "kappa_oracle": -0.1379,
   "n_human": 53,
   "n_oracle": 11,
   "n_rr": 0,
   "verdict": "uncalibrated"
  },
  "note": "oracle fields re-derived deterministically after the judge run (the seed join through the night file); judge scores untouched",
+ "oracle_definition": "WHERE only (gold entity among the first five pointers); answered kept beside it",
  "rows": [
   {
    "answer": "The rejection is host-based, not content-based, and the logic lives outside the ticket/attachment subsystem entirely. **StorageUrlValidator.java** (subsystem 3, `Rate limits & runtime config`, path `backend/.../instagram/platform/storage/service/StorageUrlValidator.java`) is a validation Rule that checks the *URL's host* against an allowed set before an attachment/storage URL is accepted â€” this is explicitly called out in the subsystem 15 and 4/204-group curation notes: \"attachment URL validation (StorageUrlValidator.java) is no longer a coverage gap â€” it is indexed as of this batch but sits in sub-3, not [support/attachments].\" So even though attachments (`TicketAttachment.java`, `ResponseAttachment.java`, etc., subsystem 15) are the domain object being uploaded, the host-allowlist/URL-shape check that can reject a syntactically/content-valid file happens in the storage/upload config bag (sub-3), separate from the ticket flow.\n\nThe graph shows StorageUrlValidator importing `ValidationTranslatableException.java` (subsystem 7, the translatable-exception layer), so a rejected host surfaces as a translatable validation exception rather than a generic error â€” consistent with how the rest of the backend reports rule failures. No indexed caller edge exists into StorageUrlValidator (it's invoked from attachment/upload service code whose call site isn't captured as a graph edge), so to see exactly which hosts are allowed/blocked, open StorageUrlValidator.java directly; for the same host-filtering pattern applied to a different domain, `VimeoUrlsValidator.java` (subsystem 8) validates social/video URLs similarly.",
@@ -46,6 +47,8 @@
    "kind": "bank",
    "model": "claude-sonnet-5",
    "oracle": {
+    "answered": true,
+    "answered_and_located": true,
     "has": true,
     "success": true
    },
@@ -187,6 +190,8 @@
    "kind": "bank",
    "model": "claude-sonnet-5",
    "oracle": {
+    "answered": true,
+    "answered_and_located": null,
     "has": false,
     "success": null
    },
@@ -335,6 +340,8 @@
    "kind": "probe",
    "model": "claude-sonnet-5",
    "oracle": {
+    "answered": false,
+    "answered_and_located": false,
     "has": true,
     "success": true
    },
@@ -570,6 +577,8 @@
    "kind": "probe",
    "model": "claude-sonnet-5",
    "oracle": {
+    "answered": true,
+    "answered_and_located": true,
     "has": true,
     "success": true
    },
@@ -905,8 +914,10 @@
    "kind": "bank",
    "model": "claude-sonnet-5",
    "oracle": {
+    "answered": false,
+    "answered_and_located": false,
     "has": true,
-    "success": false
+    "success": true
    },
    "pack_version": "1.0.1",
    "pointers": [
@@ -1093,6 +1104,8 @@
    "kind": "bank",
    "model": "claude-sonnet-5",
    "oracle": {
+    "answered": true,
+    "answered_and_located": true,
     "has": true,
     "success": true
    },
@@ -1233,6 +1246,8 @@
    "kind": "bank",
    "model": "claude-sonnet-5",
    "oracle": {
+    "answered": true,
+    "answered_and_located": true,
     "has": true,
     "success": true
    },
@@ -1428,8 +1443,10 @@
    "kind": "bank",
    "model": "claude-sonnet-5",
    "oracle": {
+    "answered": false,
+    "answered_and_located": false,
     "has": true,
-    "success": false
+    "success": true
    },
    "pack_version": "1.0.1",
    "pointers": [
@@ -1619,6 +1636,8 @@
    "kind": "bank",
    "model": "claude-sonnet-5",
    "oracle": {
+    "answered": true,
+    "answered_and_located": false,
     "has": true,
     "success": false
    },
@@ -2096,6 +2115,8 @@
    "kind": "bank",
    "model": "claude-sonnet-5",
    "oracle": {
+    "answered": true,
+    "answered_and_located": true,
     "has": true,
     "success": true
    },
@@ -2250,6 +2271,8 @@
    "kind": "bank",
    "model": "claude-opus-5",
    "oracle": {
+    "answered": true,
+    "answered_and_located": true,
     "has": true,
     "success": true
    },
@@ -2452,6 +2475,8 @@
    "kind": "bank",
    "model": "claude-opus-5",
    "oracle": {
+    "answered": true,
+    "answered_and_located": true,
     "has": true,
     "success": true
    },

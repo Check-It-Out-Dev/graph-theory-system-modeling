@@ -82,6 +82,12 @@ class PlanTests(unittest.TestCase):
         self.assertEqual(run_night.parse_report(txt)["conversations"][0]["turns"][0]["rating"], 4)
         self.assertIsNone(run_night.parse_report("no block"))
 
+    def test_baseline_share_override_reaches_the_plan(self):
+        cfg = dict(self.cfg, baseline_share=0.5)
+        half = run_night.plan("2026-09-18", cfg, self.bank, self.probes, seed=2)
+        base = sum(1 for c in half if c["mode"] == "baseline")
+        self.assertGreaterEqual(base, 5)  # 18 draws at share 0.5 (first of each persona is never a baseline)
+
     def test_every_baseline_has_a_codemap_partner_on_the_same_seed(self):
         convs = run_night.plan("2026-09-17", self.cfg, self.bank, self.probes, seed=3)
         base = [c for c in convs if c["mode"] == "baseline"]
