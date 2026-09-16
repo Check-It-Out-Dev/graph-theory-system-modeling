@@ -255,7 +255,10 @@ def apply(proposal, delta, pack, command, by, version, ledger_dir, notes_path, m
     except (OSError, ValueError):
         pass
     indexed = dict(man_prev.get("indexed_sha") or {})
-    indexed[repo] = head
+    if isinstance(delta.get("heads"), dict):  # a full reindex scans several repositories at once
+        indexed.update(delta["heads"])
+    else:
+        indexed[repo] = head
     build_release.write_manifest(pack, version, indexed, note=f"delta {repo}@{head[:7]} decided by {by}: {command['kind']}")
     # the notes ride the pack: the Release carries every note its decisions wrote, so the served prompt
     # (template + pack + notes) is the same on the VPS and in the pull request

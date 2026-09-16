@@ -113,6 +113,17 @@ def review(delta, cands, pack_dir, backend="claude", model="claude-sonnet-5", ru
         return doc
     doc.setdefault("new_subsystems", [])
     doc.setdefault("unresolved", [])
+    # a reviewer that answers for some entities and stays silent on the rest: the silent ones keep their
+    # deterministic candidate (marked as such) or stay unresolved — nothing is silently dropped
+    seen = {a.get("entity") for a in doc["assignments"]} | {m for n in doc["new_subsystems"] for m in (n.get("members") or [])}
+    for c in cands:
+        if c["entity"] in seen:
+            continue
+        if c["subsystem"] is not None:
+            doc["assignments"].append({"entity": c["entity"], "subsystem": c["subsystem"], "confidence": c["confidence"],
+                                       "alternatives": c["alternatives"], "why": "deterministic candidate (the reviewer was silent): " + c["why"]})
+        elif c["entity"] not in doc["unresolved"]:
+            doc["unresolved"].append(c["entity"])
     doc["reviewed_by"] = f"{backend}:{model}"
     doc["usage"] = res.get("usage")
     return doc

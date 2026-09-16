@@ -108,6 +108,13 @@ class ProposeTests(unittest.TestCase):
         doc = propose.review(self.delta, cands, self.pack, backend="claude", runner=runner)
         self.assertEqual(doc["reviewed_by"], "claude:claude-sonnet-5")
         self.assertEqual(len(doc["assignments"]), 2)
+        partial = {"assignments": [{"entity": cands[0]["entity"], "subsystem": 11, "confidence": 0.9, "why": "x", "alternatives": []}],
+                   "new_subsystems": [], "unresolved": []}
+        doc2 = propose.review(self.delta, cands, self.pack, backend="claude",
+                              runner=lambda cmd, env, cwd, timeout: P({"type": "result", "is_error": False, "result": "ok", "structured_output": partial,
+                                                                      "usage": {"input_tokens": 1, "output_tokens": 1}}))
+        self.assertEqual(len(doc2["assignments"]), len(cands))  # the silent entity kept its deterministic candidate
+        self.assertTrue(any("reviewer was silent" in a["why"] for a in doc2["assignments"]))
         broken = propose.review(self.delta, cands, self.pack, backend="claude",
                                 runner=lambda cmd, env, cwd, timeout: P({"type": "result", "is_error": True, "result": "Rate limit"}))
         self.assertTrue(broken["reviewed_by"].startswith("deterministic"))

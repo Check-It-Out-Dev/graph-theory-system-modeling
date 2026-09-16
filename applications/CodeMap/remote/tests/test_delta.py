@@ -134,6 +134,22 @@ class DeltaTests(unittest.TestCase):
         self.assertGreater(delta["churn"], 0.1)
         self.assertFalse(os.path.exists(os.path.join(out, "pack.next")))
 
+    def test_forced_full_builds_the_pack_and_the_scan_lists_everything(self):
+        repo = self._repo()
+        out = tempfile.mkdtemp(prefix="codemap-delta-out-")
+        ents = list(csv.DictReader(open(os.path.join(PACK, "entities.csv"), encoding="utf-8")))
+        many = [("D", e["file_path"].split("checkItOut-be2/", 1)[1], None) for e in ents if "checkItOut-be2/" in e["file_path"]][:200]
+        delta = extract.run("backend", repo, many, PACK, out, date="2026-09-17", force=True)
+        self.assertEqual((delta["mode"], delta["forced_full"]), ("full", True))
+        self.assertTrue(os.path.exists(os.path.join(out, "pack.next", "entities.csv")))
+        import fullscan
+        rows = fullscan.scan("backend", repo, PACK)
+        kinds = {st for st, _ in rows}
+        self.assertIn("D", kinds)  # the pack knows files the tiny fixture checkout lacks
+        self.assertTrue(all(st in ("A", "M", "D") for st, _ in rows))
+        on_disk = [rel for st, rel in rows if st != "D"]
+        self.assertTrue(all(extract.eligible("backend", rel) for rel in on_disk))
+
 
 class DiscoverTests(unittest.TestCase):
     def test_dispatch_row_and_poll_skips_seen_and_forks(self):

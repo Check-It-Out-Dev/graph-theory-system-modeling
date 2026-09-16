@@ -16,6 +16,7 @@ import tempfile
 import time
 
 _STRIP = ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "CLAUDECODE", "CLAUDE_CODE_ENTRYPOINT")
+PROMPT_ARGV_MAX = 8000   # longer prompts are piped through stdin (see run)
 DEFAULT_TIMEOUT = 240
 
 
@@ -108,8 +109,12 @@ def run(prompt, model, role, system_file=None, mcp_config=None, allowed_tools=()
         if runner is not None:  # tests inject a fake subprocess
             proc = runner(cmd, env=env, cwd=cwd or bare_cwd(), timeout=timeout)
         else:
+            stdin_text = None
+            if len(prompt) > PROMPT_ARGV_MAX:  # Windows caps a command line near 32k characters: the prompt goes through stdin
+                cmd = [c for c in cmd if c is not prompt]
+                stdin_text = prompt
             proc = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace",  # NOSONAR - argv list, no shell; the binary is Claude Code; see sonar-project.properties
-                                  env=env, cwd=cwd or bare_cwd(), timeout=timeout)
+                                  env=env, cwd=cwd or bare_cwd(), timeout=timeout, input=stdin_text)
     except subprocess.TimeoutExpired:
         return _fail(f"timeout after {timeout}s", model, duration_ms=int((time.time() - t0) * 1000))
     except OSError as ex:
