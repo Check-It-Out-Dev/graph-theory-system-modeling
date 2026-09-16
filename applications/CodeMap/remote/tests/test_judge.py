@@ -4,6 +4,7 @@ retry, κ by hand, disputes, anchors and drift, and the events export route."""
 import json
 import os
 import sys
+import tempfile
 import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -117,6 +118,21 @@ class CalibrationTests(unittest.TestCase):
                          "oracle": {"has": True, "success": good if i != 7 else not good},
                          "human": {"rating": 5 if good else 2}, "rr_equiv": 0.9 if good else 0.1, "terminal": "answer"})
         return rows
+
+    def test_events_window_opens_where_the_personas_started(self):
+        sys.path.insert(0, os.path.join(R, "eval", "judge"))
+        import fetch_events
+        with tempfile.TemporaryDirectory() as d:
+            self.assertEqual(fetch_events.window_start("2026-09-20", d), "2026-09-20T00:00:00Z")
+            json.dump({"started": "2026-09-17T00:02:10Z"}, open(os.path.join(d, "2026-09-20.summary.json"), "w", encoding="utf-8"))
+            self.assertEqual(fetch_events.window_start("2026-09-20", d), "2026-09-17T00:02:10Z")
+            self.assertEqual(fetch_events.window_start("2026-09-20", d, since="2026-09-17T01:00:00Z"), "2026-09-17T01:00:00Z")
+        seen = {}
+        doc = fetch_events.fetch("https://x/", "t", "a", "2026-09-17T00:02:10Z", 10,
+                                 opener=lambda req: seen.update(url=req.full_url, h=dict(req.header_items())) or {"events": []})
+        self.assertEqual(doc, {"events": []})
+        self.assertIn("/admin/events?since=2026-09-17T00%3A02%3A10Z&limit=10", seen["url"])
+        self.assertEqual(seen["h"].get("X-codemap-admin"), "a")
 
     def test_ac1_and_the_prevalence_paradox(self):
         # night 2026-09-18 by hand: 28 (yes,yes), 5 (no,yes), 1 (no,no) -> agreement 0.85, κ 0.25, AC1 0.82
