@@ -44,6 +44,10 @@ class RowTests(unittest.TestCase):
         self.assertEqual((has, ok), (True, True))
         has, ok = judge.oracle(ask_event("r", be01["q"], "x", ["Other.java"]), "bank", be01)
         self.assertEqual((has, ok), (True, False))
+        content = next(r for r in self.bank if r.get("archetype") == "content" and judge.gold_entities(r))
+        self.assertEqual(judge.oracle(ask_event("r", content["q"], "x", list(judge.gold_entities(content))[:1]), "bank", content)[0], False)
+        many = ["A.java"] * judge.TOP_POINTERS + ["PaymentsDisabledBootGuard.java"]
+        self.assertEqual(judge.oracle(ask_event("r", be01["q"], "x", many), "bank", be01), (True, False))
         od27 = next(p for p in self.probes if p["id"] == "OD27")
         self.assertEqual(judge.oracle(ask_event("r", od27["q"], "", [], terminal="abstain"), "probe", od27), (True, True))
         self.assertEqual(judge.oracle(ask_event("r", od27["q"], "sure", ["X.java"]), "probe", od27), (True, False))
@@ -73,7 +77,7 @@ class JudgeCallTests(unittest.TestCase):
             ids = [json.loads(p)["id"] for p in prompt.split("\n\n")[1:]]
             if len(calls) == 1:  # first reply is malformed → retry
                 return _Proc(json.dumps({"type": "result", "is_error": False, "result": "```json\n[{bad\n```"}))
-            arr = [{"id": i, "grounded": 4, "correct": 5, "abstain": 5, "helpful": 4, "rationale": "fine"} for i in ids]
+            arr = [{"id": i, "located": 5, "grounded": 4, "correct": 5, "abstain": 5, "helpful": 4, "rationale": "fine"} for i in ids]
             return _Proc(json.dumps({"type": "result", "is_error": False, "result": "```json\n" + json.dumps(arr) + "\n```",
                                      "usage": {"input_tokens": 100, "output_tokens": 50}}))
         usage = judge.judge_rows(rows, runner=runner)
@@ -92,7 +96,7 @@ class JudgeCallTests(unittest.TestCase):
 
     def test_parse_scores_tolerates_junk(self):
         self.assertIsNone(judge.parse_scores("nothing"))
-        s = judge.parse_scores('x ```json\n[{"id": "a", "grounded": "4", "correct": 3, "abstain": 5, "helpful": 2}, {"nope": 1}]\n```')
+        s = judge.parse_scores('x ```json\n[{"id": "a", "located": 4, "grounded": "4", "correct": 3, "abstain": 5, "helpful": 2}, {"nope": 1}]\n```')
         self.assertEqual(s["a"]["grounded"], 4)
         self.assertEqual(len(s), 1)
 
@@ -109,7 +113,7 @@ class CalibrationTests(unittest.TestCase):
         rows = []
         for i in range(20):
             good = i % 4 != 0
-            rows.append({"id": f"r{i}", "q": "q", "judge": {"correct": 5 if good else 2, "grounded": 4, "abstain": 4, "helpful": 4},
+            rows.append({"id": f"r{i}", "q": "q", "judge": {"located": 5 if good else 2, "correct": 5 if good else 2, "grounded": 4, "abstain": 4, "helpful": 4},
                          "oracle": {"has": True, "success": good if i != 7 else not good},
                          "human": {"rating": 5 if good else 2}, "rr_equiv": 0.9 if good else 0.1, "terminal": "answer"})
         return rows

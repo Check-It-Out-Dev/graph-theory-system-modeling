@@ -72,16 +72,22 @@ def gold_entities(row):
     return names
 
 
+WHERE_ARCHETYPES = ("locate", "impact", "flow", "boundary", "onboarding", "onboarding_path", "cohort", "health")
+TOP_POINTERS = 5
+
+
 def oracle(ev, kind, row):
-    """The execution oracle for pointer answers: (has_oracle, success)."""
+    """The execution oracle for pointer answers: (has_oracle, success). It measures WHERE, so it applies
+    to the bank's where-archetypes (a content/overview reference cannot be checked by a pointer) and to
+    the probes' expected terminal; success = a gold entity among the first TOP_POINTERS pointers."""
     if kind == "bank":
         gold = gold_entities(row)
-        if row.get("gold_status") == "COVERAGE_GAP":
+        if row.get("gold_status") == "COVERAGE_GAP" or not gold:
             return False, None
-        if not gold:
+        if row.get("archetype") not in WHERE_ARCHETYPES:
             return False, None
-        ptrs = {p.get("name") for p in ev.get("pointers") or []}
-        hit = bool(ptrs & gold) and ev.get("terminal") == "answer"
+        ptrs = [p.get("name") for p in (ev.get("pointers") or [])[:TOP_POINTERS]]
+        hit = bool(set(ptrs) & gold) and ev.get("terminal") == "answer"
         return True, hit
     if kind == "probe":
         return True, (ev.get("terminal") == row.get("expect"))
@@ -143,7 +149,7 @@ def parse_scores(text):
         if not isinstance(o, dict) or "id" not in o:
             continue
         try:
-            out[str(o["id"])] = {k: int(o[k]) for k in ("grounded", "correct", "abstain", "helpful")}
+            out[str(o["id"])] = {k: int(o[k]) for k in ("located", "grounded", "correct", "abstain", "helpful")}
             out[str(o["id"])]["rationale"] = str(o.get("rationale", ""))[:300]
         except (KeyError, ValueError, TypeError):
             continue
@@ -206,17 +212,15 @@ def qwen_signal(rows, client=None):
 
 
 def flag_disputes(rows):
+    """A dispute is the judge's `located` disagreeing with the execution oracle: the same question
+    ("is this the right place?") answered differently by two families. The reranker's relevance is
+    reported beside it, not used here: measured 2026-09-16, it sits near 1.0 whenever the topic matches."""
     n = 0
     for r in rows:
         j = r.get("judge") or {}
-        jc = j.get("correct")
+        jl = j.get("located")
         o = r.get("oracle") or {}
-        rr = r.get("rr_equiv")
-        dispute = False
-        if jc is not None and o.get("has"):
-            dispute |= (jc >= 4) != bool(o.get("success"))
-        if jc is not None and rr is not None:
-            dispute |= (jc >= 4) != (rr >= 0.5)
+        dispute = bool(jl is not None and o.get("has") and ((jl >= 4) != bool(o.get("success"))))
         r["disputed"] = dispute
         n += dispute
     return n
@@ -232,7 +236,7 @@ def summarize(rows, usage):
             "with_human": sum(1 for r in rows if r.get("human")),
             "with_rr": sum(1 for r in rows if r.get("rr_equiv") is not None),
             "disputed": sum(1 for r in rows if r.get("disputed")),
-            "mean": {k: mean([r["judge"][k] for r in judged]) for k in ("grounded", "correct", "abstain", "helpful")},
+            "mean": {k: mean([r["judge"][k] for r in judged]) for k in ("located", "grounded", "correct", "abstain", "helpful")},
             "oracle_success_rate": mean([1.0 if r["oracle"]["success"] else 0.0 for r in rows if r["oracle"]["has"]]),
             "abstain_rate": mean([1.0 if r["terminal"] == "abstain" else 0.0 for r in rows]),
             "usage": usage}

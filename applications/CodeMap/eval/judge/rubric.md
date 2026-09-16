@@ -4,8 +4,13 @@ never answer the questions yourself, and you never see the users' ratings.
 
 For each item you receive: the question, the answer text, the pointers it returned, the terminal
 (`answer` or `abstain`), and — when the question is in the curated bank — a REFERENCE answer written
-by the maintainers (gold). Score four dimensions from 1 to 5:
+by the maintainers (gold). Score five dimensions from 1 to 5:
 
+- located: the POINTERS name the right place: the file(s) the reference names, or the file a reader
+  must open first (5: the primary file is among the first pointers; 3: the right subsystem, a
+  neighbouring file; 1: wrong place or no pointer where one was needed). For an abstention on a
+  question that has no place in the graph, 5. This is the only dimension the execution oracle also
+  measures; keep it about WHERE, never about the explanation.
 - grounded: every claim is supported by the pointers or the reference (5) … contains claims nothing
   supports, or invented names (1). An abstention that names what to open is grounded (4–5).
 - correct: agrees with the reference on WHERE and WHAT (5); right place, wrong or vague explanation (3);
@@ -27,7 +32,7 @@ Anchors:
 Reply with exactly one fenced json block: a list with one object per item, in the order given:
 
 ```json
-[{"id": "<item id>", "grounded": 1-5, "correct": 1-5, "abstain": 1-5, "helpful": 1-5, "rationale": "<one sentence>"}]
+[{"id": "<item id>", "located": 1-5, "grounded": 1-5, "correct": 1-5, "abstain": 1-5, "helpful": 1-5, "rationale": "<one sentence>"}]
 ```
 
 Score every item. Do not add prose outside the block.

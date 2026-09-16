@@ -31,8 +31,9 @@ def cohen_kappa(pairs):
 
 
 def kappa_oracle(rows):
-    pairs = [(r["judge"]["correct"] >= 4, r["oracle"]["success"]) for r in rows
-             if r.get("judge") and r.get("oracle", {}).get("has")]
+    """judge.located vs the execution oracle: both answer "is this the right place?"."""
+    pairs = [(r["judge"]["located"] >= 4, r["oracle"]["success"]) for r in rows
+             if r.get("judge") and r["judge"].get("located") is not None and r.get("oracle", {}).get("has")]
     return cohen_kappa(pairs), len(pairs)
 
 
@@ -66,9 +67,9 @@ def anchor_drift(rows, anchors):
         if not r:
             continue
         deltas.append(abs(r["judge"]["correct"] - a["judge"]["correct"]))
-        if a.get("oracle_success") is not None:
-            pairs_then.append((a["judge"]["correct"] >= 4, a["oracle_success"]))
-            pairs_now.append((r["judge"]["correct"] >= 4, a["oracle_success"]))
+        if a.get("oracle_success") is not None and "located" in a["judge"] and "located" in r["judge"]:
+            pairs_then.append((a["judge"]["located"] >= 4, a["oracle_success"]))
+            pairs_now.append((r["judge"]["located"] >= 4, a["oracle_success"]))
     if not deltas:
         return {"matched": 0, "mean_abs_delta": None, "kappa_then": None, "kappa_now": None, "drift": False}
     k_then, k_now = cohen_kappa(pairs_then), cohen_kappa(pairs_now)
