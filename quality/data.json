@@ -1,5 +1,47 @@
 {
- "built_at": "2026-09-16T17:09:05Z",
+ "built_at": "2026-09-16T18:48:22Z",
+ "campaign": {
+  "gated": false,
+  "n_pairs": 4,
+  "nights": [
+   {
+    "baselines": 0,
+    "conversations": 1,
+    "night": "2026-09-16",
+    "pairs": 0,
+    "skipped_partners": 0
+   },
+   {
+    "baselines": 2,
+    "conversations": 18,
+    "night": "2026-09-17",
+    "pairs": 0,
+    "skipped_partners": 0
+   },
+   {
+    "baselines": 6,
+    "conversations": 24,
+    "night": "2026-09-18",
+    "pairs": 4,
+    "skipped_partners": 2
+   },
+   {
+    "baselines": 4,
+    "conversations": 22,
+    "night": "2026-09-19",
+    "pairs": 0,
+    "skipped_partners": 12
+   }
+  ],
+  "rating_baseline_mean": 4.5,
+  "rating_codemap_mean": 4.417,
+  "seconds_delta_mean": -44.55,
+  "share_fewer_tokens": 0.0,
+  "share_fewer_turns": 0.5,
+  "share_rated_at_least_as_well": 0.75,
+  "tokens_ratio_mean": 0.561,
+  "turns_delta_mean": -0.5
+ },
  "dashboards": [
   {
    "title": "CodeMap \u00b7 AI system",
@@ -129,6 +171,7 @@
     "honest": 0.8889
    },
    "cache_read_ratio": 0.8866,
+   "calibrated": true,
    "correct": 0.7429,
    "coverage": {},
    "credits_per_correct": 24.6273,
@@ -140,11 +183,11 @@
    "date": "2026-09-16",
    "disputes": 1,
    "drift": {
-    "compared": 55,
-    "drifted": 6,
-    "invalidated": 9
+    "compared": 54,
+    "drifted": 17,
+    "invalidated": 10
    },
-   "drift_rate": 0.1091,
+   "drift_rate": 0.3148,
    "gain": {
     "n_pairs": 0,
     "seconds_delta_mean": null,
@@ -165,8 +208,13 @@
    },
    "kappa": {
     "anchor_now": 0.7727,
+    "basis": "kappa",
     "human": 1.0,
-    "oracle": 0.838
+    "oracle": 0.838,
+    "oracle_ac1": 0.9562,
+    "oracle_agreement": 0.9655,
+    "oracle_n": 29,
+    "oracle_prevalence": 0.8793
    },
    "latency_p95": {
     "faq": 2,
@@ -212,6 +260,7 @@
     "honest": 1.0
    },
    "cache_read_ratio": 0.9586,
+   "calibrated": false,
    "correct": 0.7778,
    "coverage": {},
    "credits_per_correct": 17.4877,
@@ -226,11 +275,11 @@
    "date": "2026-09-17",
    "disputes": 0,
    "drift": {
-    "compared": 55,
-    "drifted": 6,
-    "invalidated": 9
+    "compared": 54,
+    "drifted": 17,
+    "invalidated": 10
    },
-   "drift_rate": 0.1091,
+   "drift_rate": 0.3148,
    "gain": {
     "n_pairs": 0,
     "seconds_delta_mean": null,
@@ -251,8 +300,13 @@
    },
    "kappa": {
     "anchor_now": null,
+    "basis": null,
     "human": -0.0842,
-    "oracle": -0.1379
+    "oracle": -0.1379,
+    "oracle_ac1": 0.6432,
+    "oracle_agreement": 0.7273,
+    "oracle_n": 11,
+    "oracle_prevalence": 0.8636
    },
    "latency_p95": {
     "faq": 3,
@@ -326,6 +380,260 @@
     "cached": 9212640,
     "completion": 85650,
     "prompt": 428
+   }
+  },
+  {
+   "abstention": {
+    "all": 0.2267,
+    "false": 0.0588,
+    "honest": 0.9412
+   },
+   "cache_read_ratio": 0.9587,
+   "calibrated": true,
+   "correct": 0.7568,
+   "coverage": {},
+   "credits_per_correct": 22.3973,
+   "credits_total": {
+    "haiku-ops": 99.2309,
+    "haiku-pm": 90.1334,
+    "judge": 330.6508,
+    "opus-architect": 170.821,
+    "opus-reviewer": 427.0065,
+    "sonnet-bugfixer": 65.7122,
+    "sonnet-newcomer": 70.6968
+   },
+   "date": "2026-09-18",
+   "disputes": 5,
+   "drift": {
+    "compared": 54,
+    "drifted": 17,
+    "invalidated": 10
+   },
+   "drift_rate": 0.3148,
+   "gain": {
+    "n_pairs": 5,
+    "seconds_delta_mean": -44.567,
+    "tokens_ratio_mean": 0.5611,
+    "turns_delta_mean": -0.5
+   },
+   "grounded": 0.7838,
+   "helpful": 0.7973,
+   "judge_n": 74,
+   "judge_usage": {
+    "cache_creation": 296699,
+    "cache_read": 152047,
+    "calls": 8,
+    "errors": 0,
+    "input": 16,
+    "output": 33143,
+    "retries": 0
+   },
+   "kappa": {
+    "anchor_now": null,
+    "basis": "ac1",
+    "human": -0.0375,
+    "oracle": 0.2478,
+    "oracle_ac1": 0.8196,
+    "oracle_agreement": 0.8529,
+    "oracle_n": 34,
+    "oracle_prevalence": 0.8971
+   },
+   "latency_p95": {
+    "faq": 2,
+    "nav-opus": 37075,
+    "nav-sonnet": 37107
+   },
+   "located": 0.8514,
+   "n": {
+    "asks": 80,
+    "feedback": 49,
+    "judged": 74,
+    "misses": 16,
+    "navigator_answers": 75,
+    "refusals": 2
+   },
+   "partial": false,
+   "personas": {
+    "haiku-ops": {
+     "conversations": 6,
+     "credits": 99.2309,
+     "misses": 2,
+     "rating_mean": 4.5,
+     "turns": 100
+    },
+    "haiku-pm": {
+     "conversations": 4,
+     "credits": 90.1334,
+     "misses": 1,
+     "rating_mean": 4.778,
+     "turns": 76
+    },
+    "opus-architect": {
+     "conversations": 2,
+     "credits": 170.821,
+     "misses": 2,
+     "rating_mean": 3.6,
+     "turns": 36
+    },
+    "opus-reviewer": {
+     "conversations": 2,
+     "credits": 427.0065,
+     "misses": 3,
+     "rating_mean": 3.0,
+     "turns": 52
+    },
+    "sonnet-bugfixer": {
+     "conversations": 5,
+     "credits": 65.7122,
+     "misses": 4,
+     "rating_mean": 3.727,
+     "turns": 73
+    },
+    "sonnet-newcomer": {
+     "conversations": 3,
+     "credits": 70.6968,
+     "misses": 0,
+     "rating_mean": 4.273,
+     "turns": 47
+    }
+   },
+   "pointer_verified": 0.9796,
+   "rating_ge4": 0.6939,
+   "rating_mean": 3.9796,
+   "requests": {
+    "faq": 5,
+    "nav-opus": 3,
+    "nav-sonnet": 72
+   },
+   "tokens": {
+    "cache_creation": 648507,
+    "cached": 15058622,
+    "completion": 116166,
+    "prompt": 608
+   }
+  },
+  {
+   "abstention": {
+    "all": 0.2326,
+    "false": 0.2,
+    "honest": 0.8
+   },
+   "cache_read_ratio": 0.9764,
+   "calibrated": true,
+   "correct": 0.7619,
+   "coverage": {},
+   "credits_per_correct": 14.1189,
+   "credits_total": {
+    "judge": 279.7641,
+    "sonnet-bugfixer": 91.7472,
+    "sonnet-newcomer": 80.2947
+   },
+   "date": "2026-09-19",
+   "disputes": 3,
+   "drift": {
+    "compared": 54,
+    "drifted": 17,
+    "invalidated": 10
+   },
+   "drift_rate": 0.3148,
+   "gain": {
+    "n_pairs": 4,
+    "seconds_delta_mean": null,
+    "tokens_ratio_mean": null,
+    "turns_delta_mean": null
+   },
+   "grounded": 0.8571,
+   "helpful": 0.8333,
+   "judge_n": 42,
+   "judge_usage": {
+    "cache_creation": 180081,
+    "cache_read": 108605,
+    "calls": 5,
+    "errors": 0,
+    "input": 10,
+    "output": 22875,
+    "retries": 0
+   },
+   "kappa": {
+    "anchor_now": null,
+    "basis": "ac1",
+    "human": 0.5714,
+    "oracle": 0.3077,
+    "oracle_ac1": 0.7809,
+    "oracle_agreement": 0.8333,
+    "oracle_n": 18,
+    "oracle_prevalence": 0.8611
+   },
+   "latency_p95": {
+    "faq": 2,
+    "nav-sonnet": 29741
+   },
+   "located": 0.8333,
+   "n": {
+    "asks": 46,
+    "feedback": 23,
+    "judged": 42,
+    "misses": 1,
+    "navigator_answers": 43,
+    "refusals": 1
+   },
+   "partial": false,
+   "personas": {
+    "haiku-ops": {
+     "conversations": 2,
+     "credits": 0.0,
+     "misses": 0,
+     "rating_mean": 5.0,
+     "turns": 28
+    },
+    "haiku-pm": {
+     "conversations": 1,
+     "credits": 0.0,
+     "misses": 0,
+     "rating_mean": 5.0,
+     "turns": 9
+    },
+    "opus-architect": {
+     "conversations": 0,
+     "credits": 0.0,
+     "misses": 0,
+     "rating_mean": null,
+     "turns": 0
+    },
+    "opus-reviewer": {
+     "conversations": 1,
+     "credits": 0.0,
+     "misses": 4,
+     "rating_mean": 4.0,
+     "turns": 39
+    },
+    "sonnet-bugfixer": {
+     "conversations": 3,
+     "credits": 91.7472,
+     "misses": 1,
+     "rating_mean": 2.923,
+     "turns": 63
+    },
+    "sonnet-newcomer": {
+     "conversations": 3,
+     "credits": 80.2947,
+     "misses": 0,
+     "rating_mean": 4.8,
+     "turns": 40
+    }
+   },
+   "pointer_verified": 0.9565,
+   "rating_ge4": 0.6522,
+   "rating_mean": 3.7391,
+   "requests": {
+    "faq": 3,
+    "nav-sonnet": 43
+   },
+   "tokens": {
+    "cache_creation": 223163,
+    "cached": 9260810,
+    "completion": 60197,
+    "prompt": 384
    }
   }
  ],
