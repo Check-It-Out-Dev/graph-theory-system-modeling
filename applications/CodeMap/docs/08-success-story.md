@@ -28,6 +28,8 @@ _Written 2026-09-16/17 while the last nights ran. Every figure here has one home
 | 17:26 | the first full night: six personas, 18 conversations, 58 asks, 11 misses | `eval/humans/runs/2026-09-17.*` |
 | 17:45 | PR #3 squash-merged to main; CI, Pages, Sonar green | `main 5fc6c86` |
 | 19:05 | **the full reindex on the box**: both repositories at their public heads, 174 entities placed by Grothendieck in chunks, 22 subsystems reclued, Release `pack-1.1.0` served | 1,594 entities, 34 navigators, coverage 100 % of eligible files |
+| 20:30 | the judge calibrated on a night's own rows — and κ's paradox under a skewed oracle named, measured, and reported beside AC1 | `eval/judge/runs/2026-09-18.json` (agreement 0.85, AC1 0.82, κ 0.25), D-R18 |
+| 20:45 | the pair count corrected (skipped partners are no pair), paired conversations first, one night per UTC day; the cost measured by hand | D-R19, the tables below |
 
 ## What the numbers say (and do not say)
 
@@ -37,10 +39,37 @@ Two nights before the reindex, on prompt v1 then v2:
 |---|---|---|---|---|---|---|---|
 | 2026-09-16 | one persona, calibration pass | 35 | 0.91 | 0.74 | 4.5 | 24.6 | 0 |
 | 2026-09-17 | all six personas | 54 | 0.87 | 0.78 | 4.16 | 17.5 | 11 |
+| 2026-09-18 | six personas + a 30-row bank pass, pack 1.1.0 | 74 | 0.78 | 0.76 | 3.98 | 22.4 | 16 |
+| 2026-09-19 | two Sonnet personas + 23 bank rows (a budget-collision night) | 42 | 0.86 | 0.76 | 3.74 | 14.1 | 1 |
 
 What they say: the navigator does not hallucinate pointers (every pointer resolves server-side to a known entity; grounded 0.87–0.96 by the judge), abstains honestly on out-of-corpus questions, and the second prompt halved the credits per correct answer. What they do not say yet: that CodeMap beats grep for an agent with a filesystem. That claim is the gain — the same question answered by the same persona with and without the graph — and the first two nights produced zero pairs because the planner never scheduled the partner conversation. Fixed; the campaign counts pairs across nights (`eval/quality/campaign.py`).
 
 Three things the first full night corrected, recorded in `INCIDENTS.md` rather than smoothed over: the same 54 answers judged twice differed by nine points on grounded; the oracle on rephrased persona questions disagreed with the judge (κ −0.28 on 11 rows, mostly abstentions that named the right files — so the oracle now answers WHERE only); baselines had no partners.
+
+The first condition of the green box was met on 2026-09-18, and not the way the row was written. The judge and the execution oracle agreed on 29 of 34 rows (85 %), the five disagreements all being the judge stricter than the oracle — yet Cohen's κ was 0.25, because the oracle said "yes" on 33 of 34 rows and κ's chance term is computed from those marginals. That is the paradox Feinstein and Cicchetti described in 1990, and there were three ways out: regold the bank (would not help — the oracle already hits), relax the judge's anchors (tuning the instrument to the verdict), or report what κ hides. `calibrate.py` now prints the raw agreement, the prevalence and Gwet's AC1 beside κ, and the verdict has two fixed routes the artifact names: κ ≥ 0.6, or, only when the prevalence is past 85 %, agreement ≥ 80 % with AC1 ≥ 0.6. The thresholds did not move for any night: 2026-09-16 passes on κ (0.84), 2026-09-17 fails on both routes (73 % agreement), 2026-09-18 and 2026-09-19 pass on AC1 (0.82 on 34 rows, 0.78 on 18). The README condition says so in words (D-R18).
+
+## Where the cost goes — the pairs, and a measurement by hand
+
+The pair campaign is the claim that matters to a team: the same persona, the same question, the same checkout, once with grep only and once with CodeMap. Four real pairs exist (night 2026-09-18; night 2026-09-19 lost every Haiku and Opus partner to the daily credit budget, D-R19), and they do not flatter the graph:
+
+| pair | tokens without / with CodeMap | turns | rating |
+|---|---|---|---|
+| haiku-ops OD11 | 210k / 363k | 9 / 7 | 5.0 / 5.0 |
+| haiku-ops OD30 | 679k / 922k | 22 / 16 | 4.0 / 4.0 |
+| sonnet-bugfixer BE01 | 454k / 848k | 7 / 11 | 5.0 / 5.0 |
+| sonnet-bugfixer BE29 | 601k / 1,523k | 14 / 20 | 4.0 / 3.7 |
+
+Two meters run in a CodeMap conversation, and the table shows one. The persona's own session re-reads its whole context every turn (97 % of those tokens are cache reads), and every `codemap_ask` answer adds one to two thousand tokens of prose and pointers that compound turn after turn; the persona then opens the pointed files anyway, because rating an unverified answer above 3 is forbidden. The second meter is the navigator on the VPS: a Claude Sonnet session per question, about 200k cached tokens, 8.6k cache-creation and 1.5k output, 5 engine steps and 20 seconds per answer, 16.7 credits — 15.8 M tokens for night 2026-09-18's 75 answers, billed as credits, never in the persona's column.
+
+Underneath both sits the model-free part, and that is where the context engineering lives. Three bank questions answered by hand, both ways, counting the bytes of tool output that enter the context before the answer file is opened (both paths open it):
+
+| question | graph (engine, no model) | grep and reads |
+|---|---|---|
+| where is the Instagram OAuth callback handled | one `find`, 1.1 KB, the controller named first | a naive `instagram` grep hits 250+ files (the package is `com.sm.instagram`), 26.9 KB of noise; a refined `callback` grep 2.2 KB |
+| what stops two instances running the same cron job | two calls, 1.3 KB, plus the 0.5 KB config | `@Scheduled` 2.5 KB, open one job 1.7 KB, grep the lock 1.6 KB |
+| what breaks if `AccountStatus.java` changes | one `impact`, 4.7 KB: 50 dependents with relation type and subsystem | 81 files, 671 hits, 9.5 KB of paths with SQL and test noise, no relation types, every import still to read |
+
+Two to twenty times fewer bytes per hop, and the impact question is the one grep cannot answer without reading dozens of files. The 117-node architecture model in Neo4j returned nothing for any of the three; the graph that helps is the 1,594-entity pack. The saving is spent above the engine: agents reach it only through a model that turns 1–5 KB of structure into prose at 210k tokens a call. The finding the pairs point at — expose `find` and `impact` to agents as direct, model-free MCP tools and keep `codemap_ask` for the vocabulary-mismatch questions — is not part of this arc and is recorded here rather than built.
 
 ## Where the graph earns its keep, honestly
 
