@@ -50,7 +50,7 @@ docker compose -f applications/CodeMap/remote/docker-compose.yml --env-file /opt
 docker image prune -f >/dev/null
 if [ "$NGINX" = 1 ]; then
   sudo install -m 644 applications/CodeMap/remote/nginx.codemap.conf /etc/nginx/sites-available/codemap.checkitout.app.conf
-  if [ -f /etc/letsencrypt/live/codemap.checkitout.app/fullchain.pem ]; then
+  if sudo test -f /etc/letsencrypt/live/codemap.checkitout.app/fullchain.pem; then
     sudo ln -sf /etc/nginx/sites-available/codemap.checkitout.app.conf /etc/nginx/sites-enabled/codemap.checkitout.app.conf
     sudo nginx -t && sudo systemctl reload nginx
   else
