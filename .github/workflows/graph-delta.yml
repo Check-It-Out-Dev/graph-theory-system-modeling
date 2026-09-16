@@ -225,6 +225,11 @@ jobs:
         with:
           python-version: "3.12"
       - run: python -m pip install real-ladybug==0.15.3
+      - name: The branch that proposed (issue_comment runs the default branch's workflow)
+        run: |
+          REF=$(printf '%s\n' "$ISSUE_BODY" | grep -o '<!-- codemap-delta [^>]* -->' | head -1 | grep -o 'ref=[^ ]*' | cut -d= -f2- || true)
+          REF=${REF:-main}
+          git fetch -q origin "$REF" && git checkout -q "$REF" && echo "checked out $REF"
       - name: Apply, release, open the pull request
         run: bash applications/CodeMap/graph/delta/ci_apply.sh
 
@@ -255,5 +260,7 @@ jobs:
                       --jq '.[] | select((now - (.createdAt | fromdateiso8601)) > 172800) | .number'); do
             export ISSUE="$n"; export COMMENT="/codemap accept-by-timeout"
             export ISSUE_BODY="$(gh issue view "$n" --json body --jq .body)"
+            REF=$(printf '%s\n' "$ISSUE_BODY" | grep -o '<!-- codemap-delta [^>]* -->' | head -1 | grep -o 'ref=[^ ]*' | cut -d= -f2- || true)
+            git fetch -q origin "${REF:-main}" && git checkout -q "${REF:-main}"
             bash applications/CodeMap/graph/delta/ci_apply.sh || echo "issue $n: apply failed" | tee -a "$GITHUB_STEP_SUMMARY"
           done
