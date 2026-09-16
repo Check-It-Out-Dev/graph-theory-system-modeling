@@ -26,7 +26,7 @@ SCHEMA = {
     "tokens": (dict,), "cache_read": (int,), "session_claude": (str,), "credits": (float, int),
     "faq_cache": (str,), "q": (str,), "answer": (str,), "pointers": (list,), "trajectory": (list,),
     "tool": (str,), "error": (str,), "rating": (int,), "vote": (str,), "tags": (list,),
-    "comment": (str,), "verified": (bool,), "path": (str,), "why": (str,),
+    "comment": (str,), "verified": (bool,), "path": (str,), "why": (str,), "repo": (str,),
     "spent": (float, int), "budget": (float, int), "queue": (int,),
 }
 REQUIRED = ("schema", "event_type", "ts", "request_id", "user", "tier")
