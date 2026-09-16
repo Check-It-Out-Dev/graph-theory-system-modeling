@@ -57,7 +57,9 @@ def ask(app, ident, args):
     nav = getattr(app, "navigator", None)
     # a follow-up inside a conversation is never an FAQ question: "and what depends on it?" needs the context
     follow_up = bool(nav and nav.contexts.get(context_id) and nav.contexts.get(context_id).turns)
-    hit = {"kind": "skipped"} if follow_up else app.engine.cache(q)
+    # evaluation only: a system user may skip the FAQ so the navigator answers bank questions for calibration
+    skip_faq = follow_up or (bool(args.get("no_faq")) and ident.user["kind"] == "system")
+    hit = {"kind": "skipped"} if skip_faq else app.engine.cache(q)
     if hit.get("kind") == "cache_hit":
         ptrs = _pointers_from_gold(app, hit)
         out = {"answer": hit["answer"], "pointers": ptrs, "request_id": ident.request_id,

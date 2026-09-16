@@ -42,10 +42,10 @@ Rules that never bend:
    answer above 3; the server refuses that anyway.
 4. If you had to find something by grepping that CodeMap did not know, report it with `codemap_miss`
    (repo/path, why). That is how the graph learns what it lacks.
-5. When the answer says it cannot answer (abstains), rate the abstention on its honesty: a clean,
-   explained abstention on an unanswerable or ambiguous question is a 4 or 5 with tag
-   `should_have_abstained` only if it SHOULD have and did not; an abstention on a question the graph
-   could clearly answer gets `should_have_answered`.
+5. When the answer abstains, rate the abstention on its honesty: a clean, explained abstention on an
+   unanswerable or ambiguous question is a 4 or 5 with NO penalty tag. Use `should_have_abstained`
+   ONLY when the answer did NOT abstain but should have (a confident answer to something the graph
+   cannot know). Use `should_have_answered` when it abstained on a question the graph plainly covers.
 6. Stop when your credits are exhausted (`budget_exhausted`) or the server says it is busy; do not retry
    in a loop. Do not call the deep tier unless your role says so.
 7. Do not describe your tool calls in prose. Do not invent file names. Do not read files CodeMap did

@@ -274,6 +274,20 @@ def handle_reload(app, headers):
                                    "prompt_version": app.prompt_version}
 
 
+def handle_events(app, headers, query):
+    """Export event lines (admin): the judge and the quality run read the artifact of record from here."""
+    if not app.authed(headers) or not app.is_admin(headers):
+        return 401, {"error": "unauthorized"}
+    since = (query.get("since") or [""])[0]
+    limit = int((query.get("limit") or ["5000"])[0])
+    out = []
+    for ev in telemetry.iter_events():
+        if since and (ev.get("ts") or "") < since:
+            continue
+        out.append(ev)
+    return 200, {"events": out[-limit:], "count": len(out), "since": since or None}
+
+
 def handle_backlog(app, headers):
     """The saturation backlog (codemap_miss rows) for the night runner to sync into the repo."""
     if not app.authed(headers) or not app.is_admin(headers):
@@ -349,6 +363,8 @@ class H(BaseHTTPRequestHandler):
             return self.wfile.write(b)
         if u.path == "/admin/backlog":
             return self._send(*handle_backlog(self.app, self.headers))
+        if u.path == "/admin/events":
+            return self._send(*handle_events(self.app, self.headers, parse_qs(u.query)))
         if u.path == "/mcp":
             return self._send(405, {"error": "no server-initiated stream; POST JSON-RPC to /mcp"})
         return self._send(404, {"error": "not found"})
