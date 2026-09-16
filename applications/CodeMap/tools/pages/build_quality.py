@@ -101,8 +101,13 @@ def collect(root=R):
             if m:
                 dashboards.append({"title": m.group(1).strip(), "uid": m.group(2), "url": m.group(3)})
     proofs = [os.path.basename(p) for p in sorted(glob.glob(os.path.join(root, "docs", "proofs", "*.jpg")))]
+    campaign = jload(os.path.join(root, "eval", "quality", "runs", "campaign.json")) or {}
+    campaign = {k: campaign.get(k) for k in ("n_pairs", "nights", "tokens_ratio_mean", "turns_delta_mean", "seconds_delta_mean",
+                                           "rating_baseline_mean", "rating_codemap_mean", "share_fewer_tokens", "share_fewer_turns",
+                                           "share_rated_at_least_as_well", "gated")} if campaign else {}
     return {"schema": 1, "built_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "nights": nights, "decisions": decisions,
-            "optimizer_runs": runs, "prompts": prompts, "dashboards": dashboards, "proofs": proofs, "mcp_url": MCP_URL, "repo": REPO_URL}
+            "optimizer_runs": runs, "prompts": prompts, "dashboards": dashboards, "proofs": proofs, "campaign": campaign,
+            "mcp_url": MCP_URL, "repo": REPO_URL}
 
 
 # ----------------------------------------------------------------------------- rendering
@@ -240,8 +245,15 @@ def render(data):
             if k in tk:
                 out.append(f"<div class='bar'><span class='bar-label'>{esc(k)}</span><span></span><span class='bar-value'>{num(tk[k])}</span></div>")
         out.append(f"<div class='muted'>cache-read ratio {pct(last.get('cache_read_ratio'))} · p95 latency {num(last.get('latency_p95'))} ms</div></div>")
+        camp = data.get("campaign") or {}
+        if camp:
+            cls = "ok" if camp.get("gated") else "warn"
+            out.append(f"<div class='card'><h3>Gain campaign (pairs across nights)</h3><div class='big {cls}'>{num(camp.get('n_pairs'))} / 30 pairs</div>"
+                       f"<div class='muted'>tokens ratio {num(camp.get('tokens_ratio_mean'), 2)} · turns Δ {num(camp.get('turns_delta_mean'))} · seconds Δ {num(camp.get('seconds_delta_mean'))} · "
+                       f"rated at least as well {pct(camp.get('share_rated_at_least_as_well'))} · fewer tokens {pct(camp.get('share_fewer_tokens'))}; "
+                       f"the row flips at thirty pairs</div></div>")
         g = last.get("gain") or {}
-        out.append(f"<div class='card'><h3>Gains vs no-CodeMap baselines</h3><div class='big info'>{num(g.get('n_pairs'))} pairs</div>"
+        out.append(f"<div class='card'><h3>Gains vs no-CodeMap baselines (this night)</h3><div class='big info'>{num(g.get('n_pairs'))} pairs</div>"
                    f"<div class='muted'>tokens ratio {num(g.get('tokens_ratio_mean'), 2)} · turns Δ {num(g.get('turns_delta_mean'))} · seconds Δ {num(g.get('seconds_delta_mean'))}; "
                    f"a gain without its baseline row is ungated</div></div>")
         out.append("</div>")

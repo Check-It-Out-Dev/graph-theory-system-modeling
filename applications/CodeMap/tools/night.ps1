@@ -54,6 +54,9 @@ python eval\judge\calibrate.py --run "eval\judge\runs\$Date.json" 2>&1 | Tee-Obj
 python eval\quality\quality.py --date $Date --events "eval\judge\runs\events-$Date.jsonl" --judge "eval\judge\runs\$Date.json" `
     --humans "eval\humans\runs\$Date.jsonl" --out "eval\quality\runs\$Date.json" --push 2>&1 | Tee-Object -FilePath $log -Append
 
+# 3b. the pair campaign across nights (the README's gain condition counts pairs cumulatively)
+python eval\quality\campaign.py 2>&1 | Tee-Object -FilePath $log -Append
+
 # 4. the artifacts become history (the public quality page reads them)
 git -C $Repo add "applications/CodeMap/eval/humans/runs" "applications/CodeMap/eval/judge/runs" "applications/CodeMap/eval/quality/runs" "applications/CodeMap/graph/delta/backlog.jsonl" 2>$null
 $msg = "Night ${Date}: personas, judge, quality"
