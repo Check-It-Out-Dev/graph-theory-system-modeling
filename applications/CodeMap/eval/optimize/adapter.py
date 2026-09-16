@@ -47,6 +47,13 @@ def _read_trace(path):
     return out
 
 
+class _EvaluationBatch:
+    """The shape GEPA reads (outputs, scores, trajectories) when gepa itself is not installed."""
+
+    def __init__(self, outputs, scores, trajectories=None, objective_scores=None):
+        self.outputs, self.scores, self.trajectories, self.objective_scores = outputs, scores, trajectories, objective_scores
+
+
 class NavigatorAdapter:
     # gepa 0.1.4 reads these attributes (the Protocol calls them optional; the engine does not):
     # None means "use GEPA's default instruction proposal over the reflective dataset"
@@ -114,7 +121,10 @@ class NavigatorAdapter:
 
     # ---------------------------------------------------------------- GEPA protocol
     def evaluate(self, batch, candidate, capture_traces=False):
-        from gepa.core.adapter import EvaluationBatch
+        try:
+            from gepa.core.adapter import EvaluationBatch
+        except ImportError:  # the suites run without gepa (a dependency of eval/optimize only)
+            EvaluationBatch = _EvaluationBatch
         template = candidate[COMPONENT]
         problems = constraints.check(template)
         outputs, scores, trajs = [], [], []

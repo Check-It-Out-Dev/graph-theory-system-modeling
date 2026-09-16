@@ -38,13 +38,18 @@ vol = modal.Volume.from_name("codemap-train", create_if_missing=True)
 
 
 @app.function(cpu=4, memory=8192, timeout=6 * 60 * 60, secrets=[modal.Secret.from_name("claude-oauth")], volumes={"/vol": vol})
-def run_gepa(args: list[str], date: str) -> dict:
+def run_gepa(args: list[str], date: str, resume: bool = False) -> dict:
     import json
+    import shutil
     import subprocess
 
     os.chdir(REMOTE_APP)
     subprocess.run([sys.executable, "tools/pack/fetch_pack.py", "--latest"], check=True)  # the pack is a Release, never in the image
     out_dir = f"/vol/optimize/{date}"
+    # GEPA resumes silently from a run dir that exists: a second run under the same label would
+    # load an exhausted checkpoint and do nothing (seen 2026-09-16). Fresh unless asked to resume.
+    if os.path.isdir(f"{out_dir}/gepa") and not resume:
+        shutil.rmtree(f"{out_dir}/gepa")
     os.makedirs(out_dir, exist_ok=True)
     cmd = [sys.executable, "eval/optimize/run.py", "--date", date, "--out", f"{out_dir}/{date}.json",
            "--candidate-out", f"{out_dir}/{date}.template.md", "--run-dir", f"{out_dir}/gepa"] + list(args)
@@ -61,14 +66,14 @@ def run_gepa(args: list[str], date: str) -> dict:
 
 @app.local_entrypoint()
 def main(date: str = "", train: int = 8, val: int = 8, max_metric_calls: int = 60, dry_run: bool = False,
-         model: str = "claude-sonnet-5", reflection_model: str = "claude-sonnet-5", seed: int = 0):
+         model: str = "claude-sonnet-5", reflection_model: str = "claude-sonnet-5", seed: int = 0, resume: bool = False):
     import json
     import time
 
     date = date or time.strftime("%Y-%m-%d", time.gmtime())
     args = ["--train", str(train), "--val", str(val), "--max-metric-calls", str(max_metric_calls), "--model", model,
             "--reflection-model", reflection_model, "--seed", str(seed)] + (["--dry-run"] if dry_run else [])
-    res = run_gepa.remote(args, date)
+    res = run_gepa.remote(args, date, resume)
     runs = os.path.join(HERE, "runs")
     os.makedirs(runs, exist_ok=True)
     if res.get("doc"):
