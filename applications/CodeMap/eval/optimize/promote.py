@@ -56,8 +56,9 @@ def decide(run, candidate_text, current_text):
     return (not reasons), reasons
 
 
-def apply(run, candidate_text, pr=False):
+def apply(run, candidate_text, pr=False, base=None):
     version = next_version()
+    candidate_text = candidate_text.replace("\r\n", "\n").rstrip("\n") + "\n"
     with open(os.path.join(NAV, "template.md"), "w", encoding="utf-8", newline="\n") as f:
         f.write(candidate_text)
     build = os.path.join(R, "tools", "prompt", "build_navigator.py")
@@ -71,11 +72,13 @@ def apply(run, candidate_text, pr=False):
     print(f"promoted: template.md, v{version}.md, active.md, PROMPT_LOG row")
     if pr:
         br = f"prompt/v{version}"
+        base = base or subprocess.run(["git", "-C", R, "rev-parse", "--abbrev-ref", "HEAD"], capture_output=True, text=True, check=True).stdout.strip()  # NOSONAR
         subprocess.run(["git", "-C", R, "checkout", "-b", br], check=True)  # NOSONAR
         subprocess.run(["git", "-C", R, "add", "applications/CodeMap/prompts/navigator", "applications/CodeMap/eval/optimize/runs"], check=True)  # NOSONAR
         subprocess.run(["git", "-C", R, "commit", "-m", f"Navigator prompt v{version}: GEPA run {run.get('date')} ({run.get('seed_val_score')} → {run.get('best_val_score')})"], check=True)  # NOSONAR
         subprocess.run(["git", "-C", R, "push", "-u", "origin", br], check=True)  # NOSONAR
-        subprocess.run(["gh", "pr", "create", "--fill", "--head", br], check=True)  # NOSONAR
+        subprocess.run(["gh", "pr", "create", "--fill", "--head", br, "--base", base], check=True)  # NOSONAR
+        subprocess.run(["git", "-C", R, "checkout", base], check=True)  # NOSONAR
     return version
 
 
@@ -85,6 +88,7 @@ def main(argv=None):
     ap.add_argument("--candidate", default=None)
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--pr", action="store_true")
+    ap.add_argument("--base", default=None, help="pull request base (default: the current branch)")
     a = ap.parse_args(argv)
     run = json.load(open(a.run, encoding="utf-8"))
     cand_path = a.candidate or a.run.replace(".json", ".template.md")
@@ -96,7 +100,7 @@ def main(argv=None):
     ok, reasons = decide(run, candidate, current)
     print(json.dumps({"promote": ok, "reasons": reasons, "seed": run.get("seed_val_score"), "best": run.get("best_val_score")}, indent=1))
     if ok and a.apply:
-        apply(run, candidate, pr=a.pr)
+        apply(run, candidate, pr=a.pr, base=a.base)
     return 0
 
 
