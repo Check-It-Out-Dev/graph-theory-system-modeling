@@ -39,7 +39,7 @@ Names are the dashboards' names (`observability/grafana/`), one home each: `code
 
 ## Not gated
 
-Gains are `ungated` until a baseline row shares the seed; the single-night rates above are
+A night's judge κ is reported per night beside the calibration pass on exact questions (κ 0.84, n 29): on the first full night it was −0.28 on 11 rephrased rows, mostly abstentions that named the right files, so the night is recorded as uncalibrated and no README row rests on it. Judge repeatability is not yet measured: the same 54 answers judged twice differed by nine points on grounded (INCIDENTS.md). Gains are `ungated` until a baseline row shares the seed; the single-night rates above are
 descriptive, not a claim of trend; the Qwen signal is reported, not gating; the optimiser's
 validation scores are on ≤ 8 examples per run and decide a promotion, not a README row. README
 rows flip from 🟡 to ✅ only with an artifact and a check that re-reads it (`eval/ci/`).
