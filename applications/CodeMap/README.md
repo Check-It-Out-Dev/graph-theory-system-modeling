@@ -90,6 +90,10 @@ understanding is served from precomputed structure instead of re-derived per que
 Model file: `bin/models/codemap-lora-r22-q4_k_m.gguf` (sha16 `9c454526d7d0d1b0`) —
 distributed separately from git (2.5 GB); the wizard verifies and instructs.
 
+## CodeMap Remote — the served half
+
+The same engine, served: `https://codemap.checkitout.app/mcp` answers with Claude Sonnet on the owner's subscription, six synthetic users rate it every night, a calibrated judge scores it, the graph follows the code through `/codemap` decisions on GitHub issues, and the prompt improves through GEPA behind a promotion gate. Start at [`remote/README.md`](./remote/README.md) (connect, security in one paragraph, run it locally as a team), then the cards: [MODEL_CARD](./MODEL_CARD.md) · [EVAL_CARD](./EVAL_CARD.md) · [DATA_CARD](./DATA_CARD.md) · [THREAT_MODEL](./THREAT_MODEL.md) · [INCIDENTS](./INCIDENTS.md). The numbers live on the [quality page](https://check-it-out-dev.github.io/graph-theory-system-modeling/quality/) and the public dashboards listed in [`observability/grafana/public-urls.md`](./observability/grafana/public-urls.md); the design and every decision are in [`docs/07-ai-quality-governance.md`](./docs/07-ai-quality-governance.md).
+
 ## Links
 
 - **Windows installer** (one 22 MB file — app + pack + Python + llama.cpp;

@@ -1,0 +1,2652 @@
+{
+ "calibration": {
+  "agreement_rr": null,
+  "anchors": {
+   "drift": false,
+   "kappa_now": null,
+   "kappa_then": null,
+   "matched": 0,
+   "mean_abs_delta": null
+  },
+  "calibrated": false,
+  "gate": 0.6,
+  "kappa_human": -0.0842,
+  "kappa_oracle": -0.2791,
+  "n_human": 53,
+  "n_oracle": 11,
+  "n_rr": 0,
+  "verdict": "uncalibrated"
+ },
+ "note": "oracle fields re-derived deterministically after the judge run (the seed join through the night file); judge scores untouched",
+ "rows": [
+  {
+   "answer": "The rejection is host-based, not content-based, and the logic lives outside the ticket/attachment subsystem entirely. **StorageUrlValidator.java** (subsystem 3, `Rate limits & runtime config`, path `backend/.../instagram/platform/storage/service/StorageUrlValidator.java`) is a validation Rule that checks the *URL's host* against an allowed set before an attachment/storage URL is accepted â€” this is explicitly called out in the subsystem 15 and 4/204-group curation notes: \"attachment URL validation (StorageUrlValidator.java) is no longer a coverage gap â€” it is indexed as of this batch but sits in sub-3, not [support/attachments].\" So even though attachments (`TicketAttachment.java`, `ResponseAttachment.java`, etc., subsystem 15) are the domain object being uploaded, the host-allowlist/URL-shape check that can reject a syntactically/content-valid file happens in the storage/upload config bag (sub-3), separate from the ticket flow.\n\nThe graph shows StorageUrlValidator importing `ValidationTranslatableException.java` (subsystem 7, the translatable-exception layer), so a rejected host surfaces as a translatable validation exception rather than a generic error â€” consistent with how the rest of the backend reports rule failures. No indexed caller edge exists into StorageUrlValidator (it's invoked from attachment/upload service code whose call site isn't captured as a graph edge), so to see exactly which hosts are allowed/blocked, open StorageUrlValidator.java directly; for the same host-filtering pattern applied to a different domain, `VimeoUrlsValidator.java` (subsystem 8) validates social/video URLs similarly.",
+   "credits": 18.7644,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 5,
+    "tags": [
+     "great",
+     "pointer_verified"
+    ],
+    "user": "haiku-pm",
+    "verified": true
+   },
+   "id": "ee12af94-abfc-4ca5-b24b-8364d907f563",
+   "judge": {
+    "abstain": 2,
+    "correct": 2,
+    "grounded": 2,
+    "helpful": 2,
+    "located": 2,
+    "rationale": "Answer centers on StorageUrlValidator.java as the host-allowlist check, but prior investigation of this codebase flagged that entity as outdated with the current validation logic actually living in SignedUrlService, making the core claim unverifiable/likely wrong without a caveat."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": "bank",
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": true,
+    "success": true
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "StorageUrlValidator.java",
+    "ValidationTranslatableException.java",
+    "TicketAttachment.java",
+    "ResponseAttachment.java",
+    "VimeoUrlsValidator.java"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "Why does the system reject attachment URLs from certain hosts even when the file content is valid? What's the host-level filtering or validation?",
+   "qid": "BE37",
+   "reference": "StorageUrlValidator (the pentest 3.1 SSRF fix, 2026-09-02) post-dates the scan — delta-scan item. Behaviour: attachment URLs validate against a storage-host allowlist; other hosts are rejected regardless of the file. Located: StorageUrlValidator.java (Rule, sub-3). Paths in gold rows.",
+   "request_id": "ee12af94-abfc-4ca5-b24b-8364d907f563",
+   "steps": 7,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "haiku-pm"
+  },
+  {
+   "answer": "Based on what the graph shows, ownership here is genuinely split across two subsystems â€” this isn't a single-team feature:\n\n- **Subsystem 15 (Support tickets & attachments)**, group 204 (Data, deletion & support), owns the attachment *domain*: `TicketAttachment.java`, `ResponseAttachment.java`, their repositories/DTOs, and the ticket create/status flow that accepts the upload.\n- **Subsystem 3 (Rate limits & runtime config)**, group 202 (Platform runtime & shared layers), owns the *URL validation* itself: `StorageUrlValidator.java` â€” the host-allowlist check that can reject an otherwise-valid file. Sub-3 is explicitly flagged as \"lowest purity in the system (Context 27%) â€” a mixed platform bag,\" i.e. storage/upload config living alongside rate limits, health checks and Spring profiles, not attachment-specific code.\n\nThe curation notes for both 15 and 204 call this split out directly: \"attachment answers span this group and [3]: StorageUrlValidator.java validates attachment URLs but sits in the config bag [3], not in [15].\"\n\nFor a \"customer can't upload an attachment\" bug ticket: triage should start in **sub-15** (does the ticket/attachment flow even receive and store the file?) but the actual host-rejection logic to inspect/fix is in **sub-3**'s `StorageUrlValidator.java`. If your org's ownership maps to subsystems, this is a shared-boundary bug â€” file it against whoever owns platform/storage config (sub-3) first, since that's where a host gets accepted or rejected, and loop in the support-ticket owners (sub-15) if the failure is upstream of validation (e.g., the upload never reaching the validator).",
+   "credits": 2.6507,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 5,
+    "tags": [
+     "great",
+     "pointer_verified"
+    ],
+    "user": "haiku-pm",
+    "verified": true
+   },
+   "id": "c106bda1-bf39-4f89-81ea-6f15aedbef63",
+   "judge": {
+    "abstain": 2,
+    "correct": 2,
+    "grounded": 2,
+    "helpful": 2,
+    "located": 2,
+    "rationale": "Ownership answer hinges entirely on StorageUrlValidator.java as the validation owner, the same entity flagged elsewhere as outdated relative to SignedUrlService, so the confident subsystem-split claim is questionable."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "StorageUrlValidator.java",
+    "TicketAttachment.java",
+    "ResponseAttachment.java",
+    "SupportTicketService.java"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "Which backend subsystem or team owns storage URL validation and attachment uploads? Who would get a bug ticket if a customer can't upload an attachment?",
+   "qid": null,
+   "reference": null,
+   "request_id": "c106bda1-bf39-4f89-81ea-6f15aedbef63",
+   "steps": 0,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "haiku-pm"
+  },
+  {
+   "answer": "The graph gives the touch set, not the edit order (there's no dependency edge from `StorageUrlValidator.java` to the storage-config files, and it has zero indexed dependents/cohort co-change data, so sequencing is a content-level judgment call, not something the graph can confirm). With that caveat:\n\n**Likely files to touch**, all in subsystem 3 (Rate limits & runtime config, the \"mixed platform bag\" that owns storage/upload):\n- `StorageUrlValidator.java` â€” the actual host-allowlist/URL-shape check; this is where the new host pattern (e.g. Cloudinary's domain) gets added.\n- `StorageConfiguration.java` / `UnifiedStorageConfiguration.java` â€” Context-type config classes for storage; if the allowlist is externalized as a property rather than hardcoded, the binding lives here.\n- profile ymls (`application-*.yml`, per sub-3's summary) â€” if hosts are configured per environment (dev/prod), the new host may need adding there too.\n- `StorageExceptionHandler.java` / `StorageTranslatableException.java` (sub-3/sub-7) â€” only if the rejection message needs updating, unlikely for a pure allowlist addition.\n- A unit test â€” sub-3 has the pattern (`FirebaseStorageServiceUnitTest.java`) but nothing under an exact \"StorageUrlValidator\" test name was found; add/extend a validator test alongside it.\n\nI can't verify from the graph whether config or validator is edited first â€” that ordering depends on how the allowlist is wired (hardcoded list vs. externalized property), which is file content. Open `StorageUrlValidator.java` first to see which pattern applies before touching config.",
+   "credits": 5.0869,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 4,
+    "tags": [
+     "pointer_verified"
+    ],
+    "user": "haiku-pm",
+    "verified": true
+   },
+   "id": "482fef3b-d977-4965-be8c-0a2fdcc1caf6",
+   "judge": {
+    "abstain": 3,
+    "correct": 2,
+    "grounded": 3,
+    "helpful": 2,
+    "located": 2,
+    "rationale": "Appropriately hedges on edit ordering, but the touch-set is still anchored on StorageUrlValidator.java, a name flagged elsewhere as outdated versus SignedUrlService."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "StorageUrlValidator.java",
+    "StorageConfiguration.java",
+    "UnifiedStorageConfiguration.java",
+    "GcpStorageConfiguration.java",
+    "StorageExceptionHandler.java"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "If a developer is adding a new storage host (e.g., \"allow uploads from Cloudinary\"), what files do they touch and in what order?",
+   "qid": null,
+   "reference": null,
+   "request_id": "482fef3b-d977-4965-be8c-0a2fdcc1caf6",
+   "steps": 2,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "haiku-pm"
+  },
+  {
+   "answer": "Both live in the same subsystem â€” they never split. Subscription billing (Stripe payments, invoicing) and consent tracking/enforcement are both inside [11] Subscriptions, payments & consent (208 files, group 201), the largest backend subsystem. This was confirmed in the curation history: [11] was measured and kept as one module, not fragmented.\n\nWhere they touch: the consent side is anchored by `LegalConsentService.java` (18 external in-edges) and `ConsentService.java` (an A_P_A spine hub, arity 3), alongside `ConsentAdminController.java` (the subsystem's actor root) and `ConsentEnforcementFilter` (called out explicitly as the piece that returns 403-with-valid-token for unmet consent â€” noted as a cross-group caveat with [9]'s auth filters). The billing side is anchored by `StripeService.java` (an A_P_R spine hub, arity 3) plus the invoicing/retry cron machinery. Both sides share the same subsystem's entry point, `UserRepository.java` (141 external in-edges), and the same user-record dependency `User.java` in [10] (billing/consent both single-carry the 11â†’10 seam). So the concrete touch points to open first are `ConsentService.java`, `LegalConsentService.java`, and `ConsentEnforcementFilter`, cross-referenced against `StripeService.java` for where a subscription action would need to check consent state.",
+   "credits": 3.3348,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 5,
+    "tags": [
+     "pointer_verified"
+    ],
+    "user": "haiku-pm",
+    "verified": true
+   },
+   "id": "83915e1e-00e4-4d1d-bc2c-cc0b8170539f",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 4,
+    "helpful": 4,
+    "located": 5,
+    "rationale": "Correctly locates both consent and billing anchors within subsystem 11 and names concrete touch points consistent with prior session notes on the same seam."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": "bank",
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "ConsentService.java",
+    "LegalConsentService.java",
+    "ConsentEnforcementFilter.java",
+    "StripeService.java",
+    "ConsentAdminController.java",
+    "UserRepository.java",
+    "User.java"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "When the graph was reindexed, did subscription billing and consent tracking stay in one module or split into separate ones? If they're in the same codebase, point me to where consent logic touches subscription logic.",
+   "qid": "GR26",
+   "reference": "Dossier 11 v3_overlap {6:78, 7:72}: two v3 subsystems (subscriptions; consent) merged into one v4 subsystem — consolidation, not separation. The curation call is whether to keep the merge; the seam data says yes: consent enforcement is billing-adjacent by construction. Answer lives in content, not structure. Pointer: dossier 11: v3_overlap {6:78, 7:72}.",
+   "request_id": "83915e1e-00e4-4d1d-bc2c-cc0b8170539f",
+   "steps": 0,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "haiku-pm"
+  },
+  {
+   "answer": "Two separate answers here.\n\n**Owner/team**: The graph has no ownership/team metadata at all â€” it models code structure (entities, dependency edges, subsystems), not org charts or CODEOWNERS-style assignment. This is outside what CodeMap indexes. If you need the actual team, check a CODEOWNERS file, the repo's issue tracker, or ask in Slack â€” the graph can't answer this one. Abstaining on this half.\n\n**If ConsentEnforcementFilter breaks**: it's wired in as a servlet filter via `WebSecurityConfiguration.java` (INJECTS edge), sitting in the request pipeline in [11] *before* any controller â€” including `PartnershipOpportunityController.java` in [4], the campaign/opportunity entry point. Its flow shows it CONSTRAINS/INJECTS `UserCacheService.java` (cached user identity, [6]) and `LegalDocumentService.java`/`LegalDocumentType.java` (consent/terms records, [11]), with `LegalDocumentService` itself importing `ResourceNotFoundException.java` from the exception layer [7]. Subsystem [9]'s caveat explicitly groups this filter with the banned-user/email-verification filters that \"return 403 with a valid token\" â€” so the expected behavior on missing/failed consent is a 403 Forbidden, never reaching the campaign-creation logic at all, even though the JWT is valid. If the filter itself breaks (throws unexpectedly or misresolves LegalDocumentService), the user would see either that same 403/blocked response or, if the failure is unhandled, a 5xx â€” the graph doesn't encode which; open `ConsentEnforcementFilter.java` directly to confirm the exact exception thrown.",
+   "credits": 14.8482,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 4,
+    "tags": [
+     "pointer_verified"
+    ],
+    "user": "haiku-pm",
+    "verified": true
+   },
+   "id": "0b3db317-5d99-4491-84ad-2303a4b0596d",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 4,
+    "helpful": 4,
+    "located": 4,
+    "rationale": "Properly separates an unanswerable org-chart question (correct abstention) from the answerable filter-behavior question, grounded in the filter/service chain."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "ConsentEnforcementFilter.java",
+    "WebSecurityConfiguration.java",
+    "LegalDocumentService.java",
+    "UserCacheService.java",
+    "PartnershipOpportunityController.java",
+    "LegalDocumentType.java",
+    "ResourceNotFoundException.java"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "Subsystem [11] owns both subscription and consent â€” who is the owner/team? And if ConsentEnforcementFilter breaks, what does a user actually see when they try to create a new campaign without accepting terms?",
+   "qid": null,
+   "reference": null,
+   "request_id": "0b3db317-5d99-4491-84ad-2303a4b0596d",
+   "steps": 7,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "haiku-pm"
+  },
+  {
+   "answer": "Good â€” this confirms a clean answer. No direct dependency edge exists between the consent/legal-document code and StripeService or the renewal cron.\n\n**The actual chain**: `LegalDocumentService.java` and `LegalDocumentType.java` (the versioned document + policy data) are consumed by exactly three things: `ConsentEnforcementFilter.java` (the 403 gate), `LegalConsentService.java` (records acceptance, calls `LegalDocumentService`), and `TokenExchangeService.java` (in [10], token/auth glue). Their co-change cohort only pulls in `LegalController.java`/`TestLegalController.java`/`LegalDocumentRepository.java` â€” the CRUD surface around the document itself, nothing billing-side.\n\n`StripeService.java` and `SubscriptionService.java` (renewal/cron logic â€” see `SubscriptionService_CronUnitTest.java`, `SubscriptionService_Terms_IntegrationTest.java`) live in the same subsystem [11] but their 2-hop flow touches `BillingPeriodRepository`, `CompanySubscriptionRepository`, `InvoiceRecordRepository`, `SubscriptionEventRepository`, `SubscriptionPlanRepository`, `UserRepository`/`User.java` and `AppPaymentsProperties.java` â€” no `LegalDocumentService`, `LegalConsentService`, or `ConsentEnforcementFilter` in that set. The only thing genuinely shared between the two sides is `User.java`/`UserRepository.java` (both are consumers of the user record) â€” there's no CALLS/IMPORTS/INJECTS edge tying consent state to Stripe billing or the renewal cron.\n\nPractical implication: a legal-document/consent-policy edit is graph-isolated from subscription renewal â€” safe to change `LegalDocumentService`/`LegalDocumentType`/`ConsentEnforcementFilter` without touching `SubscriptionService`/`StripeService`, provided you don't also touch `User.java` fields both sides read. The \"Terms\" naming in `SubscriptionService_Terms_IntegrationTest.java` refers to plan/payment terms, not legal consent â€” worth opening that file to confirm since the graph can't disambiguate naming coincidences.",
+   "credits": 22.3918,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 5,
+    "tags": [
+     "pointer_verified"
+    ],
+    "user": "haiku-pm",
+    "verified": true
+   },
+   "id": "fa67e7df-7a32-4b6b-9b72-b7779a6eae7a",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 4,
+    "helpful": 4,
+    "located": 5,
+    "rationale": "Thorough, well-grounded dependency-chain analysis showing no edge between consent code and Stripe/cron, consistent with the earlier-mapped consent/subscription topology."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "LegalDocumentService.java",
+    "LegalConsentService.java",
+    "ConsentEnforcementFilter.java",
+    "LegalDocumentType.java",
+    "SubscriptionService.java",
+    "StripeService.java",
+    "UserRepository.java",
+    "SubscriptionService_Terms_IntegrationTest.java"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "If I need to update a legal document version or consent policy without breaking subscription renewals, what's the dependency chain? Where does a consent-policy change propagate to StripeService or the renewal cron?",
+   "qid": null,
+   "reference": null,
+   "request_id": "fa67e7df-7a32-4b6b-9b72-b7779a6eae7a",
+   "steps": 15,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "haiku-pm"
+  },
+  {
+   "answer": "This is outside what the graph can answer. checkItOut's indexed estate is a Spring Boot backend (payments, identity, auth, notifications, opportunities, tickets, addresses, FAQ, etc.) and an Angular frontend â€” there is no \"recommendation engine\" component in the subsystem index, and nothing resembling Kubernetes manifests, operators, HPA/scaling controllers, or container orchestration config appears among the 30 curated subsystems (the closest infra-adjacent slice is [3] Rate limits & runtime config, which covers Spring profiles, rate limiting, storage/health config and Cucumber test context â€” not k8s). The graph's own scope notes confirm BE `src/main/resources` and e2e-test directories are only partially indexed, but a Kubernetes operator would be a distinct deployment artifact (e.g. `.yaml` manifests under a `k8s/`/`deploy/` directory) that isn't represented anywhere in this codebase model at all â€” this looks like infrastructure that either doesn't exist in this repo or lives in a separate ops/infra repository not covered by CodeMap.\n\nThe FAQ entry \"FE05\" you mention is also not something I can verify â€” FAQ content lives in subsystem [14] (Faq.java, FaqCategory.java, FaqService.java) but I found no matching entity for that code in my search.",
+   "credits": 3.1701,
+   "disputed": false,
+   "expect": "abstain",
+   "human": {
+    "rating": 4,
+    "tags": [
+     "pointer_verified"
+    ],
+    "user": "haiku-pm",
+    "verified": true
+   },
+   "id": "288572c3-fa92-42a8-9a00-7b555e85a41c",
+   "judge": {
+    "abstain": 4,
+    "correct": 3,
+    "grounded": 2,
+    "helpful": 3,
+    "located": 5,
+    "rationale": "Correct abstention on an out-of-corpus Kubernetes question, but the closing paragraph invents a 'FE05 FAQ entry' the user never mentioned, an ungrounded non-sequitur that undercuts trust in the response."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": "probe",
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": true,
+    "success": true
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "Faq.java",
+    "FaqCategory.java",
+    "FaqService.java"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "Do we have a Kubernetes operator or scaling controller that handles auto-scaling the recommendation engine pods when load increases?",
+   "qid": "OD27",
+   "reference": null,
+   "request_id": "288572c3-fa92-42a8-9a00-7b555e85a41c",
+   "steps": 0,
+   "terminal": "abstain",
+   "tier": "nav-sonnet",
+   "user": "haiku-pm"
+  },
+  {
+   "answer": "No â€” nothing in the indexed graph matches \"recommendation,\" \"recommend,\" \"suggest,\" or \"matching.\" The closest conceptually related domain is [4] Partnership opportunity lifecycle (PartnershipOpportunity/applied-opportunity entities, permissions, reference data like dictionary/city/currency/service type), which handles opportunity browsing and applications but has no scoring/ranking/suggestion logic surfaced as a named entity â€” it's a CRUD/permission/reference-data domain, not a recommender. There's also no \"deployments\" or \"infrastructure\" subsystem in the index at all (the 30 curated subsystems cover backend domains, shared/config layers, auth, and the Angular frontend only); the codebase's documented scope gaps (unindexed `e2e-tests/*.ts` and `src/main/resources`) don't include any separate infra/deployment repo either â€” this graph simply doesn't model one.\n\nGiven the zero-hit searches across multiple synonymous terms (satisfying the breadth-before-stopping rule) and no subsystem describing itself as a recommendation/scoring engine, I'm confident this component doesn't exist in what's indexed. It's possible a recommendation feature exists in a genuinely separate repository CodeMap has never scanned, but I have no evidence for or against that â€” only that it isn't part of checkItOut's backend or frontend as captured here.",
+   "credits": 8.1103,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 5,
+    "tags": [
+     "great",
+     "pointer_verified"
+    ],
+    "user": "haiku-pm",
+    "verified": true
+   },
+   "id": "1a8933ee-a7ac-4e8f-b78c-0f5bb1b4de2e",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 4,
+    "helpful": 4,
+    "located": 5,
+    "rationale": "Well-reasoned abstention with breadth-before-stopping justification and no fabricated entities, appropriate for a genuinely absent recommendation engine."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.0.1",
+   "pointers": [],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "Is there a recommendation engine component in the checkItOut system at all â€” either in the backend, frontend, or in a separate deployments/infrastructure repository?",
+   "qid": null,
+   "reference": null,
+   "request_id": "1a8933ee-a7ac-4e8f-b78c-0f5bb1b4de2e",
+   "steps": 4,
+   "terminal": "abstain",
+   "tier": "nav-sonnet",
+   "user": "haiku-pm"
+  },
+  {
+   "answer": "No dedicated recommendation/matching engine exists â€” discovery is implemented as query/filter-based browsing, not a scoring or ML-driven recommender. It's owned by subsystem [4] Partnership opportunity lifecycle on the backend, paired with [171] FE opportunities & applications on the frontend.\n\nMechanism: `PartnershipOpportunityService.java` (sub 4, 1611 lines) is the domain service backing both browsing directions â€” companies discovering influencers/opportunities and influencers finding partnership opportunities â€” and its `_Query_IntegrationTest` suite confirms filterable/queryable listing rather than any ranking algorithm. Filtering itself goes through `AppliedOpportunityContentSpecificationBuilder.java` (sub 4) for applied-opportunity content and the generic `SpecificationBuilder.java` (48 ext in-edges, sub 8) for JPA Specification-based query construction â€” this is the \"matching\" mechanism: predicate/criteria filtering, not recommendation. Facets/filters are populated from `DictionaryService.java` (22 ext in-edges, sub 4) and its reference-data family (city, currency, service type, content type, platform). `PermissionUtils.java` (68 ext in-edges) gates who can see what. On the frontend, `opportunity.service.ts` and `applied-opportunity.service.ts` (both sub [171], routing shared plumbing through [177]) drive the browsing/detail screens that consume these filtered queries.\n\nSo: discovery = structured filter/search over reference-data-tagged listings, not a recommendation engine.",
+   "credits": 8.5525,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 5,
+    "tags": [
+     "great",
+     "pointer_verified"
+    ],
+    "user": "haiku-pm",
+    "verified": true
+   },
+   "id": "dfc9fb8d-f1d7-4e7e-89d4-806ed60d25c3",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 4,
+    "helpful": 4,
+    "located": 5,
+    "rationale": "Correctly identifies filter/specification-based discovery over a real recommender and names concrete backend and frontend files backing the claim."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "PartnershipOpportunityService.java",
+    "AppliedOpportunityContentSpecificationBuilder.java",
+    "SpecificationBuilder.java",
+    "DictionaryService.java",
+    "PermissionUtils.java",
+    "opportunity.service.ts",
+    "applied-opportunity.service.ts"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "When a company wants to discover relevant influencers or an influencer wants to find relevant partnership opportunities, how is that matching/discovery implemented? What subsystem owns that?",
+   "qid": null,
+   "reference": null,
+   "request_id": "dfc9fb8d-f1d7-4e7e-89d4-806ed60d25c3",
+   "steps": 5,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "haiku-pm"
+  },
+  {
+   "answer": "This confirms the picture: no search-index (Elasticsearch/Solr) layer and no dedicated cache in front of opportunity discovery â€” `find(index)` and `find(cache)` turn up nothing tied to [4]. The flow from `PartnershipOpportunityController.java` runs straight through `RateLimit.java`/`RateLimitKeyType.java`/`RateLimitProfile.java` (sub [3]) â†’ `PartnershipOpportunityService.java` â†’ `BaseService.java` â†’ `SpecificationBuilder.java`/`RepositoryResolver.java`/`BaseRepository.java` â†’ the DB via JPA Specifications, with `DictionaryService.java` supplying facet translations. No caching or indexing layer sits between the query and the database.\n\n**Customer-visible failure**: If this degrades under load, the opportunity browse/detail screens ([171] `opportunity.service.ts`, `applied-opportunity.service.ts`) hang or error â€” companies can't discover influencers and influencers can't discover opportunities, i.e. the core discovery/browse experience breaks, not payments or auth (those are separate subsystems/services).\n\n**Protection that does exist**: only the generic `RateLimit`/`RateLimitProfile`/`RateLimitKeyType` annotations (sub [3]) throttle request volume per endpoint via `RateLimitInterceptor`; on the frontend `rate-limit-cache.interceptor.ts` and `rate-limit-state.service.ts` (sub [177]) surface that state. There is no query-result cache, no search index, and no autoscaling controller anywhere in the graph â€” every filter query hits `BaseRepository`/JPA directly, so slowness under load is a raw DB-query-performance problem, not something mitigated by caching or an index.",
+   "credits": 8.3043,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 5,
+    "tags": [
+     "great",
+     "pointer_verified"
+    ],
+    "user": "haiku-pm",
+    "verified": true
+   },
+   "id": "4adec5b0-497a-40f4-8471-921c3ce4a09b",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 4,
+    "helpful": 4,
+    "located": 5,
+    "rationale": "Consistent, well-grounded follow-up confirming no cache/index layer and tracing the rate-limit-only protection path with concrete files."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "PartnershipOpportunityController.java",
+    "PartnershipOpportunityService.java",
+    "SpecificationBuilder.java",
+    "RepositoryResolver.java",
+    "BaseRepository.java",
+    "RateLimit.java",
+    "rate-limit-cache.interceptor.ts",
+    "DictionaryService.java"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "If the partnership opportunity filtering/search breaks or gets slow under load, what does a customer experience fail? And is there any caching, indexing, or scaling layer protecting this discovery flow?",
+   "qid": null,
+   "reference": null,
+   "request_id": "4adec5b0-497a-40f4-8471-921c3ce4a09b",
+   "steps": 5,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "haiku-pm"
+  },
+  {
+   "answer": "No hits for \"LayoutService\", \"classy\", or \"with-banner\" as literal strings anywhere in the graph, and `app.routes.ts` shows no edges to `layout.component.ts` or `auth-layout.component.ts` (only two INJECTS edges to unrelated files). The graph has no config-property or feature-flag entity for this â€” layout selection between authenticated ('classy') and auth-page ('with-banner') styling is almost certainly wired directly in `app.routes.ts` route data/component assignment (routing to `LayoutComponent` vs `AuthLayoutComponent`), which lives in subsystem [177] (FE shell). There is no separate config file or guard entity indexed for it.\n\nThis is a case where the graph cannot fully answer: the actual gating mechanism (literal strings 'classy'/'with-banner', any config property) is only visible in file content, not in extracted edges. Open `app.routes.ts` (routing/layout assignment), `layout.component.ts` (the 'classy' authenticated shell) and `auth-layout.component.ts` (the auth-page variant) directly to see how the switch is coded â€” no dedicated LayoutService, config file, or guard entity was found in the index for this.",
+   "credits": 15.9209,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 4,
+    "tags": [
+     "pointer_wrong"
+    ],
+    "user": "haiku-ops",
+    "verified": true
+   },
+   "id": "40b8ec83-7855-4a77-bdec-beab8fcb60c6",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 4,
+    "helpful": 4,
+    "located": 4,
+    "rationale": "Honestly reports no dedicated config/flag entity exists and points to the two layout components and app.routes.ts as the actual place to check."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "app.routes.ts",
+    "layout.component.ts",
+    "auth-layout.component.ts",
+    "shell-status.service.ts"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "Which configuration file or feature flag gates the layout selection between 'classy' (authenticated) and 'with-banner' (auth pages)? Is there a config property or guard that controls this?",
+   "qid": null,
+   "reference": null,
+   "request_id": "40b8ec83-7855-4a77-bdec-beab8fcb60c6",
+   "steps": 12,
+   "terminal": "abstain",
+   "tier": "nav-sonnet",
+   "user": "haiku-ops"
+  },
+  {
+   "answer": "ShedLock's distributed-lock configuration lives in **ShedLockConfig.java** (subsystem 12, Notifications & domain events, package `notification/email/`) â€” a small (17-line) Context/config class. The graph records zero explicit dependency edges into it (annotation-driven `@SchedulerLock` usage isn't captured by the extractor, consistent with the system-wide note that TRIGGERS/event-style edges are under-extracted), so which jobs actually apply the lock is a content-level fact to confirm by opening the file and each job.\n\nThe candidate scheduled jobs (all `*CronJob.java` Actors) found via `find(\"Cron\")` are:\n- **EmailCronJob.java** (sub 12) â€” same subsystem as ShedLockConfig, most likely direct user\n- **InvoiceRetryCronJob.java**, **SubscriptionPeriodProcessorCronJob.java**, **TermsGraceProcessorCronJob.java**, **TrialExpiryNotifierCronJob.java**, **AnonymousConsentCleanupCronJob.java**, **ConsentEnforcementCronJob.java**, **NoConsentAccountCleanupCronJob.java** (all sub 11, Subscriptions/payments/consent lifecycle crons)\n- **DeferredDeletionCronJob.java** (sub 5, Account deletion)\n\nOpen ShedLockConfig.java first to see the lock-provider bean/config, then grep each `*CronJob.java` for `@SchedulerLock` to see which actually declare a lock name â€” the graph pins location but not the annotation usage itself.",
+   "credits": 11.0264,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 5,
+    "tags": [
+     "great",
+     "pointer_verified"
+    ],
+    "user": "haiku-ops",
+    "verified": true
+   },
+   "id": "0f5d4c7e-ccb3-4b47-be7c-b3b83e50096a",
+   "judge": {
+    "abstain": 4,
+    "correct": 3,
+    "grounded": 4,
+    "helpful": 4,
+    "located": 4,
+    "rationale": "Correctly locates ShedLockConfig.java and most cron jobs but omits ConsentEnforcementCronJob and NoConsentAccountCleanupCronJob from the 9-job set."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": "probe",
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": true,
+    "success": true
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "ShedLockConfig.java",
+    "EmailCronJob.java",
+    "InvoiceRetryCronJob.java",
+    "SubscriptionPeriodProcessorCronJob.java",
+    "TermsGraceProcessorCronJob.java",
+    "TrialExpiryNotifierCronJob.java",
+    "AnonymousConsentCleanupCronJob.java",
+    "DeferredDeletionCronJob.java"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "Which scheduled jobs use ShedLock, and where is the distributed lock configured?",
+   "qid": "OD13",
+   "reference": null,
+   "request_id": "0f5d4c7e-ccb3-4b47-be7c-b3b83e50096a",
+   "steps": 5,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "haiku-ops"
+  },
+  {
+   "answer": "The graph doesn't capture annotation parameter values (`@Scheduled(cron=...)` / `fixedDelay=...` are content inside each file, not modeled as graph edges or properties) â€” this is a content-level fact, not a structural one, so I can't extract the actual cron expressions from the graph itself.\n\nWhat I can confirm structurally: the 9 job files and where they live â€”\n- **EmailCronJob.java** (sub 12, notifications)\n- **InvoiceRetryCronJob.java**, **SubscriptionPeriodProcessorCronJob.java**, **TermsGraceProcessorCronJob.java**, **TrialExpiryNotifierCronJob.java**, **AnonymousConsentCleanupCronJob.java**, **ConsentEnforcementCronJob.java**, **NoConsentAccountCleanupCronJob.java** (all sub 11, subscriptions/consent lifecycle)\n- **DeferredDeletionCronJob.java** (sub 5, account deletion)\n\nTo get the actual schedule values, open each file and look for its `@Scheduled(...)` annotation directly â€” that's the fastest path since there are only 9 files. I'm abstaining on the specific values themselves since fabricating cron expressions would be worse than saying the graph can't answer this.",
+   "credits": 2.5495,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 4,
+    "tags": [
+     "pointer_verified"
+    ],
+    "user": "haiku-ops",
+    "verified": true
+   },
+   "id": "cf0e2c3c-a99b-48c8-a9ec-9be82c630cf7",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 5,
+    "helpful": 4,
+    "located": 5,
+    "rationale": "Correctly abstains on annotation-parameter values not captured by the graph, though the listed job set is missing DeferredDeletionCronJob."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "EmailCronJob.java",
+    "InvoiceRetryCronJob.java",
+    "SubscriptionPeriodProcessorCronJob.java",
+    "TermsGraceProcessorCronJob.java",
+    "TrialExpiryNotifierCronJob.java",
+    "AnonymousConsentCleanupCronJob.java",
+    "ConsentEnforcementCronJob.java",
+    "NoConsentAccountCleanupCronJob.java",
+    "DeferredDeletionCronJob.java"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "For each of the 9 scheduled jobs, what is the cron expression or fixed-delay schedule? List the job name and its @Scheduled value.",
+   "qid": null,
+   "reference": null,
+   "request_id": "cf0e2c3c-a99b-48c8-a9ec-9be82c630cf7",
+   "steps": 0,
+   "terminal": "abstain",
+   "tier": "nav-sonnet",
+   "user": "haiku-ops"
+  },
+  {
+   "answer": "The graph doesn't index literal log message strings or log-statement content â€” that's inside method bodies, not a modeled entity or edge. ShedLock itself (the library) typically logs at DEBUG/TRACE when a lock is not acquired (e.g. \"Not executing ... lock is held\") and the job class only logs whatever custom log statements the author wrote, if any â€” none of that text is discoverable from graph structure.\n\nWhat I can point to structurally: **ShedLockConfig.java** (sub 12) for the lock-provider setup, and subsystem **[7] Translatable exceptions & logging** (the LAYER the whole backend imports for exception/logging infrastructure â€” e.g. `BaseExceptionHandler`, `AuthenticationExceptionHandler`) in case a shared logging pattern or exception wraps scheduling failures. Also check each `*CronJob.java` file directly (EmailCronJob, InvoiceRetryCronJob, SubscriptionPeriodProcessorCronJob, TermsGraceProcessorCronJob, TrialExpiryNotifierCronJob, AnonymousConsentCleanupCronJob, ConsentEnforcementCronJob, NoConsentAccountCleanupCronJob, DeferredDeletionCronJob) and the app's logging config in subsystem [3] (Rate limits & runtime config, which holds profile ymls and logging-adjacent Context files) for a logback/log-level setting that might elevate ShedLock's own logger.\n\nThis is a content/log-line question the graph cannot answer; abstaining rather than fabricating specific message text.",
+   "credits": 2.6583,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 4,
+    "tags": [
+     "pointer_verified"
+    ],
+    "user": "haiku-ops",
+    "verified": true
+   },
+   "id": "aa18ce0c-a9dd-4e5d-ad14-cc5e4e2c0eca",
+   "judge": {
+    "abstain": 5,
+    "correct": 3,
+    "grounded": 3,
+    "helpful": 4,
+    "located": 4,
+    "rationale": "Appropriately abstains on log-string content but the link to subsystem 7 exception/logging infra is speculative and not tied to concrete edges."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "ShedLockConfig.java",
+    "EmailCronJob.java",
+    "InvoiceRetryCronJob.java",
+    "AnonymousConsentCleanupCronJob.java",
+    "DeferredDeletionCronJob.java"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "When a ShedLock scheduled job fails or is skipped (lock conflict), what log lines should the on-call operator watch for? Are there specific error patterns or INFO messages logged when a lock is acquired or when a job is skipped because the lock is held elsewhere?",
+   "qid": null,
+   "reference": null,
+   "request_id": "aa18ce0c-a9dd-4e5d-ad14-cc5e4e2c0eca",
+   "steps": 0,
+   "terminal": "abstain",
+   "tier": "nav-sonnet",
+   "user": "haiku-ops"
+  },
+  {
+   "answer": "The graph doesn't model annotation parameters or property-key-to-flag bindings (`@ConditionalOnProperty`, `@Value`, YAML keys) as edges â€” those live inside file content, not as structural relations. Searching for `ConditionalOnProperty` or a `SchedulingConfig` entity returned nothing, confirming this is genuinely content, not a graph gap I can navigate around.\n\nWhat the graph does surface as relevant:\n- **PaymentsDisabledBootGuard.java** (sub 11, Subscriptions/payments/consent) â€” described in the subsystem summary as \"the payments boot guard,\" which plausibly gates payment-related crons (InvoiceRetryCronJob, SubscriptionPeriodProcessorCronJob, TermsGraceProcessorCronJob, TrialExpiryNotifierCronJob, and the consent crons) at startup rather than per-run.\n- **application.yml** (sub 3, Rate limits & runtime config) â€” the profile YAML family (`application-*.yml`, including dev-lite) is where any `scheduling.*` or per-job `enabled` flags would be declared, if they exist.\n\nNeither result gives per-job flag names â€” I'd be guessing to fill in the 9-job table. Open `PaymentsDisabledBootGuard.java` and grep each `*CronJob.java` file for `@ConditionalOnProperty`/`@Value`, then cross-check `application.yml` (and sibling profile files in sub 3) for matching keys.",
+   "credits": 6.4266,
+   "disputed": false,
+   "expect": "answer",
+   "human": null,
+   "id": "32745ef1-7a18-4260-9040-e613e691ef1b",
+   "judge": {
+    "abstain": 5,
+    "correct": 3,
+    "grounded": 4,
+    "helpful": 4,
+    "located": 4,
+    "rationale": "Correctly abstains on annotation-parameter content; the PaymentsDisabledBootGuard-to-crons connection is plausible but unverified speculation."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "PaymentsDisabledBootGuard.java",
+    "application.yml",
+    "EmailCronJob.java",
+    "InvoiceRetryCronJob.java",
+    "AnonymousConsentCleanupCronJob.java",
+    "DeferredDeletionCronJob.java"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "Which application properties, environment variables, or @ConditionalOnProperty flags control whether scheduled jobs run or are gated? For each of the 9 cron jobs, what flags enable/disable them?",
+   "qid": null,
+   "reference": null,
+   "request_id": "32745ef1-7a18-4260-9040-e613e691ef1b",
+   "steps": 5,
+   "terminal": "abstain",
+   "tier": "nav-sonnet",
+   "user": "haiku-ops"
+  },
+  {
+   "answer": "The gate lives in **subsystem 11** (Subscriptions, payments & consent), in `AppPaymentsProperties.java` â€” a `@ConfigurationProperties`-style resource class bound by `AppPaymentsConfiguration.java`, which `PaymentsDisabledBootGuard.java` (in `subscription/config/`) reads at startup to decide whether to fail fast. The actual property name/value binding is file content the graph doesn't expose textually, so I can't confirm from the graph alone whether it's literally `app.payments.enabled` or a differently-named nested property â€” that detail lives inside `AppPaymentsProperties.java` and the profile ymls (`application-*.yml` in subsystem 3, e.g. `application-prod.yml`, `application-test.yml`) where it would be set. `AppPaymentsProperties` fans out to 12 consumers including `SubscriptionService.java`, `PublicConfigController.java`, and two cron jobs (`SubscriptionPeriodProcessorCronJob.java`, `TermsGraceProcessorCronJob.java`), plus a dedicated `PaymentsTogglePresence_IntegrationTest.java` and `payments-off.feature` BDD test â€” open those to see the exact property key and its effective values across profiles.\n\nTo confirm the exact property name, open `AppPaymentsProperties.java` (bears the `@ConfigurationProperties(prefix=...)` annotation) and check the profile ymls in subsystem 3.",
+   "credits": 14.2523,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 5,
+    "tags": [
+     "pointer_verified"
+    ],
+    "user": "haiku-ops",
+    "verified": true
+   },
+   "id": "99735857-acfb-4131-919c-d716de5f7239",
+   "judge": {
+    "abstain": 3,
+    "correct": 3,
+    "grounded": 4,
+    "helpful": 3,
+    "located": 4,
+    "rationale": "Identifies the right config classes but never confirms or denies the specific property name the user asked about, leaving the core question unresolved."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "AppPaymentsProperties.java",
+    "AppPaymentsConfiguration.java",
+    "PaymentsDisabledBootGuard.java",
+    "SubscriptionService.java",
+    "PublicConfigController.java",
+    "PaymentsTogglePresence_IntegrationTest.java",
+    "payments-off.feature",
+    "application-prod.yml"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "Which config file or property gates the PaymentsDisabledBootGuard? Is it just app.payments.enabled?",
+   "qid": null,
+   "reference": null,
+   "request_id": "99735857-acfb-4131-919c-d716de5f7239",
+   "steps": 10,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "haiku-ops"
+  },
+  {
+   "answer": "Based on the graph structure (from the earlier flow/impact traversal), `PaymentsDisabledBootGuard.java` has no edges to any cron/scheduled-task entity, no co-change cohort, and only one dependent (`PaymentsDisabledBootGuardUnitTest.java`). Its only outgoing edges are to `SubscriptionStatus.java` and `CompanySubscriptionRepository.java` (IMPORTS/INJECTS/VALIDATES) â€” no `SubscriptionPeriodProcessorCronJob.java` or `TermsGraceProcessorCronJob.java` in that walk. The name itself (\"BootGuard\") and its Rule type also point to a one-shot startup check rather than a recurring task.\n\nThe two cron jobs (`SubscriptionPeriodProcessorCronJob.java`, `TermsGraceProcessorCronJob.java`) are separate consumers of the *same config* (`AppPaymentsProperties.java`) â€” they each independently check the payments-enabled flag at their own scheduled run time â€” but they are not wired to or triggered by the boot guard itself. So: no, there's no cron/scheduled task tied to the guard; it fires once at application startup (likely via `ApplicationRunner`/`@PostConstruct`, confirm in file content), while the crons separately re-check the same property on their own schedule.",
+   "credits": 8.2367,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 5,
+    "tags": [
+     "pointer_verified"
+    ],
+    "user": "haiku-ops",
+    "verified": true
+   },
+   "id": "d71dc284-8d08-4587-bcc7-9c7abd5a07db",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 4,
+    "helpful": 5,
+    "located": 5,
+    "rationale": "Gives a direct, edge-grounded negative answer distinguishing the one-shot boot guard from the separately-scheduled cron jobs."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "PaymentsDisabledBootGuard.java",
+    "AppPaymentsProperties.java",
+    "SubscriptionPeriodProcessorCronJob.java",
+    "TermsGraceProcessorCronJob.java",
+    "PaymentsDisabledBootGuardUnitTest.java"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "Is there a cron job or scheduled task involved with PaymentsDisabledBootGuard, or does this only run once at startup?",
+   "qid": null,
+   "reference": null,
+   "request_id": "d71dc284-8d08-4587-bcc7-9c7abd5a07db",
+   "steps": 1,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "haiku-ops"
+  },
+  {
+   "answer": "The graph doesn't capture literal log/exception message strings (that's file content), so I can't quote the exact text, but I can point you at exactly where to look.\n\n`PaymentsDisabledBootGuard.java` itself (subsystem 11, `subscription/config/`) is the first file to open â€” at only 58 lines, its own log/throw statement is the primary source. Note that in the traversal, the boot guard's only dependency edges are to `SubscriptionStatus.java` and `CompanySubscriptionRepository.java` (IMPORTS/INJECTS/VALIDATES) â€” it does **not** import `PaymentsDisabledException.java`, so the guard likely throws something more generic (e.g. `IllegalStateException`) or logs directly rather than reusing that domain exception.\n\n`PaymentsDisabledException.java` (subsystem 11, `subscription/exception/`) is a related but distinct exception â€” it's used at request-time by `SubscriptionService.java` when payments are toggled off, and formatted by `BusinessExceptionHandler.java` (subsystem 7, the shared exception-handler layer) into an API response. That's the runtime-toggle path, not the boot-time failure path, but the message wording there may be a close sibling if you're trying to guess intent.\n\nAlso check `PaymentsDisabledBootGuardUnitTest.java` (its only dependent) and `PaymentsTogglePresence_IntegrationTest.java` / `payments-off.feature` â€” tests/BDD specs commonly assert on the exact log or exception text, which is the fastest way to confirm the real string without reading guard internals cold.",
+   "credits": 5.5135,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 4,
+    "tags": [
+     "pointer_verified"
+    ],
+    "user": "haiku-ops",
+    "verified": true
+   },
+   "id": "932cabd8-a8f4-4223-a168-30cc7ce7d80a",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 4,
+    "helpful": 4,
+    "located": 4,
+    "rationale": "Appropriately abstains on literal log text while pointing to the guard file, its test, and a plausible sibling exception class."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "PaymentsDisabledBootGuard.java",
+    "PaymentsDisabledBootGuardUnitTest.java",
+    "PaymentsDisabledException.java",
+    "BusinessExceptionHandler.java",
+    "SubscriptionService.java",
+    "payments-off.feature",
+    "PaymentsTogglePresence_IntegrationTest.java"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "What error message or log line should I check first if the boot guard fires and stops the app?",
+   "qid": null,
+   "reference": null,
+   "request_id": "932cabd8-a8f4-4223-a168-30cc7ce7d80a",
+   "steps": 2,
+   "terminal": "abstain",
+   "tier": "nav-sonnet",
+   "user": "haiku-ops"
+  },
+  {
+   "answer": "Based on the graph, this is a genuine gap rather than something I can trace end-to-end. Here's what the graph does show and where it breaks down:\n\n**What controls language in general:** `AppLanguageFilter.java` (subsystem [7], translation package, alongside `MessageSourceConfig.java`) is the request-scoped language-resolution filter, backed by `messages_en.properties` / `messages_pl.properties` (subsystem [16]). This is the mechanism used for translating exception/validation messages on HTTP responses.\n\n**The gap:** `AppLanguageFilter.java` has zero traced dependents in the graph (it's wired by Spring as a servlet filter, not called via explicit code references), and `MessageSourceConfig.java` likewise shows no dependents. Critically, both are *request*-scoped constructs â€” a cron job (`InvoiceRetryCronJob.java` â†’ `InvoiceRetryService.java`, subsystem [11]) has no HTTP request/Accept-Language header to resolve against. Tracing `InvoiceRetryService.java`'s flow shows it touches `CompanyDataRepository`, `InvoiceRecordRepository`, and `InvoicingPort`, but the graph shows **no edge to `EmailService.java`** or any language/locale-bearing entity â€” TRIGGERS/event-consumer edges are documented as globally under-extracted (only 6 in the whole graph), so cronâ†’email language wiring is exactly the kind of link likely missing from the index.\n\nI can't confirm from the graph whether cron emails read a stored per-user language preference (e.g. on `User.java` or `UserPreferences.java`) or default to a fixed locale. Open `InvoiceRetryService.java`, `EmailService.java`, and `AppLanguageFilter.java` directly to check for a `Locale`/language field or parameter â€” this needs file content, not graph structure.",
+   "credits": 21.9853,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 4,
+    "tags": [
+     "pointer_verified"
+    ],
+    "user": "haiku-ops",
+    "verified": true
+   },
+   "id": "7fbb58b0-a28b-4d3f-bdf3-c2b042ea1a58",
+   "judge": {
+    "abstain": 5,
+    "correct": 3,
+    "grounded": 4,
+    "helpful": 4,
+    "located": 4,
+    "rationale": "Correctly identifies a genuine graph gap between cron jobs and language resolution, with clear reasoning though partly speculative."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": "bank",
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": true,
+    "success": false
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "AppLanguageFilter.java",
+    "MessageSourceConfig.java",
+    "InvoiceRetryService.java",
+    "EmailService.java",
+    "messages_pl.properties",
+    "messages_en.properties",
+    "InvoiceRetryCronJob.java"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "When a cron job sends a transactional email (invoice reminder, consent notification), how is the email language (Polish vs English) determined? Which service or config controls that?",
+   "qid": "BE28",
+   "reference": "A cron has no request context, so language comes from the recipient's stored preference, not AppLanguageFilter; EmailCronJob renders from messages_{lang}.properties per user. Located: AppLanguageFilter.java (Rule, sub-7); EmailCronJob.java (Actor, sub-12). Paths in gold rows.",
+   "request_id": "7fbb58b0-a28b-4d3f-bdf3-c2b042ea1a58",
+   "steps": 19,
+   "terminal": "abstain",
+   "tier": "nav-sonnet",
+   "user": "haiku-ops"
+  },
+  {
+   "answer": "The graph gives a fairly clear negative result here, though with a caveat about its limits.\n\n`NotificationEmailService.java` (subsystem [12], the notification domain) is invoked only by `EmailCronJob.java` (its sole dependent â€” INJECTS + PERFORMS). Tracing its outbound edges, `NotificationEmailService.java` imports only `Notification.java`, `NotificationSnapshot.java`, `NotificationType.java`, and `ValidationTranslatableException.java` â€” domain and exception types, not any config/properties class. It has **no edge to `application.yml`**, to `RateLimitProfile.java`, or to any `@ConfigurationProperties`/`Environment`-style entity in subsystem [3] (where all the `application-*.yml` profiles and their bound config classes live). `application.yml` itself shows zero dependents in the graph, meaning no indexed Java class is traced as reading from it via import/injection edges.\n\nSo structurally, the graph shows no wired configuration flag feeding into `NotificationEmailService`'s language choice â€” consistent with a hardcoded default rather than an externalized property. That said, this is an absence-of-evidence result: `@Value(\"${...}\")` field injection of a primitive/string property often doesn't produce a class-level IMPORTS/INJECTS edge in this graph, so a property like `notification.email.default-locale` could exist in `application.yml` content without appearing as an edge. Confirming requires opening `NotificationEmailService.java` (look for `resolveLocale()` and any `@Value`) and grepping `application*.yml` in subsystem [3] directly.",
+   "credits": 10.0487,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 5,
+    "tags": [
+     "pointer_verified"
+    ],
+    "user": "haiku-ops",
+    "verified": true
+   },
+   "id": "5888ed8b-fc65-4fcd-ad1c-649d5a76b132",
+   "judge": {
+    "abstain": 4,
+    "correct": 4,
+    "grounded": 4,
+    "helpful": 4,
+    "located": 5,
+    "rationale": "Gives a well-grounded negative finding (no wired config edge) while honestly flagging the @Value blind spot in the extractor."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "NotificationEmailService.java",
+    "EmailCronJob.java",
+    "application.yml",
+    "RateLimitProfile.java"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "Is there a configuration flag or property that controls which language cron emails use? Check application.yml / environment properties that might override the hardcoded Polish default in NotificationEmailService.resolveLocale().",
+   "qid": null,
+   "reference": null,
+   "request_id": "5888ed8b-fc65-4fcd-ad1c-649d5a76b132",
+   "steps": 9,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "haiku-ops"
+  },
+  {
+   "answer": "This one I can't answer from the graph, and I want to be upfront rather than guess at log strings.\n\nThe code graph indexes structural entities and typed dependency edges (IMPORTS, CALLS, INJECTS, PERFORMS, etc.) â€” it has no visibility into log statement content (`log.info(...)`, `log.error(...)` text) inside any file. It can tell you *where* the send-attempt and failure-handling logic likely live structurally, but not what they print.\n\nBased on the two prior lookups, the entities worth opening directly for actual log lines are:\n- `EmailCronJob.java` (subsystem [12]) â€” the cron trigger; likely logs job start/end and iteration counts.\n- `NotificationEmailService.java` (subsystem [12], `resolveLocale()` lives here) â€” most likely place for a per-recipient send-attempt log and any locale-resolution log.\n- `EmailService.java` (subsystem [10]) â€” the lower-level mail-sending service that `NotificationEmailService` would ultimately delegate to for actual SMTP dispatch; a natural place for success/failure logging around the transport call.\n- `ValidationTranslatableException.java` and the exception hierarchy in [7] â€” if failures are surfaced as translatable exceptions, the handler classes there (e.g. `BaseExceptionHandler`) are where a failure gets logged/translated before propagating.\n\nI don't have grep-able log strings to give you â€” that's file content, not graph structure. Open `NotificationEmailService.java` and `EmailService.java` and search for `log.` calls; that will show the exact messages to grep for.",
+   "credits": 2.7465,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 4,
+    "tags": [
+     "pointer_verified"
+    ],
+    "user": "haiku-ops",
+    "verified": true
+   },
+   "id": "b2f18000-8b07-4630-9c09-4e27482cec96",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 5,
+    "helpful": 4,
+    "located": 5,
+    "rationale": "Correctly recognizes log-string content is outside graph scope and points to the right structural files to open."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "NotificationEmailService.java",
+    "EmailService.java",
+    "EmailCronJob.java",
+    "ValidationTranslatableException.java"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "In the logs, what are the key log statements I should grep for when troubleshooting cron email language or delivery failures? Which service logs the send attempt vs. which logs the failure?",
+   "qid": null,
+   "reference": null,
+   "request_id": "b2f18000-8b07-4630-9c09-4e27482cec96",
+   "steps": 0,
+   "terminal": "abstain",
+   "tier": "nav-sonnet",
+   "user": "haiku-ops"
+  },
+  {
+   "answer": "This is content the graph can't provide â€” `@Scheduled` cron expressions, ShedLock annotation values (`name`, `lockAtLeastFor`, `lockAtMostFor`) are annotation parameters/string literals, not structural entities or edges the graph indexes. I won't fabricate a cron string or lock name.\n\nWhat the graph does confirm structurally:\n- The class is **`EmailCronJob.java`**, entity type Actor, subsystem [12] (Notifications & domain events). It's the sole caller of `NotificationEmailService.java` (edges: INJECTS + PERFORMS), so it's the top-level scheduled trigger for cron emails in this domain.\n- For the invoicing side, the equivalent is **`InvoiceRetryCronJob.java`** (subsystem [11]), which similarly INJECTS/PERFORMS `InvoiceRetryService.java`.\n- Neither cron job showed any traced edge to `application.yml` or to a config/properties class in subsystem [3] (where profile ymls and rate-limit config live) â€” so if the schedule is externalized (e.g. `@Scheduled(cron = \"${some.property}\")`), that binding isn't visible as a graph edge, same caveat as the locale question.\n\nTo get the actual cron expression, ShedLock name/lock durations, and frequency, open `EmailCronJob.java` and `InvoiceRetryCronJob.java` directly and read the `@Scheduled`/`@SchedulerLock` annotations, then check `application.yml` (subsystem [3]) and its sibling profile files for any `${...}` property the cron expression references.",
+   "credits": 2.7741,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 5,
+    "tags": [
+     "pointer_verified"
+    ],
+    "user": "haiku-ops",
+    "verified": true
+   },
+   "id": "5acaf475-8f6e-4ebe-8c8b-1680e5ad8cb0",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 5,
+    "helpful": 4,
+    "located": 5,
+    "rationale": "Appropriately abstains on annotation-literal content while correctly naming the cron classes to inspect."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "EmailCronJob.java",
+    "InvoiceRetryCronJob.java",
+    "NotificationEmailService.java",
+    "application.yml"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "Show the full cron job definition: which class, @Scheduled cron expression, ShedLock name, and lock durations. How often does it run? What's the config that controls it?",
+   "qid": null,
+   "reference": null,
+   "request_id": "5acaf475-8f6e-4ebe-8c8b-1680e5ad8cb0",
+   "steps": 0,
+   "terminal": "abstain",
+   "tier": "nav-sonnet",
+   "user": "haiku-ops"
+  },
+  {
+   "answer": "No dependents listed in the graph (attachment consumers aren't wired as edges here), but the caveats are explicit and consistent: this is exactly the BE37-style gap the ticket description matches.\n\nThe host-checking logic for attachment/file URLs lives in **StorageUrlValidator.java**, subsystem [3] (Rate limits & runtime config) â€” despite the name, it's the security-relevant URL validator sitting in the platform config bag rather than in the ticket/support subsystem [15] where attachments themselves live. Both [15]'s and [204]'s navigator notes flag this explicitly: \"attachment URL validation (StorageUrlValidator.java)... sits in sub-3, not here.\" So a rejected-host bug for an otherwise-valid attachment file is almost certainly a host-allowlist/pattern check inside StorageUrlValidator.java â€” open that file first. If you need the calling context (where attachments invoke it), look at SupportTicketService.java in [15], which is the A_P_R hub for ticket attachment flows.",
+   "credits": 7.3439,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 3,
+    "tags": [
+     "incomplete",
+     "pointer_verified"
+    ],
+    "user": "sonnet-newcomer",
+    "verified": true
+   },
+   "id": "43fb05b5-410c-49e6-a83e-0a8cc887ee11",
+   "judge": {
+    "abstain": 3,
+    "correct": 2,
+    "grounded": 3,
+    "helpful": 2,
+    "located": 2,
+    "rationale": "Confidently named StorageUrlValidator.java despite noting zero dependents, which the very next turn reveals is dead/superseded code (SignedUrlService is the real one)."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": "bank",
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": true,
+    "success": true
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "StorageUrlValidator.java",
+    "SupportTicketService.java"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "Hey, quick one â€” I've got a ticket saying attachment URLs from certain hosts get rejected even though the file itself is totally fine. Where would that host-checking logic live?",
+   "qid": "BE37",
+   "reference": "StorageUrlValidator (the pentest 3.1 SSRF fix, 2026-09-02) post-dates the scan — delta-scan item. Behaviour: attachment URLs validate against a storage-host allowlist; other hosts are rejected regardless of the file. Located: StorageUrlValidator.java (Rule, sub-3). Paths in gold rows.",
+   "request_id": "43fb05b5-410c-49e6-a83e-0a8cc887ee11",
+   "steps": 2,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "sonnet-newcomer"
+  },
+  {
+   "answer": "That checks out with what the graph shows, and it upgrades the answer: SignedUrlService.java (also subsystem [3], Process type, not just a Rule) is a real hub with live callers â€” FileUploadController.java (IMPORTS/INJECTS/PERFORMS) and SupportTicketService.java both wire into it, and its own IMPORTS reach StorageTranslatableException.java and ValidationTranslatableException.java for its error paths. That's a much stronger production-caller signature than StorageUrlValidator.java, which came back with **zero dependents** in the graph â€” consistent with the javadoc note you found that it's dead/superseded code.\n\nSo yes: for a live rejection, open **SignedUrlService.java** first, specifically around `resolveOwnedUpload` and whatever host/URL check it performs there. Trace the request in from **FileUploadController.java** (the actor that PERFORMS the call) if you need to confirm how the rejected host reaches it, and check **StorageTranslatableException.java** / **ValidationTranslatableException.java** for the exception type actually being thrown on rejection â€” that'll tell you whether it's a translatable \"bad host\" message or a generic validation failure.",
+   "credits": 5.599,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 5,
+    "tags": [
+     "great",
+     "pointer_verified"
+    ],
+    "user": "sonnet-newcomer",
+    "verified": true
+   },
+   "id": "05a67dd9-8bc5-44d0-b2b0-afc82b61b934",
+   "judge": {
+    "abstain": 5,
+    "correct": 5,
+    "grounded": 5,
+    "helpful": 5,
+    "located": 5,
+    "rationale": "Correctly pivots to SignedUrlService.java as the live production path with strong dependent evidence, properly retiring the dead-code candidate."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "SignedUrlService.java",
+    "FileUploadController.java",
+    "StorageTranslatableException.java",
+    "ValidationTranslatableException.java",
+    "SupportTicketService.java",
+    "StorageUrlValidator.java"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "Wait, its own javadoc says \"no production callers\" and the real check moved to SignedUrlService#resolveOwnedUpload. So if I'm debugging a live rejection right now, is that the one I should actually open first instead?",
+   "qid": null,
+   "reference": null,
+   "request_id": "05a67dd9-8bc5-44d0-b2b0-afc82b61b934",
+   "steps": 3,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "sonnet-newcomer"
+  },
+  {
+   "answer": "The graph shows two test files directly wired to SignedUrlService.java: **SignedUrlServiceUnitTest.java** and **FileUploadControllerUnitTest.java** (both in subsystem [3], both IMPORTS SignedUrlService.java from the impact() result). SignedUrlServiceUnitTest.java is the more direct candidate since it imports the service itself rather than the controller wrapping it â€” that's where a `resolveOwnedUpload` rejection case would most plausibly live. FileUploadControllerUnitTest.java would be the integration-style companion if the rejection is asserted at the controller/HTTP boundary instead.\n\nOne caveat: TESTED_BY edges are flagged in the global caveats as under-extracted (\"113 under-extracted, test-coverage answers are shape signals\"), and the graph doesn't expose method-level detail â€” it can point you at the file, not confirm a specific test case named for host rejection or `resolveOwnedUpload`. Open SignedUrlServiceUnitTest.java first and grep it for \"resolveOwnedUpload\" or \"host\" yourself to confirm the exact case exists; if it doesn't, that itself would be worth flagging as a coverage gap on this bug.",
+   "credits": 2.3287,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 3,
+    "tags": [
+     "incomplete",
+     "pointer_wrong"
+    ],
+    "user": "sonnet-newcomer",
+    "verified": true
+   },
+   "id": "1c74fd43-c6bf-4ffc-b4ba-8e974c919a7f",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 5,
+    "helpful": 4,
+    "located": 5,
+    "rationale": "Names the two directly-wired test files and honestly flags that method-level confirmation isn't available in the graph."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "SignedUrlServiceUnitTest.java",
+    "FileUploadControllerUnitTest.java",
+    "SignedUrlService.java"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "is there a test I can read that actually exercises resolveOwnedUpload rejecting a bad upload/host?",
+   "qid": null,
+   "reference": null,
+   "request_id": "1c74fd43-c6bf-4ffc-b4ba-8e974c919a7f",
+   "steps": 0,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "sonnet-newcomer"
+  },
+  {
+   "answer": "The graph confirms exact cron expressions live only in file content, but it does answer \"what are they called and where do they live.\"\n\n**Scheduled jobs (\"CronJob\" family, all annotated with Spring's `@Scheduled` in file content):**\n\nNearly all live in subsystem **[11] Subscriptions, payments & consent** â€” its \"lifecycle crons\" for billing/consent:\n- `InvoiceRetryCronJob.java` â€” retries failed Fakturownia invoicing\n- `SubscriptionPeriodProcessorCronJob.java` â€” processes Stripe subscription period transitions\n- `TrialExpiryNotifierCronJob.java` â€” notifies on trial expiry\n- `TermsGraceProcessorCronJob.java` â€” processes the terms-grace window\n- `ConsentEnforcementCronJob.java` â€” enforces consent (paired with `ConsentEnforcementFilter`)\n- `NoConsentAccountCleanupCronJob.java` â€” cleans up accounts lacking consent\n- `AnonymousConsentCleanupCronJob.java` â€” cleans up anonymous consent records\n\nOutside [11]:\n- `EmailCronJob.java` in **[12] Notifications & domain events** â€” periodic email dispatch (frequency preferences)\n- `DeferredDeletionCronJob.java` in **[5] Account deletion & Instagram sync** â€” executes cascade deletion after a deferral window\n\nThe actual cron/fixed-rate schedules (e.g. `@Scheduled(cron = \"...\")`) are graph-invisible â€” that's file content, not a graph relation. Open each job class directly to read its schedule expression; `InvoiceRetryCronJob.java` and `DeferredDeletionCronJob.java` are good starting points, with `AdminCascadeDeleteServiceImpl.java` for the deletion sequence the latter triggers.",
+   "credits": 8.7008,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 5,
+    "tags": [
+     "great",
+     "pointer_verified"
+    ],
+    "user": "sonnet-newcomer",
+    "verified": true
+   },
+   "id": "20d94563-52d4-4863-9536-3b752d87125a",
+   "judge": {
+    "abstain": 5,
+    "correct": 5,
+    "grounded": 5,
+    "helpful": 5,
+    "located": 5,
+    "rationale": "Comprehensive, accurate enumeration of all cron job classes with correct subsystem placement, properly caveating schedule literals as file content."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": "bank",
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": true,
+    "success": true
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "InvoiceRetryCronJob.java",
+    "SubscriptionPeriodProcessorCronJob.java",
+    "ConsentEnforcementCronJob.java",
+    "NoConsentAccountCleanupCronJob.java",
+    "AnonymousConsentCleanupCronJob.java",
+    "TermsGraceProcessorCronJob.java",
+    "TrialExpiryNotifierCronJob.java",
+    "EmailCronJob.java"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "Hey, is there a place where the backend runs scheduled jobs? Like things that fire automatically on a timer - what are those called here and what schedules do they run on?",
+   "qid": "BE02",
+   "reference": "Located: AnonymousConsentCleanupCronJob.java (Actor, sub-11); ConsentEnforcementCronJob.java (Actor, sub-11); DeferredDeletionCronJob.java (Actor, sub-5); EmailCronJob.java (Actor, sub-12); InvoiceRetryCronJob.java (Actor, sub-11); NoConsentAccountCleanupCronJob.java (Actor, sub-11) (+3 more). Paths in gold rows. Schedules live in each class's @Scheduled/@SchedulerLock annotations — content, not structure.",
+   "request_id": "20d94563-52d4-4863-9536-3b752d87125a",
+   "steps": 4,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "sonnet-newcomer"
+  },
+  {
+   "answer": "Beyond the cron jobs, subsystem [11] (208 files, largest backend subsystem) holds everything to do with money, consent and legal:\n\n- **Stripe payments**: `StripeService.java` (the A_P_R spine hub), `StripeWebhookController.java` / `StripeWebhookHandler.java`, `StripeConfig.java`, `StripeProperties.java`, `StripeDevEventPoller.java`, plus their unit/integration tests.\n- **Invoicing (Fakturownia port)**: `InvoiceRetryService.java`, `InvoiceRecord.java` / `InvoiceRecordRepository.java`, `InvoiceStatus.java`, `FakturowniaInvoiceResponse.java`, `InvoiceCreatedEvent.java` + `InvoiceCreatedEventListener.java` (the cron jobs drive these).\n- **Consent capture/enforcement**: `ConsentService.java` (an A_P_A spine hub), `LegalConsentService.java` (18 ext in-edges, an entry point), `ConsentAdminController.java` (the subsystem's actor root).\n- **Legal documents & terms versioning**: `LegalDocumentService.java` (spine hub), `LegalDocument.java` / `LegalDocumentRepository.java`, `LegalController.java`, `LegalAdminController.java`, `LegalDocumentDtoOut.java`.\n- **User/plan plumbing that anchors the whole subsystem**: `UserRepository.java` (141 external in-edges, the top entry point), `UserType.java` (48 ext in-edges, plan/campaign-limit typing), `Permission.java`, `CorsProperties.java`.\n\nSo the crons are really the automation layer sitting on top of a larger domain: Stripe subscription lifecycle, Fakturownia invoicing, consent/GDPR, and legal-document/terms versioning. Start at `StripeService.java`, `ConsentService.java`, and `LegalDocumentService.java` for the core logic; `UserRepository.java` for how it all ties back to the user/plan.",
+   "credits": 7.013,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 4,
+    "tags": [
+     "incomplete",
+     "pointer_verified"
+    ],
+    "user": "sonnet-newcomer",
+    "verified": true
+   },
+   "id": "7d261be1-fd84-40a4-bfe5-a07aca7d37e8",
+   "judge": {
+    "abstain": 5,
+    "correct": 5,
+    "grounded": 5,
+    "helpful": 5,
+    "located": 5,
+    "rationale": "Thorough, well-organized subsystem inventory consistent with prior established facts about Stripe, invoicing, consent, and legal components."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "StripeService.java",
+    "ConsentService.java",
+    "LegalDocumentService.java",
+    "InvoiceRetryService.java",
+    "LegalConsentService.java",
+    "UserRepository.java",
+    "UserType.java",
+    "StripeWebhookHandler.java"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "Ok cool, so that subsystem [11] with the subscription and consent crons - what else lives in there besides the cron jobs themselves?",
+   "qid": null,
+   "reference": null,
+   "request_id": "7d261be1-fd84-40a4-bfe5-a07aca7d37e8",
+   "steps": 5,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "sonnet-newcomer"
+  },
+  {
+   "answer": "For an actual end-to-end run, the best candidate is **`SubscriptionService_Cron_IntegrationTest.java`** in subsystem [11] (`src/test/.../integration/service/subscription/SubscriptionService_Cron_IntegrationTest.java`, 159 lines). Its path (`integration/service/...`) and naming mark it as a real Spring-context integration test targeting the subscription cron behavior â€” likely `SubscriptionPeriodProcessorCronJob.java` and/or `TrialExpiryNotifierCronJob.java` â€” rather than a mocked unit test, so it's the one that shows the job actually running against wired-up services.\n\nIf you want lighter/faster reads instead, there are also unit tests per cron job that exercise the job's logic in isolation (mocks, no Spring context):\n- `ConsentEnforcementCronJobUnitTest.java`\n- `AnonymousConsentCleanupCronJobUnitTest.java`\n\nNote: the graph's `impact()` on the cron job classes themselves came back empty â€” expected, since cron jobs are Actor entry points nothing else depends on, so the test linkage isn't captured as a traversable edge (TRIGGERS/TESTED_BY edges are flagged system-wide as under-extracted). This is a naming/path-based read, not a confirmed graph edge â€” open the file to verify it actually invokes the cron job's `run()`/`execute()` method rather than just the underlying service.",
+   "credits": 8.951,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 4,
+    "tags": [
+     "great",
+     "pointer_verified"
+    ],
+    "user": "sonnet-newcomer",
+    "verified": true
+   },
+   "id": "45e0164b-6a45-470d-b3e0-a08acee6c49d",
+   "judge": {
+    "abstain": 4,
+    "correct": 3,
+    "grounded": 4,
+    "helpful": 4,
+    "located": 4,
+    "rationale": "Reasonable naming-based inference for an end-to-end test with clear caveats that the linkage isn't a confirmed graph edge."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "SubscriptionService_Cron_IntegrationTest.java",
+    "SubscriptionPeriodProcessorCronJob.java",
+    "TrialExpiryNotifierCronJob.java",
+    "ConsentEnforcementCronJobUnitTest.java",
+    "AnonymousConsentCleanupCronJobUnitTest.java"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "Is there a test I could read that actually exercises one of these cron jobs, so I can see it run end to end?",
+   "qid": null,
+   "reference": null,
+   "request_id": "45e0164b-6a45-470d-b3e0-a08acee6c49d",
+   "steps": 2,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "sonnet-newcomer"
+  },
+  {
+   "answer": "Honest answer: there's **no single central file that aggregates all the cron schedules** â€” the only \"schedule\" hit in the graph, `SchedulerConfig.java`, is a 12-line scheduling-infra class scoped just to `notification/email` (subsystem [12]), not a registry for all jobs, and nothing depends on it per `impact()`. Each cron job carries its own `@Scheduled(cron = \"...\")` annotation independently, so \"documented\" really means checked file-by-file.\n\nGiven that, the one file to open first is **`InvoiceRetryCronJob.java`** (subsystem [11], `src/main/java/.../subscription/cron/InvoiceRetryCronJob.java`, 43 lines, flagged as an entry point). It's the smallest/simplest of the seven consent/subscription crons, so it's the fastest way to see the annotation pattern used everywhere else in [11] before you sweep through the rest: `SubscriptionPeriodProcessorCronJob.java`, `TermsGraceProcessorCronJob.java`, `TrialExpiryNotifierCronJob.java`, `ConsentEnforcementCronJob.java`, `NoConsentAccountCleanupCronJob.java`, `AnonymousConsentCleanupCronJob.java`, plus `EmailCronJob.java` in [12] and `DeferredDeletionCronJob.java` in [5].",
+   "credits": 7.6866,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 5,
+    "tags": [
+     "great",
+     "pointer_verified"
+    ],
+    "user": "sonnet-newcomer",
+    "verified": true
+   },
+   "id": "b47a9b20-270b-47e0-a2f6-377193caf784",
+   "judge": {
+    "abstain": 4,
+    "correct": 4,
+    "grounded": 5,
+    "helpful": 4,
+    "located": 4,
+    "rationale": "Honestly notes there's no central schedule registry and gives a sensible single starting file with rationale."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "InvoiceRetryCronJob.java",
+    "SchedulerConfig.java"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "Sorry, which one should I actually open first if my ticket is just \"review the cron schedules and make sure they're documented\"? Just the one file to start.",
+   "qid": null,
+   "reference": null,
+   "request_id": "b47a9b20-270b-47e0-a2f6-377193caf784",
+   "steps": 3,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "sonnet-newcomer"
+  },
+  {
+   "answer": "Based on the graph, I could not find an explicit \"cron picks language\" edge â€” TRIGGERS/event edges are noted as sparse system-wide, so this needs a file-content check, but here's the traversal I could confirm:\n\nThe transactional-email cron is `EmailCronJob.java` (subsystem 12, Notifications & domain events). It INJECTS/PERFORMS on `NotificationEmailService.java` (also sub 12) and imports `User.java` (sub 10, the 154-in-edge user entity) directly â€” so the cron has the full User record in hand, not just a notification id. `NotificationEmailService.java` in turn imports `ValidationTranslatableException.java`, which belongs to the translatable-exception/message-key LAYER [7] (`Translatable exceptions & logging`) that supplies locale-keyed message resolution to the whole backend.\n\nSeparately, the graph's only dedicated \"pick a language\" component is `AppLanguageFilter.java`, also in [7] â€” but that's a servlet Filter, which is request-scoped (reads a header per HTTP call). A cron job has no inbound HTTP request, so it cannot go through that filter; the graph shows no edge from `EmailCronJob.java` or `NotificationEmailService.java` to `AppLanguageFilter.java`. The likely mechanism â€” the cron reading a stored language/locale field off `User.java` and feeding it into the translatable-message lookup rather than through the filter â€” is plausible from the edges present but not confirmed by any explicit \"reads language field\" edge, so this part is a partial abstention: open `EmailCronJob.java` and `User.java` to see the actual field name.",
+   "credits": 22.1916,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 4,
+    "tags": [
+     "incomplete",
+     "pointer_verified"
+    ],
+    "user": "sonnet-newcomer",
+    "verified": true
+   },
+   "id": "17e41a32-e609-43cc-91c3-c21380bfe0f3",
+   "judge": {
+    "abstain": 4,
+    "correct": 3,
+    "grounded": 4,
+    "helpful": 3,
+    "located": 4,
+    "rationale": "Carefully hedges an unconfirmed locale-resolution mechanism, correctly ruling out the request-scoped filter for a cron context, but leaves the actual answer unconfirmed."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": "bank",
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": true,
+    "success": false
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "EmailCronJob.java",
+    "NotificationEmailService.java",
+    "User.java",
+    "AppLanguageFilter.java",
+    "ValidationTranslatableException.java"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "Sorry, quick question - when a cron job sends one of those transactional emails, how does it pick which language to send it in?",
+   "qid": "BE28",
+   "reference": "A cron has no request context, so language comes from the recipient's stored preference, not AppLanguageFilter; EmailCronJob renders from messages_{lang}.properties per user. Located: AppLanguageFilter.java (Rule, sub-7); EmailCronJob.java (Actor, sub-12). Paths in gold rows.",
+   "request_id": "17e41a32-e609-43cc-91c3-c21380bfe0f3",
+   "steps": 14,
+   "terminal": "abstain",
+   "tier": "nav-sonnet",
+   "user": "sonnet-newcomer"
+  },
+  {
+   "answer": "Start with `EmailCronJob.java` (`backend/src/main/java/com/sm/instagram/platform/notification/...`, subsystem 12) â€” it's the actor root that fires the transactional email on schedule and is where it INJECTS/PERFORMS on `NotificationEmailService.java` and imports `User.java`. That's the natural place to see exactly what language input (if any) currently flows in.\n\nThen open `NotificationEmailService.java` (same subsystem, sub 12) â€” it's the actual email-content builder the cron calls, and it's the one importing `ValidationTranslatableException.java` from the translatable-message layer [7], so this is where you'd add/verify a locale parameter feeding the message-key lookup.\n\nThird, open `User.java` (subsystem 10) to confirm the exact field name for the user's stored language/locale â€” the cron already imports this entity, so if a language field exists on it, this is your source of truth instead of `AppLanguageFilter.java` (which won't fire outside an HTTP request).\n\nCheck `AppLanguageFilter.java` (subsystem 7) last, just for reference on how the request-scoped path resolves language today, so any cron-side logic you add stays consistent with it.",
+   "credits": 2.5709,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 3,
+    "tags": [
+     "incomplete",
+     "pointer_wrong"
+    ],
+    "user": "sonnet-newcomer",
+    "verified": true
+   },
+   "id": "f3463792-dba9-40c0-99b3-f1dd6235c5fc",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 4,
+    "helpful": 5,
+    "located": 5,
+    "rationale": "Gives a clear ordered open-first sequence rooted in the actor/service chain with plausible cross-file justification."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "EmailCronJob.java",
+    "NotificationEmailService.java",
+    "User.java",
+    "AppLanguageFilter.java"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "ok, so where should I open first if I need to work on this?",
+   "qid": null,
+   "reference": null,
+   "request_id": "f3463792-dba9-40c0-99b3-f1dd6235c5fc",
+   "steps": 0,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "sonnet-newcomer"
+  },
+  {
+   "answer": "I searched around `EmailCronJob.java`, `NotificationEmailService.java`, and `AppLanguageFilter.java` for a companion test â€” `find()` on \"NotificationEmailServiceTest\", \"EmailUnitTest\", \"AppLanguageFilterTest\", \"NotificationServiceUnitTest\", and cohort/co-change lookups on both cron and service â€” and none surfaced a dedicated test entity for this specific email+language path. That's consistent with the global caveat that TESTED_BY edges are under-extracted, so this is a real gap in the graph, not necessarily in the codebase.\n\nThe closest thing the graph does show is `TestEmailController.java` (subsystem 12) â€” an actor endpoint seemingly built for manually triggering/inspecting test emails, but it has zero dependents/dependencies recorded, so I can't confirm it exercises the language-selection path either.\n\nGiven TRIGGERS/TESTED_BY sparsity is a known modeling gap here, I can't point you to a confirmed test with confidence â€” you'll likely need to grep the test tree yourself (e.g. under the `notification`/`email` package in `backend/src/test`) rather than trust a graph pointer for this one.",
+   "credits": 13.6716,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 4,
+    "tags": [
+     "pointer_verified"
+    ],
+    "user": "sonnet-newcomer",
+    "verified": true
+   },
+   "id": "6a084780-480f-4af6-a564-af94cdae3e3f",
+   "judge": {
+    "abstain": 4,
+    "correct": 4,
+    "grounded": 5,
+    "helpful": 4,
+    "located": 4,
+    "rationale": "Searched multiple plausible test names, found none, honestly flagged TESTED_BY sparsity rather than inventing a test, and pointed to a concrete fallback search location."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "TestEmailController.java",
+    "NotificationEmailService.java",
+    "EmailCronJob.java"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "is there a test I can look at that shows this email-sending / language behavior in action?",
+   "qid": null,
+   "reference": null,
+   "request_id": "6a084780-480f-4af6-a564-af94cdae3e3f",
+   "steps": 12,
+   "terminal": "abstain",
+   "tier": "nav-sonnet",
+   "user": "sonnet-newcomer"
+  },
+  {
+   "answer": "Besides the email-cron path, subsystem 12 (**Notifications & domain events**, 36 files, group 201) covers:\n\n- **The notification entity model**: `Notification.java`, `NotificationSnapshot.java`, `NotificationType.java`, `NotificationCategory.java`, `NotificationPriority.java`, `NotificationRepository.java`.\n- **Notification service layer**: `NotificationService.java` (the subsystem's spine hub, an A_P_A pattern with arity 3) and `NotificationController.java` (the actor entry point for reading/managing notifications), plus `NotificationControllerUnitTest.java` and `NotificationServiceTest.java`.\n- **`NotificationTranslationService.java`** â€” a Process I hadn't surfaced before; worth opening given your language question, since it looks like the actual per-notification translation logic rather than the filter or the email service.\n- **Domain events**: `AccountActivatedEvent.java`, `SubscriptionNotificationEvent.java` â€” the `@TransactionalEventListener` decoupling pattern the navigator calls out as living here.\n- **Email frequency preferences**: `EmailFrequency.java` (8 external in-edges, one of the more-imported members).\n- **Test/BDD support**: `NotificationSteps.java`.\n- **`DefaultNoteService.java`** and `TestEmailController.java` (manual test-email trigger, no confirmed callers in-graph).\n\nIts contracts lean on [10] (User, 12 IMPORTS out), [7] (translatable exceptions, 8 IMPORTS out), and it's imported by [11] (billing, 8 in) â€” consistent with notifications firing off billing/consent events.",
+   "credits": 5.5383,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 4,
+    "tags": [
+     "great",
+     "pointer_verified"
+    ],
+    "user": "sonnet-newcomer",
+    "verified": true
+   },
+   "id": "c108996c-ef0f-4576-b0ed-ae2edd32be75",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 4,
+    "helpful": 5,
+    "located": 5,
+    "rationale": "Comprehensive, well-categorized subsystem inventory grounded in the listed pointers with plausible structural claims."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "NotificationService.java",
+    "NotificationTranslationService.java",
+    "Notification.java",
+    "NotificationController.java",
+    "EmailFrequency.java",
+    "AccountActivatedEvent.java",
+    "SubscriptionNotificationEvent.java",
+    "NotificationServiceTest.java"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "what else lives in that Notifications subsystem, besides the email cron stuff?",
+   "qid": null,
+   "reference": null,
+   "request_id": "c108996c-ef0f-4576-b0ed-ae2edd32be75",
+   "steps": 2,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "sonnet-newcomer"
+  },
+  {
+   "answer": "This gives a clear answer. The `api` node in [177] is the collapsed generated OpenAPI client (ex-sub-18, merged into [177]). \"Boundary files\" are the hand-written service files across the FE children that IMPORT `api` directly â€” 156 dependents span subsystems [170, 171, 173, 174, 175, 176, 177, 178]. The non-spec (non-test) service files are the actual touchpoints: address.service.ts, cascade-delete.service.ts, applied-opportunity-content.service.ts, applied-opportunity.service.ts, auth-api.service.ts, dictionary.service.ts, health.service.ts, legal-api.service.ts, notification-center.service.ts, opportunity.service.ts, preferences.service.ts, registry.service.ts, step-up.service.ts, subscription.service.ts, support-ticket.service.ts, two-factor.service.ts, upload.service.ts, session-state.service.ts, plus app.config.ts (bootstrap wiring) and error.interceptor.ts.\n\nThese `*.service.ts` files are where hand-written FE code (in children 170/171/174/175/176/178, and 177 itself) directly calls into the generated client. Note: sub-18 no longer exists as a separate id â€” it was merged into [177] per curation, and cached answers referencing \"18\" still resolve there via SUPERSEDED_BY. So the true boundary is FE feature children â†” the `api` node inside [177].",
+   "credits": 10.5817,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 4,
+    "tags": [
+     "great",
+     "pointer_verified"
+    ],
+    "user": "sonnet-bugfixer",
+    "verified": true
+   },
+   "id": "50a45e3c-40b7-43e3-a33e-6fedb7f6afe3",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 4,
+    "helpful": 4,
+    "located": 5,
+    "rationale": "Correctly identifies the merged api node as the boundary and enumerates concrete service files touching it, with a helpful curation caveat."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": "bank",
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": true,
+    "success": false
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "api",
+    "auth-api.service.ts",
+    "session-state.service.ts",
+    "subscription.service.ts",
+    "opportunity.service.ts",
+    "support-ticket.service.ts",
+    "notification-center.service.ts",
+    "app.config.ts"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "Which files sit on the boundary between the greenfield FE subsystem (17) and the generated API client subsystem (18) â€” i.e., the files where hand-written FE code touches the generated OpenAPI client?",
+   "qid": "GR05",
+   "reference": "Seam sub-17 <-> sub-18: 156 edges (IMPORTS 156). Beyond imports: none — the seam is pure imports.",
+   "request_id": "50a45e3c-40b7-43e3-a33e-6fedb7f6afe3",
+   "steps": 2,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "sonnet-bugfixer"
+  },
+  {
+   "answer": "Widest blast radius among the boundary service files is **auth-api.service.ts** ([170] `src/app/core/auth/auth-api.service.ts`, 180 lines) â€” 31 dependents across three subsystems (170, 173, 176), vs. session-state.service.ts (14 dependents, 4 subsystems) and user.service.ts (20 dependents, 4 subsystems). Its impact fans out through `error.interceptor.ts` and nearly every sign-in/sign-up/password-reset/verify-email/profile-security screen (sign-in, sign-out, forgot-password, reset-password, business/influencer sign-up, verify-email, auth-success, profile-view, security-settings), plus their specs and sandbox fixtures â€” it single-handedly carries most of the core/auth â†’ feature/auth seam that made [170] the largest internal seam in the frontend.\n\nThe graph pins location, not line numbers â€” line-level detail is file content, not a graph fact. Since the file is only 180 lines and is a Process (a thin API-wrapper service), open `src/app/core/auth/auth-api.service.ts` in full first; specifically look at the top where it imports/injects the generated `api` client and at the method signatures that pass through generated request/response DTOs (the `hidden-models.ts`-style shapes) â€” that's where a generated-shape change would surface as a type error. `error.interceptor.ts` is the next thing to check since it also directly imports `api` and sits downstream of auth-api's calls.",
+   "credits": 8.8351,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 3,
+    "tags": [
+     "pointer_verified",
+     "wrong"
+    ],
+    "user": "sonnet-bugfixer",
+    "verified": true
+   },
+   "id": "3337da8f-cfe3-41fb-82b8-d8eca88d4491",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 4,
+    "helpful": 5,
+    "located": 5,
+    "rationale": "Identifies auth-api.service.ts with dependent counts as evidence and honestly declines fabricated line numbers while giving a concrete reading strategy."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "auth-api.service.ts",
+    "error.interceptor.ts",
+    "session-state.service.ts",
+    "user.service.ts",
+    "sign-in.component.ts",
+    "api"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "Of those boundary service files, which one has the widest blast radius if the generated API shape changes â€” and what line range should I actually look at first?",
+   "qid": null,
+   "reference": null,
+   "request_id": "3337da8f-cfe3-41fb-82b8-d8eca88d4491",
+   "steps": 5,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "sonnet-bugfixer"
+  },
+  {
+   "answer": "Moving `auth-api.service.ts` out of `core/auth` [170] into an `api/wrappers/` home in [177] would break/require updating:\n\n1. **All 31 import sites** (from the earlier impact scan) â€” every `INJECTS`/`PERFORMS` consumer's relative import path changes: `auth-success.component.ts`, `forgot-password.component.ts`, `reset-password.component.ts`, `sign-in.component.ts`, `sign-out.component.ts`, `business-sign-up.component.ts`, `influencer-sign-up.component.ts`, `verify-email.component.ts`, `profile-view.component.ts`, `security-settings.component.ts`, `error.interceptor.ts`, plus their `.spec.ts` files and the sandbox fixtures (`auth-success.fixture.ts`, `forgot-password.fixture.ts`, `reset-password.fixture.ts`, `security-settings.fixture.ts`, `sign-in.fixture.ts`, `sign-out.fixture.ts` in [173]).\n2. **Its own spec**, `auth-api.service.spec.ts` (TESTED_BY edge) â€” moves alongside it or its import breaks.\n3. **The co-change cohort** (A_P_A hub, idf 1.2528): the same 10 components above are graph-confirmed to change together with this file historically â€” a move doesn't break them structurally beyond (1), but expect matching diffs in that same set on the PR.\n4. **Structural/architectural cost, not a graph \"break\"**: `auth-api.service.ts` only imports `api` and is tested by its spec â€” it has no other outgoing edges, so nothing it *depends on* forces it to stay in [170]. But moving it would gut [170]'s largest internal seam (core/authâ†’feature/auth, 40 edges) since auth-api.service.ts anchors much of that seam, and it would be reclassified away from its current curated home â€” a real subsystem-membership change, not just a path fix.",
+   "credits": 5.5515,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 4,
+    "tags": [
+     "pointer_verified"
+    ],
+    "user": "sonnet-bugfixer",
+    "verified": true
+   },
+   "id": "4e414048-90c3-4431-bd76-7c9d32134cd4",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 4,
+    "helpful": 5,
+    "located": 5,
+    "rationale": "Thorough, structurally grounded impact analysis of a hypothetical file move covering imports, tests, cohort, and architectural cost."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "auth-api.service.ts",
+    "auth-api.service.spec.ts",
+    "error.interceptor.ts",
+    "sign-in.component.ts",
+    "forgot-password.component.ts",
+    "security-settings.component.ts",
+    "api"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "If auth-api.service.ts were moved out of core/auth into the api subsystem itself (e.g. src/app/api/wrappers/), what would break or need updating?",
+   "qid": null,
+   "reference": null,
+   "request_id": "4e414048-90c3-4431-bd76-7c9d32134cd4",
+   "steps": 2,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "sonnet-bugfixer"
+  },
+  {
+   "answer": "The graph confirms `error.interceptor.ts` has a `TESTED_BY` edge to `error.interceptor.spec.ts` (`src/app/core/interceptors/error.interceptor.spec.ts`, 397 lines, in [170]), and structurally the interceptor `CONSTRAINS`/`INJECTS` both `auth-api.service.ts` and `session-state.service.ts` â€” consistent with a refresh-and-retry flow that calls back into auth-api and mutates session state.\n\nBut whether that 397-line spec specifically exercises the **401/419 â†’ refreshSession â†’ retry** branch (as opposed to some other error path it also covers) is not something the graph can confirm â€” TESTED_BY edges are file-to-file coverage links only, not per-behavior/per-branch mapping, and this pack's own caveats flag TESTED_BY (113 edges) as under-extracted / a shape signal, not a precise coverage answer. The graph tells you a test file exists and targets this interceptor; it can't tell you which status codes or branches inside it are asserted.\n\nOpen `error.interceptor.spec.ts` directly and search for `401`, `419`, `refreshSession`, and `retry`/`switchMap`/`catchError` assertions to verify that specific behavior is covered â€” the file is large enough (397 lines) that it may cover several interceptor concerns beyond just this one.",
+   "credits": 5.0045,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 5,
+    "tags": [
+     "great",
+     "pointer_verified"
+    ],
+    "user": "sonnet-bugfixer",
+    "verified": true
+   },
+   "id": "2844e9e3-e39c-45ba-83f6-93fac739df6f",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 5,
+    "helpful": 5,
+    "located": 5,
+    "rationale": "Correctly distinguishes file-level TESTED_BY confirmation from branch-level coverage it cannot verify, and gives concrete search terms."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "error.interceptor.ts",
+    "error.interceptor.spec.ts",
+    "auth-api.service.ts",
+    "session-state.service.ts"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "Is the error.interceptor.ts silent-refresh-and-retry behavior (401/419 -> refreshSession -> retry) actually covered by a unit test?",
+   "qid": null,
+   "reference": null,
+   "request_id": "2844e9e3-e39c-45ba-83f6-93fac739df6f",
+   "steps": 2,
+   "terminal": "abstain",
+   "tier": "nav-sonnet",
+   "user": "sonnet-bugfixer"
+  },
+  {
+   "answer": "The subscription/webhook contracts live in subsystem [11] (Subscriptions, payments & consent):\n\n- **StripeWebhookController.java** (`backend/.../platform/subscription/stripe/StripeWebhookController.java`) â€” the Stripe webhook receiver itself; delegates to `StripeWebhookHandler.java` and `StripeService.java`. This is the real inbound webhook contract your FE simulators/fixtures should be checked against.\n- **SubscriptionController.java** (`.../platform/subscription/SubscriptionController.java`) â€” the outward-facing subscription endpoints (plan, status, etc.) that `subscription.service.ts` in FE [174] actually calls.\n- **SubscriptionPaidController.java** â€” paid-plan subscription actions, also sub [11].\n- **TestSubscriptionController.java** â€” a test-only controller, don't treat as production contract.\n\nSupporting pieces: `StripeWebhookHandler.java` (processes the parsed webhook event), `SubscriptionService.java` (business logic hub), and the repositories `CompanySubscriptionRepository.java` / `SubscriptionEventRepository.java` / `SubscriptionPlanRepository.java`.\n\nNote: there's also a same-named `WebhookController.java` in subsystem [3] (`platform/storage/controller/WebhookController.java`) â€” that's unrelated storage/upload webhook plumbing, not Stripe subscriptions; don't confuse it with `StripeWebhookController.java`.\n\nOpen `StripeWebhookController.java` and `SubscriptionController.java` first to compare actual request/response shapes against the FE fixtures in [174]/[173].",
+   "credits": 9.097,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 4,
+    "tags": [
+     "incomplete",
+     "pointer_verified"
+    ],
+    "user": "sonnet-bugfixer",
+    "verified": true
+   },
+   "id": "4a0e25c9-5640-437f-8da7-becdafd33852",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 4,
+    "helpful": 5,
+    "located": 5,
+    "rationale": "Lists the relevant BE controllers with clear roles and proactively disambiguates a same-named unrelated file."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "StripeWebhookController.java",
+    "SubscriptionController.java",
+    "StripeWebhookHandler.java",
+    "SubscriptionService.java",
+    "SubscriptionPaidController.java",
+    "CompanySubscriptionRepository.java",
+    "SubscriptionEventRepository.java",
+    "SubscriptionPlanRepository.java"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "One hop up from that: which BE controllers/endpoints in this backend repo do those subscription/webhook contracts actually live in, so I can check the FE fixtures against something real?",
+   "qid": null,
+   "reference": null,
+   "request_id": "4a0e25c9-5640-437f-8da7-becdafd33852",
+   "steps": 5,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "sonnet-bugfixer"
+  },
+  {
+   "answer": "This is a content-level question â€” the graph gives me structure (file location, dependency edges), not source text, comments, or line numbers. I can't see inside `StripeWebhookHandler.java` or `StripeWebhookController.java` to locate the \"Layers 1 & 2\" comment or the idempotency-check line range.\n\nWhat I can confirm from the graph: `StripeWebhookController.java` (`backend/src/main/java/com/sm/instagram/platform/subscription/stripe/StripeWebhookController.java`, 57 lines) is the entry point, and it depends on `StripeWebhookHandler.java` (same package, `platform/subscription/stripe/`) which is where the actual event-processing/idempotency logic would sit â€” it's the natural place for a multi-layer idempotency check since the controller itself is only 57 lines (likely just receives the raw payload and delegates). To find the exact line range, open `StripeWebhookHandler.java` directly and search for the idempotency check (likely near where it looks up `SubscriptionEventRepository.java` or a processed-event-id guard, given that repository exists in the same subsystem).",
+   "credits": 2.26,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 5,
+    "tags": [
+     "great",
+     "pointer_verified"
+    ],
+    "user": "sonnet-bugfixer",
+    "verified": true
+   },
+   "id": "67d18778-353d-4b9b-abd6-47cd6f70ffef",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 5,
+    "helpful": 4,
+    "located": 4,
+    "rationale": "Appropriately abstains on line-level comment content while still pointing precisely to the file and a plausible related repository hook."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "StripeWebhookHandler.java",
+    "StripeWebhookController.java",
+    "SubscriptionEventRepository.java"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "Which line range in StripeWebhookHandler.java should I look at for the idempotency handling the comment in StripeWebhookController mentions (Layers 1 & 2)?",
+   "qid": null,
+   "reference": null,
+   "request_id": "67d18778-353d-4b9b-abd6-47cd6f70ffef",
+   "steps": 0,
+   "terminal": "abstain",
+   "tier": "nav-sonnet",
+   "user": "sonnet-bugfixer"
+  },
+  {
+   "answer": "The graph can locate the file but cannot give exact line numbers or method-level content â€” that's file content, not structure the graph indexes. `AdminCascadeDeleteServiceImpl.java` lives in subsystem [5] (Account deletion & Instagram sync), at `backend/src/main/java/com/sm/instagram/platform/admin/cascade/AdminCascadeDeleteServiceImpl.java`, 1009 lines total. Per the subsystem's own caveat: \"deletion sequence is file content â€” graph gives the touch set\" â€” the graph confirms this service fans out to 17 other files during cascade delete (entities/repos it touches), but the exact line range of `forceDeleteUser` and precisely which entities it deletes (user profile, social connections, addresses, tickets, opportunities, etc., in what order) is only visible by opening the file itself.\n\nTo answer this precisely, open `AdminCascadeDeleteServiceImpl.java` in `backend/src/main/java/com/sm/instagram/platform/admin/cascade/` and search for the `forceDeleteUser` method signature â€” the deletion order and entity touch-list are written there as sequential repository/service calls.",
+   "credits": 9.3485,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 5,
+    "tags": [
+     "pointer_verified"
+    ],
+    "user": "sonnet-bugfixer",
+    "verified": true
+   },
+   "id": "9d8f3644-f157-4b69-a5da-1d4cd06d0179",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 5,
+    "helpful": 4,
+    "located": 4,
+    "rationale": "Correctly refuses to fabricate line ranges for method-level deletion logic while still grounding the file location and fan-out fact."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "AdminCascadeDeleteServiceImpl.java"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "In AdminCascadeDeleteServiceImpl, which line range actually deletes the user's entities â€” what does forceDeleteUser touch?",
+   "qid": null,
+   "reference": null,
+   "request_id": "9d8f3644-f157-4b69-a5da-1d4cd06d0179",
+   "steps": 4,
+   "terminal": "abstain",
+   "tier": "nav-sonnet",
+   "user": "sonnet-bugfixer"
+  },
+  {
+   "answer": "Found it â€” there is indeed a frontend admin UI. `cascade-delete.service.ts` (subsystem [176], FE profile/settings/admin) is the client service, and `admin-cascade-delete-dialog.component.ts`/`.html` (with its own spec and sandbox fixture) is the admin dialog that drives it â€” this is how the backend endpoints get invoked, not via a cron or internal-only trigger.\n\nOn the backend side, `AdminCascadeDeleteController.java` (subsystem [5]) is a pure Actor root â€” the graph shows zero internal dependents/callers into it, confirming it's an entry point only reachable from outside the backend (i.e., an HTTP call), not triggered by another backend service. Its `flow()` shows it INJECTS/PERFORMS on `AdminCascadeDeleteService.java` and pulls in `RateLimit`/`RateLimitKeyType`/`RateLimitProfile` (so the endpoint is rate-limited) plus `AuthenticationTranslatableException`/`ValidationTranslatableException` for auth/validation error handling â€” consistent with an admin-only, authenticated HTTP surface.\n\nSo the answer: the admin cascade-delete endpoints are called from the Angular admin UI (`admin-cascade-delete-dialog.component.ts` â†’ `cascade-delete.service.ts`), guarded by auth and rate limiting on the backend side. No other backend caller exists in the graph.",
+   "credits": 7.7203,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 4,
+    "tags": [
+     "pointer_verified"
+    ],
+    "user": "sonnet-bugfixer",
+    "verified": true
+   },
+   "id": "aa19d835-3679-4a22-bead-3cdd7ae4f15f",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 5,
+    "helpful": 5,
+    "located": 5,
+    "rationale": "Names the FE dialog/service and BE controller/service chain with a plausible, pointer-backed explanation of the HTTP-only invocation path."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "AdminCascadeDeleteController.java",
+    "cascade-delete.service.ts",
+    "admin-cascade-delete-dialog.component.ts",
+    "AdminCascadeDeleteService.java",
+    "RateLimit.java",
+    "admin-cascade-delete.fixture.ts"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "One hop up: what calls AdminCascadeDeleteController's endpoints â€” is there a frontend admin UI, or is it invoked some other way?",
+   "qid": null,
+   "reference": null,
+   "request_id": "aa19d835-3679-4a22-bead-3cdd7ae4f15f",
+   "steps": 5,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "sonnet-bugfixer"
+  },
+  {
+   "answer": "No test entity named for `AdminCascadeDeleteServiceImpl` (or `forceDeleteUser`) turns up anywhere in the graph â€” searches for \"Cascade\", \"CascadeDelete Test\", and direct unit-test name guesses all come back empty within subsystem [5]. The 48-file subsystem [5] listing itself shows no `*Test`/`*UnitTest` member for this service.\n\nThis is consistent with the global caveat that TESTED_BY edges are under-extracted (only 113 in the whole graph) â€” so a genuine test could exist without being linked. But since no candidate test file appears in [5] at all (not even an unlinked one visible by name), the graph gives no positive evidence of unit-test coverage for `forceDeleteUser` or the class as a whole.\n\nTo confirm, check `backend/src/test/.../admin/cascade/` (or wherever mirrors the `com.sm.instagram.platform.admin.cascade` package) directly in the checkout â€” the graph can't rule test coverage in or out reliably here.",
+   "credits": 10.3718,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 5,
+    "tags": [
+     "great",
+     "pointer_verified"
+    ],
+    "user": "sonnet-bugfixer",
+    "verified": true
+   },
+   "id": "06307509-2150-4b09-bb84-52f20d536c06",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 5,
+    "helpful": 4,
+    "located": 5,
+    "rationale": "Appropriate hedge — searched thoroughly, flags the TESTED_BY under-extraction caveat, and points the reader to the exact directory to check by hand."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "AdminCascadeDeleteServiceImpl.java"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "Is forceDeleteUser in AdminCascadeDeleteServiceImpl covered by a unit test?",
+   "qid": null,
+   "reference": null,
+   "request_id": "06307509-2150-4b09-bb84-52f20d536c06",
+   "steps": 6,
+   "terminal": "abstain",
+   "tier": "nav-sonnet",
+   "user": "sonnet-bugfixer"
+  },
+  {
+   "answer": "**Dialog component:** `admin-cascade-delete-dialog.component.ts` (subsystem [176]/[17]) is standalone in the graph sense â€” no other frontend file imports it (`impact` â†’ 0 dependents), and there's no shared \"admin dialog\" wrapper service in the index. Its `flow()` shows it directly INJECTS/PERFORMS `cascade-delete.service.ts`, imports the generated `api` client, and is TESTED_BY its own spec. So it's not routed through a shared admin-dialog abstraction that the graph can see â€” it looks self-contained, likely opened ad-hoc (e.g. MatDialog.open()) from an admin screen, but no static importer edge is recorded, so treat \"who opens it\" as unconfirmed rather than absent.\n\n**Moving ServiceImpl logic into the Controller:** `impact(AdminCascadeDeleteService.java)` (the interface) shows **3 dependents**, not just the controller: `AdminCascadeDeleteController.java` (INJECTS/PERFORMS), `AdminCascadeDeleteServiceImpl.java` (IMPLEMENTS), and â€” critically â€” **`OrphanCleanupTask.java`** (INJECTS/PERFORMS), a separate Actor that also calls this service independently of HTTP. Inlining the impl into the controller would strand `OrphanCleanupTask` (likely a scheduled/cron cleanup job) with no service to call, or force it to depend on a web controller â€” a layering violation. You'd also lose the interface's mock/testability seam.",
+   "credits": 9.2062,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 5,
+    "tags": [
+     "great",
+     "pointer_verified"
+    ],
+    "user": "sonnet-bugfixer",
+    "verified": true
+   },
+   "id": "58d227aa-6c6b-4ebc-a123-4f31db1d35e1",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 5,
+    "helpful": 5,
+    "located": 5,
+    "rationale": "Distinguishes confirmed graph edges from unconfirmed inference and surfaces the real OrphanCleanupTask dependency that a naive refactor would break."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "AdminCascadeDeleteService.java",
+    "AdminCascadeDeleteController.java",
+    "OrphanCleanupTask.java",
+    "AdminCascadeDeleteServiceImpl.java",
+    "admin-cascade-delete-dialog.component.ts",
+    "cascade-delete.service.ts"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "You said the FE calls come from admin-cascade-delete-dialog.component.ts â€” is that a standalone Angular component or is it opened via some shared admin dialog service? What would break if I moved AdminCascadeDeleteServiceImpl's logic into AdminCascadeDeleteController directly?",
+   "qid": null,
+   "reference": null,
+   "request_id": "58d227aa-6c6b-4ebc-a123-4f31db1d35e1",
+   "steps": 5,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "sonnet-bugfixer"
+  },
+  {
+   "answer": "UserSocialConnectionRepository.java lives in subsystem [2] Social connection data model â€” a LAYER within group 202 (Platform runtime & shared layers) that supplies UserSocialConnection/Platform data across 8 distinct consumer subsystems (86.2% fan-in, 40 external in-edges on this repository alone).\n\nDirect dependents (16 total, hop-1) span several subsystems, no crons found:\n\n- **UserSocialConnectionService.java** â€” the in-layer service (INJECTS/MODIFIES/USES), the primary consumer.\n- **AppliedOpportunityService.java** â€” campaign domain [4], reads/writes connection data for opportunity flows.\n- **InstagramDataDeletionService.java** and **InstagramDeauthorizationService.java** â€” subsystem [5] (Instagram OAuth / account deletion), both modify and use this repo.\n- **OAuthCallbackService.java** and **RegistrationService.java** â€” subsystem [9]/[10] auth journeys, wiring social connections during login/registration.\n- **AuthService.java** â€” auth flow, subsystem [9]/[6].\n- **RepositoryResolver.java** â€” subsystem [4], generic repository lookup/injection.\n- **TestAuthController.java** â€” a test-support actor root (subsystem 9's BDD harness).\n- Unit/integration tests: AppliedOpportunityServiceIntegrationTestBase.java, AppliedOpportunityServiceUnitTest.java, AuthServiceUnitTest.java, InstagramDataDeletionServiceUnitTest.java, InstagramDeauthorizationServiceUnitTest.java, OAuthCallbackServiceUnitTest.java, RegistrationServiceUnitTest.java.\n\nNo controller or scheduled cron directly depends on it. Owning subsystem is [2] Social connection data model, but a PR touching it should also check consumers in [4] (campaign/applied-opportunity), [5] (Instagram/deletion), [9]/[10] (auth/registration) since a merge into any single consumer was measured and refuted â€” [2] stays independent by design.",
+   "credits": 7.5634,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 4,
+    "tags": [
+     "incomplete",
+     "pointer_verified"
+    ],
+    "user": "opus-reviewer",
+    "verified": true
+   },
+   "id": "87738a35-2a8d-4963-b877-3538ebceab49",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 3,
+    "helpful": 4,
+    "located": 5,
+    "rationale": "Solid dependent list per subsystem but includes oddly precise, unexplained figures (86.2% fan-in, 'measured and refuted') not clearly tied to the given pointers."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": "bank",
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": true,
+    "success": true
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "UserSocialConnectionRepository.java",
+    "UserSocialConnectionService.java",
+    "AppliedOpportunityService.java",
+    "InstagramDataDeletionService.java",
+    "InstagramDeauthorizationService.java",
+    "OAuthCallbackService.java",
+    "RegistrationService.java",
+    "AuthService.java"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "I'm reviewing a PR that touches UserSocialConnectionRepository. What depends on it directly (services, controllers, crons, tests), and which subsystem owns that area?",
+   "qid": "GR27",
+   "reference": "40 dependency edges from 16 files across 7 subsystems point at UserSocialConnectionRepository.java. Heaviest dependents: AppliedOpportunityService.java, AuthService.java, InstagramDataDeletionService.java, InstagramDeauthorizationService.java, OAuthCallbackService.java. Full sorted set in gold rows.",
+   "request_id": "87738a35-2a8d-4963-b877-3538ebceab49",
+   "steps": 1,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "opus-reviewer"
+  },
+  {
+   "answer": "Second hop out, by path:\n\n**Via UserSocialConnectionService.java** (in-layer service, subsystem [2]):\n- **UserController.java** â€” INJECTS + PERFORMS on it; a real HTTP controller in [10].\n- **UserSocialConnectionController.java** â€” INJECTS + PERFORMS; the dedicated social-connection controller, but nothing above it in the graph calls it (0 dependents) â€” it's an actor root itself, i.e. the HTTP entry point.\n- **UserService.java** â€” CALLS it; UserService itself is in turn used across [10]/[4].\n- (Unit tests: UserControllerUnitTest.java, UserServiceUnitTest.java.)\n\n**Via RepositoryResolver.java** (generic entityâ†’repository resolver, [4]): 20 dependents total, but it's a shared generic resolver used by many unrelated services (AddressService, FaqService, CurrencyService, etc.) for their *own* entity types â€” not evidence they touch UserSocialConnection specifically. The two dependents actually confirmed (from the prior hop) to route through it *and* touch UserSocialConnectionRepository are **AppliedOpportunityService.java** and, by domain adjacency, **PlatformService.java** (which is called by **PlatformController.java**, its only dependent, INJECTS+PERFORMS â€” a real controller in [4]).\n\nNo cron or security filter appears in either dependent set â€” the graph shows none reaching this repository at any hop.\n\n**On the TestAuthController challenge**: you're right that it's structurally a controller (`Actor`, entry_point=true, subsystem 9, path `.../auth/controller/TestAuthController.java`), so my earlier \"no controller\" statement was overbroad â€” I should have said \"no *production-facing* controller.\" Whether it's actually reachable in prod (e.g. gated by `@Profile`/`@ConditionalOnProperty` to test profiles only) is file content the graph doesn't encode â€” subsystem 9's own description calls it part of \"the Cucumber scenario/actor harness,\" which is a strong signal it's test-only, but you should open the file and check its class-level profile/conditional annotations to confirm before treating it as prod-reachable.",
+   "credits": 11.8487,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 2,
+    "tags": [
+     "hallucinated",
+     "incomplete",
+     "pointer_wrong"
+    ],
+    "user": "opus-reviewer",
+    "verified": true
+   },
+   "id": "5b0eedfe-81d4-4db5-9895-ad77e7dbf27b",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 5,
+    "helpful": 5,
+    "located": 5,
+    "rationale": "Carefully separates confirmed second-hop callers from generic-resolver noise and honestly concedes the TestAuthController framing error with a caveat about prod-reachability being outside graph scope."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "UserSocialConnectionService.java",
+    "UserController.java",
+    "UserSocialConnectionController.java",
+    "UserService.java",
+    "RepositoryResolver.java",
+    "AppliedOpportunityService.java",
+    "PlatformService.java",
+    "PlatformController.java"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "Go one hop further out. What calls UserSocialConnectionService, and what calls the code in RepositoryResolver that hands out the UserSocialConnection repository by entity class? I want the HTTP controllers, crons and security filters that end up reaching this repository. And a challenge: you said no controller depends on it, but TestAuthController is a controller. Is that endpoint reachable in prod?",
+   "qid": null,
+   "reference": null,
+   "request_id": "5b0eedfe-81d4-4db5-9895-ad77e7dbf27b",
+   "steps": 6,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "opus-reviewer"
+  },
+  {
+   "answer": "Good findings, and confirming your correction: **PlatformService.java's flow touches only Platform.java/PlatformDto/BaseRepository/BaseService/SpecificationBuilder/RepositoryResolver â€” no UserSocialConnection edge at all.** Retracting it as a pointer.\n\n**Second-path CRUD confirmed**: UserSocialConnectionController.java `EXTENDS BaseController.java` (subsystem [4]), and its service, `UserSocialConnectionService.java`, also imports `BaseService.java`. RepositoryResolver.java's own flow (48 touches) shows it wiring `BaseRepository`/`BaseService` generic CRUD for many entity types by class (Address, City, Consent*, ContentType, Currency, Dictionary, Notification, PartnershipOpportunity*, Platform, ServiceType, FileUpload...), and the earlier `impact()` on UserSocialConnectionRepository already showed RepositoryResolver directly INJECTS/IMPORTS it â€” so the generic `BaseController`â†’`BaseService`â†’`RepositoryResolver`â†’entity-keyed repository lookup is a real second route into `user_social_connection` rows, alongside the named-method path through `UserSocialConnectionRepository`/`UserSocialConnectionService`. Open `BaseController.java`/`BaseService.java`/`RepositoryResolver.java` to see exactly which CRUD verbs it exposes generically.\n\n**Notable negative result**: `AdminCascadeDeleteServiceImpl.java`'s full flow (17 touched files) does **not** include `UserSocialConnectionRepository` or `UserSocialConnectionService` â€” cascade account deletion, per the graph, does not appear to touch social-connection rows. That's either a real gap or an under-extraction (TRIGGERS/event edges are flagged sparse system-wide) â€” worth confirming in file content.\n\n**Liquibase / JdbcTemplate / another repository on the same entity**: none surfaced. `find(\"Liquibase\")` only returns `LiquibaseHealthIndicator.java` (health check, not changesets); `find(\"JdbcTemplate\")` and `find(\"anonymiz\")` return nothing. This is a real coverage gap, not a clean \"no\": changesets live under `src/main/resources`, and the caveats state 84 of 104 backend resources files are unindexed â€” migration/anonymization SQL is out of graph scope. Check the Liquibase changelog directory and grep for `user_social_connection` and `JdbcTemplate`/`EntityManager` native-query usage by hand.",
+   "credits": 18.5078,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 3,
+    "tags": [
+     "incomplete",
+     "pointer_verified",
+     "wrong"
+    ],
+    "user": "opus-reviewer",
+    "verified": true
+   },
+   "id": "7cd09fee-fe57-48cd-968b-825d8a2ef022",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 5,
+    "helpful": 5,
+    "located": 5,
+    "rationale": "Accepts the user's correction, retracts the wrong pointer, confirms the generic BaseController/BaseService CRUD path, and clearly flags Liquibase/JdbcTemplate as out of graph scope rather than guessing."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "BaseController.java",
+    "BaseService.java",
+    "RepositoryResolver.java",
+    "UserSocialConnectionController.java",
+    "UserSocialConnectionService.java",
+    "AdminCascadeDeleteServiceImpl.java",
+    "UserSocialConnectionRepository.java"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "Is there a second way to read or write social connection rows that doesn't go through UserSocialConnectionRepository's named methods? I mean the generic BaseService/BaseController CRUD resolved through RepositoryResolver, native SQL or JdbcTemplate on the user_social_connection table, Liquibase changesets or cleanup crons that delete those rows (for example account deletion or GDPR anonymization), or another repository mapped to the same entity. Also a correction: PlatformService does not reference UserSocialConnection at all.",
+   "qid": null,
+   "reference": null,
+   "request_id": "7cd09fee-fe57-48cd-968b-825d8a2ef022",
+   "steps": 11,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "opus-reviewer"
+  },
+  {
+   "answer": "Measured by dependents and distinct subsystems reached, the rate-limit configuration family in **[3] Rate limits & runtime config** dominates, because every controller annotates itself with it:\n\n1. **RateLimitProfile.java** â€” 34 dependents, 12 subsystems: [0], [1], [3], [4], [5], [6], [7], [9], [10], [11], [12], [15]. Imported by essentially every `*Controller` plus `BaseController`.\n2. **RateLimit.java** â€” 33 dependents, the same 12 subsystems (the annotation itself).\n3. **RateLimitKeyType.java** â€” 29 dependents, 9 subsystems: [0], [1], [3], [4], [5], [9], [11], [12], [15].\n4. **CucumberSpringConfig.java** â€” 24 dependents (BDD step classes `EXTENDS` it), 6 subsystems: [3], [4], [9], [11], [12], [15].\n5. **BaseServiceIntegrationTest.java** â€” 14 dependents, 9 subsystems: [1], [4], [6], [9], [10], [11], [12], [14], [15].\n\nNarrower, single-subsystem config nodes for contrast: **CorsProperties.java** (6 dependents, only [7]) and **RateLimitProperties.java** (6, only [3]). Pure `@Configuration` beans such as `WebSecurityConfiguration.java`, `MessageSourceConfig.java` and `JacksonConfig.java` show **zero** dependents â€” Spring instantiates them, nothing imports them, so they have no graph fan-out despite wide runtime effect. Note also that `application-*.yml` files and most of `src/main/resources` were never in scan scope, so yml profiles cannot be ranked here.\n\nOpen `RateLimitProfile.java` and `RateLimit.java` first, then `CucumberSpringConfig.java`.",
+   "credits": 154.871,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 4,
+    "tags": [
+     "incomplete",
+     "pointer_verified"
+    ],
+    "user": "opus-architect",
+    "verified": true
+   },
+   "id": "037e6763-4275-449b-9b97-bcef9334a355",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 4,
+    "helpful": 5,
+    "located": 5,
+    "rationale": "Clear ranked list with subsystem counts and a useful contrast against zero-fan-out config beans, internally consistent though precise numbers are unverifiable."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": "bank",
+   "model": "claude-opus-5",
+   "oracle": {
+    "has": true,
+    "success": true
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "RateLimitProfile.java",
+    "RateLimit.java",
+    "RateLimitKeyType.java",
+    "CucumberSpringConfig.java",
+    "BaseServiceIntegrationTest.java",
+    "CorsProperties.java",
+    "RateLimitProperties.java",
+    "WebSecurityConfiguration.java"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "Which configuration files or config classes have the widest fan-out â€” influencing the most subsystems in the backend? Rank them and name the subsystems each one reaches.",
+   "qid": "GR23",
+   "reference": "Highest-reach configuration by in-degree: CucumberSpringConfig.java (48 deps, sub-3), AppPaymentsProperties.java (20 deps, sub-11), RecaptchaConfig.java (14 deps, sub-8), RegistryProperties.java (13 deps, sub-11), CorsProperties.java (12 deps, sub-11), StripeProperties.java (10 deps, sub-11).",
+   "request_id": "037e6763-4275-449b-9b97-bcef9334a355",
+   "steps": 13,
+   "terminal": "answer",
+   "tier": "nav-opus",
+   "user": "opus-architect"
+  },
+  {
+   "answer": "The chain is confirmed and bottoms out cleanly. Following `@RateLimit`/`RateLimitProfile` downstream:\n\n**RateLimit.java / RateLimitProfile.java** (annotation + profile, on every controller method)\nâ†’ **RateLimitConfiguration.java** (registers the interceptor; 0 outbound edges itself, it's pure wiring)\nâ†’ **RateLimitInterceptor.java** (the Spring `HandlerInterceptor` that actually reads the annotation at request time)\nâ†’ **GdprCompliantRateLimiterService.java** (the enforcement service the interceptor injects, plus `RateLimitProperties.java` for config)\nâ†’ **RateLimiterService.java** (abstract base â€” **0 outbound flow edges**, the floor of the chain)\n\n**RateLimiterService.java is the deepest node.** It's an abstract base with zero outbound dependencies (`flow` returns empty), and everything else in the family leans on it: `GdprCompliantRateLimiterService`, `InMemoryRateLimiterService`, and `RedisRateLimiterService` all `EXTENDS` it (7 dependents total, spanning subsystems [3] and [9], including `RateLimitCleanupTask.java` which `PERFORMS`/`INJECTS` it directly). The two concrete leaves â€” in-memory and Redis-backed â€” hold the actual counter storage but add no further downstream dependencies beyond their parent, confirming `RateLimiterService` is the true floor rather than a pass-through.\n\n**Hops from annotation to enforcement floor: 4** â€” `RateLimit.java` â†’ `RateLimitConfiguration.java` â†’ `RateLimitInterceptor.java` â†’ `GdprCompliantRateLimiterService.java` â†’ `RateLimiterService.java`.",
+   "credits": 30.7416,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 3,
+    "tags": [
+     "incomplete",
+     "pointer_verified",
+     "wrong"
+    ],
+    "user": "opus-architect",
+    "verified": true
+   },
+   "id": "0915f390-800e-496d-b7a8-475938c8678b",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 5,
+    "helpful": 5,
+    "located": 5,
+    "rationale": "Traces a concrete hop-by-hop chain to a well-justified terminal node (RateLimiterService with zero outbound edges)."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "RateLimiterService.java",
+    "GdprCompliantRateLimiterService.java",
+    "RateLimitInterceptor.java",
+    "RateLimitConfiguration.java",
+    "RateLimit.java",
+    "RateLimitProfile.java",
+    "InMemoryRateLimiterService.java",
+    "RedisRateLimiterService.java"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "Follow the rate-limit family down: when a controller method carries @RateLimit with a RateLimitProfile, what is the deepest node in that chain â€” the thing that actually enforces the limit and that everything else leans on? Name it and the hops from annotation to it.",
+   "qid": null,
+   "reference": null,
+   "request_id": "0915f390-800e-496d-b7a8-475938c8678b",
+   "steps": 10,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "opus-architect"
+  },
+  {
+   "answer": "**Runtime entry point:** `RateLimitConfiguration.java` (subsystem [3], `platform/config/`) is flagged in the graph as an actor root (`entry_point: true`) â€” it's the `@Configuration` class that registers `RateLimitInterceptor.java` into Spring MVC's interceptor chain (via `INJECTS`/`ACCESSES` edges into it). At actual request time, control first lands in **`RateLimitInterceptor.java`** (647 lines, subsystem [3]) â€” Spring MVC invokes it per-request before the controller method runs, and it's the interceptor that inspects the handler method for the `@RateLimit`/`RateLimitProfile` annotation. The graph is file-level only, so I can't confirm the exact method name from the pack itself â€” open `RateLimitInterceptor.java` directly; by the `HandlerInterceptor` contract this is almost certainly `preHandle(...)`, but treat that as inference, not a graph fact.\n\n**Redis-vs-in-memory decision:** `StorageModeConfiguration.java` (subsystem [3], type Context, 102 lines). It sits upstream of both consumers that need to choose a backend: `RateLimitConfiguration.java` `INJECTS` it (wiring which bean gets registered) and `GdprCompliantRateLimiterService.java` `IMPORTS` it (its delegate selection). It's the shared decision point feeding both `InMemoryRateLimiterService.java` and `RedisRateLimiterService.java`. Open this file for the actual condition (profile/property check) â€” that logic is file content the graph doesn't expose.",
+   "credits": 8.7655,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 4,
+    "tags": [
+     "pointer_verified"
+    ],
+    "user": "opus-architect",
+    "verified": true
+   },
+   "id": "4741d2ca-8b3a-44cb-9dc1-b702d5b5a358",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 5,
+    "helpful": 5,
+    "located": 5,
+    "rationale": "Identifies the entry point and Redis/in-memory decision point while explicitly labeling the preHandle() method name as inference rather than a graph fact."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "RateLimitInterceptor.java",
+    "RateLimitConfiguration.java",
+    "StorageModeConfiguration.java",
+    "GdprCompliantRateLimiterService.java",
+    "InMemoryRateLimiterService.java",
+    "RedisRateLimiterService.java"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "What is the real runtime entry point of that rate-limit flow for an incoming HTTP request â€” where does control first enter it, and which method on it reads the @RateLimit annotation? Also: which component decides whether GdprCompliantRateLimiterService's delegate is the Redis or in-memory limiter?",
+   "qid": null,
+   "reference": null,
+   "request_id": "4741d2ca-8b3a-44cb-9dc1-b702d5b5a358",
+   "steps": 5,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "opus-architect"
+  },
+  {
+   "answer": "This is the important finding: the seam runs the opposite direction from what you'd guess.\n\n**Where [3] and security touch:** The seam(3,9) query surfaces `FirebaseAuthProxyService.java` (auth journeys, [9]) â†’ `RateLimiterService.java` ([3]) via both `CALLS` and `INJECTS`. That's an auth-side service consuming the rate limiter (to throttle auth attempts), not the reverse. On seam(3,7), the touch is `StorageExceptionHandler.java EXTENDS BaseExceptionHandler.java` â€” exception plumbing, not principal/security data.\n\n**Does the rate-limit interceptor depend on the authenticated principal?** Based on the graph, **no** â€” `RateLimitInterceptor.java`'s only outbound edges are to `GdprCompliantRateLimiterService.java`, `RateLimitProperties.java`, and `HashingUtil.java` (used for keying, presumably by IP/hash rather than principal). No edge from it to `JwtAuthenticationFilter.java`, `User.java`, or any SecurityContext-holding entity exists in this pack.\n\n**Filter-chain ordering:** `WebSecurityConfiguration.java` ([7]) wires `JwtAuthenticationFilter.java`, `BannedUserAuthorizationFilter.java`, `ConsentEnforcementFilter.java`, and `EmailVerificationEnforcementFilter.java` via `INJECTS` â€” that's the security filter chain, structurally separate from `RateLimitConfiguration.java`'s interceptor registration. The graph has no edge asserting one runs before the other; ordering (`FilterRegistrationBean` order / interceptor vs filter phase) is Spring plumbing in file content, not a captured relation. If a USER-keyed rate limit exists, its origin isn't visible here â€” check `RateLimitInterceptor.java` and `HashingUtil.java` content directly.",
+   "credits": 14.8719,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 2,
+    "tags": [
+     "incomplete",
+     "pointer_verified",
+     "wrong"
+    ],
+    "user": "opus-architect",
+    "verified": true
+   },
+   "id": "f7df2876-53c4-4441-a040-f2fee8c924d5",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 5,
+    "helpful": 4,
+    "located": 5,
+    "rationale": "Gives a well-evidenced 'no' on principal-based keying and correctly notes filter/interceptor ordering isn't captured in the graph, though the reader still needs to open files to fully confirm."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "RateLimitInterceptor.java",
+    "HashingUtil.java",
+    "FirebaseAuthProxyService.java",
+    "RateLimiterService.java",
+    "WebSecurityConfiguration.java",
+    "JwtAuthenticationFilter.java",
+    "StorageExceptionHandler.java",
+    "BaseExceptionHandler.java"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "Where is the seam between the rate-limit subsystem [3] and the security/authorization subsystem (WebSecurityConfiguration, the Firebase auth filter)? Does the rate-limit interceptor depend on the authenticated principal to build a USER key, and does the filter chain run before it? Name the file(s) where the two subsystems touch.",
+   "qid": null,
+   "reference": null,
+   "request_id": "f7df2876-53c4-4441-a040-f2fee8c924d5",
+   "steps": 9,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "opus-architect"
+  },
+  {
+   "answer": "Sub-13 is the ex-integration-test suite, retained with role MERGED and a `[:SUPERSEDED_BY]` edge after curation absorbed its 49 files into **[4] Partnership opportunity lifecycle** â€” 60.3% of its coupling pointed there, and its direction profile (in=9, out=361, 2 consumers) marks it as a consumer satellite, not a layer. So it validates the campaign domain.\n\nThe flow: Spring/Cucumber context `BaseServiceIntegrationTest.java` (in [3] Rate limits & runtime config, 25 external in-edges) is EXTENDED by `PartnershipOpportunityServiceIntegrationTestBase.java`, which INJECTS the production beans â€” `PartnershipOpportunityService.java`, `PartnershipOpportunityRepository.java`, `AppliedOpportunityRepository.java`, plus reference-data repos (City, Currency, ServiceType, Address) â€” and seeds entities (`PartnershipOpportunity`, `AppliedOpportunity`, `User`, `OpportunityStatus`). The per-case `PartnershipOpportunityService_{Query,Patch,Update,Delete,FindById,SaveFromDto,Authorization}_IntegrationTest.java` files extend that base. Under test, the service fans out to `PermissionUtils.java`, `DictionaryService.java`, `SpecificationBuilder.java`, `RepositoryResolver.java`, `AddressService.java` and the translatable exceptions of [7].\n\nOpen `PartnershipOpportunityServiceIntegrationTestBase.java` first, then `PartnershipOpportunityService.java`.\n\n```mermaid\nsequenceDiagram\n    PartnershipOpportunityServiceIntegrationTestBase_java->>BaseServiceIntegrationTest_java: EXTENDS\n    PartnershipOpportunityServiceIntegrationTestBase_java->>PartnershipOpportunityService_java: INJECTS\n    PartnershipOpportunityServiceIntegrationTestBase_java->>PartnershipOpportunityRepository_java: INJECTS\n    PartnershipOpportunityService_java->>PermissionUtils_java: USES\n    PartnershipOpportunityService_java->>DictionaryService_java: CALLS\n```",
+   "credits": 70.6524,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 4,
+    "tags": [
+     "pointer_verified"
+    ],
+    "user": "opus-architect",
+    "verified": true
+   },
+   "id": "35e540e8-516d-4834-9158-f2ae5ac02686",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 5,
+    "helpful": 5,
+    "located": 5,
+    "rationale": "Correctly identifies Sub-13 as merged test satellite validating the Partnership opportunity subsystem with a concrete, well-grounded hop chain to the primary test-base and service files."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": "bank",
+   "model": "claude-opus-5",
+   "oracle": {
+    "has": true,
+    "success": true
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "PartnershipOpportunityServiceIntegrationTestBase.java",
+    "PartnershipOpportunityService.java",
+    "BaseServiceIntegrationTest.java",
+    "PartnershipOpportunityService_Authorization_IntegrationTest.java",
+    "PartnershipOpportunityService_Query_IntegrationTest.java",
+    "PermissionUtils.java",
+    "DictionaryService.java",
+    "PartnershipOpportunityRepository.java"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "Subsystem 13 is test-only. Which production subsystem does it validate, and what does that validation flow look like (test harness â†’ production entry points â†’ services)?",
+   "qid": "GR12",
+   "reference": "Seam sub-13 <-> sub-4: 209 edges (IMPORTS 189, INJECTS 14, EXTENDS 4, TESTED_BY 2). Beyond imports: AppliedOpportunityContentService.java TESTED_BY AppliedOpportunityContentServiceUnitTest.java; RepositoryResolver.java INJECTS PartnershipOpportunityPhotoRepository.java; PartnershipOpportunityPhotoRepository.java EXTENDS BaseRepository.java; PartnershipOpportunityPhotoRepository.java EXTENDS PartnershipOpportunityPhoto.java; PartnershipOpportunityService.java TESTED_BY PartnershipOpportunityServiceUnitTest.java.",
+   "request_id": "35e540e8-516d-4834-9158-f2ae5ac02686",
+   "steps": 7,
+   "terminal": "answer",
+   "tier": "nav-opus",
+   "user": "opus-architect"
+  },
+  {
+   "answer": "The graph gives you the structural boundary precisely, but not the mock/real distinction â€” that annotation-level detail (`@MockBean` vs `@Autowired`) isn't a typed edge, so treat this partial answer as pointer-plus-caveat rather than a full resolution.\n\n**The seam itself:** `PartnershipOpportunityServiceIntegrationTestBase.java` (subsystem 4, ex-13) `EXTENDS` and `IMPORTS` **`BaseServiceIntegrationTest.java`** (subsystem 3 â€” the shared Cucumber/Spring test-context slice), which in turn `IMPORTS` **`ServiceIntegrationTestConfig.java`** (subsystem 3, `Context` type, 50 lines) â€” that's your config class. It's not opportunity-specific: `impact()` shows it's also imported by `FirebaseAuthProxyController_MagicLink_IntegrationTest.java` and `OpenApiSpecGeneratorTest.java`, so it's a shared Spring test-context wiring point across subsystems, not a per-domain seam.\n\n**Real beans (typed `INJECTS` edges from the test base â€” genuine Spring-wired DI):** `PartnershipOpportunityService.java`, `PartnershipOpportunityRepository.java`, `AppliedOpportunityRepository.java`, `AddressRepository.java`, `CityRepository.java`, `CurrencyRepository.java`, `ServiceTypeRepository.java`.\n\n**Candidates for mocking/stubbing** (only `IMPORTS`, never `INJECTS`, from the test base â€” suggestive, not confirmed): `SignedUrlService.java`, plus entity/enum types (`Address`, `User`, `UserType`, `OpportunityStatus`) used for fixture setup rather than DI.\n\nThe graph has no `Mock`/`Stub`/`WireMock`-named nodes in this seam (analogous stubs like `RegistryPortStubConfig.java` exist only in subsystem 11/payments). Which specific fields carry `@MockBean` is file content â€” open `ServiceIntegrationTestConfig.java` and `PartnershipOpportunityServiceIntegrationTestBase.java` directly to confirm.",
+   "credits": 18.902,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 4,
+    "tags": [
+     "incomplete",
+     "pointer_verified"
+    ],
+    "user": "opus-architect",
+    "verified": true
+   },
+   "id": "031622ed-cafc-4ccf-b1e8-5374b6890448",
+   "judge": {
+    "abstain": 4,
+    "correct": 4,
+    "grounded": 5,
+    "helpful": 4,
+    "located": 5,
+    "rationale": "Correctly abstains on the annotation-level (@MockBean vs @Autowired) distinction the graph can't capture while still giving precise, well-grounded INJECTS/IMPORTS-based structural pointers to the seam."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "ServiceIntegrationTestConfig.java",
+    "BaseServiceIntegrationTest.java",
+    "PartnershipOpportunityServiceIntegrationTestBase.java",
+    "PartnershipOpportunityService.java",
+    "PartnershipOpportunityRepository.java",
+    "SignedUrlService.java"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "Where exactly is the seam between the Sub-13 integration tests and the [4] Partnership opportunity production code? I mean the boundary where the test harness stops and real beans take over: which beans are real, which are mocked or stubbed, and which config class wires that split.",
+   "qid": null,
+   "reference": null,
+   "request_id": "031622ed-cafc-4ccf-b1e8-5374b6890448",
+   "steps": 9,
+   "terminal": "abstain",
+   "tier": "nav-sonnet",
+   "user": "opus-architect"
+  },
+  {
+   "answer": "There are two real production entry points into `PartnershipOpportunityService`:\n\n**1. HTTP entry â€” `PartnershipOpportunityController.java`** (subsystem 4, `Actor` type, entry point, 317 lines, `src/main/java/com/sm/instagram/platform/partnershipopportunities/`). It `INJECTS` and `PERFORMS` on `PartnershipOpportunityService.java` directly, extends `BaseController.java`, and is rate-limited (`RateLimit`/`RateLimitKeyType`/`RateLimitProfile` imports). `impact()` shows zero dependents on the controller itself â€” it's a true root, i.e. this is the REST surface serving opportunity CRUD/query endpoints (matches `PartnershipOpportunityDtoIn`/`DtoOut`). This is the direct, synchronous production caller the integration tests bypass.\n\n**2. Indirect trigger â€” account deletion, via `UserAccountOrchestrator.java`** (subsystem 5, `Resource`-typed but flagged entry point, 319 lines). It `INJECTS` `PartnershipOpportunityService.java` (alongside `AppliedOpportunityService.java`) to check/clean up a user's opportunities as part of account teardown. It is itself called by:\n- `DeferredDeletionCronJob.java` â€” the scheduled job that finalizes deferred account deletions (subsystem 10/11 boundary),\n- `UserService.java`, `LegalConsentService.java`, `InstagramDataDeletionService.java`, `InstagramDeauthorizationService.java` â€” deletion/consent-driven callers.\n\nSo: the controller is the everyday HTTP path (opportunity endpoints); the cron job is the secondary, deletion-driven trigger reaching the same service through the orchestrator. Open `PartnershipOpportunityController.java` for the endpoint list and `DeferredDeletionCronJob.java` for the scheduled path.",
+   "credits": 13.616,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 5,
+    "tags": [
+     "great",
+     "pointer_verified"
+    ],
+    "user": "opus-architect",
+    "verified": true
+   },
+   "id": "5a912525-e7d8-48fe-ab02-d421e0602517",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 5,
+    "helpful": 5,
+    "located": 5,
+    "rationale": "Names both the HTTP controller and the cron-driven orchestrator path into PartnershipOpportunityService with specific, plausible edge-based justification."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "PartnershipOpportunityController.java",
+    "PartnershipOpportunityService.java",
+    "UserAccountOrchestrator.java",
+    "DeferredDeletionCronJob.java",
+    "BaseController.java",
+    "AppliedOpportunityService.java"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "These tests call PartnershipOpportunityService directly. In production, what is the real entry point into that flow? Name the controller (or listener or scheduled job) that calls PartnershipOpportunityService, and the endpoints or triggers that lead there.",
+   "qid": null,
+   "reference": null,
+   "request_id": "5a912525-e7d8-48fe-ab02-d421e0602517",
+   "steps": 7,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "opus-architect"
+  },
+  {
+   "answer": "`TranslatableException.java` is the terminal node â€” `flow(TranslatableException.java,1)` returns zero outgoing edges, so nothing goes deeper. It's the root of the entire translatable-exception hierarchy in subsystem [7] (the LAYER \"everything fails through here\"): 15 direct subclasses including `ResourceNotFoundException.java`, `ValidationTranslatableException.java`, `InsufficientPermissionsException.java`, `AuthenticationTranslatableException.java`, `BusinessRuleTranslatableException.java` all `EXTENDS` it.\n\n**Hop path from your chain:**\n\n```\nPartnershipOpportunityController.java --INJECTS/PERFORMS--> PartnershipOpportunityService.java\n    --IMPORTS--> ResourceNotFoundException.java\n        --EXTENDS--> TranslatableException.java   (terminal â€” 0 outgoing edges)\n```\n\n`PartnershipOpportunityService.java` directly imports `ResourceNotFoundException.java` (confirmed in its hop-1 dependency list), which in turn `EXTENDS TranslatableException.java`, the base of the hierarchy. `TranslatableException.java` itself has no outgoing dependency edges â€” it is the true floor of this chain. It sits in subsystem [7], described as the strongest supplier LAYER in the graph (91.1% fan-in, no single consumer above 13.4%) â€” exactly the \"one node everything above depends on\" shape: everything fails through it, and it depends on nothing further.\n\n```mermaid\nsequenceDiagram\n    PartnershipOpportunityController_java->>PartnershipOpportunityService_java: INJECTS/PERFORMS\n    PartnershipOpportunityService_java->>ResourceNotFoundException_java: IMPORTS\n    ResourceNotFoundException_java->>TranslatableException_java: EXTENDS\n```",
+   "credits": 15.2165,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 4,
+    "tags": [
+     "pointer_verified"
+    ],
+    "user": "opus-architect",
+    "verified": true
+   },
+   "id": "8e9b2d83-0a37-4bbb-b046-16982579e84a",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 5,
+    "helpful": 5,
+    "located": 5,
+    "rationale": "Gives a concrete terminal node (TranslatableException) with a clear, verifiable hop path and correct claim of zero outgoing edges."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.0.1",
+   "pointers": [
+    "TranslatableException.java",
+    "ResourceNotFoundException.java",
+    "PartnershipOpportunityService.java",
+    "PartnershipOpportunityController.java"
+   ],
+   "prompt_version": "nav@dbafd39278021be9",
+   "q": "Going down from PartnershipOpportunityController through PartnershipOpportunityService, what is deepest in that chain? I want the one node everything above depends on (lowest trophic level) by name, plus the hop path that reaches it.",
+   "qid": null,
+   "reference": null,
+   "request_id": "8e9b2d83-0a37-4bbb-b046-16982579e84a",
+   "steps": 5,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "opus-architect"
+  }
+ ],
+ "schema": 1,
+ "source": "events-2026-09-17.jsonl",
+ "summary": {
+  "abstain_rate": 0.315,
+  "disputed": 0,
+  "judged": 54,
+  "mean": {
+   "abstain": 4.63,
+   "correct": 3.759,
+   "grounded": 4.259,
+   "helpful": 4.167,
+   "located": 4.519
+  },
+  "n": 54,
+  "oracle_success_rate": 1.0,
+  "usage": {
+   "cache_creation": 211839,
+   "cache_read": 130326,
+   "calls": 6,
+   "errors": 0,
+   "input": 12,
+   "output": 20620,
+   "retries": 0
+  },
+  "with_human": 53,
+  "with_oracle": 1,
+  "with_rr": 0
+ }
+}

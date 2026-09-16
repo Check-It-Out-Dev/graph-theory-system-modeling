@@ -29,7 +29,10 @@ def _jlist(value):
 
 
 class Engine:
-    def __init__(self, use_ladybug=True):
+    def __init__(self, use_ladybug=True, pack_dir=None):
+        # the pack this engine reads: the argument, else CODEMAP_PACK_DIR (the server and the tools), else the repo pack
+        PACK = os.path.abspath(pack_dir or os.environ.get("CODEMAP_PACK_DIR") or globals()["PACK"])
+        self.pack_dir = PACK
         self.ents = list(csv.DictReader(open(os.path.join(PACK, "entities.csv"), encoding="utf-8")))
         self.by_name = {}
         for e in self.ents:
@@ -54,12 +57,13 @@ class Engine:
         self.leaves = {k: n for k, n in self.l2.items() if n.get("role") != "GROUP"}
         self.l1 = json.load(open(os.path.join(PACK, "l1_master.json"), encoding="utf-8"))
         self.mfq = [json.loads(l) for l in open(os.path.join(PACK, "mfq.jsonl"), encoding="utf-8")]
-        inv_path = os.path.join(QDIR, "INVALIDATED_2026-09-02.json")
         self.invalidated = set()
-        if os.path.exists(inv_path):
-            j = json.load(open(inv_path, encoding="utf-8"))
-            self.invalidated = {r["id"] if isinstance(r, dict) else r
-                                for r in (j if isinstance(j, list) else j.get("invalidated", []))}
+        # the curated invalidation (2026-09-02) and the delta pipeline's (shipped inside the pack)
+        for inv_path in (os.path.join(QDIR, "INVALIDATED_2026-09-02.json"), os.path.join(PACK, "INVALIDATED_delta.json")):
+            if os.path.exists(inv_path):
+                j = json.load(open(inv_path, encoding="utf-8"))
+                self.invalidated |= {r["id"] if isinstance(r, dict) else r
+                                     for r in (j if isinstance(j, list) else j.get("invalidated", []))}
         self.lb = None
         if use_ladybug:
             try:
@@ -107,7 +111,7 @@ class Engine:
             while res.has_next():
                 rows.append(res.get_next())
         else:
-            rows = [[e["name"], e["entity_type"], e["subsystem"], e["file_path"]]
+            rows = [[e["name"], e["entity_type"], e.get("curated") or e["subsystem"], e["file_path"]]
                     for e in self.ents if t in e["name"].lower()][:12]
         return dict(kind="hits", term=term,
                     hits=[dict(name=r[0], type=r[1], sub=r[2]) for r in rows],

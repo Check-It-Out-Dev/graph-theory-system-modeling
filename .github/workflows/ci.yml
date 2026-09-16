@@ -1,6 +1,6 @@
 # The Python side of the estate, on GitHub-hosted runners: the two MCP servers' unit tests (the model is
-# mocked; tests marked slow or integration load it and stay out of CI), the CodeMap engine check when
-# its graph pack is present (the pack is gitignored data; without it the step says so instead of failing),
+# mocked; tests marked slow or integration load it and stay out of CI), the CodeMap engine check and the
+# remote MCP suites against the graph pack fetched from its GitHub Release (verified by sha256),
 # and the evaluation gate, which re-scores nine frozen model runs without running a model — the prompt
 # contract, the scorer's arithmetic, the DSL grammar's verdicts and every published figure
 # (applications/CodeMap/eval/ci/README.md explains why that is the half worth gating).
@@ -58,23 +58,41 @@ jobs:
           retention-days: 30
 
   codemap:
-    name: CodeMap engine check (needs the graph pack)
+    name: CodeMap engine + remote MCP (pack from the Release)
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6
         with:
           python-version: "3.12"
+      # The pack is exported data, gitignored: its home is a GitHub Release (tools/pack/build_release.py).
+      # fetch_pack.py verifies the tarball against SHA256SUMS before extracting, so this job runs the
+      # engine against the same bytes the VPS serves. real-ladybug is the engine's one dependency.
+      - run: python -m pip install pytest==9.1.1 real-ladybug==0.15.3
+      - name: Fetch the latest graph pack Release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python applications/CodeMap/tools/pack/fetch_pack.py --latest
       - name: Engine check against the pack
-        if: ${{ hashFiles('applications/CodeMap/graph/pack/entities.csv') != '' }}
         working-directory: applications/CodeMap/app
         run: python test_app.py
-      - name: No pack in this checkout
-        if: ${{ hashFiles('applications/CodeMap/graph/pack/entities.csv') == '' }}
-        run: |
-          echo "applications/CodeMap/graph/pack/ is not in the repository (exported data, gitignored)." | tee -a "$GITHUB_STEP_SUMMARY"
-          echo "The engine check runs where the pack exists; a committed fixture pack would make it run here." | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: The navigator prompt is fresh (built from this pack and template)
+        working-directory: applications/CodeMap
+        run: python tools/prompt/build_navigator.py --check --out prompts/navigator/active.md
+      - name: Remote MCP suites (no model, no network)
+        working-directory: applications/CodeMap
+        env:
+          CODEMAP_NAVIGATOR: "off"
+          CODEMAP_SEARCH: "off"
+          PYTHONUTF8: "1"
+        run: python -m pytest remote/tests -q --junitxml=junit-remote.xml
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v6
+        if: always()
+        with:
+          name: junit-remote
+          path: applications/CodeMap/junit-remote.xml
+          retention-days: 30
 
   eval-gate:
     name: Evaluation gate (frozen runs re-scored)
@@ -104,9 +122,21 @@ jobs:
           path: applications/CodeMap/eval/ci/junit.xml
           retention-days: 30
 
+  governance-docs:
+    name: Governance docs (cards, links, NIST map, Art. 50 line)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6
+        with:
+          python-version: "3.12"
+      - name: The cards say what they must
+        run: python applications/CodeMap/tools/ci/check_governance.py | tee -a "$GITHUB_STEP_SUMMARY"
+
   report:
     name: Quality metrics, Pages
-    needs: [mcp, codemap, eval-gate]
+    needs: [mcp, codemap, eval-gate, governance-docs]
     if: ${{ always() && github.event_name != 'pull_request' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10

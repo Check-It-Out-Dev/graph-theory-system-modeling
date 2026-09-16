@@ -65,6 +65,26 @@ processed_data/
 # the evaluation gate's manifests are source, not data: the frozen grammar verdicts
 # and the map from a published figure to the artifact behind it
 !applications/CodeMap/eval/ci/*.json
+# CodeMap Remote (2026-09-16): the user enum, the credit rate card and the MCP client config are
+# source, not data; the telemetry artifact of record and fetched packs stay ignored
+!applications/CodeMap/remote/*.json
+!applications/CodeMap/telemetry/fixtures/*.json
+!applications/CodeMap/eval/humans/runs/*.json
+!applications/CodeMap/eval/quality/fixtures/*.json
+!applications/CodeMap/eval/judge/runs/*.json
+!applications/CodeMap/eval/quality/runs/*.json
+!applications/CodeMap/eval/optimize/runs/*.json
+!applications/CodeMap/observability/grafana/*.json
+applications/CodeMap/telemetry/events.jsonl
+applications/CodeMap/telemetry/navigator-active.md
+applications/CodeMap/dist/
+applications/CodeMap/delta/
+!applications/CodeMap/graph/delta/*.json
+!applications/CodeMap/graph/ledger/*.json
+!applications/CodeMap/eval/humans/*.json
+applications/CodeMap/junit-remote.xml
+applications/CodeMap/telemetry/search_index-*.jsonl
+applications/CodeMap/graph/delta/backlog.jsonl
 
 # Model Files
 models/
@@ -107,3 +127,7 @@ CheckItOut_data/
 company_specific/
 client_data/
 proprietary/
+applications/CodeMap/eval/optimize/runs/*.log.jsonl
+
+# the graph pack is a GitHub Release (tools/pack/fetch_pack.py --latest), never a commit
+applications/CodeMap/graph/pack/

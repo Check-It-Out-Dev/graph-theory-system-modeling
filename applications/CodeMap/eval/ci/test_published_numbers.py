@@ -87,3 +87,30 @@ def test_every_frozen_run_is_either_cited_or_declared_uncited():
         "add them to claims.json, either as a gated claim or with a reason")
     for entry in CLAIMS["uncited"]:
         assert len(entry["reason"]) > 40, f"{entry['run']}: state why nothing cites it"
+
+
+# ----------------------------------------------------------------------------- night claims
+
+def _night_lookup(doc, metric):
+    head, _, tail = metric.partition(".")
+    v = doc[head]
+    return v[tail] if tail else v
+
+
+@pytest.mark.parametrize("claim", CLAIMS.get("night", []), ids=_label)
+def test_the_document_still_says_the_night_figure(claim):
+    assert claim["text"] in _doc(claim["doc"]), (
+        f"{claim['doc']} no longer contains {claim['text']!r} --- the manifest is stale, or a "
+        "published figure was edited without re-gating it")
+
+
+@pytest.mark.parametrize("claim", CLAIMS.get("night", []), ids=_label)
+def test_the_night_artifact_still_supports_it(claim):
+    path = harness.os.path.join(harness.CODEMAP, "eval", "quality", "runs", f"{claim['night']}.json")
+    with open(path, encoding="utf-8") as fh:
+        night = json.load(fh)
+    actual = _night_lookup(night, claim["metric"])
+    claimed = claim["value"]
+    decimals = len(str(claimed).split(".")[1]) if isinstance(claimed, float) else 0
+    assert round(actual, decimals) == claimed, (
+        f"{claim['doc']} claims {claim['metric']} = {claimed} for night {claim['night']}; the artifact says {actual}")

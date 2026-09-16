@@ -1,0 +1,37 @@
+# CodeMap Remote on the demo VPS: one service behind the host's nginx (remote/nginx.codemap.conf).
+# Secrets come from /opt/codemap/.env (never in git). Three volumes: the pack (fetched from the
+# Release, swapped by /admin/reload), the telemetry artifact of record, and the CLI's home (sessions
+# that --resume needs). Memory is capped so two concurrent navigator turns cannot starve the box.
+#   docker compose -f applications/CodeMap/remote/docker-compose.yml --env-file /opt/codemap/.env up -d --build --wait
+name: codemap
+
+services:
+  codemap:
+    build:
+      context: ../../..
+      dockerfile: applications/CodeMap/remote/Dockerfile
+    image: codemap-remote:local
+    env_file:
+      - ${CODEMAP_ENV_FILE:-/opt/codemap/.env}
+    environment:
+      CODEMAP_BIND: 0.0.0.0
+      CODEMAP_PORT: "7345"
+    ports:
+      - "127.0.0.1:7345:7345"
+    volumes:
+      - pack:/app/graph/pack
+      - telemetry:/app/telemetry
+      - clihome:/home/codemap
+    restart: unless-stopped
+    mem_limit: 1200m
+    memswap_limit: 2200m
+    pids_limit: 256
+    stop_grace_period: 30s
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+
+volumes:
+  pack:
+  telemetry:
+  clihome:

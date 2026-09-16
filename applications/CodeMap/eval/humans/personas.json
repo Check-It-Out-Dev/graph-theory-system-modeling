@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "note": "Six synthetic users on four axes (occupation, proficiency, repository knowledge, temperament). Each slices the 104-question bank by the bank's own role/archetype fields plus the off-distribution probes, holds multi-turn conversations through the remote MCP from a checkout of the product repository, verifies pointers there, and rates. baseline_share of the conversations run WITHOUT the MCP (file tools only) so gains are measured, not estimated.",
+  "order": ["haiku-pm", "haiku-ops", "sonnet-newcomer", "sonnet-bugfixer", "opus-reviewer", "opus-architect"],
+  "baseline_share": 0.2,
+  "personas": [
+    {"id": "haiku-pm", "model": "claude-haiku-4-5-20251001", "role_file": "roles/haiku-pm.md", "repo": "backend",
+     "slice": {"roles": ["pm", "em"], "archetypes": ["overview", "locate", "boundary"], "probe_kinds": ["plain", "unanswerable"]},
+     "conversations_per_night": 4, "turns_per_conversation": [3, 4], "credits_per_night": 200,
+     "follow_ups": ["which team or module owns that?", "is there anything a customer would notice if it broke?", "where would a developer start reading?"]},
+    {"id": "haiku-ops", "model": "claude-haiku-4-5-20251001", "role_file": "roles/haiku-ops.md", "repo": "backend",
+     "slice": {"roles": ["qa"], "archetypes": ["health", "locate"], "probe_kinds": ["config", "unanswerable"]},
+     "conversations_per_night": 4, "turns_per_conversation": [3, 4], "credits_per_night": 200,
+     "follow_ups": ["which config file or flag gates that?", "is there a cron or scheduled job involved?", "what would I check in the logs first?"]},
+    {"id": "sonnet-newcomer", "model": "claude-sonnet-5", "role_file": "roles/sonnet-newcomer.md", "repo": "frontend",
+     "slice": {"roles": ["onboarder", "dev"], "archetypes": ["onboarding", "onboarding_path", "locate", "overview"], "probe_kinds": ["vocab", "plain"]},
+     "conversations_per_night": 3, "turns_per_conversation": [3, 4], "credits_per_night": 300,
+     "follow_ups": ["ok, and what should I open first?", "is there a test I can read to see it in action?", "what else lives in that subsystem?"]},
+    {"id": "sonnet-bugfixer", "model": "claude-sonnet-5", "role_file": "roles/sonnet-bugfixer.md", "repo": "backend",
+     "slice": {"roles": ["dev"], "archetypes": ["locate", "content", "flow"], "probe_kinds": ["trace", "ambiguous"]},
+     "conversations_per_night": 3, "turns_per_conversation": [3, 5], "credits_per_night": 300,
+     "follow_ups": ["what calls that, one hop up?", "which line range should I look at?", "is that behaviour covered by a unit test?", "what would change if I moved it?"]},
+    {"id": "opus-reviewer", "model": "claude-opus-5", "role_file": "roles/opus-reviewer.md", "repo": "backend",
+     "slice": {"roles": ["security", "dev"], "archetypes": ["impact", "cohort", "boundary", "flow"], "probe_kinds": ["impact", "ambiguous"]},
+     "conversations_per_night": 2, "turns_per_conversation": [3, 4], "credits_per_night": 400,
+     "follow_ups": ["what depends on that, transitively?", "which tests would go red if it changed?", "is there a second implementation I should know about?"]},
+    {"id": "opus-architect", "model": "claude-opus-5", "role_file": "roles/opus-architect.md", "repo": "backend",
+     "slice": {"roles": ["architect", "em"], "archetypes": ["flow", "boundary", "overview", "trophic_inversion", "cohort"], "probe_kinds": ["cross", "plain"]},
+     "conversations_per_night": 2, "turns_per_conversation": [3, 4], "credits_per_night": 400,
+     "follow_ups": ["where is the seam between those two subsystems?", "what is the entry point of that flow?", "what is deepest in that chain, the thing everything depends on?"]}
+  ]
+}

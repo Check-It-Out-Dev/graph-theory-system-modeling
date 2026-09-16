@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "note": "The user enum. Identity is the X-CodeMap-User header (or body.user); a name not in this list is a 400, never a new persona. Registration is a commit. Budgets are daily credits (no currency; see credits.json).",
+  "users": [
+    {"id": "anonymous", "display_name": "Anonymous", "kind": "anonymous", "model_hint": null, "role_prompt_ref": null, "daily_credit_budget": 200},
+    {"id": "owner", "display_name": "Owner", "kind": "owner", "model_hint": null, "role_prompt_ref": null, "daily_credit_budget": 600},
+    {"id": "opus-architect", "display_name": "Architect (Opus)", "kind": "persona", "model_hint": "claude-opus-5", "role_prompt_ref": "eval/humans/roles/opus-architect.md", "daily_credit_budget": 400},
+    {"id": "opus-reviewer", "display_name": "Reviewer (Opus)", "kind": "persona", "model_hint": "claude-opus-5", "role_prompt_ref": "eval/humans/roles/opus-reviewer.md", "daily_credit_budget": 400},
+    {"id": "sonnet-bugfixer", "display_name": "Bug fixer (Sonnet)", "kind": "persona", "model_hint": "claude-sonnet-5", "role_prompt_ref": "eval/humans/roles/sonnet-bugfixer.md", "daily_credit_budget": 300},
+    {"id": "sonnet-newcomer", "display_name": "Newcomer (Sonnet)", "kind": "persona", "model_hint": "claude-sonnet-5", "role_prompt_ref": "eval/humans/roles/sonnet-newcomer.md", "daily_credit_budget": 300},
+    {"id": "haiku-pm", "display_name": "Product owner (Haiku)", "kind": "persona", "model_hint": "claude-haiku-4-5-20251001", "role_prompt_ref": "eval/humans/roles/haiku-pm.md", "daily_credit_budget": 200},
+    {"id": "haiku-ops", "display_name": "Operator (Haiku)", "kind": "persona", "model_hint": "claude-haiku-4-5-20251001", "role_prompt_ref": "eval/humans/roles/haiku-ops.md", "daily_credit_budget": 200},
+    {"id": "judge", "display_name": "Judge (system)", "kind": "system", "model_hint": "claude-sonnet-5", "role_prompt_ref": "eval/judge/rubric.md", "daily_credit_budget": 600},
+    {"id": "reflector", "display_name": "GEPA reflector (system)", "kind": "system", "model_hint": "claude-sonnet-5", "role_prompt_ref": null, "daily_credit_budget": 300},
+    {"id": "ci", "display_name": "Pipeline (system)", "kind": "system", "model_hint": null, "role_prompt_ref": null, "daily_credit_budget": 300}
+  ]
+}
