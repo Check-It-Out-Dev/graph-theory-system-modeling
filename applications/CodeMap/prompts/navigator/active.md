@@ -56,10 +56,10 @@ L1 SUBSYSTEM INDEX:
 GLOBAL CAVEATS: coverage gaps: 9 of the 11 documented COVERAGE_GAP records are closed by delta batch 2026-07-27 - verified by re-running each record's own locator against the graph, not assumed (BE37, FE09, FE11, FE18, FE19, FE22, FE23, FE26, FE33). The remaining 2 are NOT backlog items: BE29 is a PERMANENT REFUSAL - the 4 credential-bearing files in BE src/main/resources (keystore.p12, service-account.json, service-accountProd.json, dashboard-config.json) are deliberately never indexed, because indexing them would send secrets to the remote embedding service; FE10 needs no new file, since ApiConfiguration lives inside the collapsed generated-client node (now child 177). Do not queue either as work | remainder, measured post-batch and reproducible: 270 files are genuinely unindexed = 61 in-scope + 125 of 132 e2e-tests/*.ts + 84 of 104 BE src/main/resources. e2e-tests (bdd 0/24, integration 5/50, _framework 1/35, visual-parity 1/5) and resources/ were never in the scan scope, so absence there is scope, not failure. The 271 generated-client files are collapsed into one node by design, not missing. SEPARATELY, and do not conflate the two: 321 already-indexed files are fingerprint-stale (318 content-changed + 3 mtime-only) - their nodes, edges and embeddings exist, only the source moved since the scan | TRIGGERS (6) and TESTED_BY (113) edges are under-extracted - event-flow and test-coverage answers are shape signals | subsystems are CURATED (GrothendieckV5 batch 2026-07-27-curation) and this index is a 6-way tree (owner decision Q1=B): NavigationMaster -> 4 GROUP navigators (201-204) + the frontend GROUP [17] + [4] directly, then 17 leaf backend navigators (13 slices, 3 layers) and the frontend's 9 children (170-178). Fan-out is <=9 at every level and all 1415 members sit <=3 hops from this node (measured: 578 reachable at hop 2, 1243 at hop 3, union 1415). Layers were promoted on a measured fan-in criterion applied uniformly to all 19 candidates (in-share >= 85%, >= 8 distinct consumers, no seam partner above 40%); it selects exactly 2, 7 and 16. sub-13 merged into [4] and sub-18 into child [177]; both navigators are RETAINED with role MERGED and a [:SUPERSEDED_BY] edge to their absorber, never deleted, so cached answers stamped with 13 or 18 still resolve. Curated membership lives in CONTAINS_MEMBER plus curated_subsystem on the 455 moved or split nodes; v4_subsystem is the untouched measured layer, so the two disagree BY DESIGN - read CONTAINS_MEMBER for navigation and v4_subsystem only for provenance | behavioural-lens embeddings degenerate on quiet Resources (research F88) | clue layer is curated-v2 (re-clue batch 2026-07-27-reclue): all 30 live navigators now carry a written body with clue_body_status='CURRENT'. The 9 frontend children and the 4 GROUP navigators received their first body; 17 nodes were superseded in place, each with an off-traversal :ClueSnapshot and a [:SUPERSEDED_BY] edge; and 5 (3, 11, 12, 14, 15) kept their prose byte-identical because no number they cite moved. The 2 MERGED navigators (13, 18) keep their final pre-merge body by design. Cached answers listed in eval/q/INVALIDATED_2026-07-27-curated.json must be dropped | frontend spines are A_P_A only: no child of [17] has a majority-internal A_P_R hyperedge, because frontend Resources are models and fixtures rather than repositories. An Actor->Process->Resource walk works on the backend and returns nothing on the frontend
 
 L2 NAVIGATORS (one per subsystem):
-[0] User preferences & geo distance (SLICE, 27 files, in group 202)
+[0] User preferences & geo distance (SLICE, 29 files, in group 202)
   summary: Preference entities and rules plus geo/utility glue. Small, rule-heavy, highly external (0.94) — most of what it does is consumed elsewhere.
   does: user preference entities + repositories; geo lookup utilities; shared util rules
-  entry points: UserPreferences.java (22 ext in-edges), UserPreferencesService.java (8 ext in-edges), DictionaryEntry.java (5 ext in-edges), UserPreferencesDtoIn.java (4 ext in-edges), PiiMaskingUtils.java (1 ext in-edges), UserPreferencesController.java (actor root)
+  entry points: UserPreferences.java (22 ext in-edges), UserPreferencesService.java (8 ext in-edges), DictionaryEntry.java (5 ext in-edges), UserPreferencesDtoIn.java (4 ext in-edges), GeoLocationServiceUnitTest.java (1 ext in-edges)
 [1] Address resolution & storage (SLICE, 18 files, in group 204)
   summary: Address entities, repositories and their integration tests. Its heaviest coupling is with the campaign domain [4]: IMPORTS 30 out and 28 in.
   does: address entities + repos; address service consumers; integration test bases
@@ -87,10 +87,10 @@ L2 NAVIGATORS (one per subsystem):
   entry points: InstagramService.java (8 ext in-edges), UserAccountOrchestrator.java (6 ext in-edges), DeletionEligibilityDto.java (5 ext in-edges), HtmlEncoder.java (3 ext in-edges), InstagramConfig.java (3 ext in-edges), AdminCascadeDeleteController.java (actor root)
   spines: {'metapath': 'A_P_A', 'hub': 'AdminCascadeDeleteService.java', 'arity': 3, 'idf': 2.862}
   caveats: deletion sequence is file content — graph gives the touch set
-[6] Two-factor auth & user cache (SLICE, 51 files, in group 203)
+[6] Two-factor auth & user cache (SLICE, 52 files, in group 203)
   summary: TOTP/step-up second factor and the Firestore-backed user cache. Almost no actor roots — InMemoryUserCache.java is the only one; the rest is invoked from authentication controllers, never self-starting.
   does: TOTP + step-up flows; UserCacheService / FirestoreService; step-up token plumbing
-  entry points: UserCacheService.java (51 ext in-edges), FirestoreService.java (25 ext in-edges), TotpFirestoreService.java (23 ext in-edges), TwoFactorAuthService.java (6 ext in-edges), KMSValidationService.java (4 ext in-edges), InMemoryUserCache.java (actor root)
+  entry points: UserCacheService.java (51 ext in-edges), FirestoreService.java (25 ext in-edges), TotpFirestoreService.java (23 ext in-edges), TwoFactorAuthService.java (6 ext in-edges), RegistrationService.java (5 ext in-edges)
   caveats: UserCacheService single-carries the 11->6 seam (14/14 edges)
 [7] Translatable exceptions & logging (LAYER, 52 files, in group 202)
   summary: A SUPPLIER LAYER and the strongest one in the graph: the exception hierarchy, the translatable error-message infrastructure and the logging configuration that the whole backend imports. 91.1% fan-in (in=422, out=41) across 15 distinct consumers with no consumer above 13.4%. Everything fails through here.
@@ -107,10 +107,10 @@ L2 NAVIGATORS (one per subsystem):
   does: registration + auth flows; BannedUser/EmailVerification enforcement filters; auth feature rules
   entry points: UserPreferencesRepository.java (33 ext in-edges), ScenarioContext.java (16 ext in-edges), ActorRegistry.java (12 ext in-edges), EmailVerificationService.java (12 ext in-edges), SessionSecurityService.java (6 ext in-edges), TestAuthController.java (actor root)
   caveats: the 403 answer lives here + ConsentEnforcementFilter in Billing (gold M04)
-[10] User identity & token exchange (SLICE, 39 files, in group 201)
+[10] User identity & token exchange (SLICE, 40 files, in group 201)
   summary: User.java itself (154 external in-edges — the entity everything imports), token exchange, email plumbing.
   does: User entity + core repositories; token exchange service; email/token glue
-  entry points: User.java (154 ext in-edges), EmailService.java (23 ext in-edges), FirebaseService.java (21 ext in-edges), TokenExchangeService.java (10 ext in-edges), SocialAuthSessionService.java (9 ext in-edges), AuthController.java (actor root)
+  entry points: User.java (154 ext in-edges), EmailService.java (23 ext in-edges), FirebaseService.java (21 ext in-edges), TokenExchangeService.java (10 ext in-edges), SocialAuthSessionService.java (9 ext in-edges)
   caveats: LOAD-BEARING: User.java single-carries three seams (11->10 36/39, 12->10 18/18, 4->10 34/39). The third was 13->10 before sub-13 merged into [4]
 [11] Subscriptions, payments & consent (SLICE, 208 files, in group 201)
   summary: The largest backend subsystem (208): Stripe payments, invoicing with retry, consent enforcement, legal documents, registry lookup, the payments boot guard and the lifecycle crons. Entry UserRepository.java (141 external in-edges).
@@ -217,6 +217,8 @@ L2 NAVIGATORS (one per subsystem):
   does: route to [5]: admin cascade deletion plus the Instagram OAuth and data-deletion callback services; route to [15]: support ticket entities, attachments and flows, the public create/status surface and ticket access tokens; route to [1]: address entities, repositories, primary/copy resolution and their integration tests; route to [14]: FAQ entities and categories backing the public support content
   entry points: a group is not entered directly - route through child_index to a leaf navigator
   caveats: attachment answers span this group and [3]: StorageUrlValidator.java validates attachment URLs but sits in the config bag [3], not in [15]; the cascade deletion ORDER is file content, not graph structure - the graph gives the touch set, the sequence is inside AdminCascadeDeleteServiceImpl.java
+[205] JUnit test-execution harness (SLICE, 3 files)
+  summary: Three structurally isolated files added in the same delta batch that together configure and instrument JUnit5 test execution (security-context reset extension, execution listener, platform properties) rather than belonging to any domain slice.
 
 ## Curation notes
 
@@ -224,3 +226,11 @@ Append-only. One line per partition decision taken on a product pull request (`/
 by the delta pipeline; the navigator reads them as the most recent word on where things live.
 
 - 2026-09-16: (none yet — the first delta run writes the first line)
+- 2026-09-16 backend@ff43730 (pack 1.0.1): ClearSecurityContextExtension.java → subsystem 205 — decided by RamzesX
+- 2026-09-16 backend@ff43730 (pack 1.0.1): ProbeListener.java → subsystem 205 — decided by RamzesX
+- 2026-09-16 backend@ff43730 (pack 1.0.1): AuthControllerTokenLoggingUnitTest.java → subsystem 10 — decided by RamzesX
+- 2026-09-16 backend@ff43730 (pack 1.0.1): LocalTotpCipherUnitTest.java → subsystem 6 — decided by RamzesX
+- 2026-09-16 backend@ff43730 (pack 1.0.1): InterruptsUnitTest.java → subsystem 0 — decided by RamzesX
+- 2026-09-16 backend@ff43730 (pack 1.0.1): LogSafeUnitTest.java → subsystem 0 — decided by RamzesX
+- 2026-09-16 backend@ff43730 (pack 1.0.1): junit-platform.properties → subsystem 205 — decided by RamzesX
+- 2026-09-16 backend@ff43730 (pack 1.0.1): NEW subsystem [205] JUnit test-execution harness = ClearSecurityContextExtension.java, ProbeListener.java, junit-platform.properties — decided by RamzesX

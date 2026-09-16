@@ -1,0 +1,89 @@
+{
+ "assignments": [
+  {
+   "entity": "ClearSecurityContextExtension.java",
+   "from": null,
+   "path": "src/test/java/com/sm/instagram/platform/subsume/ClearSecurityContextExtension.java",
+   "to": "205"
+  },
+  {
+   "entity": "ProbeListener.java",
+   "from": null,
+   "path": "src/test/java/com/sm/instagram/platform/subsume/ProbeListener.java",
+   "to": "205"
+  },
+  {
+   "entity": "AuthControllerTokenLoggingUnitTest.java",
+   "from": null,
+   "path": "src/test/java/com/sm/instagram/platform/unit/controller/AuthControllerTokenLoggingUnitTest.java",
+   "to": "10"
+  },
+  {
+   "entity": "LocalTotpCipherUnitTest.java",
+   "from": null,
+   "path": "src/test/java/com/sm/instagram/platform/unit/security/LocalTotpCipherUnitTest.java",
+   "to": "6"
+  },
+  {
+   "entity": "InterruptsUnitTest.java",
+   "from": null,
+   "path": "src/test/java/com/sm/instagram/platform/unit/util/InterruptsUnitTest.java",
+   "to": "0"
+  },
+  {
+   "entity": "LogSafeUnitTest.java",
+   "from": null,
+   "path": "src/test/java/com/sm/instagram/platform/unit/util/LogSafeUnitTest.java",
+   "to": "0"
+  },
+  {
+   "entity": "junit-platform.properties",
+   "from": null,
+   "path": "src/test/resources/junit-platform.properties",
+   "to": "205"
+  }
+ ],
+ "changed_subsystems": [
+  "0",
+  "6",
+  "10",
+  "205"
+ ],
+ "command": {
+  "kind": "accept"
+ },
+ "decided_at": "2026-09-16T13:26:07Z",
+ "decided_by": "RamzesX",
+ "head": "ff43730b75b7a40f4874f811251c5b72311dbbc9",
+ "mfq_invalidated": [
+  "GR04",
+  "GR06",
+  "GR07",
+  "GR13",
+  "GR19",
+  "GR22",
+  "GR23",
+  "GR25",
+  "GR28",
+  "GR29"
+ ],
+ "new_subsystems": [
+  {
+   "id": 205,
+   "members": [
+    "ClearSecurityContextExtension.java",
+    "ProbeListener.java",
+    "junit-platform.properties"
+   ],
+   "name": "JUnit test-execution harness",
+   "why": "Three structurally isolated files added in the same delta batch that together configure and instrument JUnit5 test execution (security-context reset extension, execution listener, platform properties) rather than belonging to any domain slice."
+  }
+ ],
+ "pack_version": "1.0.1",
+ "rejected": null,
+ "repo": "backend",
+ "schema": 1,
+ "superseded_by": null,
+ "t_invalid": null,
+ "t_valid": "2026-09-16T13:26:07Z"
+}
