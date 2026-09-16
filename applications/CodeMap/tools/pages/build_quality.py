@@ -51,7 +51,8 @@ def collect(root=R):
             "pointer_verified": d.get("codemap_pointer_verified_rate"), "rating_mean": d.get("codemap_rating_mean"),
             "rating_ge4": d.get("codemap_rating_ge4_rate"), "credits_per_correct": d.get("codemap_credits_per_correct_answer"),
             "credits_total": d.get("codemap_credits_total") or {}, "tokens": d.get("codemap_tokens_total") or {},
-            "requests": d.get("codemap_requests_total") or {}, "kappa": kappa, "disputes": d.get("codemap_disputes_total"),
+            "requests": d.get("codemap_requests_total") or {}, "kappa": kappa, "calibrated": d.get("codemap_judge_calibrated"),
+            "disputes": d.get("codemap_disputes_total"),
             "drift_rate": d.get("codemap_version_drift_rate"), "drift": d.get("codemap_version_drift") or {},
             "coverage": d.get("codemap_graph_coverage_ratio") or {}, "gain": {k: gain.get(k) for k in ("n_pairs", "tokens_ratio_mean", "turns_delta_mean", "seconds_delta_mean")},
             "cache_read_ratio": d.get("codemap_cache_read_ratio"), "latency_p95": d.get("codemap_latency_ms_p95"),
@@ -198,7 +199,11 @@ def render(data):
             ("Grounded answers", pct(last.get("grounded")), "ok", "judge ≥ 4 on grounding, share of judged answers"),
             ("Correct answers", pct(last.get("correct")), "ok", "judge ≥ 4 on correctness"),
             ("Mean rating", num(last.get("rating_mean")), "info", "personas rate after verifying a pointer; unverified ratings cap at 3"),
-            ("Judge κ vs oracle", num(kappa, 2), "ok" if (kappa or 0) >= 0.6 else "warn", "Cohen's κ of the judge's 'located' against the execution oracle (gate 0.6)"),
+            ("Judge vs oracle", f"κ {num(kappa, 2)} · AC1 {num((last.get('kappa') or {}).get('oracle_ac1'), 2)}",
+             "ok" if last.get("calibrated") else "warn",
+             f"Cohen's κ and Gwet's AC1 of the judge's 'located' against the execution oracle on {num((last.get('kappa') or {}).get('oracle_n'))} rows; "
+             f"agreement {pct((last.get('kappa') or {}).get('oracle_agreement'))}, oracle yes-rate {pct((last.get('kappa') or {}).get('oracle_prevalence'))}; "
+             f"gate 0.6 on κ, or on AC1 with agreement ≥ 80 % when the yes-rate is past 85 % (κ's prevalence paradox); basis: {(last.get('kappa') or {}).get('basis') or 'none'}"),
             ("Credits per correct answer", num(last.get("credits_per_correct")), "info", "credits are relative units, never currency"),
             ("Version drift", pct(last.get("drift_rate")), "warn" if (last.get("drift_rate") or 0) > 0.05 else "ok", "bank rows answering differently after the last pack decision, not invalidated on purpose"),
             ("Answers judged", num(n.get("judged")), "info", f"{num(n.get('asks'))} asks, {num(n.get('misses'))} misses reported, {num(n.get('refusals'))} budget refusals"),

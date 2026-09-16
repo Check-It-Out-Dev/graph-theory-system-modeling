@@ -95,7 +95,10 @@ def compute(date, events, judge_doc=None, humans_rows=None, drift=None, coverage
                                       "false": _rate([r["judge"]["abstain"] < 4 for r in abst]) if abst else None}
     out["codemap_oracle_success_rate"] = _rate([r["oracle"]["success"] for r in jrows if r.get("oracle", {}).get("has")])
     out["codemap_judge_kappa"] = {"oracle": cal.get("kappa_oracle"), "human": cal.get("kappa_human"),
-                                  "anchor_now": (cal.get("anchors") or {}).get("kappa_now")}
+                                  "anchor_now": (cal.get("anchors") or {}).get("kappa_now"),
+                                  "oracle_n": cal.get("n_oracle"), "oracle_agreement": cal.get("agreement_oracle"),
+                                  "oracle_prevalence": cal.get("prevalence_oracle"), "oracle_ac1": cal.get("ac1_oracle"),
+                                  "basis": cal.get("basis")}
     out["codemap_judge_agreement"] = cal.get("agreement_rr")
     out["codemap_judge_calibrated"] = cal.get("calibrated")
     out["codemap_disputes_total"] = sum(1 for r in jrows if r.get("disputed"))

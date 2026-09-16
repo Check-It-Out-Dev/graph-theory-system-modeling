@@ -26,7 +26,13 @@ helpful) on an anchored 1–5 rubric (`eval/judge/rubric.md`); it never sees rat
 and personas never see its rubric. Calibration: Cohen's κ of `located ≥ 4` against the execution
 oracle on the where-archetypes — **κ = 0.84 on 29 rows** (gate ≥ 0.6, `eval/judge/calibrate.py`);
 20 frozen anchors detect rubric drift; the Qwen reranker (Modal) is reported as a second family;
-a dispute (judge and oracle disagree on *located*) goes to the owner's queue.
+a dispute (judge and oracle disagree on *located*) goes to the owner's queue. Beside κ every
+calibration prints the raw agreement, the prevalence (mean yes-rate of judge and oracle) and Gwet's
+AC1, because κ collapses when almost every oracle row is a hit (Feinstein & Cicchetti 1990: 29 of
+34 identical verdicts scored κ 0.25 on 2026-09-18 under a 90 % yes-rate). The verdict has two fixed
+routes, and the artifact names the one that held (`basis`): κ ≥ 0.6; or, only when the prevalence
+is outside 15–85 %, agreement ≥ 80 % and AC1 ≥ 0.6. Neither threshold moves per night, and a night
+with 73 % agreement (2026-09-17) stays uncalibrated on both routes.
 
 ## Metrics
 
@@ -39,7 +45,7 @@ Names are the dashboards' names (`observability/grafana/`), one home each: `code
 
 ## Not gated
 
-A night's judge κ is reported per night beside the calibration pass on exact questions (κ 0.84, n 29): on the first full night it was −0.28 on 11 rephrased rows, mostly abstentions that named the right files, so the night is recorded as uncalibrated and no README row rests on it. Judge repeatability is not yet measured: the same 54 answers judged twice differed by nine points on grounded (INCIDENTS.md). Gains are `ungated` until a baseline row shares the seed; the single-night rates above are
+A night's judge κ is reported per night beside the calibration pass on exact questions (κ 0.84, n 29): on the first full night it was −0.28 on 11 rephrased rows, mostly abstentions that named the right files, so the night is recorded as uncalibrated and no README row rests on it; night 2026-09-18 (pack 1.1.0, 34 oracle rows from a bank pass and the personas) is calibrated on the AC1 route (agreement 0.85, AC1 0.82, κ 0.25 under a 0.90 yes-rate; the five disagreements are all the judge being stricter than the WHERE oracle). Judge repeatability is not yet measured: the same 54 answers judged twice differed by nine points on grounded (INCIDENTS.md). Gains are `ungated` until a baseline row shares the seed; the single-night rates above are
 descriptive, not a claim of trend; the Qwen signal is reported, not gating; the optimiser's
 validation scores are on ≤ 8 examples per run and decide a promotion, not a README row. README
 rows flip from 🟡 to ✅ only with an artifact and a check that re-reads it (`eval/ci/`).
