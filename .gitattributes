@@ -1,0 +1,16 @@
+# Line endings: the VPS runs these from a git archive made on a Windows box; CRLF in a bash script
+# breaks `set -o pipefail`. Pin LF for everything that is executed or parsed on Linux.
+* text=auto
+*.sh text eol=lf
+*.py text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.json text eol=lf
+*.jsonl text eol=lf
+*.md text eol=lf
+*.toml text eol=lf
+*.conf text eol=lf
+Dockerfile text eol=lf
+*.lbdb binary
+*.gguf binary
+*.tar.gz binary
