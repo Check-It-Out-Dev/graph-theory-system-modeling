@@ -26,7 +26,7 @@ echo "[deploy] $SHA -> $HOST at $STAMP"
 
 # the source the image needs, from git (no working-tree stragglers), as one tarball
 TAR=$(mktemp -t codemap-src-XXXXXX.tar)
-git archive --format=tar -o "$TAR" "$REF" \
+git -c core.autocrlf=false -c core.eol=lf archive --format=tar -o "$TAR" "$REF" \
   applications/CodeMap/app applications/CodeMap/remote applications/CodeMap/prompts applications/CodeMap/tools \
   applications/CodeMap/graph/pack/DIALECT_NOTES.md
 echo "[deploy] source tarball $(du -k "$TAR" | cut -f1) KB"

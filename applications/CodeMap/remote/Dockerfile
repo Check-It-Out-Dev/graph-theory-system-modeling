@@ -27,6 +27,8 @@ COPY --chown=codemap:codemap applications/CodeMap/remote ./remote
 COPY --chown=codemap:codemap applications/CodeMap/prompts ./prompts
 COPY --chown=codemap:codemap applications/CodeMap/tools ./tools
 COPY --chown=codemap:codemap applications/CodeMap/graph/pack/DIALECT_NOTES.md ./graph/pack/DIALECT_NOTES.md
+# belt and braces against a CRLF checkout on the box that shipped the source
+RUN sed -i 's/\r$//' /app/remote/entrypoint.sh /app/tools/deploy.sh
 
 USER codemap
 EXPOSE 7345
