@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The judge (`eval/judge/`): Claude batched against a five-dimension rubric, execution-oracle calibration κ 0.84 on the where-archetypes, frozen anchors with drift detection, the Qwen reranker as a reported second family; `bank_pass.py` for calibration answers (S8)
 - Quality rates (`eval/quality/quality.py`): one artifact per night with the dashboard metric names, gains vs the baselines, fixture-replayed in CI, pushed as `codemap_quality_*` (S9)
 - Delta digestion, the deterministic half (`graph/delta/{extract,discover}.py`, `repos.json`, `graph-delta.yml`): eligibility, entity heuristic, content fingerprints, structural edges, purge, churn threshold, LadybugDB rebuilt from CSVs (S11)
+- Grothendieck on the pull request, as an issue: deterministic candidates + subscription review through a read-only pack MCP + an id checker (`graph/delta/{pack_mcp,propose,issue}.py`); `/codemap accept|move|new-subsystem|reject` applies (`apply.py`, `ci_apply.sh`): bi-temporal ledger rows in `graph/ledger/`, append-only curation notes in the navigator prompt, narrow FAQ invalidation shipped in the pack, `prompts/navigator/active.md`, a new pack Release and a pull request; 48 h timeout job (S12)
 
 ## [1.0.0] - 2025-09-16
 

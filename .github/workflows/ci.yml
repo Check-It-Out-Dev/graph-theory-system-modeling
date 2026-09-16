@@ -79,7 +79,7 @@ jobs:
         run: python test_app.py
       - name: The navigator prompt is fresh (built from this pack and template)
         working-directory: applications/CodeMap
-        run: python tools/prompt/build_navigator.py --check
+        run: python tools/prompt/build_navigator.py --check --out prompts/navigator/active.md
       - name: Remote MCP suites (no model, no network)
         working-directory: applications/CodeMap
         env:

@@ -22,6 +22,7 @@ import tarfile
 R = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 PACK_FILES = ["codemap.lbdb", "codemap_vocab.gbnf", "entities.csv", "edges.csv", "edges_lb.csv", "hyperedges.csv",
               "l1_master.json", "l2_navigators.jsonl", "mfq.jsonl", "DIALECT_NOTES.md"]
+OPTIONAL_FILES = ["INVALIDATED_delta.json"]
 REPO = "Check-It-Out-Dev/graph-theory-system-modeling"
 
 
@@ -46,9 +47,11 @@ def counts(pack):
 
 def write_manifest(pack, version, indexed, note=None):
     files = {}
-    for name in PACK_FILES:
+    for name in PACK_FILES + OPTIONAL_FILES:
         p = os.path.join(pack, name)
         if not os.path.exists(p):
+            if name in OPTIONAL_FILES:
+                continue
             raise SystemExit(f"pack file missing: {name}")
         files[name] = sha256(p)[:16]
     man = {"schema_version": "2.0", "pack_version": version, "codebase": "checkItOut",
@@ -69,8 +72,9 @@ def build(pack, version, out, indexed, note=None):
     os.makedirs(out, exist_ok=True)
     tar_path = os.path.join(out, f"codemap-pack-{version}.tar.gz")
     with tarfile.open(tar_path, "w:gz", compresslevel=6) as tar:
-        for name in PACK_FILES + ["manifest.json"]:
-            tar.add(os.path.join(pack, name), arcname=name)
+        for name in PACK_FILES + OPTIONAL_FILES + ["manifest.json"]:
+            if os.path.exists(os.path.join(pack, name)):
+                tar.add(os.path.join(pack, name), arcname=name)
     digest = sha256(tar_path)
     with open(os.path.join(out, "SHA256SUMS"), "w", encoding="utf-8", newline="\n") as f:
         f.write(f"{digest}  codemap-pack-{version}.tar.gz\n")
