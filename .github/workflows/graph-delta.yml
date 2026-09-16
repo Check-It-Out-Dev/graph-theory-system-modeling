@@ -1,0 +1,121 @@
+# Delta digestion of the product repositories — the graph follows the code.
+#
+# Trigger: a product pull request (by dispatch from the product repository, by a poll of its open pull
+# requests, or by hand). Jobs: `discover` decides what to look at (one entry per pull-request head not
+# seen before); `extract` runs the deterministic extractor (no model, no secret): changed files →
+# pack.next + delta.json, uploaded as an artifact and summarised. The proposal job (Grothendieck on the
+# subscription, environment `graph-delta`) and the apply job are the next slices; a churn above the
+# threshold stops here with "full reindex required". Values chosen by others (a repo, a sha, a number)
+# reach shells through `env:`, never interpolated into `run:`.
+name: graph-delta
+
+on:
+  repository_dispatch:
+    types: [product-change]
+  workflow_dispatch:
+    inputs:
+      repo:
+        description: "backend | frontend"
+        required: true
+        default: backend
+      sha:
+        description: "head commit of the product repository to digest"
+        required: true
+      base:
+        description: "base commit (default: the pack's indexed commit for that repository, else the parent)"
+        required: false
+        default: ""
+      pr:
+        description: "product pull request number (optional; for the comment)"
+        required: false
+        default: ""
+  schedule:
+    - cron: "17 */6 * * *"
+
+concurrency:
+  group: graph-delta
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    name: What changed upstream
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      any: ${{ steps.plan.outputs.any }}
+    env:
+      EVENT: ${{ github.event_name }}
+      IN_REPO: ${{ inputs.repo || github.event.client_payload.repo }}
+      IN_SHA: ${{ inputs.sha || github.event.client_payload.sha }}
+      IN_BASE: ${{ inputs.base || github.event.client_payload.base }}
+      IN_PR: ${{ inputs.pr || github.event.client_payload.pr }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5
+      - name: Plan
+        id: plan
+        run: |
+          python3 applications/CodeMap/graph/delta/discover.py --event "$EVENT" --repo "$IN_REPO" --sha "$IN_SHA" \
+            --base "$IN_BASE" --pr "$IN_PR" --out plan.json
+          echo "matrix=$(python3 -c 'import json;print(json.dumps(json.load(open("plan.json"))["include"]))')" >> "$GITHUB_OUTPUT"
+          echo "any=$(python3 -c 'import json;print("true" if json.load(open("plan.json"))["include"] else "false")')" >> "$GITHUB_OUTPUT"
+          python3 -c 'import json;print(json.dumps(json.load(open("plan.json")), indent=1))' | tee -a "$GITHUB_STEP_SUMMARY"
+
+  extract:
+    name: Extract ${{ matrix.repo }}@${{ matrix.sha }}
+    needs: discover
+    if: ${{ needs.discover.outputs.any == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.discover.outputs.matrix) }}
+    env:
+      REPO: ${{ matrix.repo }}
+      SHA: ${{ matrix.sha }}
+      BASE: ${{ matrix.base }}
+      PR: ${{ matrix.pr }}
+      PUBLIC: ${{ matrix.public }}
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6
+        with:
+          python-version: "3.12"
+      - run: python -m pip install real-ladybug==0.15.3
+      - name: The product repository at the head being digested
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5
+        with:
+          repository: ${{ matrix.public }}
+          ref: ${{ matrix.sha }}
+          path: product
+          fetch-depth: 0
+      - name: The latest graph pack Release
+        run: python applications/CodeMap/tools/pack/fetch_pack.py --latest
+      - name: Extract the delta (no model)
+        run: |
+          set -o pipefail
+          python applications/CodeMap/graph/delta/extract.py --name "$REPO" --repo-dir product --base "$BASE" --head "$SHA" \
+            --out "delta/$REPO-$SHA" | tee extract.log
+          python - <<'PY' | tee -a "$GITHUB_STEP_SUMMARY"
+          import json, os
+          d = json.load(open(f"delta/{os.environ['REPO']}-{os.environ['SHA']}/delta.json"))
+          c = d["counts"]
+          print(f"### graph-delta · {d['repo']} @ {os.environ['SHA'][:8]} · mode **{d['mode']}** (churn {d['churn']:.2%})")
+          print(f"| added | modified | deleted | unchanged | edges − | edges + |\n|---|---|---|---|---|---|")
+          print(f"| {c['added']} | {c['modified']} | {c['deleted']} | {c['unchanged']} | {c['edges_removed']} | {c['edges_added']} |")
+          if d["mode"] == "full":
+              print("\n**Full reindex required**: the change exceeds the delta threshold; the pipeline stops here by design.")
+          for a in d["added"][:20]:
+              print(f"- `{a['name']}` ({a['entity_type']}, {a['line_count']} lines) → unassigned, {len(a['edges_out'])} structural edges")
+          PY
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v6
+        with:
+          name: delta-${{ matrix.repo }}-${{ matrix.sha }}
+          path: delta/
+          retention-days: 30

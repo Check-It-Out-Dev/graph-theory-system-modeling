@@ -67,7 +67,9 @@ class Dash:
             p["options"].setdefault("graphMode", "none")
         if ptype == "timeseries":
             p["options"].setdefault("legend", {"displayMode": "list", "placement": "bottom", "showLegend": True})
-            p["fieldConfig"]["defaults"].setdefault("custom", {"lineWidth": 2, "fillOpacity": 8, "spanNulls": True})
+            # one sample per night: without points a single night draws nothing
+            p["fieldConfig"]["defaults"].setdefault("custom", {"lineWidth": 2, "fillOpacity": 8, "spanNulls": True,
+                                                               "showPoints": "always", "pointSize": 7})
         if ptype == "bargauge":
             p["options"].setdefault("reduceOptions", {"calcs": ["lastNotNull"], "fields": "", "values": False})
             p["options"].setdefault("orientation", "horizontal")
