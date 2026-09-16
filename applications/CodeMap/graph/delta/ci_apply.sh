@@ -36,6 +36,16 @@ REJECTED=$(python -c "import json;print(json.load(open('$D/apply.json')).get('re
 if [ -z "$REJECTED" ]; then
   # version drift: the bank replayed by the engine on the pack before and after (no model, seconds)
   python "$R/graph/delta/drift.py" --old work/pack.old --new "$D/pack.next" --out "$R/graph/ledger/$NEXT.drift.json" | tee -a "$GITHUB_STEP_SUMMARY"
+  # reclue the touched subsystems (ErdosNavigator delta, on the subscription); best-effort: a failed or
+  # gated reclue is recorded in graph/ledger/<v>.reclue.json and the structure-only record ships as it is
+  SUBS=$(python -c "import json;print(','.join(json.load(open('$D/apply.json'))['changed_subsystems']))")
+  if [ -n "${CLAUDE_CODE_OAUTH_TOKEN:-}" ] && [ -n "$SUBS" ]; then
+    PYTHONUTF8=1 python "$R/graph/delta/reclue.py" --pack "$D/pack.next" --subsystems "$SUBS" --version "$NEXT" \
+      --ledger "$R/graph/ledger" --notes "$R/prompts/navigator/curation_notes.md" --backend claude --by "$BY" \
+      | tee -a "$GITHUB_STEP_SUMMARY" || echo "reclue failed (recorded; the pack ships structure-only)" | tee -a "$GITHUB_STEP_SUMMARY"
+  else
+    echo "reclue skipped: no subscription token in this job" | tee -a "$GITHUB_STEP_SUMMARY"
+  fi
   # the prompt for the new pack (template + pack + notes), the seen list, the Release
   PYTHONUTF8=1 python "$R/tools/prompt/build_navigator.py" --pack "$D/pack.next" --out "$R/prompts/navigator/active.md"
   python - <<PY

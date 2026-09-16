@@ -22,7 +22,7 @@ import tarfile
 R = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 PACK_FILES = ["codemap.lbdb", "codemap_vocab.gbnf", "entities.csv", "edges.csv", "edges_lb.csv", "hyperedges.csv",
               "l1_master.json", "l2_navigators.jsonl", "mfq.jsonl", "DIALECT_NOTES.md"]
-OPTIONAL_FILES = ["INVALIDATED_delta.json"]
+OPTIONAL_FILES = ["INVALIDATED_delta.json", "curation_notes.md"]
 REPO = "Check-It-Out-Dev/graph-theory-system-modeling"
 
 

@@ -71,6 +71,10 @@ def build(template_path, pack_dir, notes_path):
     engine = Engine(pack_dir=pack_dir)
     l1 = engine.map()
     template = open(template_path, encoding="utf-8").read()
+    # the notes ride the pack (a Release carries the notes its decisions wrote); the repo file is the fallback
+    pack_notes = os.path.join(pack_dir, "curation_notes.md") if pack_dir else None
+    if pack_notes and os.path.exists(pack_notes):
+        notes_path = pack_notes
     notes = open(notes_path, encoding="utf-8").read().strip() if os.path.exists(notes_path) else ""
     caveats = l1.get("caveats")
     if isinstance(caveats, (list, tuple)):

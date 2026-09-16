@@ -48,7 +48,7 @@ def child_env(role, persona=None, extra=None):
 
 
 def build_cmd(prompt, model, system_file=None, mcp_config=None, allowed_tools=(), max_turns=1,
-              resume=None, session_id=None, effort=None, json_schema=None, exe=None, append_system=False):
+              resume=None, session_id=None, effort=None, json_schema=None, exe=None, append_system=False, tools=None):
     """append_system=False replaces Claude Code's own system prompt (the navigator: a smaller fixed
     context); True appends to it (personas working in a checkout keep the tool-use guidance)."""
     cmd = [exe or binary() or "claude", "-p", prompt, "--output-format", "json",
@@ -62,6 +62,8 @@ def build_cmd(prompt, model, system_file=None, mcp_config=None, allowed_tools=()
         cmd += ["--strict-mcp-config", "--mcp-config", '{"mcpServers":{}}']
     if allowed_tools:
         cmd += ["--allowedTools", ",".join(allowed_tools)]
+    if tools is not None:  # the available tools; [] means none (a pure text answer, no tool turn to burn)
+        cmd += ["--tools", ",".join(tools)]
     if resume:
         cmd += ["--resume", resume]
     elif session_id:
@@ -92,14 +94,14 @@ def parse_result(stdout):
 
 def run(prompt, model, role, system_file=None, mcp_config=None, allowed_tools=(), max_turns=1,
         resume=None, session_id=None, effort=None, json_schema=None, persona=None,
-        timeout=DEFAULT_TIMEOUT, cwd=None, env_extra=None, runner=None, append_system=False):
+        timeout=DEFAULT_TIMEOUT, cwd=None, env_extra=None, runner=None, append_system=False, tools=None):
     """Run one `claude -p` call. Returns a dict that never raises: {text, usage, model_usage,
     session_id, is_error, error, num_turns, duration_ms, cost_usd, structured, raw}."""
     exe = binary()
     if exe is None and runner is None:
         return _fail("claude binary not found", model)
     cmd = build_cmd(prompt, model, system_file, mcp_config, allowed_tools, max_turns, resume,
-                    session_id, effort, json_schema, exe=exe, append_system=append_system)
+                    session_id, effort, json_schema, exe=exe, append_system=append_system, tools=tools)
     env = child_env(role, persona, env_extra)
     t0 = time.time()
     try:

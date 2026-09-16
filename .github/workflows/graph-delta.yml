@@ -6,8 +6,9 @@
 #             OAuth token, read-only tools over pack.next), a checker that refuses invented ids, then an
 #             ISSUE on this repository with the table and the decision menu (no cross-repository secret)
 # decide    → an issue comment `/codemap …` by an owner/member/collaborator applies the decision: ledger
-#             row, curation note, FAQ invalidation, structural L2 fields, manifest, a new pack Release,
-#             a pull request with the notes; the VPS picks the Release up within ten minutes
+#             row, curation note, FAQ invalidation, structural L2 fields, the drift pass, the reclue of the
+#             touched subsystems (ErdosNavigator, subscription), manifest, a new pack Release, a pull request
+#             with the notes; the VPS picks the Release up within ten minutes
 # timeout   → daily: proposals older than 48 h are applied as accepted-by-timeout, recorded as such
 # Values chosen by others (a repo, a sha, a comment) reach shells through `env:`, never interpolated.
 name: graph-delta
@@ -205,7 +206,8 @@ jobs:
           && contains(github.event.issue.labels.*.name, 'graph-delta')
           && contains(fromJson('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
+    environment: graph-delta
     permissions:
       contents: write
       issues: write
@@ -217,6 +219,7 @@ jobs:
       ISSUE: ${{ github.event.issue.number }}
       ISSUE_BODY: ${{ github.event.issue.body }}
       GH_TOKEN: ${{ github.token }}
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5
         with:
@@ -224,7 +227,12 @@ jobs:
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6
         with:
           python-version: "3.12"
-      - run: python -m pip install real-ladybug==0.15.3
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444  # v5
+        with:
+          node-version: 24
+      - run: |
+          python -m pip install real-ladybug==0.15.3
+          npm install -g @anthropic-ai/claude-code@2.1.272
       - name: The branch that proposed (issue_comment runs the default branch's workflow)
         run: |
           REF=$(printf '%s\n' "$ISSUE_BODY" | grep -o '<!-- codemap-delta [^>]* -->' | head -1 | grep -o 'ref=[^ ]*' | cut -d= -f2- || true)
@@ -237,7 +245,8 @@ jobs:
     name: Proposals older than 48 h
     if: ${{ github.event_name == 'schedule' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 45
+    environment: graph-delta
     permissions:
       contents: write
       issues: write
@@ -246,6 +255,7 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       BY: github-actions[bot]
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5
         with:
@@ -253,7 +263,12 @@ jobs:
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6
         with:
           python-version: "3.12"
-      - run: python -m pip install real-ladybug==0.15.3
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444  # v5
+        with:
+          node-version: 24
+      - run: |
+          python -m pip install real-ladybug==0.15.3
+          npm install -g @anthropic-ai/claude-code@2.1.272
       - name: Apply stale proposals as accepted-by-timeout
         run: |
           for n in $(gh issue list --label graph-delta --state open --json number,createdAt \
