@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Saturation measured: the extract job's `coverage` (indexed ∩ eligible / eligible per repository) rides the ledger row and the nightly artifact (`codemap_quality_graph_coverage_ratio`), beside the misses counter on the AI-system dashboard (S13c)
 - GEPA over the navigator template (`eval/optimize/`): adapter on the real navigator path scored by the execution oracle, constraints that refuse a broken contract, one artifact per run, a promotion gate that writes `v<N>.md` + PROMPT_LOG + PR only on a real win, and the same run inside a Modal CPU container on the subscription (S14)
 - Governance docs: MODEL_CARD, EVAL_CARD, DATA_CARD, THREAT_MODEL (OWASP LLM Top 10 2025 → controls), INCIDENTS, the NIST AI RMF map in docs/07, the Art. 50 transparency line, and the `governance-docs` CI gate (`tools/ci/check_governance.py`) (S15a)
+- The public quality page (`tools/pages/build_quality.py` → Pages `/quality/`, `nightly.yml`: committed artifacts only, inline SVG, dark and light), README sections in both READMEs with the owner's security paragraph, the team story, the dashboard links and the cards (S15b)
 
 ## [1.0.0] - 2025-09-16
 

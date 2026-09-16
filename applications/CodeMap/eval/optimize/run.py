@@ -54,8 +54,8 @@ def main(argv=None):
 
     out_path = a.out or os.path.join(HERE, "runs", f"{a.date}.json")
     cand_path = a.candidate_out or os.path.join(HERE, "runs", f"{a.date}.template.md")
-    log_path = os.path.join(HERE, "runs", f"{a.date}.log.jsonl")
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    log_path = os.path.join(os.path.dirname(out_path), f"{a.date}.log.jsonl")  # beside the artifact, wherever it lives
     template = open(a.template, encoding="utf-8").read().replace("\r\n", "\n")
     seed_problems = constraints.check(template)
     if seed_problems:
