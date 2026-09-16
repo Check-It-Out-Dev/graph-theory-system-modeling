@@ -26,7 +26,7 @@ sys.path.insert(0, os.path.join(R, "app"))
 import claude_cli  # noqa: E402
 from engine import Engine  # noqa: E402
 
-from remote import credits, ids, mcp, metrics, telemetry, telemetry_push, tools, users  # noqa: E402
+from remote import credits, feedback, ids, mcp, metrics, search, telemetry, telemetry_push, tools, users  # noqa: E402
 
 VERSION = "1.2.0"
 
@@ -52,13 +52,22 @@ class App:
         self.card = credits.RateCard()
         self.ledger = credits.Ledger()
         self.registry = metrics.Registry()
+        self.seen = feedback.Seen()
         self.pusher = None
         self.replayed = 0
+        self.backlog_path = os.environ.get("CODEMAP_BACKLOG") or os.path.join(R, "graph", "delta", "backlog.jsonl")
+        self.backlog_lock = threading.Lock()
         if sink is None:  # production: the views are rebuilt from the artifact of record
             for ev in telemetry.iter_events():
                 self.ledger.observe(ev)
                 self.registry.observe(ev)
+                self.seen.observe(ev)
                 self.replayed += 1
+        self.search_index = None
+        if os.environ.get("CODEMAP_SEARCH", "auto") != "off" and sink is None:
+            self.search_index = search.SearchIndex(self)
+            if not self.search_index.load():
+                self.search_index.build_async()
         self.registry.set("codemap_info", {"version": VERSION, "pack_version": self.pack_version,
                                            "prompt_version": self.prompt_version}, 1)
         for u in self.users.values():
@@ -75,6 +84,7 @@ class App:
         ev = telemetry.emit(ev, sink=self.sink)
         self.ledger.observe(ev)
         self.registry.observe(ev)
+        self.seen.observe(ev)
         u = self.users.get(ev.get("user"))
         if u:
             self.registry.set("codemap_budget_remaining", {"user": u["id"]}, self.ledger.state(u)["remaining"])
@@ -98,9 +108,12 @@ class App:
     def names_in(self, text):
         return [n for n in self._by_name if n in (text or "")]
 
-    def clue(self, sub):
+    def clue_full(self, sub):
         l2 = self.engine.l2 if isinstance(self.engine.l2, dict) else {}
-        nav = l2.get(str(sub)) or l2.get(_int(sub))
+        return l2.get(str(sub)) or l2.get(_int(sub))
+
+    def clue(self, sub):
+        nav = self.clue_full(sub)
         if not nav:
             return None
         return {"subsystem": nav.get("sub_id", sub), "name": nav.get("name"), "role": nav.get("role"),
@@ -113,6 +126,9 @@ class App:
                 "ladybug": bool(self.engine.lb), "users": sorted(self.users),
                 "navigator": self.navigator.describe() if self.navigator else None,
                 "events_dropped": telemetry.DROPPED[0], "events_replayed": self.replayed,
+                "answers_seen": len(self.seen),
+                "search": ({"state": self.search_index.state, "entities": len(self.search_index.names),
+                            "error": self.search_index.error} if self.search_index else None),
                 "push": (self.pusher.stats if self.pusher else None),
                 "rate_card": self.card.per_1k}
 
@@ -198,6 +214,22 @@ def handle_metrics(app):
     return 200, app.registry.render()
 
 
+def handle_feedback(app, body, headers):
+    """REST twin of the codemap_feedback tool (the UI and curl use it)."""
+    if not app.authed(headers):
+        return 401, {"error": "unauthorized"}
+    user, wanted = users.resolve(app.users, headers, body if isinstance(body, dict) else None)
+    if user is None:
+        return 400, {"error": "unknown_user", "wanted": wanted, "known": sorted(app.users)}
+    ident = tools.Ident(user, _hdr(headers, "X-CodeMap-Session"))
+    text, is_error = feedback.feedback(app, ident, body if isinstance(body, dict) else {})
+    obj = json.loads(text)
+    if is_error:
+        code = 404 if "unknown request_id" in obj.get("error", "") else 400
+        return code, obj
+    return 201, obj
+
+
 # --------------------------------------------------------------------------- HTTP
 
 class H(BaseHTTPRequestHandler):
@@ -258,6 +290,8 @@ class H(BaseHTTPRequestHandler):
         if u.path == "/mcp":
             code, reply = handle_mcp(self.app, body, self.headers)
             return self._send(code, reply, {"Mcp-Session-Id": self.headers.get("Mcp-Session-Id") or ids.new_request_id()})
+        if u.path == "/feedback":
+            return self._send(*handle_feedback(self.app, body, self.headers))
         return self._send(404, {"error": "unknown endpoint"})
 
 

@@ -1,8 +1,8 @@
 """Tool bodies. Each takes the App (engine + registries) and an Ident (who is calling) and returns
 (text, is_error); the server emits exactly one event per call from what they return.
 
-S1 ships ask (FAQ or descend), step, open, status; search / feedback / miss answer "not yet" until
-their slices land (S4). The navigator tier replaces `descend` in S2.
+ask (FAQ, navigator, or descend when no navigator is configured), step, open, status here;
+search, feedback and miss live in search.py and feedback.py.
 """
 
 import json
@@ -139,12 +139,19 @@ def status(app, ident, args):
     return _text(st), False
 
 
-# ----------------------------------------------------------------------------- not yet
+def _search(app, ident, args):
+    from . import search
+    return search.search(app, ident, args)
 
-def _not_yet(which):
-    def f(app, ident, args):
-        return _text({"error": f"{which} is not available on this server yet"}), True
-    return f
+
+def _feedback(app, ident, args):
+    from . import feedback
+    return feedback.feedback(app, ident, args)
+
+
+def _miss(app, ident, args):
+    from . import feedback
+    return feedback.miss(app, ident, args)
 
 
 HANDLERS = {
@@ -152,7 +159,7 @@ HANDLERS = {
     "codemap_step": step,
     "codemap_open": open_,
     "codemap_status": status,
-    "codemap_search": _not_yet("codemap_search"),
-    "codemap_feedback": _not_yet("codemap_feedback"),
-    "codemap_miss": _not_yet("codemap_miss"),
+    "codemap_search": _search,
+    "codemap_feedback": _feedback,
+    "codemap_miss": _miss,
 }
