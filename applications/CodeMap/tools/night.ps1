@@ -49,7 +49,7 @@ python eval\quality\quality.py --date $Date --events "eval\judge\runs\events-$Da
 
 # 4. the artifacts become history (the public quality page reads them)
 git -C $Repo add "applications/CodeMap/eval/humans/runs" "applications/CodeMap/eval/judge/runs" "applications/CodeMap/eval/quality/runs" "applications/CodeMap/graph/delta/backlog.jsonl" 2>$null
-$msg = "Night $Date: personas, judge, quality"
+$msg = "Night ${Date}: personas, judge, quality"
 git -C $Repo commit -q -m $msg
 if (-not $NoPush) { git -C $Repo push -q origin HEAD }
 "[$(Get-Date -Format s)] night $Date done" | Tee-Object -FilePath $log -Append
