@@ -44,7 +44,11 @@ if ($BankPass -gt 0) {
 
 # 2. the night's events from the VPS (the server's artifact of record), then the judge
 $hdr = @{ Authorization = "Bearer $env:CODEMAP_TOKEN"; "X-CodeMap-Admin" = $env:CODEMAP_ADMIN_TOKEN }
-$ev = Invoke-RestMethod -Uri "$env:CODEMAP_URL/admin/events?since=${Date}T00:00:00Z&limit=5000" -Headers $hdr
+# the night label may sit ahead of the clock: the events window starts where the personas started
+$since = "${Date}T00:00:00Z"
+$summaryPath = "eval\humansuns\$Date.summary.json"
+if (Test-Path $summaryPath) { $started = (Get-Content $summaryPath -Raw | ConvertFrom-Json).started; if ($started) { $since = $started } }
+$ev = Invoke-RestMethod -Uri "$env:CODEMAP_URL/admin/events?since=$since&limit=5000" -Headers $hdr
 $ev.events | ForEach-Object { $_ | ConvertTo-Json -Compress -Depth 12 } | Set-Content -Encoding utf8 "eval\judge\runs\events-$Date.jsonl"
 "events fetched: $($ev.count)" | Tee-Object -FilePath $log -Append
 python eval\judge\judge.py --events "eval\judge\runs\events-$Date.jsonl" --out "eval\judge\runs\$Date.json" --backend claude --modal 2>&1 | Tee-Object -FilePath $log -Append

@@ -98,6 +98,10 @@ def oracle(ev, kind, row):
 
 # ----------------------------------------------------------------------------- rows
 
+def load_jsonl(path):
+    return [json.loads(l) for l in open(path, encoding="utf-8") if l.strip()]
+
+
 def invalidated_ids():
     """Bank rows the pack or the curated invalidation marks stale: their gold predates the graph they would judge."""
     out = set()
