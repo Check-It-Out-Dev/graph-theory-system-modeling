@@ -135,6 +135,7 @@ class ProposeTests(unittest.TestCase):
         self.assertIn("ConsentReceiptService.java → subsystem 11", text)
         self.assertIn("decided by tester", text)
         self.assertTrue(row["assignments"][0]["path"].startswith("src/"))
+        self.assertEqual(row["coverage"]["ratio"], 1.0)  # the extract's saturation measure rides the ledger row
         inv = json.load(open(os.path.join(pack, "INVALIDATED_delta.json"), encoding="utf-8"))
         n_after_add = len(inv["invalidated"])  # additions invalidate only enumerating rows
         self.assertLess(n_after_add, 20)  # of the 41 rows depending on subsystem 11

@@ -56,7 +56,24 @@ def latest_drift(ledger_dir):
             "drifted": d.get("drifted"), "compared": d.get("compared"), "invalidated": d.get("invalidated")}
 
 
-def compute(date, events, judge_doc=None, humans_rows=None, drift=None):
+def latest_coverage(ledger_dir):
+    """Coverage per repository from the newest ledger rows (one per repo; the decision job writes them)."""
+    if not os.path.isdir(ledger_dir):
+        return {}
+    out = {}
+    for n in sorted(x for x in os.listdir(ledger_dir) if x.endswith(".json") and ".drift." not in x and ".reclue." not in x):
+        try:
+            d = json.load(open(os.path.join(ledger_dir, n), encoding="utf-8"))
+        except ValueError:
+            continue
+        cov = d.get("coverage") or {}
+        if d.get("repo") and isinstance(cov.get("ratio"), (int, float)):
+            out[d["repo"]] = {"ratio": cov["ratio"], "eligible_files": cov.get("eligible_files"), "indexed_files": cov.get("indexed_files"),
+                              "pack_version": d.get("pack_version")}
+    return out
+
+
+def compute(date, events, judge_doc=None, humans_rows=None, drift=None, coverage=None):
     asks = [e for e in events if e.get("event_type") == "ask"]
     nav = [e for e in asks if str(e.get("tier", "")).startswith("nav-")]
     fb = [e for e in events if e.get("event_type") == "feedback"]
@@ -126,6 +143,10 @@ def compute(date, events, judge_doc=None, humans_rows=None, drift=None):
         out["codemap_version_drift_rate"] = drift.get("rate")
         out["codemap_version_drift"] = {k: v for k, v in drift.items() if isinstance(v, (int, float)) and k != "rate"}
         out["pack_version_drift"] = {"pack_version": drift.get("pack_version"), "from": drift.get("from")}
+    # --- saturation (the extract job measured the checkout; the decision job wrote it into the ledger)
+    if coverage:
+        out["codemap_graph_coverage_ratio"] = {repo: c["ratio"] for repo, c in coverage.items()}
+        out["graph_coverage"] = coverage
     return out
 
 
@@ -202,7 +223,7 @@ def main(argv=None):
     events = load_jsonl(a.events)
     judge_doc = json.load(open(a.judge, encoding="utf-8")) if a.judge and os.path.exists(a.judge) else None
     humans = load_jsonl(a.humans)
-    doc = compute(a.date, events, judge_doc, humans, latest_drift(a.ledger))
+    doc = compute(a.date, events, judge_doc, humans, latest_drift(a.ledger), latest_coverage(a.ledger))
     os.makedirs(os.path.dirname(os.path.abspath(a.out)), exist_ok=True)
     with open(a.out, "w", encoding="utf-8", newline="\n") as f:
         json.dump(doc, f, indent=1, sort_keys=True)

@@ -440,6 +440,61 @@
       "type": "prometheus",
       "uid": "${DS_PROMETHEUS}"
      },
+     "expr": "codemap_graph_coverage_ratio{key=\"backend\"}",
+     "legendFormat": "backend",
+     "refId": "A"
+    },
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "${DS_PROMETHEUS}"
+     },
+     "expr": "codemap_graph_coverage_ratio{key=\"frontend\"}",
+     "legendFormat": "frontend",
+     "refId": "B"
+    }
+   ],
+   "title": "Graph coverage of the checkout (saturation): indexed ∩ eligible / eligible, per repository",
+   "type": "timeseries"
+  },
+  {
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROMETHEUS}"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "custom": {
+      "fillOpacity": 8,
+      "lineWidth": 2,
+      "pointSize": 7,
+      "showPoints": "always",
+      "spanNulls": true
+     },
+     "unit": "percentunit"
+    },
+    "overrides": []
+   },
+   "gridPos": {
+    "h": 8,
+    "w": 12,
+    "x": 0,
+    "y": 15
+   },
+   "id": 11,
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom",
+     "showLegend": true
+    }
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "${DS_PROMETHEUS}"
+     },
      "expr": "codemap_quality_version_drift_rate",
      "legendFormat": "drift rate",
      "refId": "A"
@@ -469,10 +524,10 @@
    "gridPos": {
     "h": 8,
     "w": 12,
-    "x": 0,
+    "x": 12,
     "y": 15
    },
-   "id": 11,
+   "id": 12,
    "options": {
     "legend": {
      "displayMode": "list",
@@ -520,7 +575,7 @@
     "x": 0,
     "y": 23
    },
-   "id": 12,
+   "id": 13,
    "panels": [],
    "title": "Behaviour",
    "type": "row"
@@ -548,7 +603,7 @@
     "x": 0,
     "y": 24
    },
-   "id": 13,
+   "id": 14,
    "options": {
     "legend": {
      "displayMode": "list",
@@ -594,7 +649,7 @@
     "x": 8,
     "y": 24
    },
-   "id": 14,
+   "id": 15,
    "options": {
     "legend": {
      "displayMode": "list",
@@ -632,7 +687,7 @@
     "x": 16,
     "y": 24
    },
-   "id": 15,
+   "id": 16,
    "options": {
     "showHeader": true
    },

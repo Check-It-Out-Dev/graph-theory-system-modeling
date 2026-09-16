@@ -237,6 +237,24 @@ def parse_changes(text):
 
 # ----------------------------------------------------------------------------- the delta
 
+def coverage_of(name, repo_dir, ents):
+    """Saturation: how much of the checkout the graph knows. eligible = files the repository's rules admit;
+    indexed = pack entities whose canonical path is one of them. The ratio trends on the AI-system dashboard;
+    the codemap_miss backlog is what the personas found that the graph did not."""
+    prefix = REPOS["repos"][name]["prefix"]
+    eligible_paths = set()
+    for root, dirs, files in os.walk(repo_dir):
+        dirs[:] = [d for d in dirs if d not in (".git", "node_modules", "target", "dist", "build", ".angular")]
+        for f in files:
+            rel = os.path.relpath(os.path.join(root, f), repo_dir).replace("\\", "/")
+            if eligible(name, rel):
+                eligible_paths.add(prefix + rel)
+    indexed = {e["file_path"] for e in ents if e["file_path"].startswith(prefix)}
+    known = len(indexed & eligible_paths)
+    return {"eligible_files": len(eligible_paths), "indexed_files": len(indexed), "indexed_and_eligible": known,
+            "ratio": round(known / len(eligible_paths), 4) if eligible_paths else None}
+
+
 def run(name, repo_dir, changes, pack_dir, out_dir, backlog_rows=None, date=None, churn_full=None):
     repo = REPOS["repos"][name]
     churn_full = REPOS.get("churn_full_reindex", 0.1) if churn_full is None else churn_full
@@ -343,7 +361,9 @@ def run(name, repo_dir, changes, pack_dir, out_dir, backlog_rows=None, date=None
     churn = (len(added) + len(modified) + len(deleted)) / max(1, n_before)
     mode = "full" if churn > churn_full else "delta"
     os.makedirs(out_dir, exist_ok=True)
+    coverage = coverage_of(name, repo_dir, ents_next)
     delta = {"schema": 1, "repo": name, "date": date, "mode": mode, "churn": round(churn, 4), "churn_full_reindex": churn_full,
+             "coverage": coverage,
              "counts": {"before": n_before, "after": len(ents_next), "added": len(added), "modified": len(modified),
                         "deleted": len(deleted), "unchanged": len(unchanged), "skipped": len(skipped),
                         "edges_before": len(edges), "edges_removed": removed, "edges_added": len(kept) - (len(edges) - removed),

@@ -125,6 +125,9 @@ def build_all():
              {"expr": q("codemap_quality_correct_rate"), "legendFormat": "correct"},
              {"expr": q("codemap_quality_helpful_rate"), "legendFormat": "helpful"},
              {"expr": q("codemap_quality_oracle_success_rate"), "legendFormat": "oracle success"}], w=12, h=8, unit="percentunit")
+    d.panel("timeseries", "Graph coverage of the checkout (saturation): indexed ∩ eligible / eligible, per repository",
+            [{"expr": q("codemap_graph_coverage_ratio", "backend"), "legendFormat": "backend"},
+             {"expr": q("codemap_graph_coverage_ratio", "frontend"), "legendFormat": "frontend"}], w=12, h=8, unit="percentunit")
     d.panel("timeseries", "Version drift after a pack decision (bank rows answering differently, not invalidated on purpose)",
             [{"expr": q("codemap_quality_version_drift_rate"), "legendFormat": "drift rate"}], w=12, h=8, unit="percentunit")
     d.panel("timeseries", "Abstentions: all · honest · false",

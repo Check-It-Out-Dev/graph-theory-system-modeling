@@ -134,7 +134,8 @@ def apply(proposal, delta, pack, command, by, version, ledger_dir, notes_path, m
     repo, head = delta.get("repo"), delta.get("head") or proposal.get("head") or ""
     row = {"schema": 1, "pack_version": version, "repo": repo, "head": head, "decided_by": by, "decided_at": at,
            "command": command, "t_valid": at, "t_invalid": None, "superseded_by": None,
-           "assignments": [], "new_subsystems": [], "rejected": rejected, "changed_subsystems": []}
+           "assignments": [], "new_subsystems": [], "rejected": rejected, "changed_subsystems": [],
+           "coverage": delta.get("coverage")}
     if rejected:
         return row, []
     # new subsystems get fresh ids

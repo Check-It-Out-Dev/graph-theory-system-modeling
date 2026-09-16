@@ -84,6 +84,10 @@ class DeltaTests(unittest.TestCase):
                    ("D", "src/test/java/com/sm/instagram/platform/unit/service/subscription/PaymentsDisabledBootGuardUnitTest.java", None),
                    ("A", "README.md", None)]
         delta = extract.run("backend", repo, changes, PACK, out, backlog_rows=[{"path": "backend/src/main/java/com/sm/nope/Missing.java"}], date="2026-09-17")
+        cov = delta["coverage"]  # the fixture checkout holds only the changed files: every eligible one is indexed
+        self.assertGreater(cov["eligible_files"], 0)
+        self.assertEqual(cov["indexed_and_eligible"], cov["eligible_files"])
+        self.assertEqual(cov["ratio"], 1.0)
         c = delta["counts"]
         self.assertEqual((delta["mode"], c["added"], c["modified"], c["deleted"]), ("delta", 1, 1, 1))
         self.assertEqual(c["after"], c["before"])
