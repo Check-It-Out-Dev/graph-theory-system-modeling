@@ -1,12 +1,15 @@
-# Delta digestion of the product repositories — the graph follows the code.
+# Delta digestion of the product repositories — the graph follows the code, and a person decides.
 #
-# Trigger: a product pull request (by dispatch from the product repository, by a poll of its open pull
-# requests, or by hand). Jobs: `discover` decides what to look at (one entry per pull-request head not
-# seen before); `extract` runs the deterministic extractor (no model, no secret): changed files →
-# pack.next + delta.json, uploaded as an artifact and summarised. The proposal job (Grothendieck on the
-# subscription, environment `graph-delta`) and the apply job are the next slices; a churn above the
-# threshold stops here with "full reindex required". Values chosen by others (a repo, a sha, a number)
-# reach shells through `env:`, never interpolated into `run:`.
+# discover  → what changed upstream (a dispatch, or a poll of open same-repository pull requests + main)
+# extract   → the deterministic half (no model, no secret): pack.next + delta.json as an artifact
+# propose   → Grothendieck on the subscription (environment `graph-delta`, the Claude Code CLI with the
+#             OAuth token, read-only tools over pack.next), a checker that refuses invented ids, then an
+#             ISSUE on this repository with the table and the decision menu (no cross-repository secret)
+# decide    → an issue comment `/codemap …` by an owner/member/collaborator applies the decision: ledger
+#             row, curation note, FAQ invalidation, structural L2 fields, manifest, a new pack Release,
+#             a pull request with the notes; the VPS picks the Release up within ten minutes
+# timeout   → daily: proposals older than 48 h are applied as accepted-by-timeout, recorded as such
+# Values chosen by others (a repo, a sha, a comment) reach shells through `env:`, never interpolated.
 name: graph-delta
 
 on:
@@ -22,18 +25,20 @@ on:
         description: "head commit of the product repository to digest"
         required: true
       base:
-        description: "base commit (default: the pack's indexed commit for that repository, else the parent)"
+        description: "base commit (default: the pack's indexed commit for that repository)"
         required: false
         default: ""
       pr:
-        description: "product pull request number (optional; for the comment)"
+        description: "product pull request number (optional)"
         required: false
         default: ""
+  issue_comment:
+    types: [created]
   schedule:
     - cron: "17 */6 * * *"
 
 concurrency:
-  group: graph-delta
+  group: graph-delta-${{ github.event_name == 'issue_comment' && github.event.issue.number || 'digest' }}
   cancel-in-progress: false
 
 permissions:
@@ -42,6 +47,7 @@ permissions:
 jobs:
   discover:
     name: What changed upstream
+    if: ${{ github.event_name != 'issue_comment' }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
@@ -75,12 +81,13 @@ jobs:
       fail-fast: false
       matrix:
         include: ${{ fromJson(needs.discover.outputs.matrix) }}
+    outputs:
+      mode: ${{ steps.delta.outputs.mode }}
     env:
       REPO: ${{ matrix.repo }}
       SHA: ${{ matrix.sha }}
       BASE: ${{ matrix.base }}
       PR: ${{ matrix.pr }}
-      PUBLIC: ${{ matrix.public }}
       GITHUB_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5
@@ -98,24 +105,155 @@ jobs:
       - name: The latest graph pack Release
         run: python applications/CodeMap/tools/pack/fetch_pack.py --latest
       - name: Extract the delta (no model)
+        id: delta
         run: |
           set -o pipefail
           python applications/CodeMap/graph/delta/extract.py --name "$REPO" --repo-dir product --base "$BASE" --head "$SHA" \
             --out "delta/$REPO-$SHA" | tee extract.log
           python - <<'PY' | tee -a "$GITHUB_STEP_SUMMARY"
           import json, os
-          d = json.load(open(f"delta/{os.environ['REPO']}-{os.environ['SHA']}/delta.json"))
+          p = f"delta/{os.environ['REPO']}-{os.environ['SHA']}/delta.json"
+          d = json.load(open(p)); d["head"] = os.environ["SHA"]; d["pr"] = os.environ.get("PR") or None
+          json.dump(d, open(p, "w"), indent=1, sort_keys=True)
           c = d["counts"]
           print(f"### graph-delta · {d['repo']} @ {os.environ['SHA'][:8]} · mode **{d['mode']}** (churn {d['churn']:.2%})")
-          print(f"| added | modified | deleted | unchanged | edges − | edges + |\n|---|---|---|---|---|---|")
+          print("| added | modified | deleted | unchanged | edges − | edges + |\n|---|---|---|---|---|---|")
           print(f"| {c['added']} | {c['modified']} | {c['deleted']} | {c['unchanged']} | {c['edges_removed']} | {c['edges_added']} |")
           if d["mode"] == "full":
               print("\n**Full reindex required**: the change exceeds the delta threshold; the pipeline stops here by design.")
           for a in d["added"][:20]:
               print(f"- `{a['name']}` ({a['entity_type']}, {a['line_count']} lines) → unassigned, {len(a['edges_out'])} structural edges")
+          open(os.environ["GITHUB_OUTPUT"], "a").write(f"mode={d['mode']}\n")
           PY
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v6
         with:
           name: delta-${{ matrix.repo }}-${{ matrix.sha }}
           path: delta/
           retention-days: 30
+
+  propose:
+    name: Propose ${{ matrix.repo }}@${{ matrix.sha }} (Grothendieck, subscription)
+    needs: [discover, extract]
+    if: ${{ needs.discover.outputs.any == 'true' && needs.extract.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment: graph-delta
+    permissions:
+      contents: read
+      issues: write
+    strategy:
+      max-parallel: 1
+      matrix:
+        include: ${{ fromJson(needs.discover.outputs.matrix) }}
+    env:
+      REPO: ${{ matrix.repo }}
+      SHA: ${{ matrix.sha }}
+      PR: ${{ matrix.pr }}
+      GH_TOKEN: ${{ github.token }}
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444  # v5
+        with:
+          node-version: 24
+      - run: |
+          python -m pip install real-ladybug==0.15.3
+          npm install -g @anthropic-ai/claude-code@2.1.272
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131  # v7
+        with:
+          name: delta-${{ matrix.repo }}-${{ matrix.sha }}
+          path: delta
+      - name: Delta mode
+        id: mode
+        run: echo "mode=$(python -c "import json;print(json.load(open('delta/$REPO-$SHA/delta.json'))['mode'])")" >> "$GITHUB_OUTPUT"
+      - name: Propose (deterministic candidates, then Grothendieck reviews through the pack MCP)
+        if: ${{ steps.mode.outputs.mode == 'delta' }}
+        run: |
+          set -o pipefail
+          D="delta/$REPO-$SHA"
+          python applications/CodeMap/graph/delta/propose.py --delta "$D/delta.json" --pack "$D/pack.next" --out "$D/proposal.json" --backend claude | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: The checker refuses invented ids
+        if: ${{ steps.mode.outputs.mode == 'delta' }}
+        run: python applications/CodeMap/graph/delta/propose.py --check --proposal "delta/$REPO-$SHA/proposal.json" --pack "delta/$REPO-$SHA/pack.next"
+      - name: The proposal as an issue (a person decides)
+        if: ${{ steps.mode.outputs.mode == 'delta' }}
+        run: |
+          D="delta/$REPO-$SHA"
+          python - <<'PY'
+          import json, os
+          p = f"delta/{os.environ['REPO']}-{os.environ['SHA']}/proposal.json"
+          d = json.load(open(p)); d["run_id"] = os.environ["GITHUB_RUN_ID"]; d["artifact"] = f"delta-{os.environ['REPO']}-{os.environ['SHA']}"
+          json.dump(d, open(p, "w"), indent=1, sort_keys=True)
+          PY
+          python applications/CodeMap/graph/delta/issue.py --proposal "$D/proposal.json" --delta "$D/delta.json" --run-url "$RUN_URL" --ref "$GITHUB_REF_NAME" | tee -a "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v6
+        if: ${{ steps.mode.outputs.mode == 'delta' }}
+        with:
+          name: proposal-${{ matrix.repo }}-${{ matrix.sha }}
+          path: delta/${{ matrix.repo }}-${{ matrix.sha }}/proposal.json
+          retention-days: 30
+
+  decide:
+    name: Apply the decision
+    if: >-
+      ${{ github.event_name == 'issue_comment'
+          && startsWith(github.event.comment.body, '/codemap ')
+          && contains(github.event.issue.labels.*.name, 'graph-delta')
+          && contains(fromJson('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      actions: read
+    env:
+      COMMENT: ${{ github.event.comment.body }}
+      BY: ${{ github.event.comment.user.login }}
+      ISSUE: ${{ github.event.issue.number }}
+      ISSUE_BODY: ${{ github.event.issue.body }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6
+        with:
+          python-version: "3.12"
+      - run: python -m pip install real-ladybug==0.15.3
+      - name: Apply, release, open the pull request
+        run: bash applications/CodeMap/graph/delta/ci_apply.sh
+
+  timeout:
+    name: Proposals older than 48 h
+    if: ${{ github.event_name == 'schedule' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      actions: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      BY: github-actions[bot]
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6
+        with:
+          python-version: "3.12"
+      - run: python -m pip install real-ladybug==0.15.3
+      - name: Apply stale proposals as accepted-by-timeout
+        run: |
+          for n in $(gh issue list --label graph-delta --state open --json number,createdAt \
+                      --jq '.[] | select((now - (.createdAt | fromdateiso8601)) > 172800) | .number'); do
+            export ISSUE="$n"; export COMMENT="/codemap accept-by-timeout"
+            export ISSUE_BODY="$(gh issue view "$n" --json body --jq .body)"
+            bash applications/CodeMap/graph/delta/ci_apply.sh || echo "issue $n: apply failed" | tee -a "$GITHUB_STEP_SUMMARY"
+          done
