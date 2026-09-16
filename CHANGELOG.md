@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Reclue of the touched subsystems in the decision job (`graph/delta/reclue.py`: dossier from the pack, one tool-less `claude -p` per subsystem, mechanical gates on numbers and file names, snapshot in `graph/ledger/<version>.reclue.json`, untouched lines byte-identical); curation notes ride the pack so the VPS and the pull request build the same prompt (S13b)
 - Saturation measured: the extract job's `coverage` (indexed ∩ eligible / eligible per repository) rides the ledger row and the nightly artifact (`codemap_quality_graph_coverage_ratio`), beside the misses counter on the AI-system dashboard (S13c)
 - GEPA over the navigator template (`eval/optimize/`): adapter on the real navigator path scored by the execution oracle, constraints that refuse a broken contract, one artifact per run, a promotion gate that writes `v<N>.md` + PROMPT_LOG + PR only on a real win, and the same run inside a Modal CPU container on the subscription (S14)
+- Governance docs: MODEL_CARD, EVAL_CARD, DATA_CARD, THREAT_MODEL (OWASP LLM Top 10 2025 → controls), INCIDENTS, the NIST AI RMF map in docs/07, the Art. 50 transparency line, and the `governance-docs` CI gate (`tools/ci/check_governance.py`) (S15a)
 
 ## [1.0.0] - 2025-09-16
 

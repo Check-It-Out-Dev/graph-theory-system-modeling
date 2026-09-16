@@ -86,7 +86,7 @@ def dispatch(msg, call_tool, tools=None, server_name=None):
         ver = want if want in PROTOCOL_VERSIONS else PROTOCOL_VERSIONS[0]
         return 200, _ok(mid, {"protocolVersion": ver, "capabilities": {"tools": {"listChanged": False}},
                              "serverInfo": dict(SERVER_INFO, name=server_name or SERVER_INFO["name"]),
-                             "instructions": "Ask with codemap_ask; verify pointers in your checkout; "
+                             "instructions": "You are talking to an AI system (Claude Sonnet over a code graph); answers can be wrong. Ask with codemap_ask; verify pointers in your checkout; "
                                              "rate with codemap_feedback."})
     if method == "ping":
         return 200, _ok(mid, {})

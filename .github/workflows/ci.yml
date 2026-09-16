@@ -122,9 +122,21 @@ jobs:
           path: applications/CodeMap/eval/ci/junit.xml
           retention-days: 30
 
+  governance-docs:
+    name: Governance docs (cards, links, NIST map, Art. 50 line)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6
+        with:
+          python-version: "3.12"
+      - name: The cards say what they must
+        run: python applications/CodeMap/tools/ci/check_governance.py | tee -a "$GITHUB_STEP_SUMMARY"
+
   report:
     name: Quality metrics, Pages
-    needs: [mcp, codemap, eval-gate]
+    needs: [mcp, codemap, eval-gate, governance-docs]
     if: ${{ always() && github.event_name != 'pull_request' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
