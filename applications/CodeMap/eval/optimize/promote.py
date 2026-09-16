@@ -58,7 +58,7 @@ def decide(run, candidate_text, current_text):
     probs = constraints.check(candidate_text)
     if probs:
         reasons.append("constraints: " + "; ".join(probs))
-    if candidate_text.replace("\r\n", "\n") == current_text.replace("\r\n", "\n"):
+    if candidate_text.replace("\r\n", "\n").strip() == current_text.replace("\r\n", "\n").strip():
         reasons.append("candidate is byte-identical to the current template")
     return (not reasons), reasons
 
