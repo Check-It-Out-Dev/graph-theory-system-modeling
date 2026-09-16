@@ -68,8 +68,11 @@ def _ok(mid, result):
     return {"jsonrpc": "2.0", "id": mid, "result": result}
 
 
-def dispatch(msg, call_tool):
-    """One JSON-RPC message -> (http_status, reply_or_None). `call_tool(name, args) -> (text, is_error)`."""
+def dispatch(msg, call_tool, tools=None, server_name=None):
+    """One JSON-RPC message -> (http_status, reply_or_None). `call_tool(name, args) -> (text, is_error)`.
+    `tools` defaults to the remote surface; the engine MCP passes its own list."""
+    tools = TOOLS if tools is None else tools
+    names = [t["name"] for t in tools]
     if not isinstance(msg, dict) or msg.get("jsonrpc") != "2.0":
         return 400, _err(None, -32600, "invalid request")
     method = msg.get("method")
@@ -82,17 +85,17 @@ def dispatch(msg, call_tool):
         want = (msg.get("params") or {}).get("protocolVersion")
         ver = want if want in PROTOCOL_VERSIONS else PROTOCOL_VERSIONS[0]
         return 200, _ok(mid, {"protocolVersion": ver, "capabilities": {"tools": {"listChanged": False}},
-                             "serverInfo": SERVER_INFO,
+                             "serverInfo": dict(SERVER_INFO, name=server_name or SERVER_INFO["name"]),
                              "instructions": "Ask with codemap_ask; verify pointers in your checkout; "
                                              "rate with codemap_feedback."})
     if method == "ping":
         return 200, _ok(mid, {})
     if method == "tools/list":
-        return 200, _ok(mid, {"tools": TOOLS})
+        return 200, _ok(mid, {"tools": tools})
     if method == "tools/call":
         params = msg.get("params") or {}
         name = params.get("name")
-        if name not in TOOL_NAMES:
+        if name not in names:
             return 200, _err(mid, -32602, f"unknown tool {name}")
         args = params.get("arguments") or {}
         try:
@@ -106,13 +109,13 @@ def dispatch(msg, call_tool):
     return 200, _err(mid, -32601, f"method not found: {method}")
 
 
-def dispatch_body(body, call_tool):
+def dispatch_body(body, call_tool, tools=None, server_name=None):
     """A body may be one message or a batch; a batch reply is a list."""
     if isinstance(body, list):
         replies = []
         for m in body:
-            _, r = dispatch(m, call_tool)
+            _, r = dispatch(m, call_tool, tools, server_name)
             if r is not None:
                 replies.append(r)
         return (200, replies) if replies else (202, None)
-    return dispatch(body, call_tool)
+    return dispatch(body, call_tool, tools, server_name)

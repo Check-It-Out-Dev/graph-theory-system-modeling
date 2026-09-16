@@ -23,6 +23,7 @@ R = os.path.dirname(HERE)
 sys.path.insert(0, R)
 sys.path.insert(0, os.path.join(R, "app"))
 
+import claude_cli  # noqa: E402
 from engine import Engine  # noqa: E402
 
 from remote import ids, mcp, telemetry, tools, users  # noqa: E402
@@ -34,7 +35,7 @@ class App:
     """Everything a handler needs: engine, users, versions, event sink, per-user spend."""
 
     def __init__(self, engine=None, users_map=None, token=None, admin_token=None,
-                 pack_dir=None, prompt_path=None, sink=None):
+                 pack_dir=None, prompt_path=None, sink=None, navigator=None):
         self.engine = engine or Engine()
         self.users = users_map or users.load()
         self.token = token
@@ -44,11 +45,17 @@ class App:
         self.pack_version = ids.pack_version(self.pack_dir)
         self.prompt_version = ids.prompt_version(self.prompt_path)
         self.sink = sink  # list in tests, None in production (file)
-        self.navigator = None  # set in S2
+        self.navigator = None
         self._by_name = {e["name"]: e for e in self.engine.ents}
         self._lock = threading.Lock()
         self._spent = {}
         self.started = telemetry.now_iso()
+        if navigator is None:
+            mode = os.environ.get("CODEMAP_NAVIGATOR", "auto")
+            if mode != "off" and claude_cli.available() and os.path.exists(self.prompt_path):
+                from remote.navigator import Navigator
+                navigator = Navigator(self)
+        self.navigator = navigator or None
 
     # --- event + spend -------------------------------------------------------------
     def emit(self, ev):

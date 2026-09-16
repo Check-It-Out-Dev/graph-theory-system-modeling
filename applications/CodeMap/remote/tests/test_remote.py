@@ -155,7 +155,7 @@ class ServerWithPackTests(unittest.TestCase):
         from remote import server
         cls.server = server
         cls.sink = []
-        cls.app = server.App(token="t0k", admin_token="adm", sink=cls.sink)
+        cls.app = server.App(token="t0k", admin_token="adm", sink=cls.sink, navigator=False)  # never the model in tests
 
     def _post(self, body, **headers):
         h = {"Authorization": "Bearer t0k", "X-CodeMap-User": "owner"}

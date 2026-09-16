@@ -54,7 +54,10 @@ def ask(app, ident, args):
     if not q:
         return _text({"error": "empty question"}), True
     context_id = args.get("context_id") or ids.new_request_id()
-    hit = app.engine.cache(q)
+    nav = getattr(app, "navigator", None)
+    # a follow-up inside a conversation is never an FAQ question: "and what depends on it?" needs the context
+    follow_up = bool(nav and nav.contexts.get(context_id) and nav.contexts.get(context_id).turns)
+    hit = {"kind": "skipped"} if follow_up else app.engine.cache(q)
     if hit.get("kind") == "cache_hit":
         ptrs = _pointers_from_gold(app, hit)
         out = {"answer": hit["answer"], "pointers": ptrs, "request_id": ident.request_id,
@@ -64,7 +67,6 @@ def ask(app, ident, args):
                             terminal="answer", faq_cache="hit", q=q, answer=hit["answer"],
                             pointers=ptrs, credits=0.0, steps=0, tool="codemap_ask"))
         return _text(out), False
-    nav = getattr(app, "navigator", None)
     if nav is not None:
         return nav.ask(app, ident, q, context_id, args.get("tier") or "auto", hit)
     l1 = app.engine.map()
