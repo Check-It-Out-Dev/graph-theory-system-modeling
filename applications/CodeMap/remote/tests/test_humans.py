@@ -94,6 +94,20 @@ class PlanTests(unittest.TestCase):
                 if c["mode"] == "baseline":
                     self.assertEqual((mine[i + 1]["mode"], mine[i + 1]["seed_id"]), ("codemap", c["seed_id"]))
 
+    def test_conversations_override_replaces_the_per_persona_count(self):
+        cfg = dict(self.cfg, baseline_share=1.0)
+        convs = run_night.plan("2026-09-20", cfg, self.bank, self.probes, seed=1, conversations=8)
+        for p in cfg["personas"]:
+            mine = [c for c in convs if c["persona"] == p["id"] and not c.get("paired_with")]
+            self.assertEqual(len(mine), min(8, len(run_night.slice_for(p, self.bank, self.probes))), p["id"])
+        self.assertEqual(sum(1 for c in convs if c["mode"] == "baseline"),
+                         sum(1 for c in convs if c.get("paired_with") == "baseline"))
+
+    def test_partner_reserve(self):
+        self.assertEqual(run_night.partner_reserve({"spent": 0, "requests": 0}, 4), 60.0)
+        self.assertEqual(run_night.partner_reserve({"spent": 498.4579, "requests": 9}, 3), round(498.4579 / 9 * 3, 2))
+        self.assertEqual(run_night.partner_reserve({"spent": 10, "requests": 5}, 3), 24.0)  # floor of 8 per ask
+
     def test_baseline_share_override_reaches_the_plan(self):
         cfg = dict(self.cfg, baseline_share=0.5)
         half = run_night.plan("2026-09-18", cfg, self.bank, self.probes, seed=2)
@@ -161,6 +175,30 @@ class NightRunTests(unittest.TestCase):
             cmd = calls[0]
             self.assertIn("mcp__codemap__*,Read,Grep,Glob", cmd)
             self.assertIn("--append-system-prompt-file", cmd) if "--append-system-prompt-file" in cmd else self.assertIn("--system-prompt-file", cmd)
+
+    def test_baseline_skipped_when_the_partner_is_unaffordable(self):
+        calls = []
+        runner = lambda cmd, env, cwd, timeout: calls.append(cmd) or _Proc(json.dumps({"type": "result", "is_error": False, "result": "x"}))
+        # 20 credits left at 25 per ask: no baseline can be paired today, and the partner is not run either
+        http = lambda method, url, body: {"spent": 180.0, "requests": 7, "remaining": 20.0, "exhausted": False} if "/budget" in url else []
+        with tempfile.TemporaryDirectory() as d:
+            real = run_night.HERE
+            run_night.HERE = d
+            os.makedirs(os.path.join(d, "roles"))
+            for name in os.listdir(os.path.join(real, "roles")):
+                open(os.path.join(d, "roles", name), "w", encoding="utf-8").write(open(os.path.join(real, "roles", name), encoding="utf-8").read())
+            open(os.path.join(d, "personas.json"), "w", encoding="utf-8").write(open(os.path.join(real, "personas.json"), encoding="utf-8").read())
+            try:
+                run_night.run(self._args(persona="haiku-pm", limit=3, baseline_share=1.0), runner=runner, http=http,
+                              env={"CODEMAP_URL": "http://x", "CODEMAP_TOKEN": "t"})
+            finally:
+                run_night.HERE = real
+            rows = [json.loads(l) for l in open(os.path.join(d, "runs", "2026-09-17.jsonl"), encoding="utf-8")]
+        skipped = [r.get("skipped") for r in rows]
+        self.assertIn("no_budget_for_partner", skipped)
+        self.assertIn("baseline_skipped", skipped)
+        self.assertFalse(any(r.get("mode") == "baseline" and not r.get("skipped") for r in rows))
+        self.assertEqual(len(calls), 1)  # only the unpaired CodeMap conversation ran
 
     def test_exhausted_budget_skips_without_a_call(self):
         calls = []

@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] — 1.2.0, CodeMap Remote
 
 ### Added
+- Campaign nights plan past the budget (`--conversations`); a baseline runs only when the day's budget still pays for its partner (D-R20)
 - Pair campaign: a skipped partner is no pair; the runner schedules paired conversations first per persona so the daily budget reaches the partner (D-R19)
 - Judge calibration reports raw agreement, prevalence and Gwet's AC1 beside Cohen's κ; a second verdict route for a skewed oracle, named in the artifact (`eval/judge/calibrate.py`, D-R18)
 - Full reindex on the box (`graph/delta/{fullscan,reindex}.py`, `extract.py --full`): both repositories at their public main heads, Grothendieck in chunks, apply, reclue with a refined gate, drift, Release `pack-1.1.0` served by the VPS; the oracle answers WHERE only; the night gains a bank pass and paired baselines (arc 3, R1–R2)

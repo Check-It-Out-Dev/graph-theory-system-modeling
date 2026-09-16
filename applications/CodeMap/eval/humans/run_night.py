@@ -55,8 +55,10 @@ def slice_for(persona, bank, probes):
 
 # ----------------------------------------------------------------------------- plan
 
-def plan(date, cfg, bank, probes, seed=None, only=None, limit=None, haiku_only=False):
-    """Deterministic list of conversations for the night."""
+def plan(date, cfg, bank, probes, seed=None, only=None, limit=None, haiku_only=False, conversations=None):
+    """Deterministic list of conversations for the night. `conversations` replaces each persona's
+    conversations_per_night (a campaign night plans more pairs than the credits can pay for; the
+    runner stops each persona at its daily budget, so the budget - not the plan - bounds the night)."""
     convs = []
     for pid in cfg["order"]:
         p = next(x for x in cfg["personas"] if x["id"] == pid)
@@ -68,7 +70,8 @@ def plan(date, cfg, bank, probes, seed=None, only=None, limit=None, haiku_only=F
         pool = slice_for(p, bank, probes)
         if not pool:
             continue
-        n = p["conversations_per_night"] if limit is None else min(limit, p["conversations_per_night"])
+        n = conversations if conversations else p["conversations_per_night"]
+        n = n if limit is None else min(limit, n)
         seeds = rnd.sample(pool, min(n, len(pool)))
         lo, hi = p["turns_per_conversation"]
         for i, s in enumerate(seeds):
@@ -156,6 +159,14 @@ def parse_report(text):
 
 # ----------------------------------------------------------------------------- server calls
 
+def partner_reserve(b, turns):
+    """Credits a CodeMap partner of `turns` asks is expected to cost: the persona's own mean credits per
+    request today (at least 8), times the turns. No history yet -> 15 per ask."""
+    req = b.get("requests") or 0
+    per_ask = max(8.0, (b.get("spent") or 0.0) / req) if req else 15.0
+    return round(per_ask * turns, 2)
+
+
 def budget(url, token, user, http=None):
     if http is not None:
         return http("GET", f"{url}/budget?user={user}", None)
@@ -209,7 +220,8 @@ def run(args, runner=None, http=None, env=None):
     bank, probes = load_bank()
     if getattr(args, "baseline_share", None) is not None:
         cfg = dict(cfg, baseline_share=args.baseline_share)
-    convs = plan(args.date, cfg, bank, probes, args.seed, args.persona, args.limit, args.haiku_only)
+    convs = plan(args.date, cfg, bank, probes, args.seed, args.persona, args.limit, args.haiku_only,
+                 getattr(args, "conversations", None))
     url = env.get("CODEMAP_URL", "http://127.0.0.1:7345")
     token = env.get("CODEMAP_TOKEN", "")
     repos = {"backend": env.get("CODEMAP_REPO_BACKEND", os.path.expanduser("~/IdeaProjects/checkitout-backend")),
@@ -227,11 +239,28 @@ def run(args, runner=None, http=None, env=None):
     summary = {"night": args.date, "started": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "conversations": 0,
                "partial": False, "stopped_reason": None, "by_persona": {}, "credits_cap": args.max_credits}
     spent_start = {}
+    dropped = set()  # (persona, seed) whose baseline was not run: its partner is no pair either
     for c in convs:
         pid = c["persona"]
         bp = summary["by_persona"].setdefault(pid, {"conversations": 0, "baseline": 0, "turns": 0, "errors": 0,
                                                       "usage": {"input": 0, "output": 0, "cache_read": 0, "cache_creation": 0},
                                                       "credits_spent": 0.0, "ratings": [], "misses": 0})
+        if c["mode"] == "codemap" and c.get("paired_with") and (pid, c["seed_id"]) in dropped:
+            _append(out_path, {"night": args.date, "persona": pid, "mode": c["mode"], "seed_id": c["seed_id"],
+                               "skipped": "baseline_skipped"})
+            continue
+        if c["mode"] == "baseline":
+            # a baseline is worth running only if the day's budget still pays for its CodeMap partner
+            b = budget(url, token, pid, http)
+            if b is None:
+                summary["partial"], summary["stopped_reason"] = True, "server unreachable"
+                break
+            if b.get("remaining") is not None and b.get("remaining") < partner_reserve(b, c["turns"]):
+                dropped.add((pid, c["seed_id"]))
+                _append(out_path, {"night": args.date, "persona": pid, "mode": c["mode"], "seed_id": c["seed_id"],
+                                   "skipped": "no_budget_for_partner", "remaining": b.get("remaining"),
+                                   "reserve": partner_reserve(b, c["turns"])})
+                continue
         if c["mode"] == "codemap":
             b = budget(url, token, pid, http)
             if b is None:
@@ -326,6 +355,7 @@ def main(argv=None):
     ap.add_argument("--haiku-only", action="store_true")
     ap.add_argument("--max-credits", type=float, default=3000)
     ap.add_argument("--baseline-share", type=float, default=None, help="override personas.json baseline_share (the pair campaign uses 0.5)")
+    ap.add_argument("--conversations", type=int, default=None, help="conversations per persona (campaign nights plan past the budget; the budget stops each persona)")
     ap.add_argument("--max-turns", type=int, default=24)
     ap.add_argument("--timeout", type=int, default=900)
     ap.add_argument("--dry-run", action="store_true")

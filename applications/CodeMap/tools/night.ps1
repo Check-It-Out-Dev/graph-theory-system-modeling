@@ -9,7 +9,8 @@ param(
     [switch]$HaikuOnly,
     [int]$MaxCredits = 3000,
     [double]$BaselineShare = 0.5,
-    [int]$BankPass = 24
+    [int]$BankPass = 24,
+    [int]$Conversations = 0
 )
 $ErrorActionPreference = "Stop"
 $env:PYTHONUTF8 = "1"; $env:PYTHONIOENCODING = "utf-8"
@@ -34,6 +35,7 @@ New-Item -ItemType Directory -Force -Path "eval\humans\runs", "eval\judge\runs",
 
 # 1. the personas (the runner syncs the miss backlog and refuses to overrun the caps)
 $args = @("eval\humans\run_night.py", "--date", $Date, "--max-credits", "$MaxCredits", "--baseline-share", "$BaselineShare")
+if ($Conversations -gt 0) { $args += @("--conversations", "$Conversations") }
 if ($HaikuOnly) { $args += "--haiku-only" }
 python @args 2>&1 | Tee-Object -FilePath $log -Append
 
