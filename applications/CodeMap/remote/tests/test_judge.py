@@ -162,5 +162,19 @@ class EventsExportTests(unittest.TestCase):
         self.assertEqual(server.handle_events(app, {"Authorization": "Bearer t"}, {})[0], 401)
 
 
+class SeedJoinTests(unittest.TestCase):
+    def test_a_rephrased_seed_question_joins_through_the_night_file(self):
+        bank = [{"id": "BE01", "q": "What does PaymentsDisabledBootGuard do?", "archetype": "locate", "gold_status": "EXECUTED",
+                 "gold_answer": "PaymentsDisabledBootGuard.java", "gold_result_excerpt": [["PaymentsDisabledBootGuard.java", "Rule", "11", "x"]]}]
+        ev = {"event_type": "ask", "tier": "nav-sonnet", "terminal": "answer", "request_id": "r1", "user": "haiku-pm",
+              "q": "hey, which class stops the app booting when payments are switched off?", "answer": "…",
+              "pointers": [{"name": "PaymentsDisabledBootGuard.java"}]}
+        humans = [{"mode": "codemap", "seed_id": "BE01", "report": {"conversations": [{"turns": [{"request_id": "r1"}]}]}}]
+        rows = judge.rows_from_events([ev], bank, [], humans=None)
+        self.assertEqual((rows[0]["kind"], rows[0]["oracle"]["has"]), (None, False))
+        rows = judge.rows_from_events([ev], bank, [], humans=humans)
+        self.assertEqual((rows[0]["kind"], rows[0]["qid"], rows[0]["oracle"]), ("bank", "BE01", {"has": True, "success": True}))
+
+
 if __name__ == "__main__":
     unittest.main()

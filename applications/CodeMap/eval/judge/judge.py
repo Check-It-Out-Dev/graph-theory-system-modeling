@@ -102,6 +102,18 @@ def rows_from_events(events, bank, probes, humans=None, limit=None):
         if ev.get("event_type") == "feedback" and ev.get("rating") is not None:
             ratings[ev["request_id"]] = {"rating": ev["rating"], "verified": ev.get("verified"), "user": ev.get("user"),
                                          "tags": ev.get("tags")}
+    # the personas rephrase their seed question in their own words, so text matching misses it; the night
+    # file records the seed id per conversation and the request ids per turn — the first turn is the seed
+    by_id = {r["id"]: ("bank", r) for r in bank}
+    by_id.update({p["id"]: ("probe", p) for p in probes})
+    seed_of = {}
+    for h in humans or []:
+        if h.get("mode") != "codemap" or not h.get("seed_id"):
+            continue
+        for conv in ((h.get("report") or {}).get("conversations") or []):
+            turns = conv.get("turns") or []
+            if turns and turns[0].get("request_id"):
+                seed_of[turns[0]["request_id"]] = h["seed_id"]
     out = []
     for ev in events:
         if ev.get("event_type") != "ask" or not str(ev.get("tier", "")).startswith("nav-"):
@@ -109,6 +121,8 @@ def rows_from_events(events, bank, probes, humans=None, limit=None):
         if ev.get("terminal") not in ("answer", "abstain"):
             continue
         kind, row = match_question(ev.get("q"), bank, probes)
+        if not kind and ev.get("request_id") in seed_of and seed_of[ev["request_id"]] in by_id:
+            kind, row = by_id[seed_of[ev["request_id"]]]
         has, success = oracle(ev, kind, row) if kind else (False, None)
         out.append({"id": ev["request_id"], "request_id": ev["request_id"], "user": ev.get("user"), "tier": ev.get("tier"),
                     "model": ev.get("model"), "prompt_version": ev.get("prompt_version"), "pack_version": ev.get("pack_version"),

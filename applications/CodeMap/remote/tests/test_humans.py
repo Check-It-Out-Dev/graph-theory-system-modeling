@@ -81,6 +81,14 @@ class PlanTests(unittest.TestCase):
         self.assertEqual(run_night.parse_report(txt)["conversations"][0]["turns"][0]["rating"], 4)
         self.assertIsNone(run_night.parse_report("no block"))
 
+    def test_every_baseline_has_a_codemap_partner_on_the_same_seed(self):
+        convs = run_night.plan("2026-09-17", self.cfg, self.bank, self.probes, seed=3)
+        base = [c for c in convs if c["mode"] == "baseline"]
+        self.assertTrue(base, "the plan should hold at least one baseline")
+        cm = {(c["persona"], c["seed_id"]) for c in convs if c["mode"] == "codemap"}
+        for c in base:
+            self.assertIn((c["persona"], c["seed_id"]), cm)
+
 
 class _Proc:
     def __init__(self, stdout):
@@ -155,7 +163,7 @@ class NightRunTests(unittest.TestCase):
 
     def test_dry_run_and_agent_sync(self):
         s = run_night.run(self._args(dry_run=True, haiku_only=False, limit=None))
-        self.assertEqual(s["planned"], 18)
+        self.assertEqual(s["planned"], 21)  # 18 conversations + a CodeMap partner for each of the 3 baselines
         n = run_night.sync_agents()
         self.assertEqual(n, 6)
         body = open(os.path.join(R, ".claude", "agents", "opus-reviewer.md"), encoding="utf-8").read()

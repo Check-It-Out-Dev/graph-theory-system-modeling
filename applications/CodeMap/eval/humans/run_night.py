@@ -79,6 +79,14 @@ def plan(date, cfg, bank, probes, seed=None, only=None, limit=None, haiku_only=F
                           "mode": mode, "seed_id": s["id"], "seed_q": s["q"], "kind": s.get("archetype"),
                           "expect": s.get("expect", "answer"), "turns": turns, "follow_ups": fus,
                           "credits_per_night": p["credits_per_night"], "n": i + 1, "of": len(seeds)})
+    # a gain is a pair: the same persona, the same seed, once without CodeMap and once with it. A baseline
+    # without its partner is a number nobody can gate, so the partner is scheduled right after it.
+    have = {(c["persona"], c["seed_id"]) for c in convs if c["mode"] == "codemap"}
+    for c in [c for c in convs if c["mode"] == "baseline"]:
+        if (c["persona"], c["seed_id"]) not in have:
+            partner = dict(c, mode="codemap", n=c["n"], of=c["of"], paired_with="baseline")
+            convs.insert(convs.index(c) + 1, partner)
+            have.add((c["persona"], c["seed_id"]))
     return convs
 
 
