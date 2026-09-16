@@ -97,7 +97,8 @@ def miss(app, ident, args):
         return json.dumps({"error": "path must be a repository-relative path (repo/dir/file), no .."}), True
     if why is not None and (not isinstance(why, str) or len(why) > MAX_WHY):
         return json.dumps({"error": f"why must be at most {MAX_WHY} characters"}), True
-    row = {"ts": telemetry.now_iso(), "user": ident.user["id"], "path": path, "why": why}
+    repo = path.split("/", 1)[0]  # the first segment names the repository (backend/…, frontend/…)
+    row = {"ts": telemetry.now_iso(), "user": ident.user["id"], "path": path, "why": why, "repo": repo}
     try:
         os.makedirs(os.path.dirname(app.backlog_path), exist_ok=True)
         with app.backlog_lock:
@@ -105,5 +106,5 @@ def miss(app, ident, args):
                 f.write(json.dumps(row, ensure_ascii=False) + "\n")
     except OSError:
         pass
-    app.emit(tools_mod.base_event(app, ident, "miss", "none", path=path, why=why, credits=0.0, tool="codemap_miss"))
+    app.emit(tools_mod.base_event(app, ident, "miss", "none", path=path, why=why, repo=repo, credits=0.0, tool="codemap_miss"))
     return json.dumps({"ok": True, "path": path, "note": "queued for the next reindex (saturation backlog)"}), False

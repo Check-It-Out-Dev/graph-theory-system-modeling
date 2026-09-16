@@ -129,7 +129,7 @@ class ToolsWithPackTests(unittest.TestCase):
         self.assertFalse(err)
         rows = [json.loads(l) for l in open(self.app.backlog_path, encoding="utf-8")]
         self.assertEqual(rows[-1]["path"], "backend/src/main/resources/application.yml")
-        self.assertEqual(self.sink[-1]["event_type"], "miss")
+        self.assertEqual((self.sink[-1]["event_type"], self.sink[-1]["repo"], rows[-1]["repo"]), ("miss", "backend", "backend"))
         _, err = self._call("codemap_miss", path="../../etc/passwd")
         self.assertTrue(err)
         self.assertIn('codemap_miss_total{repo="backend"}', self.app.registry.render())
