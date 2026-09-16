@@ -1,0 +1,82 @@
+<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>CodeMap Remote — quality</title><style>
+:root{--bg:#0e1116;--card:#161b22;--ink:#e6edf3;--muted:#9da7b3;--line:#2b3441;--accent:#3fb950;--accent2:#d29922;--accent3:#58a6ff;--danger:#f85149}
+@media (prefers-color-scheme: light){:root{--bg:#f6f8fa;--card:#ffffff;--ink:#1f2328;--muted:#59636e;--line:#d0d7de}}
+*{box-sizing:border-box}body{margin:0;padding:24px 16px 48px;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;max-width:1120px;margin-inline:auto}
+h1{font-size:28px;margin:0 0 4px}h2{font-size:20px;margin:36px 0 12px;border-bottom:1px solid var(--line);padding-bottom:6px}h3{font-size:15px;margin:0 0 8px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+p{max-width:78ch}.muted{color:var(--muted)}a{color:var(--accent3)}code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;background:var(--card);padding:1px 5px;border-radius:4px;border:1px solid var(--line)}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.big{font-size:34px;font-weight:700;line-height:1.1;margin:2px 0 4px}.big.ok{color:var(--accent)}.big.warn{color:var(--accent2)}.big.info{color:var(--accent3)}
+.spark{width:100%;height:48px;margin-top:6px}.spark path{fill:none;stroke:var(--accent3);stroke-width:2}.spark circle{fill:var(--accent3)}
+.bar{display:grid;grid-template-columns:150px 1fr 60px;gap:10px;align-items:center;margin:6px 0}.bar-track{height:10px;background:var(--line);border-radius:5px;overflow:hidden}.bar-fill{display:block;height:100%;background:var(--accent)}.bar-value{text-align:right;font-variant-numeric:tabular-nums}
+table{border-collapse:collapse;width:100%;font-size:14px}.tablewrap{overflow-x:auto}th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:var(--muted);font-weight:600}td.n{text-align:right;font-variant-numeric:tabular-nums}
+.tag{display:inline-block;padding:1px 8px;border-radius:999px;border:1px solid var(--line);font-size:12px;color:var(--muted)}.tag.ok{color:var(--accent);border-color:var(--accent)}.tag.no{color:var(--danger);border-color:var(--danger)}
+.proofs{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}.proofs img{width:100%;height:auto;border:1px solid var(--line);border-radius:8px}figcaption{font-size:13px;color:var(--muted);margin-top:4px}
+footer{margin-top:40px;color:var(--muted);font-size:13px}
+</style></head><body>
+<h1>CodeMap Remote — measuring prompt quality in an AI system</h1>
+<p class='muted'>Every number on this page is recomputed from an artifact committed in <a href='https://github.com/Check-It-Out-Dev/graph-theory-system-modeling'>the repository</a>: nightly quality runs, judge calibrations, the personas' nights, partition decisions with their drift, and prompt-optimisation runs. No model runs to build it. Built 2026-09-16T14:03:25Z. The live counterpart is the set of public Grafana Cloud dashboards below; the served MCP is <code>https://codemap.checkitout.app/mcp</code>.</p>
+<h2>The latest night — 2026-09-16</h2>
+<div class='grid'>
+<div class='card'><h3>Grounded answers</h3><div class='big ok'>91 %</div><div class='muted'>judge ≥ 4 on grounding, share of judged answers</div></div>
+<div class='card'><h3>Correct answers</h3><div class='big ok'>74 %</div><div class='muted'>judge ≥ 4 on correctness</div></div>
+<div class='card'><h3>Mean rating</h3><div class='big info'>4.5</div><div class='muted'>personas rate after verifying a pointer; unverified ratings cap at 3</div></div>
+<div class='card'><h3>Judge κ vs oracle</h3><div class='big ok'>0.84</div><div class='muted'>Cohen&#x27;s κ of the judge&#x27;s &#x27;located&#x27; against the execution oracle (gate 0.6)</div></div>
+<div class='card'><h3>Credits per correct answer</h3><div class='big info'>24.6</div><div class='muted'>credits are relative units, never currency</div></div>
+<div class='card'><h3>Version drift</h3><div class='big warn'>11 %</div><div class='muted'>bank rows answering differently after the last pack decision, not invalidated on purpose</div></div>
+<div class='card'><h3>Answers judged</h3><div class='big info'>35</div><div class='muted'>36 asks, 0 misses reported, 0 budget refusals</div></div>
+<div class='card'><h3>Honest abstention</h3><div class='big ok'>89 %</div><div class='muted'>all 26 %, false 11 %</div></div>
+</div>
+<h2>Night over night</h2>
+<p class='muted'>One night so far: a point, not a trend. Sparklines fill in as nights accumulate.</p>
+<div class='grid'>
+<div class='card'><h3>Grounded</h3><div class='big info'>91 %</div><svg class="spark" viewBox="0 0 220 48" role="img"><path d="M 6.0 9.1"/><circle cx="6.0" cy="9.1" r="3"/></svg><div class='muted'>1 night(s)</div></div>
+<div class='card'><h3>Correct</h3><div class='big info'>74 %</div><svg class="spark" viewBox="0 0 220 48" role="img"><path d="M 6.0 15.3"/><circle cx="6.0" cy="15.3" r="3"/></svg><div class='muted'>1 night(s)</div></div>
+<div class='card'><h3>Mean rating (of 5)</h3><div class='big info'>4.5</div><svg class="spark" viewBox="0 0 220 48" role="img"><path d="M 6.0 42.0"/><circle cx="6.0" cy="42.0" r="3"/></svg><div class='muted'>1 night(s)</div></div>
+<div class='card'><h3>Pointer-verified ratings</h3><div class='big info'>100 %</div><svg class="spark" viewBox="0 0 220 48" role="img"><path d="M 6.0 6.0"/><circle cx="6.0" cy="6.0" r="3"/></svg><div class='muted'>1 night(s)</div></div>
+<div class='card'><h3>Version drift</h3><div class='big info'>11 %</div><svg class="spark" viewBox="0 0 220 48" role="img"><path d="M 6.0 38.1"/><circle cx="6.0" cy="38.1" r="3"/></svg><div class='muted'>1 night(s)</div></div>
+<div class='card'><h3>Credits per correct answer</h3><div class='big info'>24.6</div><svg class="spark" viewBox="0 0 220 48" role="img"><path d="M 6.0 42.0"/><circle cx="6.0" cy="42.0" r="3"/></svg><div class='muted'>1 night(s)</div></div>
+</div>
+<h2>Who asked — the synthetic users</h2>
+<div class='tablewrap'><table><tr><th>persona</th><th class='n'>conversations</th><th class='n'>turns</th><th class='n'>credits</th><th class='n'>mean rating</th><th class='n'>misses</th></tr>
+<tr><td><code>haiku-pm</code></td><td class='n'>1</td><td class='n'>13</td><td class='n'>13.5</td><td class='n'>4.5</td><td class='n'>0</td></tr>
+</table></div>
+<h2>What it cost — in credits and tokens, never currency</h2><div class='grid'>
+<div class='card'><h3>Credits by user</h3>
+<div class="bar"><span class="bar-label">judge</span><span class="bar-track"><span class="bar-fill" style="width:94.2%"></span></span><span class="bar-value">602.9</span></div>
+<div class="bar"><span class="bar-label">owner</span><span class="bar-track"><span class="bar-fill" style="width:3.2%"></span></span><span class="bar-value">20.7</span></div>
+<div class="bar"><span class="bar-label">haiku-pm</span><span class="bar-track"><span class="bar-fill" style="width:2.6%"></span></span><span class="bar-value">16.7</span></div>
+</div>
+<div class='card'><h3>Tokens</h3>
+<div class='bar'><span class='bar-label'>cached</span><span></span><span class='bar-value'>7,484,570</span></div>
+<div class='bar'><span class='bar-label'>cache_creation</span><span></span><span class='bar-value'>957,177</span></div>
+<div class='bar'><span class='bar-label'>completion</span><span></span><span class='bar-value'>37,888</span></div>
+<div class='bar'><span class='bar-label'>prompt</span><span></span><span class='bar-value'>262</span></div>
+<div class='muted'>cache-read ratio 89 % · p95 latency 29,550 ms</div></div>
+<div class='card'><h3>Gains vs no-CodeMap baselines</h3><div class='big info'>0 pairs</div><div class='muted'>tokens ratio — · turns Δ — · seconds Δ —; a gain without its baseline row is ungated</div></div>
+</div>
+<h2>The graph follows the code — decisions on the pull request</h2>
+<div class='tablewrap'><table><tr><th>pack</th><th>repo @ head</th><th>decision</th><th>by</th><th class='n'>placed</th><th>new subsystems</th><th class='n'>FAQ invalidated</th><th class='n'>drift</th><th>reclued</th></tr>
+<tr><td><code>1.0.1</code></td><td>backend @ <code>ff43730</code></td><td><span class='tag ok'>accept</span></td><td>RamzesX</td><td class='n'>7</td><td>JUnit test-execution harness</td><td class='n'>10</td><td class='n'>6/55 (11 %)</td><td>—</td></tr>
+</table></div>
+<h2>The prompt improves on request — GEPA runs</h2>
+<div class='tablewrap'><table><tr><th>run</th><th>mode</th><th>where</th><th class='n'>seed (val)</th><th class='n'>best (val)</th><th class='n'>candidates</th><th class='n'>metric calls</th><th>outcome</th></tr>
+<tr><td><code>2026-09-16-modal-dry</code></td><td>dry-run</td><td>modal</td><td class='n'>0.67</td><td class='n'>—</td><td class='n'>—</td><td class='n'>3</td><td><span class='tag '>seed measured</span></td></tr>
+</table></div>
+<div class='tablewrap'><table><tr><th>prompt</th><th>built</th><th>parent</th><th>why</th><th>gate</th></tr>
+<tr><td><code>v1</code></td><td>2026-09-16</td><td>—</td><td>seed: the API navigator prompt&#x27;s protocol + the big tier&#x27;s graph lesson, rewritten for pointers</td><td>n/a (baseline)</td></tr>
+</table></div>
+<h2>Live dashboards (Grafana Cloud, public)</h2><ul>
+<li><a href='https://checkitoutapp.grafana.net/public-dashboards/2b6abfd10f054b4b820e0c208e35a0d1'>CodeMap · AI system</a> <span class='muted'>codemap-ai-system</span></li>
+<li><a href='https://checkitoutapp.grafana.net/public-dashboards/22d443290c97414489df2d09d850e8ea'>CodeMap · Budget burn &amp; gains</a> <span class='muted'>codemap-budget-burn-gains</span></li>
+<li><a href='https://checkitoutapp.grafana.net/public-dashboards/1e95550d0b314f338b01be00a5bdb400'>CodeMap · Credit rate card</a> <span class='muted'>codemap-credit-rate-card</span></li>
+<li><a href='https://checkitoutapp.grafana.net/public-dashboards/5e04be1b4f1a449fbdfbab81fd86f125'>CodeMap · Happiness</a> <span class='muted'>codemap-happiness</span></li>
+<li><a href='https://checkitoutapp.grafana.net/public-dashboards/84675eedc4c74a45a205d73f91a47967'>CodeMap · Quality over time</a> <span class='muted'>codemap-quality-over-time</span></li>
+<li><a href='https://checkitoutapp.grafana.net/public-dashboards/cec76185a1df4641972ac23aaabce7fb'>CodeMap · Usage &amp; tokens</a> <span class='muted'>codemap-usage-tokens</span></li>
+</ul>
+<h2>Visual proofs</h2><div class='proofs'>
+<figure><img src='proofs/2026-09-16-ai-system-dashboard.jpg' alt='2026 09 16 ai system dashboard' loading='lazy'><figcaption>2026 09 16 ai system dashboard</figcaption></figure>
+<figure><img src='proofs/2026-09-16-issue-4-decided.jpg' alt='2026 09 16 issue 4 decided' loading='lazy'><figcaption>2026 09 16 issue 4 decided</figcaption></figure>
+<figure><img src='proofs/2026-09-16-issue-4-proposal.jpg' alt='2026 09 16 issue 4 proposal' loading='lazy'><figcaption>2026 09 16 issue 4 proposal</figcaption></figure>
+</div>
+<footer>Security is designed to serve a small team, even behind a firewall — identity is a header from an enum and one shared token; this deployment exists to show how to measure prompt quality in an AI system and how to observe it. Cards: <a href='https://github.com/Check-It-Out-Dev/graph-theory-system-modeling/blob/main/applications/CodeMap/MODEL_CARD.md'>model</a> · <a href='https://github.com/Check-It-Out-Dev/graph-theory-system-modeling/blob/main/applications/CodeMap/EVAL_CARD.md'>evaluation</a> · <a href='https://github.com/Check-It-Out-Dev/graph-theory-system-modeling/blob/main/applications/CodeMap/DATA_CARD.md'>data</a> · <a href='https://github.com/Check-It-Out-Dev/graph-theory-system-modeling/blob/main/applications/CodeMap/THREAT_MODEL.md'>threat model</a> · <a href='https://github.com/Check-It-Out-Dev/graph-theory-system-modeling/blob/main/applications/CodeMap/INCIDENTS.md'>incidents</a>. You are reading about an AI system; its answers can be wrong.</footer>
+</body></html>
