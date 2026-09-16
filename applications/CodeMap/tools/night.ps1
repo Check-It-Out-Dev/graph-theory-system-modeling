@@ -36,7 +36,10 @@ if ($HaikuOnly) { $args += "--haiku-only" }
 python @args 2>&1 | Tee-Object -FilePath $log -Append
 
 # 2. the night's events from the VPS (the server's artifact of record), then the judge
-python eval\judge\bank_pass.py --events-only --out "eval\judge\runs\events-$Date.jsonl" 2>&1 | Tee-Object -FilePath $log -Append
+$hdr = @{ Authorization = "Bearer $env:CODEMAP_TOKEN"; "X-CodeMap-Admin" = $env:CODEMAP_ADMIN_TOKEN }
+$ev = Invoke-RestMethod -Uri "$env:CODEMAP_URL/admin/events?since=${Date}T00:00:00Z&limit=5000" -Headers $hdr
+$ev.events | ForEach-Object { $_ | ConvertTo-Json -Compress -Depth 12 } | Set-Content -Encoding utf8 "eval\judge\runs\events-$Date.jsonl"
+"events fetched: $($ev.count)" | Tee-Object -FilePath $log -Append
 python eval\judge\judge.py --events "eval\judge\runs\events-$Date.jsonl" --out "eval\judge\runs\$Date.json" --backend claude --modal 2>&1 | Tee-Object -FilePath $log -Append
 python eval\judge\calibrate.py --run "eval\judge\runs\$Date.json" 2>&1 | Tee-Object -FilePath $log -Append
 
