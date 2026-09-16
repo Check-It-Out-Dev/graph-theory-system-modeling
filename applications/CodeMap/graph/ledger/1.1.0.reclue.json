@@ -1,0 +1,881 @@
+{
+ "at": "2026-09-16T16:52:54Z",
+ "backend": "claude",
+ "model": "claude-sonnet-5",
+ "pack_version": "1.1.0",
+ "results": [
+  {
+   "after": {
+    "ai_summary": "Manages user preference storage and a bundle of shared low-level utilities (PII masking, geo distance, session validation) plus a large cluster of unit tests. UserPreferencesController.java is the sole actor entry point, delegating to UserPreferencesService.java; UserPreferences.java, DictionaryEntry.java, and the DTOs are consumed heavily by external callers (external_ratio 0.94), chiefly subsystem 4's partnership lifecycle, subsystem 6's auth/cache code, and subsystem 7's exception/logging layer.",
+    "caveats": [
+     "Many members (BaseClassesUnitTest, EncryptionServicesUnitTest, HmacUtilsUnitTest, RegistrationServiceUnitTest, FileManagementControllerUnitTest, etc.) test code living in other subsystems — structure-only membership, not domain ownership (per those members' ext_in=0 with nonzero ext_out)",
+     "GeoDistanceCalculator.java and SessionValidationUtils.java have zero in/out edges, so their role here is inferred from name, not from call graph",
+     "Curation notes show InterruptsUnitTest.java and LogSafeUnitTest.java were manually reassigned into this subsystem on 2026-09-16, not structurally derived",
+     "Rule layer dominates (20 of 30 members) despite the subsystem's stated purpose being preferences + geo — test harness files outnumber domain code",
+     "All 30 members are flagged added_by_delta, so this subsystem's composition is entirely new since the last snapshot — treat prior assumptions about its scope as stale"
+    ],
+    "responsibilities": [
+     "Model and store user preferences (UserPreferences.java, UserPreferencesDtoIn/Out, UserPreferencesMapping.java)",
+     "Expose preference CRUD via UserPreferencesController.java and UserPreferencesService.java",
+     "Mask PII and compute geo distance (PiiMaskingUtils.java, GeoDistanceCalculator.java)",
+     "Provide shared session/security utilities (SessionValidationUtils.java)",
+     "Carry unit-test coverage spanning preference logic and unrelated auth/crypto/file-management utilities"
+    ]
+   },
+   "before": {
+    "ai_summary": "Holds user preference data plus a grab-bag of shared low-level utilities (PII masking, geo distance, HMAC, HTML encoding, session validation) and their unit tests. UserPreferencesController.java is the sole actor entry point, delegating to UserPreferencesService.java; UserPreferences.java, DictionaryEntry.java, and the DTOs (UserPreferencesDtoIn/Out) are consumed heavily by callers outside the subsystem (external_ratio 0.94), especially subsystem 4's partnership lifecycle and subsystem 6's auth/cache code.",
+    "caveats": [
+     "Many members (BaseClassesUnitTest, EncryptionServicesUnitTest, HmacUtilsUnitTest, RegistrationServiceUnitTest, etc.) test code that lives in other subsystems — structure-only membership, not domain ownership (per members' ext_in=0 with high ext_out)",
+     "GeoDistanceCalculator.java and SessionValidationUtils.java have zero in/out edges, so their role here is inferred from name, not from call graph",
+     "Curation notes show three unit tests (Interrupts, LogSafe, OtpAuthUrls) were manually reassigned into this subsystem, not structurally derived",
+     "Rule layer dominates (20 of 30 members) despite the subsystem's stated purpose being preferences + geo — test harness files outnumber domain code"
+    ],
+    "clue_body_status": "CURRENT",
+    "responsibilities": [
+     "Model and store user preferences (UserPreferences.java, UserPreferencesDtoIn/Out, UserPreferencesMapping.java)",
+     "Expose preference CRUD via UserPreferencesController.java and UserPreferencesService.java",
+     "Mask PII and compute geo distance (PiiMaskingUtils.java, GeoDistanceCalculator.java)",
+     "Provide shared security/session utilities (SessionValidationUtils.java, HmacUtils, HtmlEncoder)",
+     "Carry unit-test coverage for both preference logic and unrelated auth/crypto utilities"
+    ]
+   },
+   "name": "User preferences & geo distance",
+   "problems": [],
+   "status": "reclued",
+   "sub_id": "0",
+   "usage": {
+    "cache_creation_input_tokens": 19173,
+    "cache_read_input_tokens": 0,
+    "input_tokens": 2,
+    "output_tokens": 729
+   }
+  },
+  {
+   "after": {
+    "ai_summary": "Enforces API rate limiting (RateLimit.java, RateLimitProfile.java, RateLimitKeyType.java, GdprCompliantRateLimiterService.java, StorageRateLimitService.java) and wires the Cucumber/Spring integration-test harness (CucumberSpringConfig.java, BaseServiceIntegrationTest.java), alongside file-upload/storage, geo-IP, and health-check config. Callers span Partnership opportunities (subsystem 4), Auth/BDD harness (subsystem 9), and exceptions/logging (subsystem 7) — its three largest seams. Context (39) and Rule (48) layers dominate the 156-member mix; external_ratio runs high at 0.637.",
+    "caveats": [
+     "All members carry added_by_delta: true — this delta replaced the subsystem's membership wholesale; the prior 'Spring profiles/StorageUrlValidator.java' prose no longer applies since that file isn't in the current member list",
+     "External_ratio is high (0.637) and concentrated in five hub files (CucumberSpringConfig.java 44 ext-in, RateLimitProfile.java 31, RateLimit.java 30, BaseServiceIntegrationTest.java 29, RateLimitKeyType.java 26) — most cross-subsystem seam traffic funnels through a handful of files",
+     "Test-harness files (CucumberSpringConfig.java, BaseServiceIntegrationTest.java, ServiceIntegrationTestConfig.java, TestContainersConfig.java, TestEnvironmentGuard.java) sit alongside production rate-limit/storage/geo code per the members list",
+     "96 of 156 members are truncated from this dossier's listing — many low-connectivity files (health-check unit tests, geo-IP steps, misc utils) aren't named here"
+    ],
+    "responsibilities": [
+     "Enforces rate limits via RateLimit.java, RateLimitProfile.java, RateLimitKeyType.java, GdprCompliantRateLimiterService.java, StorageRateLimitService.java",
+     "Wires Cucumber/Spring integration tests via CucumberSpringConfig.java and BaseServiceIntegrationTest.java, its top two entry points",
+     "Configures file upload/storage via FileUploadController.java, FirebaseStorageService.java, GcpStorageConfiguration.java, SignedUrlService.java",
+     "Resolves geo-IP/location via GeoLocationService.java, GeoIpAdminController.java, GeoIpConfiguration.java",
+     "Reports app/database/disk health via ApplicationHealthIndicator.java, DatabaseHealthIndicator.java, DiskSpaceHealthIndicator.java"
+    ]
+   },
+   "before": {
+    "ai_summary": "Spring profiles (application-*.yml, incl. dev-lite), Cucumber/Spring test context, storage/upload and health config. Lowest purity in the system (Context 27%) — a mixed platform bag.",
+    "caveats": [
+     "low purity (0.27) — expect heterogeneous members",
+     "holds StorageUrlValidator.java (storage URL validation), newly indexed this batch: security-relevant validation sits in the config bag, not in billing or tickets"
+    ],
+    "clue_body_status": "CURRENT",
+    "responsibilities": [
+     "profile ymls for every run mode",
+     "Cucumber test wiring",
+     "storage, upload + health configuration"
+    ]
+   },
+   "name": "Rate limits & runtime config",
+   "problems": [],
+   "status": "reclued",
+   "sub_id": "3",
+   "usage": {
+    "cache_creation_input_tokens": 20730,
+    "cache_read_input_tokens": 0,
+    "input_tokens": 2,
+    "output_tokens": 5225
+   }
+  },
+  {
+   "after": {
+    "ai_summary": "The partnership-opportunity campaign domain: PartnershipOpportunity and AppliedOpportunity entities, active-cooperation flows (ActiveCooperationService.java), permission gating (PermissionUtils.java, 69 ext in-edges) and reference-data services (DictionaryService.java, City/Currency/Platform/ServiceType). Shared persistence infra (BaseRepository.java, 38 ext in-edges; BaseService.java; RepositoryResolver.java) and controllers (BaseController, AdminController, DictionaryController) sit alongside domain code. Resource-dominant (90 of 174 members) with heavy Rule presence (51, mostly tests) invoking through PermissionUtils and BaseRepository entry points.",
+    "caveats": [
+     "All 174 members show added_by_delta=true this pass; treat membership as freshly reconstituted, not incrementally patched (members[].added_by_delta).",
+     "Resource-dominant layer profile (90 of 174, Rule 51) risks B-lens degeneracy; most Rule members are test classes, not business rules (layer_profile; e.g. ActiveCooperationControllerUnitTest.java type Rule).",
+     "BaseRepository.java (ext_in 38, ext_out 0) and BaseService.java are generic persistence infra pulled in structurally, not partnership-specific (members).",
+     "Heaviest seams run to Translatable exceptions & logging [7] (104 edges) and Subscriptions, payments & consent [11] (97 edges); this subsystem leans on those rather than owning the concerns (seams).",
+     "curation_notes is empty for this delta — no recorded rationale for the reshuffled entry points (BaseRepository.java, UpdaterTracking.java newly prominent) (curation_notes)."
+    ],
+    "responsibilities": [
+     "Owns PartnershipOpportunity and AppliedOpportunity entities plus active-cooperation flows (ActiveCooperationService.java).",
+     "Gates access via permission checks (PermissionUtils.java, 69 external in-edges).",
+     "Serves reference data through DictionaryService.java, CityRepository.java, CurrencyRepository.java, PlatformConverter.java.",
+     "Supplies shared persistence base classes (BaseRepository.java, BaseService.java, RepositoryResolver.java) used estate-wide.",
+     "Bundles integration/unit tests alongside domain code (ActiveCooperationServiceIntegrationTestBase.java, ActiveCooperationControllerUnitTest.java)."
+    ]
+   },
+   "before": {
+    "ai_summary": "The campaign domain: PartnershipOpportunity and applied-opportunity entities, their flows, permissions and reference data (dictionary, city, currency, service type, content type, platform) - and, since curation batch 2026-09-02, its own 49-file integration-test suite absorbed from ex-sub-13, because 60.3% of that suite's coupling pointed here. Second-largest subsystem after [11]. Entry PermissionUtils.java (68 external in-edges).",
+    "caveats": [
+     "the merge was measured, not assumed: cohesion 0.362 -> 0.478 (+32%), size 123 -> 172 = 12.16% of the corpus, still under the 20% MEGA split trigger",
+     "DISSENT PRESERVED: the alternative reading of ex-sub-13 as a cross-cutting LAYER was refuted (its direction profile was in=9 out=361, only 2 distinct consumers - a consumer satellite, not a supplier) and is recorded on the sub-13 node as curation_dissent. sub-13 is retained with role MERGED and a [:SUPERSEDED_BY] edge, never deleted, so old mfq stamps naming 13 still resolve",
+     "B-lens degeneracy possible: Resource-dominant (90 of 172)",
+     "richest spine structure in the estate: 12 majority-internal A_P_R hyperedges over 40 of its 172 members. Highest IDF is DictionaryService.java (arity 4, idf 2.485); the widest is PartnershipOpportunityService.java (arity 10)"
+    ],
+    "clue_body_status": "CURRENT",
+    "responsibilities": [
+     "opportunity and applied-opportunity entities",
+     "application / registration / active-cooperation flows",
+     "permission checks (PermissionUtils, 68 external in-edges)",
+     "reference-data services (dictionary, city, currency, service type, content type)",
+     "the domain's 49-file integration-test suite (ex-sub-13, merged 2026-09-02)"
+    ]
+   },
+   "name": "Partnership opportunity lifecycle",
+   "problems": [],
+   "status": "reclued",
+   "sub_id": "4",
+   "usage": {
+    "cache_creation_input_tokens": 21114,
+    "cache_read_input_tokens": 0,
+    "input_tokens": 2,
+    "output_tokens": 5801
+   }
+  },
+  {
+   "after": {
+    "ai_summary": "Backs TOTP/step-up two-factor auth and the Firestore/Redis-backed user cache. UserCacheService.java, FirestoreService.java, and TotpFirestoreService.java are the dominant entry points (53/25/21 external in-edges), invoked from authentication, preferences, deletion, and subscription flows across the app. RegistrationService.java and AuthService.java orchestrate outward (43/42 ext-out) with few external callers. Heaviest seams run to User identity & token exchange (72 edges), Translatable exceptions & logging (54), and Auth journeys & BDD harness (50).",
+    "caveats": [
+     "All 60 members are marked added_by_delta this cycle — prior notes about the file set are stale (members[].added_by_delta)",
+     "14 Rule-type members are unit/integration tests (AuthControllerUnitTest.java, TwoFactorAuthServiceUnitTest.java, etc.) living beside TOTP/cache domain code (layer_profile.Rule=14)",
+     "UserPreferencesService_AdminPatch/GetAndCreate/Update_IntegrationTest.java plus UserPreferencesServiceIntegrationTestBase.java test the User-preferences domain, not TOTP/cache — structure-only membership tied to the seam with subsystem 0 (24 edges)",
+     "RegistrationService.java and AuthService.java carry large ext_out (43, 42) but tiny ext_in (6, 1) — they orchestrate outward rather than acting as called-into hubs like UserCacheService.java"
+    ],
+    "responsibilities": [
+     "TOTP/step-up second factor: TwoFactorAuthService.java, TotpValidationService.java, TotpFirestoreService.java, ImprovedQRCodeService.java, QRCodeGeneratorService.java",
+     "User cache layer: UserCacheService.java, InMemoryUserCache.java, RedisUserCache.java",
+     "Registration & auth orchestration: RegistrationService.java, AuthService.java, FirestoreService.java",
+     "Token/crypto helpers: TokenEncryptionService.java, TotpEncryptionService.java, KMSValidationService.java",
+     "Status/step-up endpoints and DTOs: TwoFactorStatusController.java, StepUpCheckResponse.java, StepUpTokenResponse.java"
+    ]
+   },
+   "before": {
+    "ai_summary": "TOTP/step-up second factor and the Firestore-backed user cache. Almost no actor roots — InMemoryUserCache.java is the only one; the rest is invoked from authentication controllers, never self-starting.",
+    "caveats": [
+     "UserCacheService single-carries the 11->6 seam (14/14 edges)"
+    ],
+    "clue_body_status": "CURRENT",
+    "responsibilities": [
+     "TOTP + step-up flows",
+     "UserCacheService / FirestoreService",
+     "step-up token plumbing"
+    ]
+   },
+   "name": "Two-factor auth & user cache",
+   "problems": [],
+   "status": "reclued",
+   "sub_id": "6",
+   "usage": {
+    "cache_creation_input_tokens": 20613,
+    "cache_read_input_tokens": 0,
+    "input_tokens": 2,
+    "output_tokens": 4256
+   }
+  },
+  {
+   "after": null,
+   "before": {
+    "ai_summary": "A SUPPLIER LAYER and the strongest one in the graph: the exception hierarchy, the translatable error-message infrastructure and the logging configuration that the whole backend imports. 91.1% fan-in (in=422, out=41) across 15 distinct consumers with no consumer above 13.4%. Everything fails through here.",
+    "caveats": [
+     "retyped to LAYER by curation without any membership change: it was not in the queue, but the same fan-in criterion that promoted [2] and [16] selects this node more strongly than either, and applying a criterion to some candidates and not to others would make the taxonomy arbitrary",
+     "what it supplies is pure supply - ResourceNotFoundException 101 external in-edges, ValidationTranslatableException 96, InsufficientPermissionsException 58, BusinessRuleTranslatableException 37, AuthenticationTranslatableException 37 - and it has no actor roots at all, so it never starts a flow",
+     "no majority-internal hyperedge, so no spine: it is a shelf, walk it by name"
+    ],
+    "clue_body_status": "CURRENT",
+    "responsibilities": [
+     "exception types and handlers (BaseExceptionHandler, AuthenticationExceptionHandler)",
+     "translatable message keys and the translatable-exception family",
+     "logging and network-filter configuration"
+    ]
+   },
+   "name": "Translatable exceptions & logging",
+   "problems": [
+    "number not in the dossier: 91.1"
+   ],
+   "status": "gated",
+   "sub_id": "7",
+   "usage": {
+    "cache_creation_input_tokens": 20921,
+    "cache_read_input_tokens": 0,
+    "input_tokens": 2,
+    "output_tokens": 3103
+   }
+  },
+  {
+   "after": {
+    "ai_summary": "Query specification builders plus crypto, recaptcha, TOTP and URL validation rules, entered mainly via SpecificationBuilder.java (36 ext in-edges), HmacUtils.java (12), RecaptchaConfig.java (7) and TotpCodeGenerator.java (6). Rule-dominant (36 of 52 members) with heavy unit-test coverage sitting beside the domain validators. Called from partnership, 2FA/user-cache, auth-journey and identity subsystems across its seams.",
+    "caveats": [
+     "MERGE CHECK RESOLVED as KEEP (external_ratio 0.944 trips the merge trigger but no single partner dominates and direction is balanced) — do not re-queue for merge into [4]",
+     "Many members (CityServiceUnitTest.java, CurrencyServiceUnitTest.java, PlatformServiceUnitTest.java, etc.) are test harness files for domain services outside this subsystem, not validation/crypto/query logic themselves",
+     "UserManagementService.java and SocialPlatformFactory.java carry Process/Resource roles unrelated to the validation/crypto/query naming and sit here on structural grounds only"
+    ],
+    "responsibilities": [
+     "Build dynamic query specifications (SpecificationBuilder.java, SpecificationBuilderUnitTest.java)",
+     "Verify HMAC signatures and TOTP codes (HmacUtils.java, TotpCodeGenerator.java)",
+     "Enforce recaptcha on sensitive actions (RecaptchaConfig.java, RecaptchaValidationAspect.java, RequiresRecaptcha.java)",
+     "Validate URL and text-pattern formats (ValidationPatterns.java, VimeoUrlsValidator.java, SocialPostUrlValidator.java)",
+     "Provide unrelated unit tests for city/currency/platform/dictionary services that ride along in this slice"
+    ]
+   },
+   "before": {
+    "ai_summary": "Specification builders plus recaptcha, Vimeo-URL and social-post-URL validation rules (entry SpecificationBuilder, 48 external in-edges). Rule-dominant (67%).",
+    "caveats": [
+     "MERGE CHECK RESOLVED as KEEP (GrothendieckV5, 2026-09-02). external_ratio 0.944 trips the first half of the merge trigger, but no partner dominates ([4] 26.8%) and the direction profile is balanced (in=104 out=105, 12 consumers), so it is neither a fragment of one neighbour nor a supplier layer. The measured merge into [4] gained +0.006 cohesion. Do not re-queue."
+    ],
+    "clue_body_status": "CURRENT",
+    "responsibilities": [
+     "specification/query builders",
+     "recaptcha verification",
+     "URL-format validators (Vimeo, social post)",
+     "unit-tested validation rules"
+    ]
+   },
+   "name": "Validation, crypto & query specs",
+   "problems": [],
+   "status": "reclued",
+   "sub_id": "8",
+   "usage": {
+    "cache_creation_input_tokens": 20155,
+    "cache_read_input_tokens": 0,
+    "input_tokens": 2,
+    "output_tokens": 638
+   }
+  },
+  {
+   "after": {
+    "ai_summary": "Auth journeys & BDD harness runs core auth flows (EmailVerificationService, FirebaseAuthProxyService, EmailChangeService, StepUpAuthService, PasswordResetService, MultiUserAuthService) and post-auth enforcement filters (BannedUserAuthorizationFilter, EmailVerificationEnforcementFilter), invoked via FirebaseAuthProxyController and TestAuthController. It also hosts a screenplay-pattern BDD harness (ActorRegistry, Actor, ScenarioContext) driving Cucumber steps like LoginSteps, MagicLinkSteps, FullAuthSteps. Every listed member is added_by_delta: true — this subsystem's membership was rebuilt this delta. Rule-typed files (54) dominate the layer profile, ahead of Resource (42) and Process (8), reflecting dense unit/integration test coverage.",
+    "caveats": [
+     "UserPreferencesRepository.java is the top entry point (28 ext in-edges per entry_points) despite reading as a preferences-domain file, not auth — likely structural grouping",
+     "Every member carries added_by_delta: true per the members list, meaning this subsystem's entire membership was rebuilt this delta; treat prior size/ranking assumptions as stale",
+     "Rule layer (54 of 109 per layer_profile) is mostly *UnitTest/*IntegrationTest/*Steps files sitting beside the two real enforcement filters — don't assume Rule members are all domain logic",
+     "external_ratio 0.774 with seams spread across 8 subsystems (10, 3, 7, 11, 6, 4, 8, 0, per seams) — no single dominant seam; coupling is broad, not concentrated",
+     "spines is empty per the dossier, so there's no single dominant call chain to anchor navigation despite the dense entry_points list"
+    ],
+    "responsibilities": [
+     "Runs domain auth flows: EmailVerificationService, FirebaseAuthProxyService, EmailChangeService, StepUpAuthService, PasswordResetService, MultiUserAuthService",
+     "Enforces post-auth access via BannedUserAuthorizationFilter and EmailVerificationEnforcementFilter",
+     "Hosts screenplay-pattern BDD actors: ActorRegistry, Actor, ScenarioContext, SoftAssertionContext",
+     "Backs Cucumber step definitions (LoginSteps, MagicLinkSteps, FullAuthSteps, ProfileUpdateSteps, RateLimitingSteps) for auth scenarios",
+     "Carries unit/integration tests for Firebase auth, password reset, and email verification (e.g. FirebaseAuthProxyServiceUnitTest, PasswordResetServiceUnitTest)"
+    ]
+   },
+   "before": {
+    "ai_summary": "Auth journeys & BDD harness runs core auth flows (EmailVerificationService, FirebaseAuthProxyService, EmailChangeService, StepUpAuthService, PasswordResetService, MultiUserAuthService) and post-auth enforcement filters (BannedUserAuthorizationFilter, EmailVerificationEnforcementFilter), invoked via FirebaseAuthProxyController and TestAuthController. It also hosts a screenplay-pattern BDD test harness (ActorRegistry, Actor, ScenarioContext) driving Cucumber steps like LoginSteps, MagicLinkSteps, and FullAuthSteps. Rule-typed files (54) dominate the layer profile, ahead of Resource (42) and Process (8), reflecting dense unit/integration test coverage alongside the filters.",
+    "caveats": [
+     "UserPreferencesRepository.java is the top entry point (28 ext in-edges per entry_points) despite reading as a preferences-domain file, not auth — likely structural grouping",
+     "All listed members carry added_by_delta: true, meaning this subsystem's membership was substantially rebuilt this delta; the prior size-ranking prose may be stale",
+     "Rule layer (54 of 109 per layer_profile) is mostly *UnitTest/*IntegrationTest/*Steps files sitting beside the two real enforcement filters — don't assume Rule members are all domain logic",
+     "ext_ratio 0.774 with seams spread across 8 subsystems (10, 3, 7, 11, 6, 4, 8, 0, per seams) — no single dominant seam; coupling is broad, not concentrated"
+    ],
+    "clue_body_status": "CURRENT",
+    "responsibilities": [
+     "Runs domain auth flows: EmailVerificationService, FirebaseAuthProxyService, EmailChangeService, StepUpAuthService, PasswordResetService, MultiUserAuthService",
+     "Enforces post-auth access via BannedUserAuthorizationFilter and EmailVerificationEnforcementFilter",
+     "Hosts screenplay-pattern BDD actors: ActorRegistry, Actor, ScenarioContext, SoftAssertionContext",
+     "Backs Cucumber step definitions (LoginSteps, MagicLinkSteps, FullAuthSteps, ProfileUpdateSteps, RateLimitingSteps) for auth scenarios",
+     "Carries unit/integration tests for Firebase auth, password reset, and email verification (e.g. FirebaseAuthProxyServiceUnitTest, PasswordResetServiceUnitTest)"
+    ]
+   },
+   "name": "Auth journeys & BDD harness",
+   "problems": [],
+   "status": "reclued",
+   "sub_id": "9",
+   "usage": {
+    "cache_creation_input_tokens": 21295,
+    "cache_read_input_tokens": 0,
+    "input_tokens": 2,
+    "output_tokens": 928
+   }
+  },
+  {
+   "after": {
+    "ai_summary": "Owns user identity: the User.java entity (149 ext in-edges, dominant import target), token exchange (TokenExchangeService.java, 45 ext out-edges), Firebase auth (FirebaseService.java), email plumbing (EmailService.java), and social-auth session state (SocialAuthSessionService.java). AuthController.java is the sole Actor entry point. Called across the app for identity/session lookups; itself a heavy caller into Rule/Resource layers (UserService.java: 49 ext out-edges). Layer shape skews Rule/Resource-heavy (20/12) with a thin Process tier (5) doing the work.",
+    "caveats": [
+     "LOAD-BEARING: User.java single-carries the dominant seams to subsystems 11, 6, 9, 4 per contracts/seams fields — no fallback file if split",
+     "Rule layer (20 of 41 members) is dominated by UserService_*_IntegrationTest.java and *UnitTest.java files — test harness sits beside domain code, not structural logic",
+     "AsyncConfig.java, EmailConfig.java, ThymeleafEmailConfiguration.java have zero in/out edges — structure-only membership, not call-graph participants",
+     "curation_notes shows AuthControllerTokenLoggingUnitTest.java was manually reassigned here by RamzesX — a boundary judgment call, not a structural fact"
+    ],
+    "responsibilities": [
+     "User.java carries the core identity entity and its repositories",
+     "TokenExchangeService.java and FirebaseService.java handle token/session exchange",
+     "EmailService.java owns email dispatch and token-in-email glue",
+     "AuthController.java is the single Actor-layer HTTP entry point",
+     "SocialAuthSessionService.java tracks social-login session state"
+    ]
+   },
+   "before": {
+    "ai_summary": "User.java itself (154 external in-edges — the entity everything imports), token exchange, email plumbing.",
+    "caveats": [
+     "LOAD-BEARING: User.java single-carries three seams (11->10 36/39, 12->10 18/18, 4->10 34/39). The third was 13->10 before sub-13 merged into [4]"
+    ],
+    "clue_body_status": "CURRENT",
+    "responsibilities": [
+     "User entity + core repositories",
+     "token exchange service",
+     "email/token glue"
+    ]
+   },
+   "name": "User identity & token exchange",
+   "problems": [],
+   "status": "reclued",
+   "sub_id": "10",
+   "usage": {
+    "cache_creation_input_tokens": 19278,
+    "cache_read_input_tokens": 0,
+    "input_tokens": 2,
+    "output_tokens": 586
+   }
+  },
+  {
+   "after": {
+    "ai_summary": "Subscriptions, payments & consent handles Stripe billing, invoicing retry, GDPR consent capture/enforcement, legal-document versioning, and company registry lookups. UserRepository.java (137 ext in-edges) and UserType.java (48) are the dominant external entry points; LegalConsentService.java, CorsProperties.java and Permission.java round out the top callers. Spines run through StripeService.java, ConsentService.java and LegalDocumentService.java (Process hubs, A_P_R/A_P_A). Resource-heavy (110 of 211 members) with Rule (61) close behind — DTOs, repositories and enums dominate over orchestration code.",
+    "caveats": [
+     "UserRepository.java and UserType.java are delta-added, high-fan-in Resources (137 and 48 ext_in) but carry identity data shared across subsystem 10 (User identity & token exchange, 78 seam edges) — treat as structural membership, not payments-specific logic",
+     "Unit test files (e.g. AnonymousConsentCleanupCronJobUnitTest.java, CeidgRegistryAdapterUnitTest.java, BoundaryRefusalUnitTest.java) sit beside domain code per members list — don't mistake test harness files for runtime services",
+     "External ratio is 0.509 (dossier) — roughly half of this subsystem's edges cross to other subsystems, notably subsystem 4 (Partnership opportunity lifecycle, 97 edges) and subsystem 10 (78 edges)",
+     "StripeService.java's spine shows arity 3 with no cross-subsystem dependency noted in memory, unlike ConsentCookieService.java/LegalConsentService.java which cross-import subsystem 10"
+    ],
+    "responsibilities": [
+     "Stripe subscription lifecycle, checkout and invoicing retry via StripeService.java, SubscriptionService.java",
+     "Consent capture, cookie signing and enforcement via ConsentService.java, ConsentCookieService.java, ConsentEnforcementFilter.java",
+     "Legal document versioning via LegalDocumentService.java, LegalConsentService.java",
+     "Campaign limits gated by plan via CampaignLimitService.java",
+     "Company registry lookups (CEIDG, Biala Lista) via CeidgRegistryAdapter.java, BialaListaVatAdapter.java"
+    ]
+   },
+   "before": {
+    "ai_summary": "The largest backend subsystem (208): Stripe payments, invoicing with retry, consent enforcement, legal documents, registry lookup, the payments boot guard and the lifecycle crons. Entry UserRepository.java (141 external in-edges).",
+    "caveats": [
+     "StorageUrlValidator is indexed as of batch 2026-09-02 and was assigned to sub-3 (storage/upload config), not here — storage-validation answers live there",
+     "B-lens degeneracy possible: Resource-dominant"
+    ],
+    "clue_body_status": "CURRENT",
+    "responsibilities": [
+     "Stripe subscription lifecycle + webhook",
+     "invoicing (Fakturownia port) + retry cron",
+     "consent capture/enforcement + GDPR crons",
+     "legal documents + terms versioning",
+     "campaign limits from plan"
+    ]
+   },
+   "name": "Subscriptions, payments & consent",
+   "problems": [],
+   "status": "reclued",
+   "sub_id": "11",
+   "usage": {
+    "cache_creation_input_tokens": 20749,
+    "cache_read_input_tokens": 0,
+    "input_tokens": 2,
+    "output_tokens": 786
+   }
+  },
+  {
+   "after": null,
+   "before": {
+    "ai_summary": "Support ticket entities, attachments and flows — the public ticket create/status surface, plus TicketAccessTokenService (new this batch).",
+    "caveats": [
+     "attachment URL validation (StorageUrlValidator.java) is no longer a coverage gap — it is indexed as of this batch but sits in sub-3, not here: attachment answers span both subsystems",
+     "TicketAccessTokenService was a low-margin assignment (kNN top inconclusive at 0.333 over 6 distinct subsystems; folder prior support/ticket/services/ and a 1/1 in-edge decided sub-15)"
+    ],
+    "clue_body_status": "CURRENT",
+    "responsibilities": [
+     "ticket entities + repos",
+     "attachment handling",
+     "ticket status flows",
+     "ticket access tokens"
+    ]
+   },
+   "name": "Support tickets & attachments",
+   "problems": [
+    "number not in the dossier: 0.333"
+   ],
+   "status": "gated",
+   "sub_id": "15",
+   "usage": {
+    "cache_creation_input_tokens": 19011,
+    "cache_read_input_tokens": 0,
+    "input_tokens": 2,
+    "output_tokens": 731
+   }
+  },
+  {
+   "after": {
+    "ai_summary": "Shared-vocabulary layer: status/compensation enums headed by AccountStatus.java (52 ext in-edges), status metadata (StatusMetadata.java, EnrichableEnum.java, FutureOrPresentDate.java), i18n bundles (messages_en.properties, messages_pl.properties), OpenAPI spec config (OpenApiConfig.java) and its own contract-validation test suite. external_ratio is 1.0 with zero internal edges. Pulled in by Partnership opportunity lifecycle [4] (13 seam edges), Auth journeys [9], Two-factor auth [6] and Subscriptions [11] (8 each) as consumers, not callers.",
+    "caveats": [
+     "external_ratio is 1.0 with no internal edges (per seams/contracts data) - by construction this leaves local_height null and no spine; correct for a vocabulary shelf, not missing data",
+     "seam edge counts are uneven, not tied: Partnership opportunity lifecycle [4] carries 13 edges vs 8 each for Auth journeys [9], Two-factor auth [6] and Subscriptions [11] - a newcomer reading only AccountStatus.java's 52 ext in-edges could miss that [4] is the dominant single consumer",
+     "five Rule-type files (OpenApiSpecGeneratorTest.java, NullableFieldsAreDeclaredNullableUnitTest.java, OpenApiDateTimeFormatUnitTest.java, ResponseShapeMatchesReturnTypeUnitTest.java, FreeFormMapSchemaCustomizerUnitTest.java) are test harness code sitting beside the domain enums/DTOs, not additional production surface",
+     "all 16 members carry added_by_delta:true, so this subsystem's membership is entirely new in this snapshot; treat prior consumer-count or edge-tie claims from earlier prose as unverified against this dossier's 8-subsystem seam list"
+    ],
+    "responsibilities": [
+     "AccountStatus.java anchors the status/compensation enum family, carrying 52 ext in-edges alone",
+     "StatusMetadata.java, EnrichableEnum.java, FutureOrPresentDate.java supply status metadata and field validation",
+     "messages_en.properties/messages_pl.properties hold i18n bundles; OpenApiConfig.java configures the OpenAPI spec",
+     "AccountStatusDtoOut.java, CompensationTypeDtoOut.java, OpportunityStatusDtoOut.java, AppliedOpportunityContentDtoIn.java expose enum-backed DTOs",
+     "Five Rule-type unit tests validate the OpenAPI contract (OpenApiSpecGeneratorTest.java, ResponseShapeMatchesReturnTypeUnitTest.java, NullableFieldsAreDeclaredNullableUnitTest.java, OpenApiDateTimeFormatUnitTest.java, FreeFormMapSchemaCustomizerUnitTest.java)"
+    ]
+   },
+   "before": {
+    "ai_summary": "A SHARED-VOCABULARY LAYER: status and compensation enums, their i18n message bundles and the OpenAPI spec config. 93.7% fan-in across 12 distinct consumers with ZERO internal edges. Merge was considered and REFUTED - external_ratio 1.000 trips the first half of the trigger but the top three partners are tied at 8 edges each (12.7%), which is a shared kernel, not a fragment of anybody.",
+    "caveats": [
+     "every candidate merge LOWERED the host's cohesion - into [4] 0.362->0.353, [6] 0.177->0.173, [9] 0.242->0.234, [11] 0.489->0.471. This was the top curation item and it is now closed; do not re-queue it",
+     "zero internal edges means no trophic height and no spine: E1 leaves local_height null on all 12 members BY CONSTRUCTION. That is correct for a vocabulary shelf and is not missing data",
+     "the promotion contradicts the manual's purity>0.85 layer trigger (measured purity is Resource 67%); the fan-in signature is the direct evidence and the measurement was allowed to win"
+    ],
+    "clue_body_status": "CURRENT",
+    "responsibilities": [
+     "AccountStatus and the status / compensation enum family (AccountStatus.java alone takes 51 external in-edges)",
+     "status metadata and i18n message bundles",
+     "OpenAPI spec configuration"
+    ]
+   },
+   "name": "Status enums & OpenAPI contract",
+   "problems": [],
+   "status": "reclued",
+   "sub_id": "16",
+   "usage": {
+    "cache_creation_input_tokens": 17821,
+    "cache_read_input_tokens": 0,
+    "input_tokens": 2,
+    "output_tokens": 4673
+   }
+  },
+  {
+   "after": {
+    "ai_summary": "Auth vertical slice of the greenfield FE: sign-in/sign-up/reset screens, social callback and post-auth action router, plus the auth-api, session-state, step-up and two-factor client services and the HTTP interceptor chain (error, language, rate-limit-cache, shell-headers, ssr-cookie-forward, step-up). session-state.service.ts (28 ext in-edges) and auth-api.service.ts (14) are the dominant entry points invoked shell-wide; social-auth.service.ts anchors the A_P_A hub walk. Rule-heavy (37 of 78) because specs sit beside their subjects.",
+    "caveats": [
+     "all listed members are added_by_delta:true, so this is effectively a wholesale re-membership, not an incremental change",
+     "spines are both A_P_A (social-auth.service.ts arity 3, auth-api.service.ts arity 11) - no A_P_R walk exists, land on these service hubs instead",
+     "the seam to [177] FE shell/i18n/generated client carries 76 edges, the largest of any listed seam, and 20 of the subsystem's outbound IMPORTS target it alone",
+     "the seam to [173] FE fixtures & E2E harness (33 edges) plus 8 inbound INJECTS mean spec files (*.spec.ts) sit beside their domain files throughout, inflating the Rule count (37 of 78)",
+     "external_ratio 0.444 is mid-range, not self-contained - roughly half this subsystem's edges cross into [177], [173], [176] and smaller neighbors"
+    ],
+    "responsibilities": [
+     "session-state.service.ts and auth-api.service.ts carry almost all external callers (28 and 14 ext-in)",
+     "step-up.service.ts and two-factor.service.ts gate step-up/2FA flows client-side",
+     "sign-in/sign-up/reset/social-callback components and action-router.component.ts drive the auth screens",
+     "the interceptor chain (error, language, rate-limit-cache, shell-headers, ssr-cookie-forward, step-up, set-to-array) shapes every HTTP call",
+     "sandbox-auth.service.ts and sandbox-persona-picker.component.ts serve the demo/sandbox persona path"
+    ]
+   },
+   "before": {
+    "ai_summary": "core/auth and feature/auth of the greenfield app: sign-in, sign-up and password-reset screens, the social callback, the step-up and two-factor client services, and the HTTP interceptor chain. Rule-dominant (36 of 69) because specs sit beside their subjects. Holds the largest internal seam in the whole app - core/auth to feature/auth, 40 edges - which is why the frontend was split vertically rather than by layer.",
+    "caveats": [
+     "no A_P_R spine exists in this child: every majority-internal hyperedge under it is A_P_A. Frontend Resources are models and fixtures, not repositories, so the Actor->Process->Resource walk that works on the backend has nothing to land on here - walk the A_P_A service hubs listed in spines instead",
+     "external_ratio 0.444 makes it the third most self-contained child, after [178] at 0.176 and [172] at 0.0; cohesion 0.559"
+    ],
+    "clue_body_status": "CURRENT",
+    "responsibilities": [
+     "sign-in / sign-up / forgot-password screens and their specs",
+     "auth API and session-state services (14 external in-edges each)",
+     "step-up and two-factor client services",
+     "the HTTP interceptor chain (set-to-array.interceptor.ts is the consumed one)",
+     "social auth callback and the post-auth action router"
+    ]
+   },
+   "name": "FE auth, 2FA & interceptors",
+   "problems": [],
+   "status": "reclued",
+   "sub_id": "170",
+   "usage": {
+    "cache_creation_input_tokens": 20751,
+    "cache_read_input_tokens": 0,
+    "input_tokens": 2,
+    "output_tokens": 738
+   }
+  },
+  {
+   "after": {
+    "ai_summary": "Renders opportunity and applied-opportunity screens: browsing (opportunities-list.component.ts, opportunity-detail.component.ts, opportunity-form.component.ts), applications (applied-opportunities-list.component.ts, applied-opportunity-detail.component.ts), content submission/review, collaboration dashboards, campaigns and grants. Backed by the three A_P_A spine hubs external callers enter through: applied-opportunity.service.ts (6 in-edges), opportunity.service.ts (4), applied-opportunity-content.service.ts (2). Actor-dominant (27 of 50 members); heaviest seam is FE shell, i18n & generated client (subsystem 177, 58 edges).",
+    "caveats": [
+     "No A_P_R spine exists here — only A_P_A hubs (applied-opportunity-content.service.ts, opportunity.service.ts, applied-opportunity.service.ts per spines); walk those, not an Actor->Process->Resource path",
+     "16 of 50 members are Rule-typed *.spec.ts test files sitting beside the code they test (layer_profile Rule:16), not a separated harness",
+     "Heaviest seam is subsystem 177 (FE shell, i18n & generated client) at 58 edges — most external wiring funnels through the generated client/shell, not a peer domain",
+     "The three .contract.ts Resource members (applied-opportunities, opportunities, opportunity-dictionaries) all show ext_in 0 — structure-only, not externally invoked"
+    ],
+    "responsibilities": [
+     "Applied-opportunity list/detail screens and service (applied-opportunities-list, applied-opportunity-detail, applied-opportunity.service, applied-opportunity-content.service)",
+     "Opportunity browsing, detail and form screens backed by opportunity.service.ts and opportunity-dictionaries.service.ts",
+     "Content submission and review flow (content-submission.component.ts, content-review.component.ts)",
+     "Collaboration, campaign and grant surfaces (collaboration-dashboard, my-campaigns, campaign-applicants, grants components)",
+     "Admin cascade-delete and reject-applicant dialogs for moderation actions"
+    ]
+   },
+   "before": {
+    "ai_summary": "Opportunity browsing and applied opportunities: list and detail screens, content submission, collaborations and grants, with their services and specs. Actor-dominant (24 of 43). Only one file is imported from outside the child (opportunity-dictionaries.service.ts, 1 external in-edge), so it is entered at its screens, not through an API.",
+    "caveats": [
+     "no A_P_R spine exists in this child: every majority-internal hyperedge under it is A_P_A. Frontend Resources are models and fixtures, not repositories, so the Actor->Process->Resource walk that works on the backend has nothing to land on here - walk the A_P_A service hubs listed in spines instead",
+     "36 of its 43 files come from a single v3 cell (v3=12), so the child is a cohort the previous partition already saw; cohesion 0.524"
+    ],
+    "clue_body_status": "CURRENT",
+    "responsibilities": [
+     "applied-opportunity list and detail screens",
+     "opportunity browsing and detail screens",
+     "content submission flow",
+     "collaborations and grants surfaces",
+     "opportunity / applied-opportunity / content client services"
+    ]
+   },
+   "name": "FE opportunities & applications",
+   "problems": [],
+   "status": "reclued",
+   "sub_id": "171",
+   "usage": {
+    "cache_creation_input_tokens": 20105,
+    "cache_read_input_tokens": 0,
+    "input_tokens": 2,
+    "output_tokens": 3005
+   }
+  },
+  {
+   "after": null,
+   "before": {
+    "ai_summary": "The onboarding survey and its showcase chapters (compliance, engineering, operations, platform, security and the per-topic showcases). The single most self-contained unit in the estate: cohesion 1.000, 14 internal edges and ZERO edges to any sibling or any other subsystem.",
+    "caveats": [
+     "no A_P_R spine exists in this child: every majority-internal hyperedge under it is A_P_A. Frontend Resources are models and fixtures, not repositories, so the Actor->Process->Resource walk that works on the backend has nothing to land on here - walk the A_P_A service hubs listed in spines instead - and this child has no majority-internal hyperedge at all (hyperedges_majority 0), so it has no spine of any kind",
+     "external_ratio 0.0 is a measurement, not a gap: nothing imports into it and it imports nothing, so an impact query starting anywhere else in the estate will never reach it. Enter at survey-hub.component.ts",
+     "30 of its 42 members are flagged entry_point by E1 because every Actor with no internal in-edge is an actor root here - read that as 'many independent screens', not as 34 API surfaces"
+    ],
+    "clue_body_status": "CURRENT",
+    "responsibilities": [
+     "survey hub and chapter components",
+     "per-topic showcase components",
+     "survey chapter specs"
+    ]
+   },
+   "name": "FE onboarding survey",
+   "problems": [
+    "number not in the dossier: 30"
+   ],
+   "status": "gated",
+   "sub_id": "172",
+   "usage": {
+    "cache_creation_input_tokens": 19951,
+    "cache_read_input_tokens": 0,
+    "input_tokens": 2,
+    "output_tokens": 815
+   }
+  },
+  {
+   "after": null,
+   "before": {
+    "ai_summary": "A SUPPLIER LAYER, not a feature slice. It supplies the sandbox fixture data (sign-up, profile, opportunity-form and 20-odd more), the sandbox host / index / registry that renders them, the icon audit, and the e2e harness including the integration _trace recorder and real-login. 85% Resource purity over 67 files with only 4 internal edges - it is consumed, it does not orchestrate.",
+    "caveats": [
+     "cohesion 0.065 is EXPECTED and is the reason for the LAYER retype - a fixture shelf has no internal story. Do not read it as a defect or queue a split",
+     "only 7 of its 67 members carry a local_height: the 4 internal edges touch 7 nodes and the remaining 60 have no internal edge and no layer median to inherit. Trophic questions about this child have no answer by construction",
+     "it INJECTS into the feature children (177 x37 IMPORTS, 170 x8, 174 x6, 176 x5) rather than being called by them, so it will not appear on a caller->callee walk that starts at a screen",
+     "real-login.ts sits here rather than in [170] by owner decision Q2=A (tier coherence over a degree-0 cross-repo affinity to backend [9]); the dissent is recorded on the node as curation_dissent"
+    ],
+    "clue_body_status": "CURRENT",
+    "responsibilities": [
+     "sandbox fixture data for every feature child",
+     "sandbox host, index and registry components",
+     "e2e harness: integration _trace recorder, real-login, visual-parity pairs",
+     "icon audit surface"
+    ]
+   },
+   "name": "FE fixtures & E2E harness",
+   "problems": [
+    "number not in the dossier: 60"
+   ],
+   "status": "gated",
+   "sub_id": "173",
+   "usage": {
+    "cache_creation_input_tokens": 20705,
+    "cache_read_input_tokens": 0,
+    "input_tokens": 2,
+    "output_tokens": 5275
+   }
+  },
+  {
+   "after": {
+    "ai_summary": "Plan, billing and consent slice for the FE: plan-billing.component.ts and its dialogs (reconsent, upgrade-confirm, downgrade-confirm, trial-consent, dialog-header) drive subscription.service.ts, consent.service.ts, legal-api.service.ts and public-config.service.ts, backed by hidden-models.ts and legal/subscription contracts. subscription.service.ts is the dominant A_P_A hub (arity 5). Heaviest seam is subsystem 177 (FE shell, i18n & generated client, 33 edges); subsystem 173 (FE fixtures & E2E harness) trails at 18.",
+    "caveats": [
+     "No A_P_R spine here (per spines): Resources are frozen models/contracts, not repositories, so walk the A_P_A hub subscription.service.ts instead of an Actor->Process->Resource path",
+     "hidden-models.ts alone carries 17 of the subsystem's external in-edges (entry_points), making it the seam's real chokepoint despite being a Resource",
+     "Nearly half the 27 members are .spec.ts test files (e.g. consent.service.spec.ts, plan-billing.component.spec.ts) sitting beside the domain code they test, per members",
+     "external_ratio 0.533 with a 33-edge seam to subsystem 177 (FE shell, i18n & generated client) means most of this slice's edges point outward, not internally"
+    ],
+    "responsibilities": [
+     "Render plan/billing screens and upgrade, downgrade, reconsent and trial-consent dialogs (plan-billing.component.ts, *-dialog.component.ts)",
+     "Drive subscription state through subscription.service.ts and subscription.client.ts, the dominant A_P_A hub",
+     "Fetch consent and legal terms via consent.service.ts and legal-api.service.ts",
+     "Serve app config through public-config.service.ts",
+     "Hold frozen API shapes in hidden-models.ts, subscription.contract.ts and legal.contract.ts"
+    ]
+   },
+   "before": {
+    "ai_summary": "Plan and billing screens with the subscription client, the frozen API models, and the consent / legal surface (reconsent dialog, upgrade and downgrade confirmations, legal API). Lowest purity of any frontend child (0.391) because screens, rules and services are all present in a 23-file space.",
+    "caveats": [
+     "no A_P_R spine exists in this child: every majority-internal hyperedge under it is A_P_A. Frontend Resources are models and fixtures, not repositories, so the Actor->Process->Resource walk that works on the backend has nothing to land on here - walk the A_P_A service hubs listed in spines instead",
+     "two of its files carry a measured cross-repo affinity to backend [11] (subscription.client.ts and public-config.service.ts), confirmed in curation - billing questions that cross the repo boundary land in [11]",
+     "cohesion 0.467"
+    ],
+    "clue_body_status": "CURRENT",
+    "responsibilities": [
+     "plan and billing screens",
+     "upgrade / downgrade / reconsent dialogs",
+     "subscription and public-config client services",
+     "consent and legal API services",
+     "frozen API models (hidden-models.ts)"
+    ]
+   },
+   "name": "FE plan, billing & consent",
+   "problems": [],
+   "status": "reclued",
+   "sub_id": "174",
+   "usage": {
+    "cache_creation_input_tokens": 18414,
+    "cache_read_input_tokens": 0,
+    "input_tokens": 2,
+    "output_tokens": 666
+   }
+  },
+  {
+   "after": {
+    "ai_summary": "Support & help-centre screens for filing and tracking tickets. create-ticket.component.ts, ticket-status.component.ts, and user-tickets-list.component.ts serve end users; admin-tickets-list.component.ts and admin-ticket-detail.component.ts give staff the queue and detail views. support-ticket.service.ts is the shared client and the subsystem's only A_P_A spine hub, drawing 4 of the group's external in-edges. Heaviest outbound traffic (12 IMPORTS) lands in subsystem 177's shell/i18n/generated client; auth-adjacent calls (PERFORMS/INJECTS, 2 each) reach subsystem 170.",
+    "caveats": [
+     "entry_points now lists five files with real external in-edges (support-ticket.service.ts 4, four screens 2 each) — the prior 'nothing imports into it' claim is stale; enter via support-ticket.service.ts or the admin screens",
+     "spines shows only one A_P_A metapath (hub support-ticket.service.ts, arity 6, idf 1.946); no A_P_R spine exists, and the lone Resource is support.contract.ts, not a repository, so walk the A_P_A hub rather than Actor->Process->Resource",
+     "the seam to subsystem 173 (FE fixtures & E2E harness, 10 edges) is carried by the .spec.ts files sitting beside the domain components, not by the components themselves",
+     "all 21 members carry added_by_delta:true, so this whole subsystem's membership is new — treat prior structural assumptions about it as unverified until re-checked"
+    ],
+    "responsibilities": [
+     "create-ticket.component.ts and user-tickets-list.component.ts handle end-user ticket creation and tracking",
+     "admin-tickets-list.component.ts and admin-ticket-detail.component.ts drive the staff ticket queue and detail view",
+     "support-ticket.service.ts is the shared A_P_A hub (arity 6) other screens call into",
+     "support.contract.ts is the sole Resource member, shaping the shared ticket data model",
+     "seven .spec.ts files test each screen/service one-for-one, adding no runtime behavior"
+    ]
+   },
+   "before": {
+    "ai_summary": "The support and help-centre screens: create-ticket, ticket status, the admin ticket list and detail, and the support-ticket client service that all of them share. Twenty files, all of them from one v3 cell.",
+    "caveats": [
+     "no A_P_R spine exists in this child: every majority-internal hyperedge under it is A_P_A. Frontend Resources are models and fixtures, not repositories, so the Actor->Process->Resource walk that works on the backend has nothing to land on here - walk the A_P_A service hubs listed in spines instead",
+     "nothing outside the child imports into it (entry_points empty) - enter at support.component.ts or the admin screens",
+     "no member carries a measured cross-repo affinity, so the pairing with backend [15] is a name match, not a measurement; cohesion 0.529"
+    ],
+    "clue_body_status": "CURRENT",
+    "responsibilities": [
+     "create-ticket and ticket-status screens",
+     "admin ticket list and detail screens",
+     "support-ticket client service"
+    ]
+   },
+   "name": "FE support & help centre",
+   "problems": [],
+   "status": "reclued",
+   "sub_id": "175",
+   "usage": {
+    "cache_creation_input_tokens": 17822,
+    "cache_read_input_tokens": 0,
+    "input_tokens": 2,
+    "output_tokens": 2133
+   }
+  },
+  {
+   "after": {
+    "ai_summary": "Profile, settings and admin surfaces for the FE: profile view/upload, security, preferences and social-connection settings, team, addresses, company setup, plus admin user list and dictionary editor. Callers reach in through user.service.ts (11 ext in-edges), registry.service.ts (5), address.service.ts (4) and cascade-delete.service.ts (4); user.service.ts also anchors the child's A_P_A hub. Nearly every member here was added by this delta.",
+    "caveats": [
+     "No A_P_R spine exists here: the only listed spine is A_P_A on user.service.ts, so the Actor->Process->Resource backend-style walk has nothing to land on - enter at that hub instead",
+     "cross-tab.ts is a Resource-typed member with 3 ext in-edges but 0 ext out-edges, per members - a one-directional seam carried by a single file",
+     "*.spec.ts files (address.service.spec.ts, cascade-delete.service.spec.ts, and others) sit alongside their domain counterparts as Rule-typed members, not a separate test subsystem",
+     "external_ratio 0.545 and the dominant seam to subsystem 177 (68 edges) mean over half this child's edges leave it, mostly through the FE shell/i18n/generated-client subsystem"
+    ],
+    "responsibilities": [
+     "Profile view, upload and settings screens (profile-view, profile-picture-upload components)",
+     "Account and security settings (security-settings, email-change, social-connections-settings components)",
+     "Team, company and address surfaces (team, company-setup, addresses components)",
+     "Admin user list and dictionary editor (user-list.component.ts, dictionary.component.ts)",
+     "User/address/registry/cascade-delete/upload client services backing the screens"
+    ]
+   },
+   "before": {
+    "ai_summary": "Profile, user and settings surfaces plus the admin side: profile view and upload, preferences, security and social-connection settings, team, addresses, company, the admin user list and the dictionary editor. user.service.ts is the child's hub (11 external in-edges and the widest internal hyperedge).",
+    "caveats": [
+     "no A_P_R spine exists in this child: every majority-internal hyperedge under it is A_P_A. Frontend Resources are models and fixtures, not repositories, so the Actor->Process->Resource walk that works on the backend has nothing to land on here - walk the A_P_A service hubs listed in spines instead",
+     "two of its files carry a measured cross-repo affinity to backend [2], the social-connection data model (social-connections.service.ts and social-connections-settings.component.ts), confirmed in curation",
+     "cohesion 0.455, the lowest of the feature children - it is a settings drawer of loosely related surfaces, so expect to enter at a named screen rather than to walk it"
+    ],
+    "clue_body_status": "CURRENT",
+    "responsibilities": [
+     "profile view, upload and settings screens",
+     "security, preferences and social-connection settings",
+     "team, company and address surfaces",
+     "admin user list and dictionary editor",
+     "user / address / registry / cascade-delete client services"
+    ]
+   },
+   "name": "FE profile, settings & admin",
+   "problems": [],
+   "status": "reclued",
+   "sub_id": "176",
+   "usage": {
+    "cache_creation_input_tokens": 20546,
+    "cache_read_input_tokens": 0,
+    "input_tokens": 2,
+    "output_tokens": 575
+   }
+  },
+  {
+   "after": null,
+   "before": {
+    "ai_summary": "The frontend's shared hub: layout and shell, theme, notification centre, i18n, shared utilities, health, error page, landing and marketing, the root build config and the bootstrap (main.ts / main.server.ts) - plus the whole generated OpenAPI client, collapsed into the single node `api` and merged here from ex-sub-18. Lowest purity in the estate (0.324) by design.",
+    "caveats": [
+     "no A_P_R spine exists in this child: every majority-internal hyperedge under it is A_P_A. Frontend Resources are models and fixtures, not repositories, so the Actor->Process->Resource walk that works on the backend has nothing to land on here - walk the A_P_A service hubs listed in spines instead",
+     "this is where every sibling's top seam points: 173 x37, 176 x33, 171 x29, 170 x20, 174 x14, 175 x12, 178 x2 IMPORTS inbound. If a frontend question is about something shared, it is almost certainly here",
+     "the `api` node stands for 271 generated files collapsed by design - per-endpoint traceability does not exist. Regenerate via openapi:gen, never hand-edit. Of ex-sub-18's 156 in-edges, 147 remain external and 9 became internal when it was merged into this child",
+     "rate-limit-state.service.ts carries a measured cross-repo affinity to backend [3]; 8 of the 74 members have no local_height (no internal edge and no layer median to inherit)"
+    ],
+    "clue_body_status": "CURRENT",
+    "responsibilities": [
+     "layout, shell and theme components",
+     "notification centre, i18n (Transloco en/pl) and shared utilities",
+     "landing, marketing, error page and health surfaces",
+     "root build config and the SSR/browser bootstrap",
+     "the collapsed generated OpenAPI client (`api`, 147 external in-edges)"
+    ]
+   },
+   "name": "FE shell, i18n & generated client",
+   "problems": [
+    "number not in the dossier: 60"
+   ],
+   "status": "gated",
+   "sub_id": "177",
+   "usage": {
+    "cache_creation_input_tokens": 20804,
+    "cache_read_input_tokens": 0,
+    "input_tokens": 2,
+    "output_tokens": 677
+   }
+  },
+  {
+   "after": {
+    "ai_summary": "FE demo mode simulates third-party integrations and product tours for prospects: fakturownia-sim, ksef-sim, inbox-sim, phone-totp-sim and checkout-sim components render fake vendor UIs while collab-hero and demo-guide drive guided walkthroughs via guide-runner.service.ts and guide-spotlight.component.ts. sandbox-director.service.ts is the A_P_A hub (arity 6) that orchestrates scenario-registry.ts and demo-mode.ts; demo.interceptor.ts gates HTTP calls. Entry points (demo-mode.ts, sandbox-director.service.ts, scenario-registry.ts) receive external in-edges, mostly from subsystem 177 (FE shell, i18n & generated client).",
+    "caveats": [
+     "Entry_points now show real external in-edges (demo-mode.ts 6, sandbox-director.service.ts 3, scenario-registry.ts 2) - the prior 'nothing imports in' claim no longer holds.",
+     "Ten Rule-typed members are mostly *.spec.ts test files (collab-hero.component.spec.ts, demo-fixtures.spec.ts, demo.interceptor.spec.ts, guide-hint.spec.ts, guide-runner.service.spec.ts, guide-spotlight.component.spec.ts, sandbox-director.service.spec.ts, world-sim-shell.component.spec.ts, demo-fixtures.account.spec.ts) sitting beside domain code, not business rules - per layer_profile and members.",
+     "Seam to 170 (FE auth, 2FA & interceptors, 3 edges) is most likely carried by demo.interceptor.ts alone, per seams and members.",
+     "Dominant seam is 177 (FE shell, i18n & generated client, 19 edges) though out-contracts list only 2 IMPORTS - most of that traffic is inbound via entry_points, not outbound contracts."
+    ],
+    "responsibilities": [
+     "Simulates vendor integrations (fakturownia-sim, ksef-sim, inbox-sim, phone-totp-sim, checkout-sim) for sandboxed demos.",
+     "Drives guided product tours via guide-runner.service.ts, guide-hint.ts and guide-spotlight.component.ts.",
+     "Orchestrates scenario state through sandbox-director.service.ts (A_P_A hub) and scenario-registry.ts.",
+     "Gates demo HTTP traffic with demo.interceptor.ts; demo-mode.ts flags the active mode.",
+     "Carries fixtures and test specs (demo-fixtures.ts, *.spec.ts) alongside domain components."
+    ]
+   },
+   "before": {
+    "ai_summary": "Demo mode: the demo interceptor and demo-mode screens - demo hub and guide, the collab hero, and the Fakturownia / KSeF / inbox / phone-TOTP simulators driven by a scenario registry and sandbox director. Sixteen files, three external edges: external_ratio 0.176, the most self-contained child that touches anything at all.",
+    "caveats": [
+     "no A_P_R spine exists in this child: every majority-internal hyperedge under it is A_P_A. Frontend Resources are models and fixtures, not repositories, so the Actor->Process->Resource walk that works on the backend has nothing to land on here - walk the A_P_A service hubs listed in spines instead",
+     "nothing imports into it (entry_points empty); its only outward edges are IMPORTS x2 to [177] and INJECTS x1 to [174]. Enter at demo-hub.component.ts",
+     "cohesion 0.824, second only to the survey"
+    ],
+    "clue_body_status": "CURRENT",
+    "responsibilities": [
+     "demo hub, guide and collab hero screens",
+     "Fakturownia / KSeF / inbox / phone-TOTP simulators",
+     "scenario registry and demo fixtures",
+     "the demo interceptor"
+    ]
+   },
+   "name": "FE demo mode",
+   "problems": [],
+   "status": "reclued",
+   "sub_id": "178",
+   "usage": {
+    "cache_creation_input_tokens": 18472,
+    "cache_read_input_tokens": 0,
+    "input_tokens": 2,
+    "output_tokens": 5457
+   }
+  },
+  {
+   "after": {
+    "ai_summary": "Ten files that configure and instrument JUnit5 test execution rather than implement domain logic: ClearSecurityContextExtension.java resets security context between tests, ProbeListener.java is an execution listener, and profile/property files (application*.properties, application-test-ratelimit.yml, junit-platform.properties, logback-test.xml, testcontainers.properties) set test, e2e, integration, and container behavior. No entry points, spines, or seams — grouped by structural isolation, not by caller relationship.",
+    "caveats": [
+     "All 10 members were added in the same delta batch (added_by_delta: true) — this is a freshly assembled harness, not an established subsystem",
+     "No entry_points, spines, contracts, or seams are recorded; membership is structural co-occurrence, not a call graph (layer_profile is Context/Rule only, no Action/Path/Router)",
+     "external_ratio is null and every member shows ext_in/ext_out 0 — the dossier cannot confirm real coupling to the systems these files configure",
+     "Property/config files (application*.properties, .yml, .xml) sit beside two Java rule/listener classes — a newcomer might assume a uniform file type"
+    ],
+    "responsibilities": [
+     "ClearSecurityContextExtension.java resets Spring Security context between JUnit tests",
+     "ProbeListener.java hooks JUnit platform execution for test instrumentation",
+     "junit-platform.properties configures JUnit5 platform behavior",
+     "application*.properties/yml files set per-profile test, e2e, and integration config",
+     "testcontainers.properties and logback-test.xml configure container and logging behavior for test runs"
+    ]
+   },
+   "before": {
+    "ai_summary": "Three structurally isolated files added in the same delta batch that together configure and instrument JUnit5 test execution (security-context reset extension, execution listener, platform properties) rather than belonging to any domain slice.",
+    "caveats": [],
+    "clue_body_status": "STRUCTURE_ONLY",
+    "responsibilities": []
+   },
+   "name": "JUnit test-execution harness",
+   "problems": [],
+   "status": "reclued",
+   "sub_id": "205",
+   "usage": {
+    "cache_creation_input_tokens": 16597,
+    "cache_read_input_tokens": 0,
+    "input_tokens": 2,
+    "output_tokens": 534
+   }
+  },
+  {
+   "after": {
+    "ai_summary": "Trajectory playback feature for CodeMap: codemap-page.component.html hosts trajectory-player.component.ts/.html, which renders recordings supplied by codemap-recordings.ts. All 6 members entered together in this delta (pack 1.1.0). Entry points are trajectory-player.component.ts (2 ext in-edges) and codemap-page.component.spec.ts (1 ext in-edge), reached from FE shell/routing subsystem 177; a single edge ties it to FE fixtures/E2E harness subsystem 173.",
+    "caveats": [
+     "Spines and contracts are empty in the dossier — no confirmed call chain beyond structural membership",
+     "All 6 members were added_by_delta together with no prior history, so page-to-player wiring isn't independently evidenced",
+     "codemap-page.component.spec.ts and trajectory-player.component.spec.ts are test files living beside the domain components, not separate harness code",
+     "external_ratio is null, so cohesion versus seam subsystems 177 and 173 can't be quantified from this dossier",
+     "The seam to subsystem 173 (FE fixtures & E2E harness) is carried by a single edge, per seams"
+    ],
+    "responsibilities": [
+     "trajectory-player.component.ts/.html render and drive trajectory playback, the main entry point",
+     "codemap-page.component.html hosts the player within the codemap page shell",
+     "codemap-recordings.ts supplies recording data to the player",
+     "codemap-page.component.spec.ts and trajectory-player.component.spec.ts test the page and player"
+    ]
+   },
+   "before": {
+    "ai_summary": "New feature cluster for CodeMap's trajectory playback: codemap-page.component.html hosts trajectory-player.component.ts/.html, which reads recording data from codemap-recordings.ts. All six members were added in this delta (pack 1.1.0). Entry points are trajectory-player.component.ts (2 external in-edges) and codemap-page.component.spec.ts (1 external in-edge), reached from the FE shell/routing subsystem 177.",
+    "caveats": [
+     "Spines and contracts are empty in the dossier — no confirmed call chain beyond structural membership; treat as STRUCTURE_ONLY per current_prose.clue_body_status",
+     "All 6 members were added_by_delta together with no prior history, so internal relationships (e.g., page-to-player wiring) aren't independently evidenced yet",
+     "codemap-page.component.spec.ts and trajectory-player.component.spec.ts are test files living beside the domain components, not separate harness code",
+     "external_ratio is null, so cohesion versus subsystem 177/173 can't be quantified from this dossier"
+    ],
+    "clue_body_status": "CURRENT",
+    "responsibilities": [
+     "trajectory-player.component.ts/.html render and drive trajectory playback, the subsystem's main entry point",
+     "codemap-page.component.html hosts the player within the codemap page shell",
+     "codemap-recordings.ts supplies recording data to the player",
+     "codemap-page.component.spec.ts and trajectory-player.component.spec.ts test the page and player"
+    ]
+   },
+   "name": "codemap-trajectory-viewer",
+   "problems": [],
+   "status": "reclued",
+   "sub_id": "206",
+   "usage": {
+    "cache_creation_input_tokens": 16805,
+    "cache_read_input_tokens": 0,
+    "input_tokens": 2,
+    "output_tokens": 510
+   }
+  }
+ ],
+ "schema": 1
+}

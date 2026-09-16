@@ -234,14 +234,27 @@ def apply(proposal, delta, pack, command, by, version, ledger_dir, notes_path, m
         json.dump({"invalidated": sorted(set(old_inv) | set(invalidated)), "by": "graph/delta/apply.py", "at": at,
                    "changed_subsystems": row["changed_subsystems"]}, open(inv_p, "w", encoding="utf-8", newline="\n"), indent=1)
     row["mfq_invalidated"] = invalidated
-    # curation note (append-only) — the "response in the prompt"
+    # curation note (append-only) — the "response in the prompt". A handful of placements get one line each;
+    # a batch (a full reindex) gets one line per subsystem, so the prompt grows by the decision, not by the row count
+    AGGREGATE_ABOVE = 20
+    tag = f"{repo}{'@' + head[:7] if head else ''} (pack {version})"
     with open(notes_path, "a", encoding="utf-8", newline="\n") as f:
-        for a in row["assignments"]:
-            f.write(f"- {at[:10]} {repo}{'@' + head[:7] if head else ''} (pack {version}): {a['entity']} → subsystem {a['to']}"
-                    + (f" (was {a['from']})" if a["from"] else "") + f" — decided by {by}"
-                    + (" (timeout)" if command.get("timeout") else "") + "\n")
+        if len(row["assignments"]) > AGGREGATE_ABOVE:
+            by_sub = {}
+            for a in row["assignments"]:
+                by_sub.setdefault(str(a["to"]), []).append(a["entity"])
+            f.write(f"- {at[:10]} {tag}: full reindex, {len(row['assignments'])} entities placed across {len(by_sub)} subsystems — decided by {by}\n")
+            for sid in sorted(by_sub, key=lambda x: int(x) if x.lstrip('-').isdigit() else 0):
+                names = sorted(by_sub[sid])
+                shown = ", ".join(names[:8]) + (f" (+{len(names) - 8} more)" if len(names) > 8 else "")
+                f.write(f"  - subsystem {sid}: {shown}\n")
+        else:
+            for a in row["assignments"]:
+                f.write(f"- {at[:10]} {tag}: {a['entity']} → subsystem {a['to']}"
+                        + (f" (was {a['from']})" if a.get("from") else "") + f" — decided by {by}"
+                        + (" (timeout)" if command.get("timeout") else "") + "\n")
         for n in row["new_subsystems"]:
-            f.write(f"- {at[:10]} {repo}@{head[:7]} (pack {version}): NEW subsystem [{n['id']}] {n['name']} = {', '.join(n['members'])} — decided by {by}\n")
+            f.write(f"- {at[:10]} {tag}: NEW subsystem [{n['id']}] {n['name']} = {', '.join(n['members'])} — decided by {by}\n")
     # ledger row + rebuilt lbdb + manifest
     with open(os.path.join(ledger_dir, f"{version}.json"), "w", encoding="utf-8", newline="\n") as f:
         json.dump(row, f, indent=1, sort_keys=True)

@@ -98,7 +98,21 @@ def oracle(ev, kind, row):
 
 # ----------------------------------------------------------------------------- rows
 
+def invalidated_ids():
+    """Bank rows the pack or the curated invalidation marks stale: their gold predates the graph they would judge."""
+    out = set()
+    for p in (os.path.join(R, "graph", "pack", "INVALIDATED_delta.json"), os.path.join(R, "eval", "q", "INVALIDATED_2026-09-02.json")):
+        if os.path.exists(p):
+            try:
+                j = json.load(open(p, encoding="utf-8"))
+                out |= {r["id"] if isinstance(r, dict) else r for r in (j if isinstance(j, list) else j.get("invalidated", []))}
+            except (OSError, ValueError):
+                pass
+    return out
+
+
 def rows_from_events(events, bank, probes, humans=None, limit=None):
+    stale = invalidated_ids()
     ratings = {}
     for ev in events:
         if ev.get("event_type") == "feedback" and ev.get("rating") is not None:
@@ -126,6 +140,8 @@ def rows_from_events(events, bank, probes, humans=None, limit=None):
         if not kind and ev.get("request_id") in seed_of and seed_of[ev["request_id"]] in by_id:
             kind, row = by_id[seed_of[ev["request_id"]]]
         has, success = oracle(ev, kind, row) if kind else (False, None)
+        if kind == "bank" and row.get("id") in stale:
+            has, success = False, None  # invalidated: the gold predates the pack
         answered = ev.get("terminal") == "answer"
         out.append({"id": ev["request_id"], "request_id": ev["request_id"], "user": ev.get("user"), "tier": ev.get("tier"),
                     "model": ev.get("model"), "prompt_version": ev.get("prompt_version"), "pack_version": ev.get("pack_version"),

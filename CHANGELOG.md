@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] — 1.2.0, CodeMap Remote
 
 ### Added
+- Full reindex on the box (`graph/delta/{fullscan,reindex}.py`, `extract.py --full`): both repositories at their public main heads, Grothendieck in chunks, apply, reclue with a refined gate, drift, Release `pack-1.1.0` served by the VPS; the oracle answers WHERE only; the night gains a bank pass and paired baselines (arc 3, R1–R2)
 - `applications/CodeMap/remote/`: the served MCP (Streamable HTTP JSON-RPC, bearer token, user enum, one event line per call, pointers instead of paths) with a socket-free test suite (S1)
 - The navigator tier: Claude Sonnet on the subscription drives the engine through a loopback MCP and answers with pointers; conversations resume their Claude session; `prompts/navigator/v1.md` is built from the pack by `tools/prompt/build_navigator.py` (S2)
 - Credits without currency, daily budgets rebuilt from the events file, `GET /metrics` (Prometheus text, OTel GenAI semconv), Influx and Loki push to Grafana Cloud, a 200-row replay fixture (S3)
