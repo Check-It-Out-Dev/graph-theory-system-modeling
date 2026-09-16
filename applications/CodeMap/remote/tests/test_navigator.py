@@ -191,6 +191,38 @@ class EngineMcpTests(unittest.TestCase):
                                     {"Authorization": "Bearer t", "X-CodeMap-User": "owner"})
         self.assertTrue(r["result"]["isError"])
 
+    def test_budget_exhausted_refuses_before_any_model_call(self):
+        from remote import server
+        sink = []
+        app = server.App(token="t", sink=sink, navigator=False)
+        broke = dict(app.users["haiku-pm"], daily_credit_budget=0.0001)
+        app.users["haiku-pm"] = broke
+        nav = navigator.Navigator(app)
+        cap = []
+        nav.runner = fake_runner(RESULT, cap)
+        app.navigator = nav
+        # one paid answer, then the budget is gone
+        code, r = server.handle_mcp(app, {"jsonrpc": "2.0", "id": 1, "method": "tools/call",
+                                          "params": {"name": "codemap_ask", "arguments": {"q": "where is the boot guard?"}}},
+                                    {"Authorization": "Bearer t", "X-CodeMap-User": "haiku-pm"})
+        first = json.loads(r["result"]["content"][0]["text"])
+        self.assertGreater(first["credits"], 0.0001)
+        code, r = server.handle_mcp(app, {"jsonrpc": "2.0", "id": 2, "method": "tools/call",
+                                          "params": {"name": "codemap_ask", "arguments": {"q": "and the webhook?"}}},
+                                    {"Authorization": "Bearer t", "X-CodeMap-User": "haiku-pm"})
+        out = json.loads(r["result"]["content"][0]["text"])
+        self.assertEqual((out["terminal"], r["result"].get("isError")), ("budget_exhausted", True))
+        self.assertEqual(len(cap), 1, "no second model call")
+        self.assertEqual(sink[-1]["event_type"], "budget_refusal")
+        self.assertGreater(out["retry_after_s"], 0)
+        st = server.handle_budget(app, {"Authorization": "Bearer t"}, {"user": ["haiku-pm"]})
+        self.assertEqual(st[0], 429)
+        # the engine tools stay free
+        code, r = server.handle_mcp(app, {"jsonrpc": "2.0", "id": 3, "method": "tools/call",
+                                          "params": {"name": "codemap_step", "arguments": {"dsl": "map()"}}},
+                                    {"Authorization": "Bearer t", "X-CodeMap-User": "haiku-pm"})
+        self.assertNotIn("isError", r["result"])
+
 
 if __name__ == "__main__":
     unittest.main()

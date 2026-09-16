@@ -62,6 +62,16 @@ class Navigator:
         tier = tier if tier in MODELS else "auto"
         model = MODELS[tier]
         tname = TIER_OF[tier]
+        st = app.budget_state(ident.user) if hasattr(app, "budget_state") else {"exhausted": False}
+        if st.get("exhausted"):
+            ev = tools_mod.base_event(app, ident, "budget_refusal", tname, context_id=context_id, protocol="navigator",
+                                      terminal="budget_exhausted", q=q, credits=0.0, steps=0, model=model,
+                                      tool="codemap_ask", spent=st["spent"], budget=st["budget"])
+            app.emit(ev)
+            out = {"error": "budget_exhausted", "terminal": "budget_exhausted", "request_id": ident.request_id,
+                   "context_id": context_id, "spent": st["spent"], "budget": st["budget"],
+                   "retry_after_s": st.get("resets_in_s"), "note": "daily credits are spent; the engine tools stay free"}
+            return json.dumps(out), True
         try:
             ctx, created = self.contexts.get_or_create(context_id, ident.user["id"])
         except PermissionError as ex:

@@ -135,10 +135,7 @@ def open_(app, ident, args):
 
 def status(app, ident, args):
     st = app.status()
-    st["you"] = {"user": ident.user["id"], "kind": ident.user["kind"],
-                 "daily_credit_budget": ident.user["daily_credit_budget"],
-                 "spent_today": app.spent_today(ident.user["id"]),
-                 "remaining": max(0.0, ident.user["daily_credit_budget"] - app.spent_today(ident.user["id"]))}
+    st["you"] = dict(app.budget_state(ident.user), kind=ident.user["kind"])
     return _text(st), False
 
 

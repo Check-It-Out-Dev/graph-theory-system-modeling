@@ -26,7 +26,7 @@ sys.path.insert(0, os.path.join(R, "app"))
 import claude_cli  # noqa: E402
 from engine import Engine  # noqa: E402
 
-from remote import ids, mcp, telemetry, tools, users  # noqa: E402
+from remote import credits, ids, mcp, metrics, telemetry, telemetry_push, tools, users  # noqa: E402
 
 VERSION = "1.2.0"
 
@@ -48,8 +48,21 @@ class App:
         self.navigator = None
         self._by_name = {e["name"]: e for e in self.engine.ents}
         self._lock = threading.Lock()
-        self._spent = {}
         self.started = telemetry.now_iso()
+        self.card = credits.RateCard()
+        self.ledger = credits.Ledger()
+        self.registry = metrics.Registry()
+        self.pusher = None
+        self.replayed = 0
+        if sink is None:  # production: the views are rebuilt from the artifact of record
+            for ev in telemetry.iter_events():
+                self.ledger.observe(ev)
+                self.registry.observe(ev)
+                self.replayed += 1
+        self.registry.set("codemap_info", {"version": VERSION, "pack_version": self.pack_version,
+                                           "prompt_version": self.prompt_version}, 1)
+        for u in self.users.values():
+            self.registry.set("codemap_budget_remaining", {"user": u["id"]}, self.ledger.state(u)["remaining"])
         if navigator is None:
             mode = os.environ.get("CODEMAP_NAVIGATOR", "auto")
             if mode != "off" and claude_cli.available() and os.path.exists(self.prompt_path):
@@ -60,14 +73,23 @@ class App:
     # --- event + spend -------------------------------------------------------------
     def emit(self, ev):
         ev = telemetry.emit(ev, sink=self.sink)
-        c = ev.get("credits") or 0
-        if c:
-            with self._lock:
-                self._spent[ev["user"]] = self._spent.get(ev["user"], 0.0) + float(c)
+        self.ledger.observe(ev)
+        self.registry.observe(ev)
+        u = self.users.get(ev.get("user"))
+        if u:
+            self.registry.set("codemap_budget_remaining", {"user": u["id"]}, self.ledger.state(u)["remaining"])
+        if self.pusher:
+            self.pusher.on_event(ev)
         return ev
 
     def spent_today(self, user_id):
-        return round(self._spent.get(user_id, 0.0), 4)
+        return self.ledger.spent(user_id)
+
+    def budget_state(self, user_doc):
+        return self.ledger.state(user_doc)
+
+    def credits_for(self, tier, model, tokens, flat=None):
+        return self.card.compute(tier, tokens, flat)
 
     # --- pack helpers ---------------------------------------------------------------
     def entity(self, name):
@@ -90,7 +112,9 @@ class App:
                 "entities": len(self.engine.ents), "navigators": len(self.engine.l2),
                 "ladybug": bool(self.engine.lb), "users": sorted(self.users),
                 "navigator": self.navigator.describe() if self.navigator else None,
-                "events_dropped": telemetry.DROPPED[0]}
+                "events_dropped": telemetry.DROPPED[0], "events_replayed": self.replayed,
+                "push": (self.pusher.stats if self.pusher else None),
+                "rate_card": self.card.per_1k}
 
     # --- auth -----------------------------------------------------------------------
     def authed(self, headers):
@@ -166,9 +190,12 @@ def handle_budget(app, headers, query):
     u = app.users.get(uid)
     if not u:
         return 400, {"error": "unknown_user", "wanted": uid, "known": sorted(app.users)}
-    spent = app.spent_today(uid)
-    return 200, {"user": uid, "budget": u["daily_credit_budget"], "spent": spent,
-                 "remaining": round(max(0.0, u["daily_credit_budget"] - spent), 4)}
+    st = app.budget_state(u)
+    return (429 if st["exhausted"] else 200), st
+
+
+def handle_metrics(app):
+    return 200, app.registry.render()
 
 
 # --------------------------------------------------------------------------- HTTP
@@ -200,7 +227,17 @@ class H(BaseHTTPRequestHandler):
         if u.path == "/users":
             return self._send(*handle_users(self.app, self.headers))
         if u.path == "/budget":
-            return self._send(*handle_budget(self.app, self.headers, parse_qs(u.query)))
+            code, st = handle_budget(self.app, self.headers, parse_qs(u.query))
+            extra = {"Retry-After": str(st.get("resets_in_s", 0))} if code == 429 else None
+            return self._send(code, st, extra)
+        if u.path == "/metrics":
+            code, text = handle_metrics(self.app)
+            b = text.encode("utf-8")
+            self.send_response(code)
+            self.send_header("Content-Type", "text/plain; version=0.0.4; charset=utf-8")
+            self.send_header("Content-Length", str(len(b)))
+            self.end_headers()
+            return self.wfile.write(b)
         if u.path == "/mcp":
             return self._send(405, {"error": "no server-initiated stream; POST JSON-RPC to /mcp"})
         return self._send(404, {"error": "not found"})
@@ -230,9 +267,15 @@ def serve(bind="127.0.0.1", port=7345, app=None):
     H.app = app
     if not app.token and bind not in ("127.0.0.1", "localhost"):
         raise SystemExit("refusing to bind a non-loopback address without CODEMAP_TOKEN")
+    app.pusher = telemetry_push.Pusher(app.registry)
+    pushing = app.pusher.start()
     print(f"codemap-remote {VERSION}: {len(app.engine.ents)} entities, pack {app.pack_version}, "
-          f"prompt {app.prompt_version}, token={'set' if app.token else 'NONE (local)'} -> http://{bind}:{port}/mcp")
-    ThreadingHTTPServer((bind, port), H).serve_forever()  # NOSONAR - bind is configured; loopback by default; see sonar-project.properties
+          f"prompt {app.prompt_version}, token={'set' if app.token else 'NONE (local)'}, "
+          f"replayed {app.replayed} events, push={'on' if pushing else 'off'} -> http://{bind}:{port}/mcp")
+    try:
+        ThreadingHTTPServer((bind, port), H).serve_forever()  # NOSONAR - bind is configured; loopback by default; see sonar-project.properties
+    finally:
+        app.pusher.stop()
 
 
 def main():
