@@ -1,4 +1,4 @@
-> **Status: PLAN (2026-09-14).** Approved design, execution not started — the owner is deciding between this arc and a redundant-test-detection tool for the product repositories. Slices, budget and laws are as designed; nothing below is shipped yet.
+> **Status: IN PROGRESS as arc 2 "CodeMap Remote" (2026-09-16).** The 2026-09-14 design below is the substrate; § Revision 2026-09-16 at the end says what moved (the answering tier is Claude on the subscription behind a remote MCP on the VPS; the graph follows the code through a delta pipeline on GitHub) and the decision log D-R1.. records each shipped slice. The goal file of record lives beside the plans (`GOAL-codemap-remote.md`).
 
 # THE GOAL — CodeMap AI-quality governance loop (SOTA evaluate → improve → observe)
 
@@ -259,3 +259,21 @@ Path of the merged commit on main; the 6 public dashboard URLs; the Pages `/qual
 | κ_oracle < 0.6 | iterate rubric wording + anchors; report honestly; never lower the gate |
 | Box clock skew | events in UTC; GitHub timestamps authority; `date` check at session start |
 | Owner ratings absent at S16 | κ_owner reported as "pending 30 ratings"; κ_oracle carries the gate |
+
+
+## Revision 2026-09-16 — arc 2, "CodeMap Remote"
+
+The owner reopened this design with a different centre of gravity: not the local 4B/80B app but a **served MCP** a team points Claude Code at, answered by **Claude Sonnet on the owner's subscription**, used by six synthetic users with credit limits, observed in Grafana Cloud, improved by GEPA, and fed by a **delta digestion pipeline on GitHub** whose partition decisions are taken on the product pull request itself. What changes against the plan above:
+
+| Was (2026-09-14) | Is (2026-09-16) | Why |
+|---|---|---|
+| local 4B loop + Modal 80B tier answer `/ask` | `codemap_ask` answers through `claude -p` (Sonnet; Opus for `deep`) driving the engine over a loopback MCP; the 4B stays the installer's offline story | the prompt under optimisation is the navigator prompt Sonnet reads (L1 + L2 prose fit in one cached prompt); no GPU on a 4 GB VPS |
+| llama-server slots as the KV cache | `--resume` per context; Anthropic prompt-cache reads are the cache metric | same signal, no sidecar |
+| stdio MCP on the owner's box | Streamable-HTTP MCP at `https://codemap.checkitout.app/mcp`, one shared bearer token, identity by `X-CodeMap-User` from the enum | the README's small-team security statement, verbatim |
+| Gemini / Qwen-80B judge | Claude judge + the existing Qwen3 reranker/embedding on Modal as the non-Claude signal | family separation kept; no new GPU model |
+| no ingestion | `graph-delta.yml`: deterministic extract → Grothendieck proposal on the PR → `/codemap` decision → pack Release → VPS reload → drift pass | the graph must follow the code, and a partition is a decision, not a side effect |
+| GEPA on the box | GEPA on a Modal CPU function (secret `claude-oauth`), on request, never on a schedule | the box need not stay on; every expensive action is per request (owner, 2026-09-16) |
+
+Decision log (continues D-lines above):
+
+- **D-R1 (S1).** The remote package is stdlib + `real_ladybug` under `remote/`; handlers are pure `(body, headers) -> (code, obj)`; `mcp.dispatch` is tested without an engine. Streamable HTTP is answered with plain JSON (no SSE): tools only, no server-initiated messages, so the simplest legal shape is the right one. An unknown user is HTTP 400 even on `initialize` — the client fails loudly instead of minting a persona. Pointers rewrite the authoring box's absolute paths into `(repo, relative path)` so the pack can be served from anywhere and no local path leaks.

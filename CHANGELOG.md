@@ -5,6 +5,11 @@ All notable changes to the Graph Theory System Modeling project will be document
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] — 1.2.0, CodeMap Remote
+
+### Added
+- `applications/CodeMap/remote/`: the served MCP (Streamable HTTP JSON-RPC, bearer token, user enum, one event line per call, pointers instead of paths) with a socket-free test suite (S1)
+
 ## [1.0.0] - 2025-09-16
 
 ### Added
