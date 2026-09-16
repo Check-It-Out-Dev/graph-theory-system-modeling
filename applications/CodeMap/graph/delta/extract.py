@@ -378,7 +378,9 @@ def run(name, repo_dir, changes, pack_dir, out_dir, backlog_rows=None, date=None
             w.writeheader()
             for h in hyper_next:
                 w.writerow(h)
-    for name_ in ("l1_master.json", "l2_navigators.jsonl", "mfq.jsonl", "codemap_vocab.gbnf", "DIALECT_NOTES.md"):
+    # the manifest rides along (indexed_sha of the other repository, the version to bump) and so does an
+    # earlier delta invalidation, which the next apply extends rather than replaces
+    for name_ in ("l1_master.json", "l2_navigators.jsonl", "mfq.jsonl", "codemap_vocab.gbnf", "DIALECT_NOTES.md", "manifest.json", "INVALIDATED_delta.json"):
         src = os.path.join(pack_dir, name_)
         if os.path.exists(src):
             shutil.copy2(src, os.path.join(nxt, name_))

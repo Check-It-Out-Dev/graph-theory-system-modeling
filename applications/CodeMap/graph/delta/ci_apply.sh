@@ -22,7 +22,9 @@ mkdir -p work && gh run download "$RUN_ID" -n "delta-$REPO-$SHA" -D work/delta &
 D="work/delta/$REPO-$SHA"
 cp work/proposal/proposal.json "$D/proposal.json"
 
-# next pack version: patch + 1 of the manifest inside pack.next (which came from the latest Release)
+# the pack before the decision (drift's baseline; its manifest is the version to bump when pack.next lacks one)
+python "$R/tools/pack/fetch_pack.py" --latest --dest work/pack.old
+[ -f "$D/pack.next/manifest.json" ] || cp work/pack.old/manifest.json "$D/pack.next/manifest.json"
 CUR=$(python -c "import json;print(json.load(open('$D/pack.next/manifest.json')).get('pack_version','1.0.0'))")
 NEXT=$(python -c "v='$CUR'.split('.');v[-1]=str(int(v[-1])+1);print('.'.join(v))")
 export DECISION="$COMMENT"
@@ -33,7 +35,6 @@ REJECTED=$(python -c "import json;print(json.load(open('$D/apply.json')).get('re
 
 if [ -z "$REJECTED" ]; then
   # version drift: the bank replayed by the engine on the pack before and after (no model, seconds)
-  python "$R/tools/pack/fetch_pack.py" --latest --dest work/pack.old
   python "$R/graph/delta/drift.py" --old work/pack.old --new "$D/pack.next" --out "$R/graph/ledger/$NEXT.drift.json" | tee -a "$GITHUB_STEP_SUMMARY"
   # the prompt for the new pack (template + pack + notes), the seen list, the Release
   PYTHONUTF8=1 python "$R/tools/prompt/build_navigator.py" --pack "$D/pack.next" --out "$R/prompts/navigator/active.md"
