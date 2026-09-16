@@ -1,0 +1,57 @@
+# The public quality page: committed artifacts → GitHub Pages /quality/. No model, no secret.
+# Runs nightly after the box's persona night has committed its artifacts, and on every push that
+# touches an artifact, and by hand.
+name: nightly
+
+on:
+  schedule:
+    - cron: "0 4 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "applications/CodeMap/eval/quality/runs/**"
+      - "applications/CodeMap/eval/judge/runs/**"
+      - "applications/CodeMap/eval/humans/runs/**"
+      - "applications/CodeMap/eval/optimize/runs/**"
+      - "applications/CodeMap/graph/ledger/**"
+      - "applications/CodeMap/docs/proofs/**"
+      - "applications/CodeMap/tools/pages/**"
+      - ".github/workflows/nightly.yml"
+
+concurrency:
+  group: pages-quality
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  quality-page:
+    name: Quality page → Pages /quality/
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6
+        with:
+          python-version: "3.12"
+      - name: The site as it is (other publishers keep their directories)
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5
+        continue-on-error: true
+        with:
+          ref: gh-pages
+          path: site
+      - name: Build /quality/ from the committed artifacts
+        run: |
+          rm -rf site/.git
+          python applications/CodeMap/tools/pages/build_quality.py --out site/quality | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Publish
+        uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453  # v4.0.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: site
+          keep_files: false
+          commit_message: "quality page ${{ github.run_number }}"
