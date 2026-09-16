@@ -402,10 +402,12 @@ def serve(bind="127.0.0.1", port=7345, app=None):
     pushing = app.pusher.start()
     app.poller = reload_mod.Poller(app)
     polling = app.poller.start()
+    from remote import housekeeping
+    pruned = housekeeping.prune_sessions()
     print(f"codemap-remote {VERSION}: {len(app.engine.ents)} entities, pack {app.pack_version}, "
           f"prompt {app.prompt_version}, token={'set' if app.token else 'NONE (local)'}, "
-          f"replayed {app.replayed} events, push={'on' if pushing else 'off'}, pack-poll={'on' if polling else 'off'} "
-          f"-> http://{bind}:{port}/mcp")
+          f"replayed {app.replayed} events, push={'on' if pushing else 'off'}, pack-poll={'on' if polling else 'off'}, "
+          f"sessions pruned {pruned[0]} -> http://{bind}:{port}/mcp")
     try:
         ThreadingHTTPServer((bind, port), H).serve_forever()  # NOSONAR - bind is configured; loopback by default; see sonar-project.properties
     finally:

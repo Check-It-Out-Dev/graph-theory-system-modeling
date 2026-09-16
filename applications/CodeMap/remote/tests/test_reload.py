@@ -70,5 +70,21 @@ class ReloadTests(unittest.TestCase):
         self.assertFalse(p.start())  # interval 0 = disabled
 
 
+class HousekeepingTests(unittest.TestCase):
+    def test_prune_old_sessions_only(self):
+        import time
+        from remote import housekeeping
+        d = tempfile.mkdtemp()
+        old = os.path.join(d, "old.jsonl")
+        new = os.path.join(d, "new.jsonl")
+        open(old, "w").write("x")
+        open(new, "w").write("y")
+        os.utime(old, (time.time() - 10 * 86400, time.time() - 10 * 86400))
+        self.assertEqual(housekeeping.prune_sessions(d, keep_days=7), (1, 1))
+        self.assertTrue(os.path.exists(new) and not os.path.exists(old))
+        self.assertEqual(housekeeping.prune_sessions(os.path.join(d, "nope")), (0, 0))
+        self.assertTrue(housekeeping.sessions_dir("/home/codemap/cli", home="/h").endswith(os.path.join(".claude", "projects", "-home-codemap-cli")))
+
+
 if __name__ == "__main__":
     unittest.main()

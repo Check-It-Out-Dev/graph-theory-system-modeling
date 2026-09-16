@@ -58,6 +58,8 @@ class Poller:
         self.last = {"checked": None, "result": None, "reloaded": 0}
 
     def tick(self):
+        from . import housekeeping
+        self.last["pruned"] = housekeeping.prune_sessions()[0]
         rc = check_latest(self.app.pack_dir, self.runner)
         self.last["checked"] = time.time()
         self.last["result"] = rc
