@@ -87,7 +87,14 @@ def plan(date, cfg, bank, probes, seed=None, only=None, limit=None, haiku_only=F
             partner = dict(c, mode="codemap", n=c["n"], of=c["of"], paired_with="baseline")
             convs.insert(convs.index(c) + 1, partner)
             have.add((c["persona"], c["seed_id"]))
-    return convs
+    # pairs first within each persona: the daily credit budget must reach the partner before unpaired
+    # conversations spend it (night 2026-09-19 lost every Haiku and Opus partner to `budget_exhausted`).
+    paired = {(c["persona"], c["seed_id"]) for c in convs if c["mode"] == "baseline"}
+    order = []
+    for pid in dict.fromkeys(c["persona"] for c in convs):
+        mine = [c for c in convs if c["persona"] == pid]
+        order += [c for c in mine if (pid, c["seed_id"]) in paired] + [c for c in mine if (pid, c["seed_id"]) not in paired]
+    return order
 
 
 def conversation_prompt(c):

@@ -82,6 +82,18 @@ class PlanTests(unittest.TestCase):
         self.assertEqual(run_night.parse_report(txt)["conversations"][0]["turns"][0]["rating"], 4)
         self.assertIsNone(run_night.parse_report("no block"))
 
+    def test_pairs_first_per_persona(self):
+        cfg = dict(self.cfg, baseline_share=0.5)
+        convs = run_night.plan("2026-09-20", cfg, self.bank, self.probes, seed=20)
+        for pid in {c["persona"] for c in convs}:
+            mine = [c for c in convs if c["persona"] == pid]
+            paired = {c["seed_id"] for c in mine if c["mode"] == "baseline"}
+            flags = [c["seed_id"] in paired for c in mine]
+            self.assertEqual(flags, sorted(flags, reverse=True), (pid, flags))  # paired block, then the rest
+            for i, c in enumerate(mine):
+                if c["mode"] == "baseline":
+                    self.assertEqual((mine[i + 1]["mode"], mine[i + 1]["seed_id"]), ("codemap", c["seed_id"]))
+
     def test_baseline_share_override_reaches_the_plan(self):
         cfg = dict(self.cfg, baseline_share=0.5)
         half = run_night.plan("2026-09-18", cfg, self.bank, self.probes, seed=2)

@@ -46,7 +46,7 @@ if ($BankPass -gt 0) {
 $hdr = @{ Authorization = "Bearer $env:CODEMAP_TOKEN"; "X-CodeMap-Admin" = $env:CODEMAP_ADMIN_TOKEN }
 # the night label may sit ahead of the clock: the events window starts where the personas started
 $since = "${Date}T00:00:00Z"
-$summaryPath = "eval\humansuns\$Date.summary.json"
+$summaryPath = "eval\humans\runs\$Date.summary.json"
 if (Test-Path $summaryPath) { $started = (Get-Content $summaryPath -Raw | ConvertFrom-Json).started; if ($started) { $since = $started } }
 $ev = Invoke-RestMethod -Uri "$env:CODEMAP_URL/admin/events?since=$since&limit=5000" -Headers $hdr
 $ev.events | ForEach-Object { $_ | ConvertTo-Json -Compress -Depth 12 } | Set-Content -Encoding utf8 "eval\judge\runs\events-$Date.jsonl"

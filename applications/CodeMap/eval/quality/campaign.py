@@ -32,8 +32,9 @@ def _rating(r):
 
 
 def pairs_of(rows, night):
-    base = {(r["persona"], r["seed_id"]): r for r in rows if r.get("mode") == "baseline" and not r.get("is_error")}
-    cm = {(r["persona"], r["seed_id"]): r for r in rows if r.get("mode") == "codemap" and not r.get("is_error")}
+    ran = [r for r in rows if not r.get("is_error") and not r.get("skipped") and r.get("usage")]  # a skipped partner is no pair
+    base = {(r["persona"], r["seed_id"]): r for r in ran if r.get("mode") == "baseline"}
+    cm = {(r["persona"], r["seed_id"]): r for r in ran if r.get("mode") == "codemap"}
     out = []
     for k in sorted(base):
         if k not in cm:
@@ -56,7 +57,8 @@ def campaign(runs_dir):
         night = os.path.basename(p)[:-6]
         rows = [json.loads(l) for l in open(p, encoding="utf-8") if l.strip()]
         night_pairs = pairs_of(rows, night)
-        nights.append({"night": night, "conversations": len(rows), "baselines": sum(1 for r in rows if r.get("mode") == "baseline"), "pairs": len(night_pairs)})
+        nights.append({"night": night, "conversations": len(rows), "baselines": sum(1 for r in rows if r.get("mode") == "baseline"),
+                       "skipped_partners": sum(1 for r in rows if r.get("skipped") and r.get("mode") == "codemap"), "pairs": len(night_pairs)})
         pairs += night_pairs
 
     def mean(xs):
