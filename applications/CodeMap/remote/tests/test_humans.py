@@ -35,7 +35,8 @@ class PlanTests(unittest.TestCase):
         self.assertEqual(a, b)
         self.assertEqual(a[0]["model"], "claude-haiku-4-5-20251001")
         self.assertEqual(a[-1]["model"], "claude-opus-5")
-        self.assertEqual(len(a), sum(p["conversations_per_night"] for p in self.cfg["personas"]))
+        partners = sum(1 for x in a if x.get("paired_with"))
+        self.assertEqual(len(a) - partners, sum(p["conversations_per_night"] for p in self.cfg["personas"]))
         c = run_night.plan("2026-09-18", self.cfg, self.bank, self.probes, seed=1)
         self.assertNotEqual([x["seed_id"] for x in a], [x["seed_id"] for x in c])
 

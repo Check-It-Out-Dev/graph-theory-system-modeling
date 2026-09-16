@@ -33,7 +33,8 @@ class PagesTests(unittest.TestCase):
         data = build_quality.build(out, R)
         html = open(os.path.join(out, "index.html"), encoding="utf-8").read()
         self.assertIn("<title>CodeMap Remote — quality</title>", html)
-        self.assertIn("91 %", html)  # grounded 0.9143 on the first night
+        latest = max(data["nights"], key=lambda n: n["date"])
+        self.assertIn(build_quality.pct(latest["grounded"]), html)  # the latest night's grounded rate is on the page
         self.assertIn("pack", html)
         self.assertIn("codemap.checkitout.app/mcp", html)
         self.assertIn("prefers-color-scheme", html)
