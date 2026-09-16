@@ -48,11 +48,13 @@ def child_env(role, persona=None, extra=None):
 
 
 def build_cmd(prompt, model, system_file=None, mcp_config=None, allowed_tools=(), max_turns=1,
-              resume=None, session_id=None, effort=None, json_schema=None, exe=None):
+              resume=None, session_id=None, effort=None, json_schema=None, exe=None, append_system=False):
+    """append_system=False replaces Claude Code's own system prompt (the navigator: a smaller fixed
+    context); True appends to it (personas working in a checkout keep the tool-use guidance)."""
     cmd = [exe or binary() or "claude", "-p", prompt, "--output-format", "json",
            "--model", model, "--max-turns", str(int(max_turns)), "--permission-mode", "dontAsk"]
     if system_file:
-        cmd += ["--system-prompt-file", system_file]
+        cmd += ["--append-system-prompt-file" if append_system else "--system-prompt-file", system_file]
     if mcp_config is not None:
         cfg = mcp_config if isinstance(mcp_config, str) else json.dumps(mcp_config)
         cmd += ["--mcp-config", cfg, "--strict-mcp-config"]
@@ -90,14 +92,14 @@ def parse_result(stdout):
 
 def run(prompt, model, role, system_file=None, mcp_config=None, allowed_tools=(), max_turns=1,
         resume=None, session_id=None, effort=None, json_schema=None, persona=None,
-        timeout=DEFAULT_TIMEOUT, cwd=None, env_extra=None, runner=None):
+        timeout=DEFAULT_TIMEOUT, cwd=None, env_extra=None, runner=None, append_system=False):
     """Run one `claude -p` call. Returns a dict that never raises: {text, usage, model_usage,
     session_id, is_error, error, num_turns, duration_ms, cost_usd, structured, raw}."""
     exe = binary()
     if exe is None and runner is None:
         return _fail("claude binary not found", model)
     cmd = build_cmd(prompt, model, system_file, mcp_config, allowed_tools, max_turns, resume,
-                    session_id, effort, json_schema, exe=exe)
+                    session_id, effort, json_schema, exe=exe, append_system=append_system)
     env = child_env(role, persona, env_extra)
     t0 = time.time()
     try:

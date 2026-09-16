@@ -274,6 +274,23 @@ def handle_reload(app, headers):
                                    "prompt_version": app.prompt_version}
 
 
+def handle_backlog(app, headers):
+    """The saturation backlog (codemap_miss rows) for the night runner to sync into the repo."""
+    if not app.authed(headers) or not app.is_admin(headers):
+        return 401, {"error": "unauthorized"}
+    rows = []
+    try:
+        with open(app.backlog_path, encoding="utf-8") as f:
+            for line in f:
+                try:
+                    rows.append(json.loads(line))
+                except ValueError:
+                    pass
+    except OSError:
+        pass
+    return 200, {"rows": rows[-2000:], "count": len(rows)}
+
+
 def handle_feedback(app, body, headers):
     """REST twin of the codemap_feedback tool (the UI and curl use it)."""
     if not app.authed(headers):
@@ -330,6 +347,8 @@ class H(BaseHTTPRequestHandler):
             self.send_header("Content-Length", str(len(b)))
             self.end_headers()
             return self.wfile.write(b)
+        if u.path == "/admin/backlog":
+            return self._send(*handle_backlog(self.app, self.headers))
         if u.path == "/mcp":
             return self._send(405, {"error": "no server-initiated stream; POST JSON-RPC to /mcp"})
         return self._send(404, {"error": "not found"})
