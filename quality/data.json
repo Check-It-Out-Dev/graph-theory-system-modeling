@@ -1,5 +1,5 @@
 {
- "built_at": "2026-09-16T14:03:25Z",
+ "built_at": "2026-09-16T15:31:56Z",
  "dashboards": [
   {
    "title": "CodeMap \u00b7 AI system",
@@ -143,9 +143,154 @@
     "completion": 37888,
     "prompt": 262
    }
+  },
+  {
+   "abstention": {
+    "all": 0.3148,
+    "false": 0.0588,
+    "honest": 0.9412
+   },
+   "cache_read_ratio": 0.9586,
+   "correct": 0.8519,
+   "coverage": {},
+   "credits_per_correct": 15.967,
+   "credits_total": {
+    "haiku-ops": 104.1388,
+    "haiku-pm": 95.214,
+    "opus-architect": 327.6369,
+    "opus-reviewer": 37.9199,
+    "sonnet-bugfixer": 77.9766,
+    "sonnet-newcomer": 91.5954
+   },
+   "date": "2026-09-17",
+   "disputes": 0,
+   "drift": {
+    "compared": 55,
+    "drifted": 6,
+    "invalidated": 9
+   },
+   "drift_rate": 0.1091,
+   "gain": {
+    "n_pairs": 0,
+    "seconds_delta_mean": null,
+    "tokens_ratio_mean": null,
+    "turns_delta_mean": null
+   },
+   "grounded": 0.963,
+   "helpful": 0.8889,
+   "judge_n": 54,
+   "judge_usage": {
+    "cache_creation": 240751,
+    "cache_read": 108605,
+    "calls": 6,
+    "errors": 0,
+    "input": 12,
+    "output": 17338,
+    "retries": 0
+   },
+   "kappa": {
+    "anchor_now": null,
+    "human": -0.0088,
+    "oracle": null
+   },
+   "latency_p95": {
+    "faq": 3,
+    "nav-opus": 47858,
+    "nav-sonnet": 41280
+   },
+   "located": 0.963,
+   "n": {
+    "asks": 58,
+    "feedback": 57,
+    "judged": 54,
+    "misses": 11,
+    "navigator_answers": 54,
+    "refusals": 0
+   },
+   "partial": false,
+   "personas": {
+    "haiku-ops": {
+     "conversations": 4,
+     "credits": 104.1388,
+     "misses": 3,
+     "rating_mean": 4.625,
+     "turns": 82
+    },
+    "haiku-pm": {
+     "conversations": 4,
+     "credits": 95.214,
+     "misses": 0,
+     "rating_mean": 4.727,
+     "turns": 48
+    },
+    "opus-architect": {
+     "conversations": 2,
+     "credits": 327.6369,
+     "misses": 4,
+     "rating_mean": 3.75,
+     "turns": 55
+    },
+    "opus-reviewer": {
+     "conversations": 2,
+     "credits": 37.9199,
+     "misses": 9,
+     "rating_mean": 3.0,
+     "turns": 68
+    },
+    "sonnet-bugfixer": {
+     "conversations": 3,
+     "credits": 77.9766,
+     "misses": 0,
+     "rating_mean": 4.143,
+     "turns": 56
+    },
+    "sonnet-newcomer": {
+     "conversations": 3,
+     "credits": 91.5954,
+     "misses": 2,
+     "rating_mean": 4.0,
+     "turns": 58
+    }
+   },
+   "pointer_verified": 0.9825,
+   "rating_ge4": 0.8246,
+   "rating_mean": 4.1579,
+   "requests": {
+    "faq": 4,
+    "nav-opus": 2,
+    "nav-sonnet": 52
+   },
+   "tokens": {
+    "cache_creation": 397890,
+    "cached": 9212640,
+    "completion": 85650,
+    "prompt": 428
+   }
   }
  ],
  "optimizer_runs": [
+  {
+   "best": null,
+   "candidates": null,
+   "date": "2026-09-16-confirm-candidate",
+   "metric_calls": 12,
+   "mode": "dry-run",
+   "seconds": 306.3,
+   "seed": 1.0,
+   "where": "box",
+   "win": false
+  },
+  {
+   "best": null,
+   "candidates": null,
+   "date": "2026-09-16-confirm-seed",
+   "metric_calls": 12,
+   "mode": "dry-run",
+   "seconds": 293.7,
+   "seed": 0.9167,
+   "where": "box",
+   "win": false
+  },
   {
    "best": null,
    "candidates": null,
@@ -156,6 +301,28 @@
    "seed": 0.6667,
    "where": "modal",
    "win": false
+  },
+  {
+   "best": 0.8333333333333334,
+   "candidates": 1,
+   "date": "2026-09-16-noproposal",
+   "metric_calls": 30,
+   "mode": "gepa",
+   "seconds": 563.4,
+   "seed": 0.8333333333333334,
+   "where": "box",
+   "win": false
+  },
+  {
+   "best": 1.0,
+   "candidates": 3,
+   "date": "2026-09-16b",
+   "metric_calls": 33,
+   "mode": "gepa",
+   "seconds": 345.6,
+   "seed": 0.8333333333333334,
+   "where": "box",
+   "win": true
   }
  ],
  "prompts": [
@@ -165,12 +332,20 @@
    "parent": "\u2014",
    "version": "v1",
    "why": "seed: the API navigator prompt's protocol + the big tier's graph lesson, rewritten for pointers"
+  },
+  {
+   "built": "2026-09-16",
+   "gate": "promoted (0.03 gate)",
+   "parent": "v1",
+   "version": "v2",
+   "why": "GEPA run 2026-09-16b: val 0.8333333333333334 \u2192 1.0 on 6 examples, 33 metric calls"
   }
  ],
  "proofs": [
   "2026-09-16-ai-system-dashboard.jpg",
   "2026-09-16-issue-4-decided.jpg",
-  "2026-09-16-issue-4-proposal.jpg"
+  "2026-09-16-issue-4-proposal.jpg",
+  "2026-09-16-pages-quality.jpg"
  ],
  "repo": "https://github.com/Check-It-Out-Dev/graph-theory-system-modeling",
  "schema": 1
