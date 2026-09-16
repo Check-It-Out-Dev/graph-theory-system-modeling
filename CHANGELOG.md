@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Version drift without a model (`graph/delta/drift.py`): the bank replayed by the engine on the pack before and after a decision, order-free canonical hashes, invalidated rows excluded; `graph/ledger/<version>.drift.json` from the decision job, `codemap_quality_version_drift_rate` on the AI-system dashboard; `find` now reports the curated subsystem (S13a)
 - Reclue of the touched subsystems in the decision job (`graph/delta/reclue.py`: dossier from the pack, one tool-less `claude -p` per subsystem, mechanical gates on numbers and file names, snapshot in `graph/ledger/<version>.reclue.json`, untouched lines byte-identical); curation notes ride the pack so the VPS and the pull request build the same prompt (S13b)
 - Saturation measured: the extract job's `coverage` (indexed ∩ eligible / eligible per repository) rides the ledger row and the nightly artifact (`codemap_quality_graph_coverage_ratio`), beside the misses counter on the AI-system dashboard (S13c)
+- GEPA over the navigator template (`eval/optimize/`): adapter on the real navigator path scored by the execution oracle, constraints that refuse a broken contract, one artifact per run, a promotion gate that writes `v<N>.md` + PROMPT_LOG + PR only on a real win, and the same run inside a Modal CPU container on the subscription (S14)
 
 ## [1.0.0] - 2025-09-16
 
