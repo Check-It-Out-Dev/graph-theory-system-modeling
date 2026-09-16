@@ -44,6 +44,12 @@ class Pusher:
                             ("GRAFANA_PROM_USER", "GRAFANA_CLOUD_PROM_USER"), ("GRAFANA_LOKI_USER", "GRAFANA_CLOUD_LOKI_USER")):
             if not env.get(short) and env.get(long):
                 env[short] = env[long]
+        # the estate's stack: with a token but no URLs, use Grafana Cloud eu-west-2 (stack 1359921)
+        if env.get("GRAFANA_ALLOY_TOKEN") and not env.get("GRAFANA_INFLUX_URL"):
+            env.setdefault("GRAFANA_INFLUX_URL", "https://influx-prod-24-prod-eu-west-2.grafana.net/api/v1/push/influx/write")
+            env.setdefault("GRAFANA_PROM_USER", "2644077")
+            env.setdefault("GRAFANA_LOKI_URL", "https://logs-prod-012.grafana.net/loki/api/v1/push")
+            env.setdefault("GRAFANA_LOKI_USER", "1317715")
         self.registry = registry
         self.http = http
         self.influx_url = env.get("GRAFANA_INFLUX_URL")

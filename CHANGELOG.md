@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Six synthetic users (`eval/humans/`): role files, bank slices, 30 off-distribution probes, the deterministic night runner with seeded no-CodeMap baselines, Claude Code OTEL to Grafana Cloud, `.claude/agents/` copies; first live conversation recorded (S7)
 - Six public Grafana Cloud dashboards as code (`observability/grafana/`, builder + lint + provision, public URLs in `public-urls.md`) (S10)
 - The judge (`eval/judge/`): Claude batched against a five-dimension rubric, execution-oracle calibration κ 0.84 on the where-archetypes, frozen anchors with drift detection, the Qwen reranker as a reported second family; `bank_pass.py` for calibration answers (S8)
+- Quality rates (`eval/quality/quality.py`): one artifact per night with the dashboard metric names, gains vs the baselines, fixture-replayed in CI, pushed as `codemap_quality_*` (S9)
 
 ## [1.0.0] - 2025-09-16
 
