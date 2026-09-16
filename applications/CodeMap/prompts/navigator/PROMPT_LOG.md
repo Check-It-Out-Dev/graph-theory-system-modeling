@@ -12,3 +12,4 @@ when the template changes (a promotion).
 | version | built | parent | template sha16 | why | gate |
 |---|---|---|---|---|---|
 | v1 | 2026-09-16 | — | (see build output) | seed: the API navigator prompt's protocol + the big tier's graph lesson, rewritten for pointers | n/a (baseline) |
+| v2 | 2026-09-16 | v1 | b8f61f1ea5b0af6b | GEPA run 2026-09-16b: val 0.8333333333333334 → 1.0 on 6 examples, 33 metric calls | promoted (0.03 gate) |
