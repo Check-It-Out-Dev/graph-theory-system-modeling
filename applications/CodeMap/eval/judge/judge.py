@@ -268,7 +268,8 @@ def main(argv=None):
     a = ap.parse_args(argv)
     events = [json.loads(l) for l in open(a.events, encoding="utf-8") if l.strip()]
     bank, probes = load_bank()
-    rows = rows_from_events(events, bank, probes, limit=a.limit)
+    humans = load_jsonl(a.humans) if a.humans and os.path.exists(a.humans) else None
+    rows = rows_from_events(events, bank, probes, humans=humans, limit=a.limit)
     usage = judge_rows(rows, a.backend, a.model)
     if a.modal:
         qwen_signal(rows)
