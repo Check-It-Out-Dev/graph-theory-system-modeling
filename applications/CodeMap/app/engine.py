@@ -30,7 +30,8 @@ def _jlist(value):
 
 class Engine:
     def __init__(self, use_ladybug=True, pack_dir=None):
-        PACK = os.path.abspath(pack_dir) if pack_dir else globals()["PACK"]  # the pack this engine reads
+        # the pack this engine reads: the argument, else CODEMAP_PACK_DIR (the server and the tools), else the repo pack
+        PACK = os.path.abspath(pack_dir or os.environ.get("CODEMAP_PACK_DIR") or globals()["PACK"])
         self.pack_dir = PACK
         self.ents = list(csv.DictReader(open(os.path.join(PACK, "entities.csv"), encoding="utf-8")))
         self.by_name = {}

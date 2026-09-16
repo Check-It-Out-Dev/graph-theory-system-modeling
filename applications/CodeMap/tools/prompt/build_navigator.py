@@ -68,7 +68,7 @@ def build(template_path, pack_dir, notes_path):
     from engine import Engine
     if pack_dir:
         os.environ["CODEMAP_PACK_DIR"] = pack_dir
-    engine = Engine()
+    engine = Engine(pack_dir=pack_dir)
     l1 = engine.map()
     template = open(template_path, encoding="utf-8").read()
     notes = open(notes_path, encoding="utf-8").read().strip() if os.path.exists(notes_path) else ""
