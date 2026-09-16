@@ -74,7 +74,7 @@ def apply(run, candidate_text, pr=False, base=None):
         br = f"prompt/v{version}"
         base = base or subprocess.run(["git", "-C", R, "rev-parse", "--abbrev-ref", "HEAD"], capture_output=True, text=True, check=True).stdout.strip()  # NOSONAR
         subprocess.run(["git", "-C", R, "checkout", "-b", br], check=True)  # NOSONAR
-        subprocess.run(["git", "-C", R, "add", "applications/CodeMap/prompts/navigator", "applications/CodeMap/eval/optimize/runs"], check=True)  # NOSONAR
+        subprocess.run(["git", "-C", R, "add", "prompts/navigator", "eval/optimize/runs"], check=True)  # NOSONAR
         subprocess.run(["git", "-C", R, "commit", "-m", f"Navigator prompt v{version}: GEPA run {run.get('date')} ({run.get('seed_val_score')} → {run.get('best_val_score')})"], check=True)  # NOSONAR
         subprocess.run(["git", "-C", R, "push", "-u", "origin", br], check=True)  # NOSONAR
         subprocess.run(["gh", "pr", "create", "--fill", "--head", br, "--base", base], check=True)  # NOSONAR
