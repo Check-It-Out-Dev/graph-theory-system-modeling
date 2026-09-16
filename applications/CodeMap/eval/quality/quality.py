@@ -41,7 +41,22 @@ def load_jsonl(path):
     return [json.loads(l) for l in open(path, encoding="utf-8") if l.strip()]
 
 
-def compute(date, events, judge_doc=None, humans_rows=None):
+def latest_drift(ledger_dir):
+    """The newest `graph/ledger/<version>.drift.json` (written by the decision job before a Release)."""
+    if not os.path.isdir(ledger_dir):
+        return None
+    names = sorted(n for n in os.listdir(ledger_dir) if n.endswith(".drift.json"))
+    if not names:
+        return None
+    try:
+        d = json.load(open(os.path.join(ledger_dir, names[-1]), encoding="utf-8"))
+    except ValueError:
+        return None
+    return {"pack_version": d.get("new_version"), "from": d.get("old_version"), "rate": d.get("drift_rate"),
+            "drifted": d.get("drifted"), "compared": d.get("compared"), "invalidated": d.get("invalidated")}
+
+
+def compute(date, events, judge_doc=None, humans_rows=None, drift=None):
     asks = [e for e in events if e.get("event_type") == "ask"]
     nav = [e for e in asks if str(e.get("tier", "")).startswith("nav-")]
     fb = [e for e in events if e.get("event_type") == "feedback"]
@@ -106,6 +121,11 @@ def compute(date, events, judge_doc=None, humans_rows=None):
     out["codemap_budget_refusals_total"] = len(refusals)
     # --- gains (baseline vs codemap, paired by persona + seed)
     out["codemap_gain"] = gains(humans_rows or [])
+    # --- version drift (the decision job's artifact; the bank replayed by the engine, no model)
+    if drift:
+        out["codemap_version_drift_rate"] = drift.get("rate")
+        out["codemap_version_drift"] = {k: v for k, v in drift.items() if isinstance(v, (int, float)) and k != "rate"}
+        out["pack_version_drift"] = {"pack_version": drift.get("pack_version"), "from": drift.get("from")}
     return out
 
 
@@ -177,11 +197,12 @@ def main(argv=None):
     ap.add_argument("--humans", default=None)
     ap.add_argument("--out", required=True)
     ap.add_argument("--push", action="store_true")
+    ap.add_argument("--ledger", default=os.path.join(R, "graph", "ledger"), help="where the decision job leaves <version>.drift.json")
     a = ap.parse_args(argv)
     events = load_jsonl(a.events)
     judge_doc = json.load(open(a.judge, encoding="utf-8")) if a.judge and os.path.exists(a.judge) else None
     humans = load_jsonl(a.humans)
-    doc = compute(a.date, events, judge_doc, humans)
+    doc = compute(a.date, events, judge_doc, humans, latest_drift(a.ledger))
     os.makedirs(os.path.dirname(os.path.abspath(a.out)), exist_ok=True)
     with open(a.out, "w", encoding="utf-8", newline="\n") as f:
         json.dump(doc, f, indent=1, sort_keys=True)

@@ -71,6 +71,15 @@ def decide(proposal, command):
         return {}, [], command.get("reason") or "rejected"
     assign = {a["entity"]: str(a["subsystem"]) for a in proposal.get("assignments", []) if a.get("subsystem") not in (None, "")}
     new = list(proposal.get("new_subsystems") or [])
+    # the reviewer names a proposed new subsystem by its name; members it listed but did not assign follow it
+    names = {n["name"] for n in new if n.get("name")}
+    for ent, sub in list(assign.items()):
+        if sub in names:
+            assign[ent] = f"new:{sub}"
+    for n in new:
+        for m in n.get("members") or []:
+            if m not in assign:
+                assign[m] = f"new:{n['name']}"
     if command["kind"] == "move":
         if command["entity"] not in assign and not any(command["entity"] == a["entity"] for a in proposal.get("assignments", [])):
             raise SystemExit(f"move: {command['entity']} is not in the proposal")
@@ -105,7 +114,7 @@ def structural_l2(sub_id, ents, edges, nav):
     return nav
 
 
-ENUMERATING = {"overview", "cohort", "health", "boundary"}  # archetypes whose gold enumerates or counts members
+ENUMERATING = {"overview", "cohort", "health", "boundary", "onboarding", "onboarding_path"}  # archetypes whose gold enumerates or counts members
 
 
 def rel_path(file_path):

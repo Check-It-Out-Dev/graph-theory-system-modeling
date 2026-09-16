@@ -167,6 +167,25 @@ class ProposeTests(unittest.TestCase):
         with self.assertRaises(SystemExit):
             apply_mod.apply(doc, delta, pack, {"kind": "move", "entity": "ConsentReceiptDto.java", "subsystem": "9999"}, "t", "1.0.5", ledger, notes)
 
+    def test_accept_a_proposal_that_names_a_new_subsystem(self):
+        out, delta = _delta_fixture()
+        pack = os.path.join(out, "pack.next")
+        doc = {"assignments": [{"entity": "ConsentReceiptService.java", "subsystem": "Consent receipts", "confidence": 0.6, "why": "x"}],
+               "new_subsystems": [{"name": "Consent receipts", "members": ["ConsentReceiptService.java", "ConsentReceiptDto.java"], "why": "a pair"}],
+               "unresolved": [], "reviewed_by": "claude:test"}
+        self.assertEqual(propose.check(doc, pack), [])
+        ledger = tempfile.mkdtemp(prefix="codemap-ledger-")
+        notes = os.path.join(out, "curation_notes.md")
+        open(notes, "w", encoding="utf-8").write("## Curation notes\n")
+        row, _ = apply_mod.apply(doc, delta, pack, {"kind": "accept"}, "tester", "1.0.1", ledger, notes)
+        self.assertEqual(len(row["new_subsystems"]), 1)
+        sid = str(row["new_subsystems"][0]["id"])
+        ents = {e["name"]: e for e in csv.DictReader(open(os.path.join(pack, "entities.csv"), encoding="utf-8"))}
+        self.assertEqual({ents["ConsentReceiptService.java"]["curated"], ents["ConsentReceiptDto.java"]["curated"]}, {sid})
+        l2 = [json.loads(l) for l in open(os.path.join(pack, "l2_navigators.jsonl"), encoding="utf-8") if l.strip()]
+        nav = next(n for n in l2 if str(n["sub_id"]) == sid)
+        self.assertEqual((nav["name"], nav["size"], nav["clue_body_status"]), ("Consent receipts", 2, "STRUCTURE_ONLY"))
+
 
 if __name__ == "__main__":
     unittest.main()

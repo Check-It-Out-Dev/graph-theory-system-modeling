@@ -29,7 +29,9 @@ def _jlist(value):
 
 
 class Engine:
-    def __init__(self, use_ladybug=True):
+    def __init__(self, use_ladybug=True, pack_dir=None):
+        PACK = os.path.abspath(pack_dir) if pack_dir else globals()["PACK"]  # the pack this engine reads
+        self.pack_dir = PACK
         self.ents = list(csv.DictReader(open(os.path.join(PACK, "entities.csv"), encoding="utf-8")))
         self.by_name = {}
         for e in self.ents:
@@ -108,7 +110,7 @@ class Engine:
             while res.has_next():
                 rows.append(res.get_next())
         else:
-            rows = [[e["name"], e["entity_type"], e["subsystem"], e["file_path"]]
+            rows = [[e["name"], e["entity_type"], e.get("curated") or e["subsystem"], e["file_path"]]
                     for e in self.ents if t in e["name"].lower()][:12]
         return dict(kind="hits", term=term,
                     hits=[dict(name=r[0], type=r[1], sub=r[2]) for r in rows],

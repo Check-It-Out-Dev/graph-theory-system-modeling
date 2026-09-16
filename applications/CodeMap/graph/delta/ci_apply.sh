@@ -32,6 +32,9 @@ python "$R/graph/delta/apply.py" --proposal "$D/proposal.json" --delta "$D/delta
 REJECTED=$(python -c "import json;print(json.load(open('$D/apply.json')).get('rejected') or '')")
 
 if [ -z "$REJECTED" ]; then
+  # version drift: the bank replayed by the engine on the pack before and after (no model, seconds)
+  python "$R/tools/pack/fetch_pack.py" --latest --dest work/pack.old
+  python "$R/graph/delta/drift.py" --old work/pack.old --new "$D/pack.next" --out "$R/graph/ledger/$NEXT.drift.json" | tee -a "$GITHUB_STEP_SUMMARY"
   # the prompt for the new pack (template + pack + notes), the seen list, the Release
   PYTHONUTF8=1 python "$R/tools/prompt/build_navigator.py" --pack "$D/pack.next" --out "$R/prompts/navigator/active.md"
   python - <<PY
@@ -58,6 +61,15 @@ else
     --body "Decision on #$ISSUE by @$BY: \`$DECISION\`. Ledger row \`graph/ledger/$NEXT.json\`, curation note appended, navigator prompt rebuilt, seen.json updated. Release: pack-$NEXT (the VPS reloads it within ten minutes).")
   echo "pull request: $PR_URL" | tee -a "$GITHUB_STEP_SUMMARY"
 fi
-SUMMARY=$(python -c "import json;d=json.load(open('$D/apply.json'));print(f\"assignments {len(d['assignments'])}, new subsystems {len(d['new_subsystems'])}, changed subsystems {d['changed_subsystems']}, FAQ invalidated {len(d.get('mfq_invalidated',[]))}\")")
+SUMMARY=$(python - "$D/apply.json" "$R/graph/ledger/$NEXT.drift.json" <<'PY'
+import json, os, sys
+d = json.load(open(sys.argv[1]))
+s = f"assignments {len(d['assignments'])}, new subsystems {len(d['new_subsystems'])}, changed subsystems {d['changed_subsystems']}, FAQ invalidated {len(d.get('mfq_invalidated', []))}"
+if os.path.exists(sys.argv[2]):
+    r = json.load(open(sys.argv[2]))
+    s += f", version drift {r['drifted']}/{r['compared']} bank rows ({r['drift_rate']:.1%})"
+print(s)
+PY
+)
 gh issue comment "$ISSUE" --body "Applied \`$DECISION\` by @$BY → pack **$NEXT**: $SUMMARY. ${PR_URL:+Pull request: $PR_URL}"
 gh issue close "$ISSUE" --reason completed

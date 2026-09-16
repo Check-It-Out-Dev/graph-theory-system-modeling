@@ -440,6 +440,52 @@
       "type": "prometheus",
       "uid": "${DS_PROMETHEUS}"
      },
+     "expr": "codemap_quality_version_drift_rate",
+     "legendFormat": "drift rate",
+     "refId": "A"
+    }
+   ],
+   "title": "Version drift after a pack decision (bank rows answering differently, not invalidated on purpose)",
+   "type": "timeseries"
+  },
+  {
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROMETHEUS}"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "custom": {
+      "fillOpacity": 8,
+      "lineWidth": 2,
+      "pointSize": 7,
+      "showPoints": "always",
+      "spanNulls": true
+     },
+     "unit": "percentunit"
+    },
+    "overrides": []
+   },
+   "gridPos": {
+    "h": 8,
+    "w": 12,
+    "x": 0,
+    "y": 15
+   },
+   "id": 11,
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom",
+     "showLegend": true
+    }
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "prometheus",
+      "uid": "${DS_PROMETHEUS}"
+     },
      "expr": "codemap_quality_abstention_rate{key=\"all\"}",
      "legendFormat": "all",
      "refId": "A"
@@ -472,9 +518,9 @@
     "h": 1,
     "w": 24,
     "x": 0,
-    "y": 15
+    "y": 23
    },
-   "id": 11,
+   "id": 12,
    "panels": [],
    "title": "Behaviour",
    "type": "row"
@@ -500,9 +546,9 @@
     "h": 7,
     "w": 8,
     "x": 0,
-    "y": 16
+    "y": 24
    },
-   "id": 12,
+   "id": 13,
    "options": {
     "legend": {
      "displayMode": "list",
@@ -546,9 +592,9 @@
     "h": 7,
     "w": 8,
     "x": 8,
-    "y": 16
+    "y": 24
    },
-   "id": 13,
+   "id": 14,
    "options": {
     "legend": {
      "displayMode": "list",
@@ -584,9 +630,9 @@
     "h": 7,
     "w": 8,
     "x": 16,
-    "y": 16
+    "y": 24
    },
-   "id": 14,
+   "id": 15,
    "options": {
     "showHeader": true
    },
