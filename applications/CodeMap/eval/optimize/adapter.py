@@ -48,6 +48,10 @@ def _read_trace(path):
 
 
 class NavigatorAdapter:
+    # gepa 0.1.4 reads these attributes (the Protocol calls them optional; the engine does not):
+    # None means "use GEPA's default instruction proposal over the reflective dataset"
+    propose_new_texts = None
+
     def __init__(self, pack_dir, notes_path, model="claude-sonnet-5", max_turns=10, effort="medium", timeout=240,
                  runner=None, log_path=None, oracle=None):
         self.pack_dir, self.notes_path = pack_dir, notes_path

@@ -75,6 +75,10 @@ class AdapterTests(unittest.TestCase):
         self.assertEqual(eb2.scores, [0.0])
         self.assertIn("missed", eb2.trajectories[0]["feedback"])
 
+    def test_the_adapter_carries_the_attributes_gepa_reads(self):
+        ad = adapter_mod.NavigatorAdapter(PACK, self.notes, runner=_runner_answer("x"))
+        self.assertIsNone(ad.propose_new_texts)  # gepa 0.1.4 dereferences it; the run of 2026-09-16 proposed nothing without it
+
     def test_a_candidate_that_breaks_the_contract_is_refused_without_a_call(self):
         ad = adapter_mod.NavigatorAdapter(PACK, self.notes, runner=_runner_answer("x"))
         eb = ad.evaluate([self.inst], {adapter_mod.COMPONENT: TEMPLATE.replace("{{L1_INDEX}}", "")}, capture_traces=True)
