@@ -14,6 +14,7 @@ import hashlib
 import io
 import json
 import os
+import shutil
 import sys
 import tarfile
 import urllib.error
@@ -70,13 +71,29 @@ def fetch(release, dest, repo=REPO):
         raise SystemExit(f"sha256 mismatch: expected {expected}, got {got}")
     os.makedirs(dest, exist_ok=True)
     dest_abs = os.path.abspath(dest)
+    # Stage, then replace file by file: an engine may hold the current lbdb open (the server does;
+    # a test suite did, on Windows, and extracting over it left a zero-byte database). os.replace is
+    # atomic on POSIX and the old inode stays valid for whoever has it open; on Windows it refuses
+    # while the file is open, and the old pack stays intact.
+    stage = os.path.join(dest_abs, ".incoming")
+    if os.path.isdir(stage):
+        shutil.rmtree(stage)
+    os.makedirs(stage)
     with tarfile.open(fileobj=io.BytesIO(blob), mode="r:gz") as tar:
-        for m in tar.getmembers():
-            target = os.path.abspath(os.path.join(dest_abs, m.name))
-            if not m.isfile() or os.path.dirname(target) != dest_abs or m.name.startswith((".", "/")):
+        members = tar.getmembers()
+        for m in members:
+            target = os.path.abspath(os.path.join(stage, m.name))
+            if not m.isfile() or os.path.dirname(target) != stage or m.name.startswith((".", "/")):
                 raise SystemExit(f"refusing tar member {m.name!r}")
-        tar.extractall(dest_abs, members=[m for m in tar.getmembers() if m.isfile()], filter="data")
-    man = json.load(open(os.path.join(dest, "manifest.json"), encoding="utf-8"))
+        tar.extractall(stage, members=[m for m in members if m.isfile()], filter="data")
+    man = json.load(open(os.path.join(stage, "manifest.json"), encoding="utf-8"))
+    for name, short in man.get("files", {}).items():
+        p = os.path.join(stage, name)
+        if not os.path.exists(p) or hashlib.sha256(open(p, "rb").read()).hexdigest()[:16] != short:
+            raise SystemExit(f"manifest hash mismatch for {name}")
+    for name in os.listdir(stage):
+        os.replace(os.path.join(stage, name), os.path.join(dest_abs, name))
+    shutil.rmtree(stage, ignore_errors=True)
     return version, man, got
 
 

@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Credits without currency, daily budgets rebuilt from the events file, `GET /metrics` (Prometheus text, OTel GenAI semconv), Influx and Loki push to Grafana Cloud, a 200-row replay fixture (S3)
 - `codemap_feedback` (strict validation, verified ratings), `codemap_miss` (the saturation backlog), `codemap_search` (Qwen3 embedding + reranker on Modal over a per-entity socket; index cached per pack version), `POST /feedback` (S4)
 - The graph pack as a GitHub Release (`pack-1.0.0`): `tools/pack/build_release.py` + `fetch_pack.py` (sha256-verified); CI fetches it and runs the engine check and the remote suites (S5)
+- Hosted on the demo VPS at codemap.checkitout.app: Dockerfile, compose, nginx vhost, `tools/deploy.sh`, dispatch-only `deploy-codemap.yml`; pack reload without restart (`POST /admin/reload` + Releases poll); the active prompt built from template + pack + notes (S6)
 
 ## [1.0.0] - 2025-09-16
 

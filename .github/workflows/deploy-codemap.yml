@@ -1,0 +1,44 @@
+# Deploy CodeMap Remote to the demo VPS — on request only (workflow_dispatch), never on push.
+# The key and the host fingerprint live in the `codemap-vps` environment; the same tools/deploy.sh a
+# developer runs from a box is what runs here, so there is one deploy path to reason about. The
+# workflow holds no application secret: /opt/codemap/.env is provisioned on the host by hand.
+name: deploy-codemap
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "git ref to deploy (default: the branch this workflow runs from)"
+        required: false
+        default: ""
+
+concurrency:
+  group: deploy-codemap
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Ship, build on the host, roll the container
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: codemap-vps
+    env:
+      REF: ${{ inputs.ref || github.sha }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09  # v5
+        with:
+          fetch-depth: 0
+      - name: SSH identity from the environment
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.CODEMAP_VPS_SSH_KEY }}" > ~/.ssh/id_ed25519 && chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "${{ secrets.CODEMAP_VPS_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          printf 'Host gvps\n  HostName 57.128.225.42\n  User ubuntu\n  IdentityFile ~/.ssh/id_ed25519\n  IdentitiesOnly yes\n' > ~/.ssh/config
+      - name: Deploy
+        run: bash applications/CodeMap/tools/deploy.sh --host gvps --ref "$REF"
+      - name: Public health
+        run: |
+          curl -fsS --max-time 20 https://codemap.checkitout.app/healthz | tee -a "$GITHUB_STEP_SUMMARY"

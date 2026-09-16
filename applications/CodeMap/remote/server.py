@@ -26,7 +26,7 @@ sys.path.insert(0, os.path.join(R, "app"))
 import claude_cli  # noqa: E402
 from engine import Engine  # noqa: E402
 
-from remote import credits, feedback, ids, mcp, metrics, search, telemetry, telemetry_push, tools, users  # noqa: E402
+from remote import credits, feedback, ids, mcp, metrics, reload as reload_mod, search, telemetry, telemetry_push, tools, users  # noqa: E402
 
 VERSION = "1.2.0"
 
@@ -41,9 +41,18 @@ class App:
         self.token = token
         self.admin_token = admin_token
         self.pack_dir = pack_dir or os.environ.get("CODEMAP_PACK_DIR") or os.path.join(R, "graph", "pack")
-        self.prompt_path = prompt_path or os.environ.get("CODEMAP_NAV_PROMPT") or os.path.join(R, "prompts", "navigator", "v1.md")
         self.pack_version = ids.pack_version(self.pack_dir)
+        # the active prompt is built from template + pack + notes unless a file is pinned (tests, GEPA candidates)
+        self.prompt_path = prompt_path or os.environ.get("CODEMAP_NAV_PROMPT")
+        if not self.prompt_path:
+            active = os.path.join(os.environ.get("CODEMAP_TELEMETRY_DIR") or telemetry.DEFAULT_DIR, "navigator-active.md")
+            try:
+                self.prompt_path = reload_mod.build_active_prompt(self, active)
+            except Exception:  # a broken pack must not stop the server from answering FAQ/engine calls
+                self.prompt_path = os.path.join(R, "prompts", "navigator", "v1.md")
         self.prompt_version = ids.prompt_version(self.prompt_path)
+        self.poller = None
+        self.reloads = []
         self.sink = sink  # list in tests, None in production (file)
         self.navigator = None
         self._by_name = {e["name"]: e for e in self.engine.ents}
@@ -119,6 +128,48 @@ class App:
         return {"subsystem": nav.get("sub_id", sub), "name": nav.get("name"), "role": nav.get("role"),
                 "summary": nav.get("ai_summary")}
 
+    # --- reload -----------------------------------------------------------------------
+    def reload(self, fetch=True, runner=None):
+        """Fetch the latest pack (unless fetch=False), rebuild engine, prompt, indexes. -> (ok, detail)"""
+        detail = ""
+        if fetch:
+            ok, detail = reload_mod.fetch_latest(self.pack_dir, runner)
+            if not ok:
+                self.reloads.append({"at": telemetry.now_iso(), "ok": False, "detail": detail[-300:]})
+                return False, detail
+        try:
+            engine = Engine()
+        except Exception as ex:
+            self.reloads.append({"at": telemetry.now_iso(), "ok": False, "detail": f"engine: {ex}"[:300]})
+            return False, f"engine failed to open the new pack: {ex}"
+        with self._lock:
+            self.engine = engine
+            self._by_name = {e["name"]: e for e in engine.ents}
+            old_pack, old_prompt = self.pack_version, self.prompt_version
+            self.pack_version = ids.pack_version(self.pack_dir)
+            if not os.environ.get("CODEMAP_NAV_PROMPT"):
+                try:
+                    active = os.path.join(os.environ.get("CODEMAP_TELEMETRY_DIR") or telemetry.DEFAULT_DIR, "navigator-active.md")
+                    self.prompt_path = reload_mod.build_active_prompt(self, active)
+                except Exception:
+                    pass
+            self.prompt_version = ids.prompt_version(self.prompt_path)
+            if self.navigator is not None:
+                self.navigator.contexts = __import__("remote.contexts", fromlist=["Contexts"]).Contexts()
+            if self.search_index is not None:
+                self.search_index = search.SearchIndex(self)
+                if not self.search_index.load():
+                    self.search_index.build_async()
+        self.registry.set("codemap_info", {"version": VERSION, "pack_version": self.pack_version,
+                                           "prompt_version": self.prompt_version}, 1)
+        ev = {"schema": 1, "event_type": "reload", "ts": telemetry.now_iso(), "request_id": ids.new_request_id(),
+              "user": "ci", "user_kind": "system", "tier": "none", "credits": 0.0, "terminal": "ok",
+              "pack_version": self.pack_version, "prompt_version": self.prompt_version,
+              "comment": f"pack {old_pack} -> {self.pack_version}; prompt {old_prompt} -> {self.prompt_version}"}
+        self.emit(ev)
+        self.reloads.append({"at": ev["ts"], "ok": True, "detail": ev["comment"]})
+        return True, ev["comment"]
+
     def status(self):
         return {"service": "codemap-remote", "version": VERSION, "started": self.started,
                 "pack_version": self.pack_version, "prompt_version": self.prompt_version,
@@ -126,7 +177,8 @@ class App:
                 "ladybug": bool(self.engine.lb), "users": sorted(self.users),
                 "navigator": self.navigator.describe() if self.navigator else None,
                 "events_dropped": telemetry.DROPPED[0], "events_replayed": self.replayed,
-                "answers_seen": len(self.seen),
+                "answers_seen": len(self.seen), "reloads": self.reloads[-5:],
+                "poll": (self.poller.last if self.poller else None),
                 "search": ({"state": self.search_index.state, "entities": len(self.search_index.names),
                             "error": self.search_index.error} if self.search_index else None),
                 "push": (self.pusher.stats if self.pusher else None),
@@ -214,6 +266,14 @@ def handle_metrics(app):
     return 200, app.registry.render()
 
 
+def handle_reload(app, headers):
+    if not app.authed(headers) or not app.is_admin(headers):
+        return 401, {"error": "unauthorized"}
+    ok, detail = app.reload()
+    return (200 if ok else 502), {"ok": ok, "detail": detail, "pack_version": app.pack_version,
+                                   "prompt_version": app.prompt_version}
+
+
 def handle_feedback(app, body, headers):
     """REST twin of the codemap_feedback tool (the UI and curl use it)."""
     if not app.authed(headers):
@@ -292,6 +352,8 @@ class H(BaseHTTPRequestHandler):
             return self._send(code, reply, {"Mcp-Session-Id": self.headers.get("Mcp-Session-Id") or ids.new_request_id()})
         if u.path == "/feedback":
             return self._send(*handle_feedback(self.app, body, self.headers))
+        if u.path == "/admin/reload":
+            return self._send(*handle_reload(self.app, self.headers))
         return self._send(404, {"error": "unknown endpoint"})
 
 
@@ -303,9 +365,12 @@ def serve(bind="127.0.0.1", port=7345, app=None):
         raise SystemExit("refusing to bind a non-loopback address without CODEMAP_TOKEN")
     app.pusher = telemetry_push.Pusher(app.registry)
     pushing = app.pusher.start()
+    app.poller = reload_mod.Poller(app)
+    polling = app.poller.start()
     print(f"codemap-remote {VERSION}: {len(app.engine.ents)} entities, pack {app.pack_version}, "
           f"prompt {app.prompt_version}, token={'set' if app.token else 'NONE (local)'}, "
-          f"replayed {app.replayed} events, push={'on' if pushing else 'off'} -> http://{bind}:{port}/mcp")
+          f"replayed {app.replayed} events, push={'on' if pushing else 'off'}, pack-poll={'on' if polling else 'off'} "
+          f"-> http://{bind}:{port}/mcp")
     try:
         ThreadingHTTPServer((bind, port), H).serve_forever()  # NOSONAR - bind is configured; loopback by default; see sonar-project.properties
     finally:
