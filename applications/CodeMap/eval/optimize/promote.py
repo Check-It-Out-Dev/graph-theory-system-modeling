@@ -24,6 +24,7 @@ sys.path.insert(0, HERE)
 import constraints  # noqa: E402
 
 MIN_GAIN = 0.03
+MIN_EXAMPLES = 18   # validation + confirmation examples the decision must rest on (six alone decides nothing)
 NAV = os.path.join(R, "prompts", "navigator")
 
 
@@ -48,6 +49,12 @@ def decide(run, candidate_text, current_text):
     seed, best = run.get("seed_val_score"), run.get("best_val_score")
     if seed is None or best is None or best - seed < MIN_GAIN:
         reasons.append(f"gain {None if seed is None or best is None else round(best - seed, 4)} < {MIN_GAIN}")
+    conf = run.get("confirmation") or {}
+    n_examples = len(run.get("val") or []) + int(conf.get("n") or 0)
+    if n_examples < MIN_EXAMPLES:
+        reasons.append(f"only {n_examples} examples behind the decision (< {MIN_EXAMPLES}); run --confirm N on a fresh split")
+    if conf and conf.get("candidate") is not None and conf.get("seed") is not None and conf["candidate"] < conf["seed"]:
+        reasons.append(f"regression on the confirmation split: seed {conf['seed']} > candidate {conf['candidate']}")
     probs = constraints.check(candidate_text)
     if probs:
         reasons.append("constraints: " + "; ".join(probs))
@@ -82,6 +89,24 @@ def apply(run, candidate_text, pr=False, base=None):
     return version
 
 
+def confirm(run, candidate_text, n, seed, pack, notes, probes, model="claude-sonnet-5", max_turns=10, effort="medium", runner=None):
+    """Seed and candidate on n fresh examples (a split the run never saw), written into the run as `confirmation`."""
+    sys.path.insert(0, HERE)
+    import adapter as adapter_mod
+    seen = set(run.get("train") or []) | set(run.get("val") or [])
+    pool, rest = adapter_mod.dataset(pack, probes, 10_000, 0, seed=seed)
+    fresh = [i for i in pool if i["id"] not in seen][:n]
+    ad = adapter_mod.NavigatorAdapter(pack, notes, model=model, max_turns=max_turns, effort=effort, runner=runner)
+    current = open(os.path.join(NAV, "template.md"), encoding="utf-8").read()
+    s_eb = ad.evaluate(fresh, {adapter_mod.COMPONENT: current})
+    c_eb = ad.evaluate(fresh, {adapter_mod.COMPONENT: candidate_text})
+    run["confirmation"] = {"n": len(fresh), "seed_split": seed, "ids": [i["id"] for i in fresh],
+                           "seed": round(sum(s_eb.scores) / max(1, len(fresh)), 4), "candidate": round(sum(c_eb.scores) / max(1, len(fresh)), 4),
+                           "per_example": [{"id": i["id"], "seed": a, "candidate": b} for i, a, b in zip(fresh, s_eb.scores, c_eb.scores)],
+                           "usage": ad.usage}
+    return run["confirmation"]
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--run", required=True)
@@ -89,6 +114,9 @@ def main(argv=None):
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--pr", action="store_true")
     ap.add_argument("--base", default=None, help="pull request base (default: the current branch)")
+    ap.add_argument("--confirm", type=int, default=0, help="run seed and candidate on N fresh examples first (written into the run)")
+    ap.add_argument("--confirm-seed", type=int, default=7)
+    ap.add_argument("--pack", default=os.path.join(R, "graph", "pack"))
     a = ap.parse_args(argv)
     run = json.load(open(a.run, encoding="utf-8"))
     cand_path = a.candidate or a.run.replace(".json", ".template.md")
@@ -96,6 +124,11 @@ def main(argv=None):
         print(f"no candidate file ({cand_path}); nothing to promote")
         return 0
     candidate = open(cand_path, encoding="utf-8").read()
+    if a.confirm:
+        conf = confirm(run, candidate, a.confirm, a.confirm_seed, a.pack, os.path.join(NAV, "curation_notes.md"),
+                       os.path.join(R, "eval", "q", "probes_offdist.jsonl"))
+        json.dump(run, open(a.run, "w", encoding="utf-8", newline="\n"), indent=1, sort_keys=True)
+        print(json.dumps({"confirmation": {k: conf[k] for k in ("n", "seed", "candidate")}}))
     current = open(os.path.join(NAV, "template.md"), encoding="utf-8").read()
     ok, reasons = decide(run, candidate, current)
     print(json.dumps({"promote": ok, "reasons": reasons, "seed": run.get("seed_val_score"), "best": run.get("best_val_score")}, indent=1))

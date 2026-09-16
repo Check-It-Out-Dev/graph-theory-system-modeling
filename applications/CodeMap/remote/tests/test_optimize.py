@@ -108,7 +108,8 @@ class AdapterTests(unittest.TestCase):
 
 class PromoteTests(unittest.TestCase):
     def test_gate(self):
-        run = {"mode": "gepa", "win": True, "seed_val_score": 0.5, "best_val_score": 0.6}
+        run = {"mode": "gepa", "win": True, "seed_val_score": 0.5, "best_val_score": 0.6, "val": [f"v{i}" for i in range(6)],
+               "confirmation": {"n": 12, "seed": 0.9, "candidate": 0.95}}
         cand = TEMPLATE.replace("Do not restate the index", "Never restate the index")
         ok, reasons = promote.decide(run, cand, TEMPLATE)
         self.assertTrue(ok, reasons)
@@ -116,6 +117,23 @@ class PromoteTests(unittest.TestCase):
         self.assertFalse(promote.decide(run, TEMPLATE, TEMPLATE)[0])  # identical
         self.assertFalse(promote.decide(run, cand.replace("seam(", "x("), TEMPLATE)[0])  # constraint
         self.assertFalse(promote.decide({"mode": "dry-run", "win": False}, cand, TEMPLATE)[0])
+        thin = dict(run, confirmation=None)
+        ok, reasons = promote.decide(thin, cand, TEMPLATE)
+        self.assertFalse(ok)
+        self.assertTrue(any("only 6 examples" in r for r in reasons), reasons)
+        regress = dict(run, confirmation={"n": 12, "seed": 0.95, "candidate": 0.9})
+        self.assertTrue(any("regression" in r for r in promote.decide(regress, cand, TEMPLATE)[1]))
+
+    @unittest.skipUnless(HAS_PACK, "pack absent")
+    def test_confirm_runs_both_templates_on_a_fresh_split(self):
+        run = {"train": ["BE01"], "val": ["BE02"]}
+        good = "x\n```json\n{\"terminal\": \"answer\", \"pointers\": []}\n```"
+        conf = promote.confirm(run, TEMPLATE.replace("Do not restate", "Never restate"), 4, 3, PACK,
+                               os.path.join(R, "prompts", "navigator", "curation_notes.md"), os.path.join(R, "eval", "q", "probes_offdist.jsonl"),
+                               runner=_runner_answer(good))
+        self.assertEqual(conf["n"], 4)
+        self.assertFalse({"BE01", "BE02"} & set(conf["ids"]))
+        self.assertEqual(len(conf["per_example"]), 4)
 
 
 if __name__ == "__main__":
