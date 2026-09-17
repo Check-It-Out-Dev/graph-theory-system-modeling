@@ -20,6 +20,11 @@ adds `architecture_fit` and `patterns_followed`, and writes `runs/<label>.judge-
 wording that tells which arm used the graph: bracketed subsystem ids such as `[11]` go, and "graph" becomes
 "dependency analysis". Answers written with the Erdős 2.0 manual and earlier carry that wording; from 2.1 on the
 manual keeps it out. The deterministic checks read the original answers; the judge file counts the replacements.
+
+Rubric r3 (2026-09-17 16:09, the owner: evaluate and augment the prompt itself, no comparison with a plain agent)
+grades ONE answer against the key, with the trace of how it was produced (the graph queries and the rows they
+returned, the files opened): correctness, completeness, architectural fit, and the use of the graph to understand
+the architecture, each 1-5 with a short reason. `ask_pointwise` is what the prompt optimiser calls.
 """
 
 import argparse
@@ -83,6 +88,63 @@ def neutralize(text):
         for rx, repl in TIDY:
             text = rx.sub(repl, text)
     return text, count
+
+
+POINTWISE_RUBRIC = "r3"
+POINTWISE = """You are a principal engineer grading ONE answer to a hard architectural problem about one codebase.
+You have an answer key built from the source code, the answer, and the trace of how the answer was produced: the queries
+its author ran against a dependency graph of the codebase (files as nodes, typed edges, subsystem membership), with the
+rows they returned, and the files the author opened. Grade only against the key, the trace and the answer; do not reward
+length or confidence.
+
+Counts (integers):
+- must_find_hits: how many of the key's must_find files the answer identifies (by name or unmistakable description).
+- key_facts_supported: how many key facts the answer states correctly or relies on correctly.
+- gaps_found: how many of the key's gaps the answer discovers.
+- red_flags_made: how many of the key's red flags the answer makes, plus other claims the key contradicts.
+- patterns_followed: how many of the key's architecture entries the design reuses or extends correctly.
+
+Scores 1-5:
+- correctness: 5 no false claims about the code; 3 minor errors that do not change the plan; 1 errors that would mislead the implementation.
+- completeness: 5 finds the key's files, facts and gaps that matter for the plan; 3 misses some that change the plan; 1 misses most.
+- architecture_fit: 5 the design builds on the mechanisms the project already uses for this concern (the key's architecture entries) and adds no parallel mechanism; 3 mostly fits but duplicates one existing mechanism or bypasses one that applies; 1 ignores or duplicates the existing architecture.
+- graph_use: 5 the trace shows the architecture was understood from the graph before files were read and before the solution was written: the queries target the subsystems, entry points, dependents, seams and behaviour edges this problem turns on, and the answer's structural claims (who depends on what, which flows cross which modules) agree with the rows returned; 3 the graph was queried, but thinly, late, or away from the problem's structure, or the answer's structure came mostly from reading files; 1 the graph was not used to understand the architecture.
+
+For each 1-5 score give a reason of at most 40 words that says what the answer or the trace did or missed. Describe behaviour; name files only when the reason needs it.
+Reply with ONE JSON object only, no prose, no code fence:
+{"must_find_hits": 0, "key_facts_supported": 0, "gaps_found": 0, "red_flags_made": 0, "patterns_followed": 0, "correctness": 1, "completeness": 1, "architecture_fit": 1, "graph_use": 1, "reasons": {"correctness": "...", "completeness": "...", "architecture_fit": "...", "graph_use": "..."}}"""
+POINTWISE_SCORES = ("correctness", "completeness", "architecture_fit", "graph_use")
+
+
+def pointwise_prompt(problem, answer, trace):
+    return ("PROBLEM\n" + problem["prompt"] + "\n\nANSWER KEY (from the source code)\n" +
+            json.dumps(key_for_judge(problem), ensure_ascii=False, indent=1) +
+            "\n\nTRACE (how the answer was produced)\n" + trace + "\n\nANSWER\n" + answer +
+            "\n\nGrade the answer against the key and the trace, and reply with the JSON object.")
+
+
+def valid_pointwise(verdict):
+    return isinstance(verdict, dict) and all(isinstance(verdict.get(k), (int, float)) and 1 <= verdict[k] <= 5
+                                             for k in POINTWISE_SCORES)
+
+
+def ask_pointwise(problem, answer, trace, model, runner=None, timeout=900):
+    """-> (verdict or None, usage, is_error): one answer graded with rubric r3."""
+    import claude_cli
+    fd, sys_path = tempfile.mkstemp(prefix="erdos-judge-r3-", suffix=".md")
+    with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as f:
+        f.write(POINTWISE)
+    try:
+        out = claude_cli.run(pointwise_prompt(problem, answer, trace), model=model, role="judge", system_file=sys_path,
+                             max_turns=1, timeout=timeout, runner=runner, tools=[])
+    finally:
+        try:
+            os.unlink(sys_path)
+        except OSError:
+            pass
+    verdict = parse_json_text(out.get("text"))
+    ok = valid_pointwise(verdict)
+    return (verdict if ok else None), out.get("usage"), bool(out.get("is_error")) or not ok
 
 
 def workspace_index(workspace):

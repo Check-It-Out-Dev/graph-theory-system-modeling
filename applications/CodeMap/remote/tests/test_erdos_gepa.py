@@ -1,5 +1,6 @@
-"""GEPA over the Erdős skill without a model: the quality-first score, the guard against memorised answers,
-the masked feedback, and one evaluation with a fake runner and a fake judge."""
+"""GEPA over Erdős's manual without a model: the score over the judge's criteria and adherence, the guards against
+memorised answers, the masked feedback, one evaluation with a fake runner and a fake judge, the seed-run import and
+the judge-noise measurement."""
 
 import json
 import os
@@ -10,24 +11,26 @@ import unittest
 HERE = os.path.dirname(os.path.abspath(__file__))
 R = os.path.dirname(os.path.dirname(HERE))
 sys.path.insert(0, os.path.join(R, "eval", "erdos"))
+sys.path.insert(0, HERE)
 
 import erdos_gepa  # noqa: E402
 import erdos_prompt  # noqa: E402
 import run_pairs  # noqa: E402
+from test_erdos_adherence import _events  # noqa: E402
+
+PERFECT = {"correctness": 5, "completeness": 5, "architecture_fit": 5, "graph_use": 5}
+WORST = {"correctness": 1, "completeness": 1, "architecture_fit": 1, "graph_use": 1}
 
 
 class ScoreTests(unittest.TestCase):
-    def test_quality_comes_first(self):
-        same_cost = dict(erdos_weighted=500, general_weighted=1000)
-        worse_cheap = erdos_gepa.score({"overall": 3}, {"overall": 4}, **same_cost)
-        equal_cheap = erdos_gepa.score({"overall": 4}, {"overall": 4}, **same_cost)
-        equal_dear = erdos_gepa.score({"overall": 4}, {"overall": 4}, erdos_weighted=1000, general_weighted=1000)
-        self.assertEqual(worse_cheap, round(0.7 * 0.75 + 0.2 * 0.5, 4))
-        self.assertEqual(equal_cheap, 0.9)
-        self.assertEqual(equal_dear, 0.8)
-        self.assertGreater(equal_dear, worse_cheap)                 # matching quality at no saving beats a cheap worse answer
-        self.assertEqual(erdos_gepa.score({"overall": 5}, {"overall": 4}, **same_cost), 0.9)   # parity is capped
-        self.assertEqual(erdos_gepa.score({}, {"overall": 4}, **same_cost), 0.0)
+    def test_the_score_follows_the_criteria(self):
+        self.assertAlmostEqual(sum(erdos_gepa.WEIGHTS.values()), 1.0)
+        self.assertEqual(erdos_gepa.score(PERFECT, 1.0), 1.0)
+        self.assertEqual(erdos_gepa.score(WORST, 0.0), 0.0)
+        self.assertEqual(erdos_gepa.score({}, 1.0), 0.0)                              # an ungraded answer scores nothing
+        graph_better = erdos_gepa.score(dict(PERFECT, graph_use=5, correctness=3), 0.5)
+        graph_worse = erdos_gepa.score(dict(PERFECT, graph_use=1, correctness=3), 0.5)
+        self.assertAlmostEqual(graph_better - graph_worse, erdos_gepa.WEIGHTS["graph_use"])
 
 
 class GuardTests(unittest.TestCase):
@@ -39,10 +42,10 @@ class GuardTests(unittest.TestCase):
         seed = erdos_prompt.skill_body()
         self.assertEqual(erdos_gepa.check(seed, self.ids), [])
         leaking = seed + "\n\nNote: during an outage the upload limiter in StorageRateLimitService fails open."
-        problems = erdos_gepa.check(leaking, self.ids)
-        self.assertTrue(any("StorageRateLimitService" in p for p in problems), problems)
-        self.assertTrue(erdos_gepa.check(seed.replace("references/graph-map.md", "the map"), self.ids))
-        self.assertTrue(erdos_gepa.check("x" * (erdos_gepa.MAX_CHARS + 1) + "references/graph-map.md", self.ids))
+        self.assertTrue(any("StorageRateLimitService" in p for p in erdos_gepa.check(leaking, self.ids)))
+        dropped = seed.replace('<include file="references/topology.md"/>', "")
+        self.assertIn("the skill no longer includes references/topology.md", erdos_gepa.check(dropped, self.ids))
+        self.assertTrue(erdos_gepa.check(seed + "x" * erdos_gepa.MAX_CHARS, self.ids))
 
     def test_feedback_masks_code_names(self):
         masked = erdos_gepa.mask("B wrongly says RedisUserCache.getTokenVersion fails open; see step_up_token in StepUpAuthService.java")
@@ -51,49 +54,70 @@ class GuardTests(unittest.TestCase):
         self.assertIn("fails open", masked)
 
 
+def _write_events(path):
+    with open(path, "w", encoding="utf-8") as f:
+        for t, e in _events():
+            f.write(json.dumps({"t": t, "event": e}) + "\n")
+
+
 class EvaluateTests(unittest.TestCase):
     def test_one_evaluation_with_fakes(self):
         problems = run_pairs.load_problems()[:1]
         pid = problems[0]["id"]
-        seen = {}
+        seen = {"runs": 0, "judge": 0}
 
         def runner(cmd, cwd, events_path, timeout):
+            seen["runs"] += 1
             seen["cmd"] = cmd
-            with open(events_path, "w", encoding="utf-8") as f:
-                for t, e in [(0.0, {"type": "system", "subtype": "init"}),
-                             (1.0, {"type": "stream_event", "event": {"type": "message_start", "message": {"id": "m1", "usage": {
-                                 "input_tokens": 1, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 1000, "output_tokens": 1}}}}),
-                             (1.1, {"type": "assistant", "message": {"id": "m1", "content": [{"type": "text", "text": "## Problem\n" + "a" * 500 + "\n=== ANSWER COMPLETE ==="}]}}),
-                             (1.2, {"type": "stream_event", "event": {"type": "message_delta", "usage": {
-                                 "input_tokens": 1, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 1000, "output_tokens": 99}}}),
-                             (2.0, {"type": "result", "subtype": "success", "is_error": False})]:
-                    f.write(json.dumps({"t": t, "event": e}) + "\n")
+            _write_events(events_path)
             return 2.0
 
-        def judge(problem, a, b, model):
-            order = erdos_gepa.erdos_judge.blind_order(problem["id"])
-            letter = {order[0]: "A", order[1]: "B"}
-            return ({letter["erdos"]: {"overall": 4, "correctness": 4}, letter["general"]: {"overall": 4, "correctness": 5},
-                     "equivalent": True, "better": "tie", "why": "RedisUserCache claim unverified"}, {}, False)
+        def judge(problem, answer, trace, model):
+            seen["judge"] += 1
+            seen["trace"] = trace
+            verdict = dict(PERFECT, graph_use=3, must_find_hits=1, key_facts_supported=2, gaps_found=1, red_flags_made=0,
+                           patterns_followed=2, reasons={"correctness": "RedisUserCache claim holds", "completeness": "misses gaps",
+                                                         "architecture_fit": "reuses the guard", "graph_use": "few queries"})
+            return verdict, {}, False
 
         with tempfile.TemporaryDirectory() as d:
-            ad = erdos_gepa.ErdosAdapter(problems, "2026-09-17", "C:/ws", os.path.join(R, "graph", "pack"), d, runner=runner, judge=judge,
+            ad = erdos_gepa.ErdosAdapter(problems, "C:/ws", os.path.join(R, "graph", "pack"), d, runner=runner, judge=judge,
                                          parallel=1, context_root=os.path.join(d, "ctx"))
-            eb = ad.evaluate([{"id": pid}], {erdos_gepa.COMPONENT: erdos_prompt.skill_body()}, capture_traces=True)
-            self.assertEqual(len(eb.scores), 1)
-            self.assertGreater(eb.scores[0], 0.8)                       # parity reached, and cheaper than the reference
+            seed = {erdos_gepa.COMPONENT: erdos_prompt.skill_body()}
+            eb = ad.evaluate([{"id": pid}], seed, capture_traces=True)
+            out = eb.outputs[0]
+            self.assertEqual(eb.scores[0], erdos_gepa.score(out["verdict"], out["adherence"]["score"]))
             ctx = seen["cmd"][seen["cmd"].index("--add-dir") + 1]
             self.assertEqual(os.listdir(ctx), ["CLAUDE.md"])
             self.assertIn("mcp__graph__*", seen["cmd"][seen["cmd"].index("--allowedTools") + 1])
+            self.assertIn("Graph queries: 2 in all", seen["trace"])
             fb = eb.trajectories[0]["feedback"]
             self.assertNotIn("RedisUserCache", fb)
+            self.assertIn("graph_use 3/5", fb)
+            self.assertIn("adherence to the manual", fb)
             rows = ad.make_reflective_dataset({}, eb, [erdos_gepa.COMPONENT])[erdos_gepa.COMPONENT]
-            self.assertEqual(rows[0]["Generated Outputs"], "(answer withheld: judged against a key)")
-            calls = {"judge": 0}
-            ad.judge = lambda *args: calls.__setitem__("judge", calls["judge"] + 1) or judge(*args)
-            again = ad.evaluate([{"id": pid}], {erdos_gepa.COMPONENT: erdos_prompt.skill_body()})   # cached run and verdict
+            self.assertEqual(rows[0]["Generated Outputs"], "(answer withheld: graded against a key)")
+            again = ad.evaluate([{"id": pid}], seed)                                   # cached run and verdict
             self.assertEqual(again.scores, eb.scores)
-            self.assertEqual(calls["judge"], 0)
+            self.assertEqual((seen["runs"], seen["judge"]), (1, 1))
+            noise = erdos_gepa.judge_noise(ad, seed[erdos_gepa.COMPONENT])             # the repeat grading is a new call
+            self.assertEqual((seen["judge"], noise["problems"], noise["graph_use"]), (2, 1, 0.0))
+
+
+class SeedRunTests(unittest.TestCase):
+    def test_seed_runs_are_imported_only_for_the_same_manual(self):
+        seed = erdos_prompt.skill_body()
+        with tempfile.TemporaryDirectory() as d:
+            runs, run_dir = os.path.join(d, "runs"), os.path.join(d, "gepa-run")
+            os.makedirs(os.path.join(runs, "old"))
+            _write_events(os.path.join(runs, "old", "p.erdos.events.jsonl"))
+            with open(os.path.join(runs, "old.json"), "w", encoding="utf-8") as f:
+                json.dump({"meta": {"prompt_version": "erdos@0000000000000000"}}, f)
+            self.assertIn("ran erdos@0000000000000000", erdos_gepa.import_seed_runs("old", seed, run_dir, ["p"], runs_dir=runs))
+            with open(os.path.join(runs, "old.json"), "w", encoding="utf-8") as f:
+                json.dump({"meta": {"prompt_version": erdos_prompt.version(erdos_prompt.assemble(seed))}}, f)
+            self.assertEqual(erdos_gepa.import_seed_runs("old", seed, run_dir, ["p"], runs_dir=runs), ["p"])
+            self.assertTrue(os.path.exists(os.path.join(run_dir, erdos_gepa.sha16(seed), "p.erdos.events.jsonl")))
 
 
 if __name__ == "__main__":
