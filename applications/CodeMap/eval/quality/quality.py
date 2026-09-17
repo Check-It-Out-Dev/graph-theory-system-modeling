@@ -158,8 +158,9 @@ def gains(rows):
         u = r.get("usage") or {}
         return (u.get("input_tokens", 0) or 0) + (u.get("output_tokens", 0) or 0) + (u.get("cache_read_input_tokens", 0) or 0) \
             + (u.get("cache_creation_input_tokens", 0) or 0)
-    base = {(r["persona"], r["seed_id"]): r for r in rows if r.get("mode") == "baseline" and not r.get("is_error")}
-    cm = {(r["persona"], r["seed_id"]): r for r in rows if r.get("mode") == "codemap" and not r.get("is_error")}
+    ran = [r for r in rows if not r.get("is_error") and not r.get("skipped") and r.get("usage")]  # a skipped row is no half of a pair
+    base = {(r["persona"], r["seed_id"]): r for r in ran if r.get("mode") == "baseline"}
+    cm = {(r["persona"], r["seed_id"]): r for r in ran if r.get("mode") == "codemap"}
     pairs = [(base[k], cm[k]) for k in base if k in cm]
     ratios, turns, secs = [], [], []
     for b, c in pairs:
