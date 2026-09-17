@@ -15,7 +15,8 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 GOLD = os.path.join(HERE, "gold")
-FIELDS = ("id", "valid", "validity_note", "must_find", "key_facts", "gaps", "invariants", "good_designs", "red_flags")
+FIELDS = ("id", "valid", "validity_note", "must_find", "key_facts", "gaps", "invariants", "good_designs", "red_flags", "architecture")
+ARCH_FIELDS = ("pattern", "where", "today", "fit", "breaks")
 
 
 def load(problem_id):
@@ -32,6 +33,11 @@ def check(key, workspace):
     for m in key.get("must_find") or []:
         if not os.path.exists(os.path.join(workspace, m["path"])):
             problems.append(f"absent path {m['path']}")
+    for entry in key.get("architecture") or []:
+        problems += [f"architecture entry without {f}" for f in ARCH_FIELDS if not entry.get(f)]
+        for path in entry.get("where") or []:
+            if not os.path.exists(os.path.join(workspace, path)):
+                problems.append(f"absent architecture path {path}")
     return problems
 
 
@@ -47,7 +53,8 @@ def main(argv=None):
         issues = ["no key"] if key is None else check(key, a.workspace)
         bad += bool(issues)
         counts = "" if key is None else (f"valid={key.get('valid')} must_find={len(key.get('must_find') or [])} "
-                                         f"key_facts={len(key.get('key_facts') or [])} gaps={len(key.get('gaps') or [])}")
+                                         f"key_facts={len(key.get('key_facts') or [])} gaps={len(key.get('gaps') or [])} "
+                                         f"architecture={len(key.get('architecture') or [])}")
         print(f"{p['id']}: {counts} {'OK' if not issues else issues}")
     return 1 if bad else 0
 

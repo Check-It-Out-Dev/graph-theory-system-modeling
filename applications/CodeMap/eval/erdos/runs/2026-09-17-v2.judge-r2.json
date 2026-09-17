@@ -1,0 +1,568 @@
+{
+ "label": "2026-09-17-v2",
+ "model": "claude-opus-5",
+ "problems": [
+  {
+   "blind_order": {
+    "A": "erdos",
+    "B": "general"
+   },
+   "deterministic": {
+    "erdos": {
+     "files": {
+      "mentioned": 54,
+      "unknown": [
+       "-payments-pilot-company.sql",
+       "paymentseligibilityservice.java",
+       "paymentspilotbootguard.java",
+       "paymentspilotcompany.java",
+       "paymentspilotcompanyrepository.java"
+      ]
+     },
+     "must_find": {
+      "hits": [
+       "AppPaymentsProperties.java",
+       "PaymentsDisabledBootGuard.java",
+       "StripeConfig.java",
+       "StripeWebhookController.java",
+       "SubscriptionPaidController.java",
+       "SubscriptionService.java",
+       "SubscriptionPeriodProcessorCronJob.java",
+       "TermsGraceProcessorCronJob.java",
+       "InvoiceCreatedEventListener.java",
+       "PublicConfigController.java",
+       "PaymentsTogglePresence_IntegrationTest.java",
+       "public-config.service.ts",
+       "plan-billing.component.ts",
+       "layout.component.ts",
+       "hidden-models.ts"
+      ],
+      "n": 15,
+      "recall": 1.0
+     }
+    },
+    "general": {
+     "files": {
+      "mentioned": 62,
+      "unknown": [
+       "-payments-pilot-company.sql",
+       ".api.ts",
+       "payments-pilot.feature",
+       "paymentsaccesspolicy.java",
+       "paymentsnotavailableexception.java",
+       "paymentspilotbootguard.java",
+       "paymentspilotcompany.java",
+       "paymentspilotcompanyrepository.java",
+       "public-config.service.spec.ts"
+      ]
+     },
+     "must_find": {
+      "hits": [
+       "AppPaymentsProperties.java",
+       "PaymentsDisabledBootGuard.java",
+       "StripeConfig.java",
+       "StripeWebhookController.java",
+       "SubscriptionPaidController.java",
+       "SubscriptionService.java",
+       "SubscriptionPeriodProcessorCronJob.java",
+       "TermsGraceProcessorCronJob.java",
+       "InvoiceCreatedEventListener.java",
+       "PublicConfigController.java",
+       "PaymentsTogglePresence_IntegrationTest.java",
+       "public-config.service.ts",
+       "plan-billing.component.ts",
+       "layout.component.ts"
+      ],
+      "n": 15,
+      "recall": 0.933
+     }
+    }
+   },
+   "judge": {
+    "better": "general",
+    "equivalent": false,
+    "scores": {
+     "erdos": {
+      "architecture_fit": 5,
+      "correctness": 4,
+      "design": 3,
+      "gaps_found": 1,
+      "key_facts_supported": 8,
+      "must_find_hits": 15,
+      "overall": 3,
+      "patterns_followed": 6,
+      "plan": 4,
+      "red_flags_made": 0
+     },
+     "general": {
+      "architecture_fit": 4,
+      "correctness": 5,
+      "design": 4,
+      "gaps_found": 3,
+      "key_facts_supported": 8,
+      "must_find_hits": 15,
+      "overall": 4,
+      "patterns_followed": 5,
+      "plan": 5,
+      "red_flags_made": 0
+     }
+    },
+    "why": "Both split the infrastructure switch from a DB-backed pilot list, keep webhooks infra-only and add a status field. A's canManageExistingPaid is true for any non-FREE_ACTIVE row, which makes its pilot boot guard and TERMS_PENDING cron filter vacuous. A also misses the default mismatch, FREE=BUSINESS limits and the ungated FE banners. B finds these, refuses removal while paid, and maps invariants to tests. B pilot-gates invoice retry and adds a 404 exception, which bends the existing invoicing and 503 patterns."
+   },
+   "judge_error": false,
+   "judge_usage": {
+    "cache_creation_input_tokens": 45332,
+    "cache_read_input_tokens": 0,
+    "input_tokens": 2,
+    "output_tokens": 7074
+   },
+   "neutralized": {
+    "erdos": 5,
+    "general": 0
+   },
+   "problem": "payments-per-company"
+  },
+  {
+   "blind_order": {
+    "A": "erdos",
+    "B": "general"
+   },
+   "deterministic": {
+    "erdos": {
+     "files": {
+      "mentioned": 33,
+      "unknown": []
+     },
+     "must_find": {
+      "hits": [
+       "UserAccountOrchestrator.java",
+       "UserService.java",
+       "DeferredDeletionCronJob.java",
+       "InstagramDataDeletionService.java",
+       "InstagramDeauthorizationService.java",
+       "InstagramCallbackController.java",
+       "AdminCascadeDeleteServiceImpl.java",
+       "FirebaseStorageService.java",
+       "SignedUrlService.java",
+       "LegalConsentService.java",
+       "11-03-2026-create-pending-data-deletion-request.sql",
+       "RedisUserCache.java",
+       "profile-view.component.ts"
+      ],
+      "n": 15,
+      "recall": 0.867
+     }
+    },
+    "general": {
+     "files": {
+      "mentioned": 54,
+      "unknown": [
+       "accounterasureservice.java",
+       "erasureexecutor.java",
+       "retentionpolicy.java"
+      ]
+     },
+     "must_find": {
+      "hits": [
+       "UserAccountOrchestrator.java",
+       "UserService.java",
+       "UserController.java",
+       "DeferredDeletionCronJob.java",
+       "InstagramDataDeletionService.java",
+       "InstagramDeauthorizationService.java",
+       "InstagramCallbackController.java",
+       "AdminCascadeDeleteServiceImpl.java",
+       "FirebaseStorageService.java",
+       "SignedUrlService.java",
+       "FirestoreService.java",
+       "LegalConsentService.java",
+       "11-03-2026-create-pending-data-deletion-request.sql",
+       "RedisUserCache.java",
+       "profile-view.component.ts"
+      ],
+      "n": 15,
+      "recall": 1.0
+     }
+    }
+   },
+   "judge": {
+    "better": "erdos",
+    "equivalent": false,
+    "scores": {
+     "erdos": {
+      "architecture_fit": 4,
+      "correctness": 4,
+      "design": 4,
+      "gaps_found": 5,
+      "key_facts_supported": 8,
+      "must_find_hits": 14,
+      "overall": 4,
+      "patterns_followed": 5,
+      "plan": 5,
+      "red_flags_made": 1
+     },
+     "general": {
+      "architecture_fit": 3,
+      "correctness": 4,
+      "design": 4,
+      "gaps_found": 6,
+      "key_facts_supported": 9,
+      "must_find_hits": 15,
+      "overall": 4,
+      "patterns_followed": 5,
+      "plan": 4,
+      "red_flags_made": 1
+     }
+    },
+    "why": "Both converge on one request pipeline, after-commit external steps and the content/{uid} fix. B diagnoses more: commit ordering, deferred deadlock, consent sweep, snapshots. But B adds a new erasure_request table, and its hard delete lets invoice_record cascade. Its DISCONNECTED rollback claim conflicts with the key. A extends pending_data_deletion_request and the locked cron, and keeps invoices and consent via stub plus RESTRICT. A misses the deadlock and snapshots."
+   },
+   "judge_error": false,
+   "judge_usage": {
+    "cache_creation_input_tokens": 44092,
+    "cache_read_input_tokens": 714,
+    "input_tokens": 2,
+    "output_tokens": 15269
+   },
+   "neutralized": {
+    "erdos": 9,
+    "general": 0
+   },
+   "problem": "account-erasure"
+  },
+  {
+   "blind_order": {
+    "A": "general",
+    "B": "erdos"
+   },
+   "deterministic": {
+    "erdos": {
+     "files": {
+      "mentioned": 39,
+      "unknown": [
+       "cacheerrorhandlerconfiguration.java",
+       "ephemeralstore.java",
+       "pl.properties",
+       "redisavailability.java",
+       "redisavailabilityhealthindicator.java",
+       "resilientstorageconfiguration.java",
+       "resilientusercache.java"
+      ]
+     },
+     "must_find": {
+      "hits": [
+       "application-no-redis.yml",
+       "RedisUserCache.java",
+       "InMemoryUserCache.java",
+       "JwtAuthenticationFilter.java",
+       "RedisRateLimiterService.java",
+       "GdprCompliantRateLimiterService.java",
+       "RedisGeoLocationCache.java",
+       "StepUpAuthService.java",
+       "EmailVerificationService.java",
+       "StorageRateLimitService.java",
+       "RedisStartupConnectivityTest.java",
+       "RedisValidationService.java",
+       "UploadSystemHealthIndicator.java"
+      ],
+      "n": 15,
+      "recall": 0.867
+     }
+    },
+    "general": {
+     "files": {
+      "mentioned": 54,
+      "unknown": [
+       "cacheresilienceconfiguration.java",
+       "ephemeralsecuritystore.java",
+       "inmemoryephemeralsecuritystore.java",
+       "redisavailability.java",
+       "redisavailabilityhealthindicator.java",
+       "redisephemeralsecuritystore.java",
+       "redisfailureclassifier.java",
+       "redisoutageintegrationtest.java",
+       "resilientusercache.java"
+      ]
+     },
+     "must_find": {
+      "hits": [
+       "StorageModeConfiguration.java",
+       "application-no-redis.yml",
+       "RedisConfiguration.java",
+       "RedisUserCache.java",
+       "JwtAuthenticationFilter.java",
+       "RedisRateLimiterService.java",
+       "RedisGeoLocationCache.java",
+       "StepUpAuthService.java",
+       "EmailVerificationService.java",
+       "StorageRateLimitService.java",
+       "RedisStartupConnectivityTest.java",
+       "RedisValidationService.java",
+       "UploadSystemHealthIndicator.java"
+      ],
+      "n": 15,
+      "recall": 0.867
+     }
+    }
+   },
+   "judge": {
+    "better": "general",
+    "equivalent": false,
+    "scores": {
+     "erdos": {
+      "architecture_fit": 4,
+      "correctness": 4,
+      "design": 3,
+      "gaps_found": 3,
+      "key_facts_supported": 7,
+      "must_find_hits": 14,
+      "overall": 3,
+      "patterns_followed": 5,
+      "plan": 4,
+      "red_flags_made": 1
+     },
+     "general": {
+      "architecture_fit": 4,
+      "correctness": 5,
+      "design": 4,
+      "gaps_found": 4,
+      "key_facts_supported": 9,
+      "must_find_hits": 15,
+      "overall": 4,
+      "patterns_followed": 4,
+      "plan": 5,
+      "red_flags_made": 0
+     }
+    },
+    "why": "Both designs share a Redis availability signal, a DB-backed user cache, fail-closed step-up and a CacheErrorHandler. A also finds that evictions inside transactions roll back writes, that the compose healthcheck uses overall health, and adds a quarantine with no replay queue. B wrongly says the Docker healthcheck uses readiness and misses the eviction rollback. B's eviction replay queue breaks the after-commit pattern. A's hand-rolled breaker replaces Resilience4j, while B reuses it. Both miss the in-memory upload-limit gap."
+   },
+   "judge_error": false,
+   "judge_usage": {
+    "cache_creation_input_tokens": 43555,
+    "cache_read_input_tokens": 714,
+    "input_tokens": 2,
+    "output_tokens": 7888
+   },
+   "neutralized": {
+    "erdos": 5,
+    "general": 0
+   },
+   "problem": "redis-outage"
+  },
+  {
+   "blind_order": {
+    "A": "general",
+    "B": "erdos"
+   },
+   "deterministic": {
+    "erdos": {
+     "files": {
+      "mentioned": 30,
+      "unknown": []
+     },
+     "must_find": {
+      "hits": [
+       "CampaignLimitService.java",
+       "BillingPeriodRepository.java",
+       "SubscriptionService.java",
+       "StripeWebhookHandler.java",
+       "SubscriptionPeriodProcessorCronJob.java",
+       "22-03-2026-subscription-tables.sql",
+       "09-04-2026-update-free-plan-campaign-limit.sql",
+       "PartnershipOpportunityService.java",
+       "23-03-2026-subscription-notification-translations.sql",
+       "plan-billing.component.ts",
+       "downgrade-confirm-dialog.component.ts",
+       "opportunity-form.component.ts"
+      ],
+      "n": 15,
+      "recall": 0.8
+     }
+    },
+    "general": {
+     "files": {
+      "mentioned": 35,
+      "unknown": []
+     },
+     "must_find": {
+      "hits": [
+       "CampaignLimitService.java",
+       "BillingPeriodRepository.java",
+       "SubscriptionService.java",
+       "StripeWebhookHandler.java",
+       "SubscriptionPeriodProcessorCronJob.java",
+       "22-03-2026-subscription-tables.sql",
+       "09-04-2026-update-free-plan-campaign-limit.sql",
+       "PartnershipOpportunityService.java",
+       "23-03-2026-subscription-notification-translations.sql",
+       "plan-billing.component.ts",
+       "downgrade-confirm-dialog.component.ts",
+       "PaymentsDisabledBootGuard.java"
+      ],
+      "n": 15,
+      "recall": 0.8
+     }
+    }
+   },
+   "judge": {
+    "better": "general",
+    "equivalent": false,
+    "scores": {
+     "erdos": {
+      "architecture_fit": 4,
+      "correctness": 4,
+      "design": 3,
+      "gaps_found": 6,
+      "key_facts_supported": 9,
+      "must_find_hits": 12,
+      "overall": 3,
+      "patterns_followed": 5,
+      "plan": 4,
+      "red_flags_made": 0
+     },
+     "general": {
+      "architecture_fit": 4,
+      "correctness": 4,
+      "design": 4,
+      "gaps_found": 5,
+      "key_facts_supported": 9,
+      "must_find_hits": 12,
+      "overall": 4,
+      "patterns_followed": 5,
+      "plan": 4,
+      "red_flags_made": 1
+     }
+    },
+    "why": "Both answers keep existing campaigns, use a rolling creation window, branch the deleted handler, replace the dead cron with reconciliation and move limits to the API. B finds the stale PAYMENT_FAILED window, but it cuts PAYMENT_FAILED to Free limits, which breaks the invariant that paid entitlement lasts until Stripe confirms. A keeps that invariant and catches the PAYMENT_FAILED downgrade mismatch. A treats the latent TERMS_PENDING boot-guard issue as live, and its separate plans endpoint fits slightly worse than B's status fields."
+   },
+   "judge_error": false,
+   "judge_usage": {
+    "cache_creation_input_tokens": 43053,
+    "cache_read_input_tokens": 714,
+    "input_tokens": 2,
+    "output_tokens": 7724
+   },
+   "neutralized": {
+    "erdos": 8,
+    "general": 0
+   },
+   "problem": "downgrade-over-limit"
+  },
+  {
+   "blind_order": {
+    "A": "general",
+    "B": "erdos"
+   },
+   "deterministic": {
+    "erdos": {
+     "files": {
+      "mentioned": 43,
+      "unknown": [
+       "billing-step-up.feature",
+       "requiresstepup.java",
+       "step-up-gate.service.spec.ts",
+       "step-up-gate.service.ts",
+       "stepupaspect.java"
+      ]
+     },
+     "must_find": {
+      "hits": [
+       "StepUpAuthService.java",
+       "StepUpActionType.java",
+       "StepUpAuthController.java",
+       "UserController.java",
+       "FirebaseAuthProxyController.java",
+       "SubscriptionPaidController.java",
+       "SubscriptionService.java",
+       "StripeService.java",
+       "RegistryController.java",
+       "InvoiceRetryService.java",
+       "step-up.interceptor.ts",
+       "step-up-dialog.component.ts",
+       "subscription.client.ts",
+       "upgrade-confirm-dialog.component.ts",
+       "step-up-auth.feature"
+      ],
+      "n": 15,
+      "recall": 1.0
+     }
+    },
+    "general": {
+     "files": {
+      "mentioned": 52,
+      "unknown": [
+       "step-up-billing.feature",
+       "step-up-billing.spec.ts",
+       "step-up-gate.ts",
+       "stepupauthserviceunittest.java"
+      ]
+     },
+     "must_find": {
+      "hits": [
+       "StepUpAuthService.java",
+       "StepUpActionType.java",
+       "StepUpAuthController.java",
+       "UserController.java",
+       "FirebaseAuthProxyController.java",
+       "SubscriptionPaidController.java",
+       "SubscriptionService.java",
+       "StripeService.java",
+       "RegistryController.java",
+       "InvoiceRetryService.java",
+       "step-up.interceptor.ts",
+       "step-up-dialog.component.ts",
+       "subscription.client.ts",
+       "upgrade-confirm-dialog.component.ts"
+      ],
+      "n": 15,
+      "recall": 0.933
+     }
+    }
+   },
+   "judge": {
+    "better": "general",
+    "equivalent": true,
+    "scores": {
+     "erdos": {
+      "architecture_fit": 4,
+      "correctness": 4,
+      "design": 4,
+      "gaps_found": 1,
+      "key_facts_supported": 9,
+      "must_find_hits": 15,
+      "overall": 4,
+      "patterns_followed": 5,
+      "plan": 4,
+      "red_flags_made": 0
+     },
+     "general": {
+      "architecture_fit": 5,
+      "correctness": 5,
+      "design": 4,
+      "gaps_found": 3,
+      "key_facts_supported": 10,
+      "must_find_hits": 15,
+      "overall": 4,
+      "patterns_followed": 6,
+      "plan": 5,
+      "red_flags_made": 0
+     }
+    },
+    "why": "Both answers add billing action types, always require step-up, gate the same subscription endpoints, run step-up before consent, and ship the frontend first. A also finds the password-change token gap and the null dialog result ambiguity, fixes the 401 refresh loop, lists the existing tests that will break, and ports proof to Playwright. B uses the reCAPTCHA-style aspect and gates refresh, but skips the frontend e2e port. Neither answer finds the account-deletion cancellation or the update-email bypass."
+   },
+   "judge_error": false,
+   "judge_usage": {
+    "cache_creation_input_tokens": 41371,
+    "cache_read_input_tokens": 714,
+    "input_tokens": 2,
+    "output_tokens": 8772
+   },
+   "neutralized": {
+    "erdos": 10,
+    "general": 0
+   },
+   "problem": "step-up-for-billing"
+  }
+ ],
+ "rubric": "r2",
+ "schema": 1
+}

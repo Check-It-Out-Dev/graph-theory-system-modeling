@@ -28,6 +28,8 @@ from collections import Counter
 SOLVED = "=== ANSWER COMPLETE ==="
 VERIFIED = "=== VERIFIED ==="
 KEYS = ("input_tokens", "cache_creation_input_tokens", "cache_read_input_tokens", "output_tokens")
+GRAPH_PREFIXES = ("mcp__engine__", "mcp__graph__")
+FILE_TOOLS = ("Read", "Grep", "Glob")
 WEIGHTS = {"input_tokens": 1.0, "cache_creation_input_tokens": 2.0, "cache_read_input_tokens": 0.1, "output_tokens": 5.0}
 
 
@@ -99,10 +101,13 @@ def calls(events):
 def _aggregate(part, t_start, t_end):
     tokens = {k: sum(c["usage"][k] for c in part) for k in KEYS}
     tools = Counter(name for c in part for name in c["tools"])
+    sequence = [name for c in part for name in c["tools"]]
+    first_file = next((i for i, name in enumerate(sequence) if name in FILE_TOOLS), len(sequence))
     return {"calls": len(part), "tokens": tokens, "tokens_sum": sum(tokens.values()),
             "tokens_weighted": round(sum(tokens[k] * WEIGHTS[k] for k in KEYS), 1),
             "tool_calls": sum(tools.values()), "tools": dict(sorted(tools.items())),
-            "graph_tool_calls": sum(n for name, n in tools.items() if name.startswith(("mcp__engine__", "mcp__graph__"))),
+            "graph_tool_calls": sum(n for name, n in tools.items() if name.startswith(GRAPH_PREFIXES)),
+            "graph_before_files": sum(1 for name in sequence[:first_file] if name.startswith(GRAPH_PREFIXES)),
             "result_bytes": sum(c["result_bytes"] for c in part),
             "seconds": round(max(0.0, t_end - t_start), 1) if part else 0.0}
 

@@ -1,0 +1,557 @@
+{
+ "label": "2026-09-17-v2.1",
+ "model": "claude-opus-5",
+ "problems": [
+  {
+   "blind_order": {
+    "A": "erdos",
+    "B": "general"
+   },
+   "deterministic": {
+    "erdos": {
+     "files": {
+      "mentioned": 38,
+      "unknown": []
+     },
+     "must_find": {
+      "hits": [
+       "AppPaymentsProperties.java",
+       "PaymentsDisabledBootGuard.java",
+       "StripeConfig.java",
+       "StripeWebhookController.java",
+       "SubscriptionPaidController.java",
+       "SubscriptionService.java",
+       "SubscriptionPeriodProcessorCronJob.java",
+       "TermsGraceProcessorCronJob.java",
+       "InvoiceCreatedEventListener.java",
+       "PublicConfigController.java",
+       "public-config.service.ts",
+       "plan-billing.component.ts",
+       "layout.component.ts",
+       "hidden-models.ts"
+      ],
+      "n": 15,
+      "recall": 0.933
+     }
+    },
+    "general": {
+     "files": {
+      "mentioned": 62,
+      "unknown": [
+       "-payments-pilot-company.sql",
+       ".api.ts",
+       "payments-pilot.feature",
+       "paymentsaccesspolicy.java",
+       "paymentsnotavailableexception.java",
+       "paymentspilotbootguard.java",
+       "paymentspilotcompany.java",
+       "paymentspilotcompanyrepository.java",
+       "public-config.service.spec.ts"
+      ]
+     },
+     "must_find": {
+      "hits": [
+       "AppPaymentsProperties.java",
+       "PaymentsDisabledBootGuard.java",
+       "StripeConfig.java",
+       "StripeWebhookController.java",
+       "SubscriptionPaidController.java",
+       "SubscriptionService.java",
+       "SubscriptionPeriodProcessorCronJob.java",
+       "TermsGraceProcessorCronJob.java",
+       "InvoiceCreatedEventListener.java",
+       "PublicConfigController.java",
+       "PaymentsTogglePresence_IntegrationTest.java",
+       "public-config.service.ts",
+       "plan-billing.component.ts",
+       "layout.component.ts"
+      ],
+      "n": 15,
+      "recall": 0.933
+     }
+    }
+   },
+   "judge": {
+    "better": "general",
+    "equivalent": false,
+    "scores": {
+     "erdos": {
+      "architecture_fit": 5,
+      "correctness": 4,
+      "design": 3,
+      "gaps_found": 1,
+      "key_facts_supported": 8,
+      "must_find_hits": 15,
+      "overall": 3,
+      "patterns_followed": 6,
+      "plan": 4,
+      "red_flags_made": 0
+     },
+     "general": {
+      "architecture_fit": 4,
+      "correctness": 5,
+      "design": 4,
+      "gaps_found": 4,
+      "key_facts_supported": 9,
+      "must_find_hits": 15,
+      "overall": 4,
+      "patterns_followed": 5,
+      "plan": 5,
+      "red_flags_made": 0
+     }
+    },
+    "why": "Both designs share the same core: the global flag stays as the infrastructure switch, a DB allowlist gates user-initiated paths, webhooks stay global, the grace cron is scoped, a pilot boot guard is added, and status gains a per-company field. B also finds the FREE=BUSINESS=5 plan-limit trap, the incomplete FE gating and the defaults mismatch. B keeps /public-config false in pilot mode. A misses those gaps and guesses 4xx for the exception. B's pilot filter on invoice retry slightly breaks the invoicing pattern."
+   },
+   "judge_error": false,
+   "judge_usage": {
+    "cache_creation_input_tokens": 44707,
+    "cache_read_input_tokens": 0,
+    "input_tokens": 2,
+    "output_tokens": 10168
+   },
+   "neutralized": {
+    "erdos": 0,
+    "general": 0
+   },
+   "problem": "payments-per-company"
+  },
+  {
+   "blind_order": {
+    "A": "erdos",
+    "B": "general"
+   },
+   "deterministic": {
+    "erdos": {
+     "files": {
+      "mentioned": 41,
+      "unknown": [
+       "retentionmatrix.java",
+       "userdataeraser.java"
+      ]
+     },
+     "must_find": {
+      "hits": [
+       "UserAccountOrchestrator.java",
+       "UserService.java",
+       "UserController.java",
+       "DeferredDeletionCronJob.java",
+       "InstagramDataDeletionService.java",
+       "InstagramDeauthorizationService.java",
+       "InstagramCallbackController.java",
+       "AdminCascadeDeleteServiceImpl.java",
+       "FirebaseStorageService.java",
+       "FirestoreService.java",
+       "LegalConsentService.java",
+       "11-03-2026-create-pending-data-deletion-request.sql",
+       "profile-view.component.ts"
+      ],
+      "n": 15,
+      "recall": 0.867
+     }
+    },
+    "general": {
+     "files": {
+      "mentioned": 54,
+      "unknown": [
+       "accounterasureservice.java",
+       "erasureexecutor.java",
+       "retentionpolicy.java"
+      ]
+     },
+     "must_find": {
+      "hits": [
+       "UserAccountOrchestrator.java",
+       "UserService.java",
+       "UserController.java",
+       "DeferredDeletionCronJob.java",
+       "InstagramDataDeletionService.java",
+       "InstagramDeauthorizationService.java",
+       "InstagramCallbackController.java",
+       "AdminCascadeDeleteServiceImpl.java",
+       "FirebaseStorageService.java",
+       "SignedUrlService.java",
+       "FirestoreService.java",
+       "LegalConsentService.java",
+       "11-03-2026-create-pending-data-deletion-request.sql",
+       "RedisUserCache.java",
+       "profile-view.component.ts"
+      ],
+      "n": 15,
+      "recall": 1.0
+     }
+    }
+   },
+   "judge": {
+    "better": "general",
+    "equivalent": false,
+    "scores": {
+     "erdos": {
+      "architecture_fit": 4,
+      "correctness": 4,
+      "design": 3,
+      "gaps_found": 4,
+      "key_facts_supported": 8,
+      "must_find_hits": 14,
+      "overall": 4,
+      "patterns_followed": 5,
+      "plan": 4,
+      "red_flags_made": 0
+     },
+     "general": {
+      "architecture_fit": 3,
+      "correctness": 4,
+      "design": 4,
+      "gaps_found": 6,
+      "key_facts_supported": 8,
+      "must_find_hits": 15,
+      "overall": 4,
+      "patterns_followed": 4,
+      "plan": 4,
+      "red_flags_made": 1
+     }
+    },
+    "why": "B finds all six gaps, including the deferred deadlock, unpersisted Meta codes, file_uploads and the 1-year consent sweep. It also honours the invariants on blockers-scope, reactivation and persisted codes. It loses fit by adding an erasure_request table instead of reusing pending_data_deletion_request. Its DISCONNECTED-constraint claim conflicts with the key's completed flow. A reuses the pending-request table, the cron and CascadeDeleteTask better, and its tombstone keeps billing records. A misses file_uploads, SKIPPED, the deadlock and whole-account blocking."
+   },
+   "judge_error": false,
+   "judge_usage": {
+    "cache_creation_input_tokens": 46829,
+    "cache_read_input_tokens": 714,
+    "input_tokens": 2,
+    "output_tokens": 9362
+   },
+   "neutralized": {
+    "erdos": 0,
+    "general": 0
+   },
+   "problem": "account-erasure"
+  },
+  {
+   "blind_order": {
+    "A": "general",
+    "B": "erdos"
+   },
+   "deterministic": {
+    "erdos": {
+     "files": {
+      "mentioned": 36,
+      "unknown": [
+       "ephemeralstore.java",
+       "redisavailability.java",
+       "resilientusercache.java",
+       "usercacheconfiguration.java"
+      ]
+     },
+     "must_find": {
+      "hits": [
+       "StorageModeConfiguration.java",
+       "application-no-redis.yml",
+       "RedisConfiguration.java",
+       "RedisUserCache.java",
+       "JwtAuthenticationFilter.java",
+       "RedisRateLimiterService.java",
+       "RedisGeoLocationCache.java",
+       "StepUpAuthService.java",
+       "EmailVerificationService.java",
+       "StorageRateLimitService.java",
+       "RedisStartupConnectivityTest.java",
+       "UploadSystemHealthIndicator.java"
+      ],
+      "n": 15,
+      "recall": 0.8
+     }
+    },
+    "general": {
+     "files": {
+      "mentioned": 54,
+      "unknown": [
+       "cacheresilienceconfiguration.java",
+       "ephemeralsecuritystore.java",
+       "inmemoryephemeralsecuritystore.java",
+       "redisavailability.java",
+       "redisavailabilityhealthindicator.java",
+       "redisephemeralsecuritystore.java",
+       "redisfailureclassifier.java",
+       "redisoutageintegrationtest.java",
+       "resilientusercache.java"
+      ]
+     },
+     "must_find": {
+      "hits": [
+       "StorageModeConfiguration.java",
+       "application-no-redis.yml",
+       "RedisConfiguration.java",
+       "RedisUserCache.java",
+       "JwtAuthenticationFilter.java",
+       "RedisRateLimiterService.java",
+       "RedisGeoLocationCache.java",
+       "StepUpAuthService.java",
+       "EmailVerificationService.java",
+       "StorageRateLimitService.java",
+       "RedisStartupConnectivityTest.java",
+       "RedisValidationService.java",
+       "UploadSystemHealthIndicator.java"
+      ],
+      "n": 15,
+      "recall": 0.867
+     }
+    }
+   },
+   "judge": {
+    "better": "general",
+    "equivalent": false,
+    "scores": {
+     "erdos": {
+      "architecture_fit": 3,
+      "correctness": 3,
+      "design": 3,
+      "gaps_found": 3,
+      "key_facts_supported": 6,
+      "must_find_hits": 15,
+      "overall": 3,
+      "patterns_followed": 4,
+      "plan": 4,
+      "red_flags_made": 2
+     },
+     "general": {
+      "architecture_fit": 4,
+      "correctness": 5,
+      "design": 4,
+      "gaps_found": 4,
+      "key_facts_supported": 8,
+      "must_find_hits": 15,
+      "overall": 4,
+      "patterns_followed": 5,
+      "plan": 5,
+      "red_flags_made": 0
+     }
+    },
+    "why": "A is better. B implies Redis sits in readiness and claims content uploads fail open via checkAndRecordUpload, which has no caller. It also misses the readiness/overall health inconsistency, stops counting upload quotas, and adds a retry queue for evictions. A also fails closed for oobCodes and adds a DEGRADED health status. B is stronger on reusing the Resilience4j breaker and mapping infrastructure errors to 503 in the filter."
+   },
+   "judge_error": false,
+   "judge_usage": {
+    "cache_creation_input_tokens": 45295,
+    "cache_read_input_tokens": 714,
+    "input_tokens": 2,
+    "output_tokens": 8601
+   },
+   "neutralized": {
+    "erdos": 0,
+    "general": 0
+   },
+   "problem": "redis-outage"
+  },
+  {
+   "blind_order": {
+    "A": "general",
+    "B": "erdos"
+   },
+   "deterministic": {
+    "erdos": {
+     "files": {
+      "mentioned": 31,
+      "unknown": [
+       "subscriptionentitlements.java"
+      ]
+     },
+     "must_find": {
+      "hits": [
+       "CampaignLimitService.java",
+       "BillingPeriodRepository.java",
+       "SubscriptionService.java",
+       "StripeWebhookHandler.java",
+       "SubscriptionPeriodProcessorCronJob.java",
+       "22-03-2026-subscription-tables.sql",
+       "09-04-2026-update-free-plan-campaign-limit.sql",
+       "PartnershipOpportunityService.java",
+       "plan-billing.component.ts",
+       "opportunity-form.component.ts"
+      ],
+      "n": 15,
+      "recall": 0.667
+     }
+    },
+    "general": {
+     "files": {
+      "mentioned": 35,
+      "unknown": []
+     },
+     "must_find": {
+      "hits": [
+       "CampaignLimitService.java",
+       "BillingPeriodRepository.java",
+       "SubscriptionService.java",
+       "StripeWebhookHandler.java",
+       "SubscriptionPeriodProcessorCronJob.java",
+       "22-03-2026-subscription-tables.sql",
+       "09-04-2026-update-free-plan-campaign-limit.sql",
+       "PartnershipOpportunityService.java",
+       "23-03-2026-subscription-notification-translations.sql",
+       "plan-billing.component.ts",
+       "downgrade-confirm-dialog.component.ts",
+       "PaymentsDisabledBootGuard.java"
+      ],
+      "n": 15,
+      "recall": 0.8
+     }
+    }
+   },
+   "judge": {
+    "better": "general",
+    "equivalent": false,
+    "scores": {
+     "erdos": {
+      "architecture_fit": 3,
+      "correctness": 3,
+      "design": 3,
+      "gaps_found": 4,
+      "key_facts_supported": 8,
+      "must_find_hits": 13,
+      "overall": 3,
+      "patterns_followed": 4,
+      "plan": 4,
+      "red_flags_made": 1
+     },
+     "general": {
+      "architecture_fit": 4,
+      "correctness": 4,
+      "design": 4,
+      "gaps_found": 5,
+      "key_facts_supported": 9,
+      "must_find_hits": 12,
+      "overall": 4,
+      "patterns_followed": 5,
+      "plan": 4,
+      "red_flags_made": 0
+     }
+    },
+    "why": "Both find the created-per-period count, period reset, dead PENDING_DOWNGRADE cron, PAYMENT_EXHAUSTED mislabel and stale previousPlan. A keeps the paid limit in PAYMENT_FAILED until Stripe confirms, and it serves limits from subscription_plan so FE constants go away. B drops to the FREE limit locally after a grace deadline, which breaks the invariant. B also misses the FE PLAN_LADDER Free=2. It wrongly treats messages_en.properties as the email source and plans edits there. Neither catches schedule.cancel() or paid-period accumulation."
+   },
+   "judge_error": false,
+   "judge_usage": {
+    "cache_creation_input_tokens": 43276,
+    "cache_read_input_tokens": 714,
+    "input_tokens": 2,
+    "output_tokens": 7876
+   },
+   "neutralized": {
+    "erdos": 0,
+    "general": 0
+   },
+   "problem": "downgrade-over-limit"
+  },
+  {
+   "blind_order": {
+    "A": "general",
+    "B": "erdos"
+   },
+   "deterministic": {
+    "erdos": {
+     "files": {
+      "mentioned": 48,
+      "unknown": [
+       "requiresstepup.java",
+       "step-up-gate.ts",
+       "stepupenforcementaspect.java"
+      ]
+     },
+     "must_find": {
+      "hits": [
+       "StepUpAuthService.java",
+       "StepUpActionType.java",
+       "StepUpAuthController.java",
+       "UserController.java",
+       "FirebaseAuthProxyController.java",
+       "SubscriptionPaidController.java",
+       "SubscriptionService.java",
+       "RegistryController.java",
+       "InvoiceRetryService.java",
+       "step-up.interceptor.ts",
+       "step-up-dialog.component.ts",
+       "subscription.client.ts",
+       "upgrade-confirm-dialog.component.ts",
+       "step-up-auth.feature"
+      ],
+      "n": 15,
+      "recall": 0.933
+     }
+    },
+    "general": {
+     "files": {
+      "mentioned": 52,
+      "unknown": [
+       "step-up-billing.feature",
+       "step-up-billing.spec.ts",
+       "step-up-gate.ts",
+       "stepupauthserviceunittest.java"
+      ]
+     },
+     "must_find": {
+      "hits": [
+       "StepUpAuthService.java",
+       "StepUpActionType.java",
+       "StepUpAuthController.java",
+       "UserController.java",
+       "FirebaseAuthProxyController.java",
+       "SubscriptionPaidController.java",
+       "SubscriptionService.java",
+       "StripeService.java",
+       "RegistryController.java",
+       "InvoiceRetryService.java",
+       "step-up.interceptor.ts",
+       "step-up-dialog.component.ts",
+       "subscription.client.ts",
+       "upgrade-confirm-dialog.component.ts"
+      ],
+      "n": 15,
+      "recall": 0.933
+     }
+    }
+   },
+   "judge": {
+    "better": "general",
+    "equivalent": false,
+    "scores": {
+     "erdos": {
+      "architecture_fit": 4,
+      "correctness": 3,
+      "design": 3,
+      "gaps_found": 1,
+      "key_facts_supported": 8,
+      "must_find_hits": 14,
+      "overall": 3,
+      "patterns_followed": 5,
+      "plan": 4,
+      "red_flags_made": 1
+     },
+     "general": {
+      "architecture_fit": 5,
+      "correctness": 5,
+      "design": 4,
+      "gaps_found": 3,
+      "key_facts_supported": 10,
+      "must_find_hits": 15,
+      "overall": 4,
+      "patterns_followed": 6,
+      "plan": 5,
+      "red_flags_made": 0
+     }
+    },
+    "why": "A calls validateAndConsumeToken directly so every billing action fails closed. It notes the immediate ALWAYS_INVOICE proration charge, the password-change token gap and the null-dialog ambiguity, and plans a Playwright port. B's reCAPTCHA-style aspect is sound, but it calls validateTokenIfRequired and keeps the setup skip for invoice data. B wrongly equates setup-incomplete with email-unverified and describes upgrade only as Checkout. Neither answer finds the account-deletion Stripe cancel or the update-email bypass."
+   },
+   "judge_error": false,
+   "judge_usage": {
+    "cache_creation_input_tokens": 40980,
+    "cache_read_input_tokens": 714,
+    "input_tokens": 2,
+    "output_tokens": 5091
+   },
+   "neutralized": {
+    "erdos": 0,
+    "general": 0
+   },
+   "problem": "step-up-for-billing"
+  }
+ ],
+ "rubric": "r2",
+ "schema": 1
+}

@@ -62,7 +62,8 @@ class PhaseTests(unittest.TestCase):
         self.assertEqual((s["solve"]["calls"], s["verify"]["calls"], s["total"]["calls"]), (3, 2, 5))
         self.assertEqual(s["solve"]["graph_tool_calls"], 1)
         self.assertEqual(s["solve"]["tools"], {"Read": 1, "mcp__graph__graph_query": 1})
-        self.assertEqual(s["solve"]["graph_tool_calls"], 1)
+        self.assertEqual(s["solve"]["graph_before_files"], 1)                 # the graph query came before the first Read
+        self.assertEqual(s["verify"]["graph_before_files"], 0)
         self.assertEqual(s["verify"]["tools"], {"Grep": 1})
         self.assertEqual(s["solve"]["result_bytes"], 800)
         self.assertEqual(s["verify"]["result_bytes"], 50)
@@ -81,6 +82,13 @@ class PhaseTests(unittest.TestCase):
         self.assertEqual(s["total"]["tokens"], result)                      # every key, per-call sums = run totals
         self.assertEqual(s["total"]["calls"], 2)
         self.assertEqual(s["total"]["tools"], {"Glob": 1})
+
+    def test_graph_before_files_stops_at_the_first_file_tool(self):
+        stream = [(0.0, {"type": "system", "subtype": "init"}),
+                  (1.0, _start("m1")), (1.1, _block("m1", tool="Grep")), (1.2, _block("m1", tool="mcp__graph__graph_query")), (1.3, _delta(5)),
+                  (2.0, _start("m2")), (2.1, _block("m2", tool="mcp__graph__graph_query")), (2.2, _delta(5))]
+        s = phases.split(stream)
+        self.assertEqual((s["solve"]["graph_tool_calls"], s["solve"]["graph_before_files"]), (2, 0))
 
     def test_a_run_without_the_marker_is_all_solve(self):
         s = phases.split(STREAM[:9])
@@ -179,6 +187,86 @@ class PromptTests(unittest.TestCase):
         self.assertEqual(committed, prompt.assemble())
         self.assertFalse(prompt.skill_body().startswith("---"))
         self.assertIsNotNone(prompt.checksum(committed))
+
+
+class ReportTests(unittest.TestCase):
+    @staticmethod
+    def _runs(label, erdos_tokens, verify_tokens):
+        def phase(tokens, graph=0, calls=2, tools=3, seconds=10.0):
+            return {"calls": calls, "graph_tool_calls": graph, "tool_calls": tools, "result_bytes": 1000, "seconds": seconds,
+                    "tokens": {}, "tokens_sum": tokens, "tokens_weighted": tokens / 2}
+
+        rows = []
+        for arm, tokens in (("general", 1000), ("erdos", erdos_tokens)):
+            graph = 1 if arm == "erdos" else 0
+            rows.append({"problem": "p", "arm": arm, "solve": phase(tokens, graph), "verify": phase(verify_tokens),
+                         "total": phase(tokens + verify_tokens, graph, calls=4, tools=6, seconds=20.0), "result": {}, "marker": True})
+        return {"label": label, "meta": {"prompt_version": f"erdos@{label}"}, "rows": rows}
+
+    @staticmethod
+    def _judge(erdos_overall):
+        return {"problems": [{"problem": "p", "blind_order": {"A": "erdos", "B": "general"},
+                              "judge": {"scores": {"erdos": {"overall": erdos_overall, "red_flags_made": 1}, "general": {"overall": 4}}},
+                              "deterministic": {"erdos": {"must_find": {"recall": 0.5}}, "general": {"must_find": {"recall": 1.0}}}}]}
+
+    def test_the_comparison_shows_both_runs_per_arm(self):
+        report = __import__("erdos_report")
+        text = report.build(self._runs("v2", 800, 0), self._judge(4), against=(self._runs("v1", 400, 200), self._judge(3)))
+        self.assertIn("## Against v1", text)
+        self.assertIn("| v1 | erdos | solve + verify | 4 | 1 | 5 | 600 | 300 | 20 |", text)
+        self.assertIn("| v2 | erdos | solve | 2 | 1 | 2 | 800 |", text)
+        self.assertIn("| v1 | erdos | solve | 2 | 1 | 2 | 400 | 200 | 10 | 3.0 | 0.0 | 0.0 | 1.0 | 0.50 |", text)
+        self.assertNotIn("| v2 | erdos | solve + verify", text)
+        self.assertNotIn("## Against", report.build(self._runs("v2", 800, 0), self._judge(4)))
+
+
+class RubricTests(unittest.TestCase):
+    def test_rubric_r2_scores_architecture_and_writes_its_own_file(self):
+        self.assertEqual(judge.RUBRIC, "r2")
+        for key in ("architecture_fit", "patterns_followed"):
+            self.assertIn(key, judge.SYSTEM)
+        self.assertTrue(judge.judge_path("x").endswith("x.judge-r2.json"))
+        self.assertTrue(judge.judge_path("x", rubric="r1").endswith("x.judge.json"))
+        problem = {"id": "p", "prompt": "P", "gold": {"must_find": [], "architecture": [{"pattern": "ShedLock on crons"}]}}
+        self.assertIn("ShedLock on crons", judge.judge_prompt(problem, "A", "B"))
+
+    def test_the_judge_never_sees_the_arm_tells(self):
+        text, n = judge.neutralize("**Frontend** (subsystems [170], [174], [177]): the screen in [176] ([11]). "
+                                   "The graph shows two callers; e2e is not in the graph. See [173]/[178] and `a[0]`.")
+        self.assertNotRegex(text.replace("`a[0]`", ""), r"\[\d{1,3}\]")
+        self.assertNotIn("graph", text.lower())
+        self.assertIn("**Frontend**: the screen in.", text)
+        self.assertIn("The dependency analysis shows two callers; e2e is not in the dependency analysis.", text)
+        self.assertIn("`a[0]`", text)                                          # code indexing is not an id
+        self.assertNotIn("subsystems", text)
+        self.assertGreaterEqual(n, 5)
+        self.assertEqual(judge.neutralize("Plain answer with no tells.")[1], 0)
+
+    def test_a_key_needs_a_checked_architecture_section(self):
+        import take_gold
+        with tempfile.TemporaryDirectory() as ws:
+            os.makedirs(os.path.join(ws, "backend"))
+            open(os.path.join(ws, "backend", "A.java"), "w").close()
+            key = {f: [] for f in take_gold.FIELDS}
+            key["architecture"] = [{"pattern": "p", "where": ["backend/A.java", "backend/Missing.java"], "today": "t", "fit": "f"}]
+            issues = take_gold.check(key, ws)
+            self.assertIn("architecture entry without breaks", issues)
+            self.assertIn("absent architecture path backend/Missing.java", issues)
+            self.assertNotIn("absent architecture path backend/A.java", issues)
+
+    def test_general_runs_are_reused_without_overwriting(self):
+        with tempfile.TemporaryDirectory() as d:
+            src, dst = os.path.join(d, "v2"), os.path.join(d, "v21")
+            os.makedirs(src)
+            os.makedirs(dst)
+            for pid in ("done", "unfinished", "kept"):
+                with open(os.path.join(src, f"{pid}.general.events.jsonl"), "w", encoding="utf-8") as f:
+                    events = STREAM if pid != "unfinished" else STREAM[:3]
+                    f.writelines(json.dumps({"t": t, "event": e}) + "\n" for t, e in events)
+            with open(os.path.join(dst, "kept.general.events.jsonl"), "w", encoding="utf-8") as f:
+                f.write("original\n")
+            self.assertEqual(run_pairs.reuse_runs(src, dst, ["done", "unfinished", "kept"], "general"), ["done"])
+            self.assertEqual(open(os.path.join(dst, "kept.general.events.jsonl"), encoding="utf-8").read(), "original\n")
 
 
 class JudgeTests(unittest.TestCase):

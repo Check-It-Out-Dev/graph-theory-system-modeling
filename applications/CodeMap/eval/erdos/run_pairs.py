@@ -138,6 +138,18 @@ def preflight(files, expected, cwd, exe=None, run=subprocess.run, timeout=300):
     return ok, f"expected {expected}, the model said {said[:60]!r}, context {context} tokens"
 
 
+def reuse_runs(src_dir, dst_dir, problem_ids, arm):
+    """Copy finished `<problem>.<arm>.events.jsonl` files from another label; -> the problem ids copied.
+    Valid for the general arm across manual versions: its command does not depend on Erdős's manual."""
+    copied = []
+    for pid in problem_ids:
+        src, dst = (os.path.join(d, f"{pid}.{arm}.events.jsonl") for d in (src_dir, dst_dir))
+        if finished(src) and not os.path.exists(dst):
+            shutil.copyfile(src, dst)
+            copied.append(pid)
+    return copied
+
+
 def run_one(cmd, cwd, events_path, timeout):
     """Stream one run to its events file; -> seconds. Never raises on a failing run."""
     env = child_env()
@@ -218,6 +230,7 @@ def main(argv=None):
     ap.add_argument("--parallel", type=int, default=2)
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--context-root", default=os.path.join(tempfile.gettempdir(), "codemap-erdos"))
+    ap.add_argument("--reuse-general-from", default=None, help="copy the general arm's finished runs from this label")
     a = ap.parse_args(argv)
     problems = [p for p in load_problems(a.problems) if not a.only or p["id"] == a.only]
     arms = [x for x in a.arms.split(",") if x]
@@ -237,6 +250,10 @@ def main(argv=None):
             "graph_access": "raw read-only Cypher (remote/ladybug_mcp.py)", "task_card": "single phase, no verification round",
             "pack_version": manifest.get("pack_version"), "pack_indexed_sha": manifest.get("indexed_sha"),
             "workspace_heads": heads(a.workspace), "started": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
+    if a.reuse_general_from:
+        source = os.path.join(HERE, "runs", a.reuse_general_from)
+        meta["general_reused_from"] = a.reuse_general_from
+        print("general runs reused from", a.reuse_general_from, reuse_runs(source, run_dir, [p["id"] for p in problems], "general"))
     stale = {k: v for k, v in meta["workspace_heads"].items() if v and v != (manifest.get("indexed_sha") or {}).get(k)}
     if stale:
         print("WARNING: workspace heads differ from the pack's indexed commits:", stale)
