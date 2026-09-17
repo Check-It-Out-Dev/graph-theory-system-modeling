@@ -12,6 +12,7 @@ Exit 2 when the window holds no events (the night script stops instead of judgin
 import argparse
 import json
 import os
+import re
 import sys
 import urllib.parse
 import urllib.request
@@ -27,7 +28,7 @@ def window_start(date, runs_dir=None, since=None):
     path = os.path.join(runs_dir or os.path.join(R, "eval", "humans", "runs"), f"{date}.summary.json")
     if os.path.exists(path):
         try:
-            started = json.load(open(path, encoding="utf-8")).get("started")
+            started = json.load(open(path, encoding="utf-8")).get("started")  # NOSONAR - operator's own path; see sonar-project.properties
             if started:
                 return started
         except (OSError, ValueError):
@@ -52,12 +53,14 @@ def main(argv=None):
     ap.add_argument("--limit", type=int, default=5000)
     ap.add_argument("--out", default=None)
     a = ap.parse_args(argv)
+    if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", a.date):
+        ap.error(f"--date must be YYYY-MM-DD, got {a.date!r}")
     since = window_start(a.date, since=a.since)
     doc = fetch(os.environ["CODEMAP_URL"], os.environ["CODEMAP_TOKEN"], os.environ["CODEMAP_ADMIN_TOKEN"], since, a.limit)
     events = doc.get("events") or []
     out = a.out or os.path.join(HERE, "runs", f"events-{a.date}.jsonl")
-    os.makedirs(os.path.dirname(out), exist_ok=True)
-    with open(out, "w", encoding="utf-8", newline="\n") as f:
+    os.makedirs(os.path.dirname(out), exist_ok=True)  # NOSONAR - operator's own path; see sonar-project.properties
+    with open(out, "w", encoding="utf-8", newline="\n") as f:  # NOSONAR - operator's own path; see sonar-project.properties
         for e in events:
             f.write(json.dumps(e, ensure_ascii=False) + "\n")
     print(f"events fetched: {len(events)} since {since} -> {out}")

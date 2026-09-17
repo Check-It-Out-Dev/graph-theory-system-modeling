@@ -22,7 +22,7 @@ import extract  # noqa: E402
 
 def scan(name, repo_dir, pack_dir):
     prefix = extract.REPOS["repos"][name]["prefix"]
-    ents = list(csv.DictReader(open(os.path.join(pack_dir, "entities.csv"), encoding="utf-8")))
+    ents = list(csv.DictReader(open(os.path.join(pack_dir, "entities.csv"), encoding="utf-8")))  # NOSONAR - operator's own path; see sonar-project.properties
     known = {e["file_path"] for e in ents if e["file_path"].startswith(prefix)}
     on_disk = set()
     rows = []
@@ -48,7 +48,7 @@ def main(argv=None):
     ap.add_argument("--out", required=True)
     a = ap.parse_args(argv)
     rows = scan(a.name, a.repo_dir, a.pack)
-    with open(a.out, "w", encoding="utf-8", newline="\n") as f:
+    with open(a.out, "w", encoding="utf-8", newline="\n") as f:  # NOSONAR - operator's own path; see sonar-project.properties
         for st, rel in rows:
             f.write(f"{st}\t{rel}\n")
     counts = {k: sum(1 for st, _ in rows if st == k) for k in ("A", "M", "D")}

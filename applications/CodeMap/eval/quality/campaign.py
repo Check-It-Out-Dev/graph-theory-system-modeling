@@ -53,7 +53,7 @@ def pairs_of(rows, night):
 def campaign(runs_dir):
     pairs = []
     nights = []
-    for p in sorted(glob.glob(os.path.join(runs_dir, "*.jsonl"))):
+    for p in sorted(glob.glob(os.path.join(runs_dir, "*.jsonl"))):  # NOSONAR - operator's own path; see sonar-project.properties
         night = os.path.basename(p)[:-6]
         rows = [json.loads(l) for l in open(p, encoding="utf-8") if l.strip()]
         night_pairs = pairs_of(rows, night)
@@ -87,8 +87,8 @@ def main(argv=None):
     ap.add_argument("--out", default=os.path.join(R, "eval", "quality", "runs", "campaign.json"))
     a = ap.parse_args(argv)
     doc = campaign(a.runs)
-    os.makedirs(os.path.dirname(a.out), exist_ok=True)
-    json.dump(doc, open(a.out, "w", encoding="utf-8", newline="\n"), indent=1, sort_keys=True)
+    os.makedirs(os.path.dirname(a.out), exist_ok=True)  # NOSONAR - operator's own path; see sonar-project.properties
+    json.dump(doc, open(a.out, "w", encoding="utf-8", newline="\n"), indent=1, sort_keys=True)  # NOSONAR - operator's own path; see sonar-project.properties
     print(json.dumps({k: doc[k] for k in ("n_pairs", "tokens_ratio_mean", "turns_delta_mean", "seconds_delta_mean", "rating_baseline_mean",
                                           "rating_codemap_mean", "share_fewer_tokens", "share_fewer_turns", "share_rated_at_least_as_well", "gated")}))
     print("nights:", [(n["night"], n["pairs"]) for n in doc["nights"]])

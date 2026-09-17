@@ -99,7 +99,7 @@ def oracle(ev, kind, row):
 # ----------------------------------------------------------------------------- rows
 
 def load_jsonl(path):
-    return [json.loads(l) for l in open(path, encoding="utf-8") if l.strip()]
+    return [json.loads(l) for l in open(path, encoding="utf-8") if l.strip()]  # NOSONAR - operator's own path; see sonar-project.properties
 
 
 def invalidated_ids():
