@@ -14,56 +14,59 @@ table{border-collapse:collapse;width:100%;font-size:14px}.tablewrap{overflow-x:a
 footer{margin-top:40px;color:var(--muted);font-size:13px}
 </style></head><body>
 <h1>CodeMap Remote — measuring prompt quality in an AI system</h1>
-<p class='muted'>Every number on this page is recomputed from an artifact committed in <a href='https://github.com/Check-It-Out-Dev/graph-theory-system-modeling'>the repository</a>: nightly quality runs, judge calibrations, the personas' nights, partition decisions with their drift, and prompt-optimisation runs. No model runs to build it. Built 2026-09-17T04:22:31Z. The live counterpart is the set of public Grafana Cloud dashboards below; the served MCP is <code>https://codemap.checkitout.app/mcp</code>.</p>
-<h2>The latest night — 2026-09-17</h2>
+<p class='muted'>Every number on this page is recomputed from an artifact committed in <a href='https://github.com/Check-It-Out-Dev/graph-theory-system-modeling'>the repository</a>: nightly quality runs, judge calibrations, the personas' nights, partition decisions with their drift, and prompt-optimisation runs. No model runs to build it. Built 2026-09-17T07:06:00Z. The live counterpart is the set of public Grafana Cloud dashboards below; the served MCP is <code>https://codemap.checkitout.app/mcp</code>.</p>
+<h2>The latest night — 2026-09-20</h2>
 <div class='grid'>
-<div class='card'><h3>Grounded answers</h3><div class='big ok'>87 %</div><div class='muted'>judge ≥ 4 on grounding, share of judged answers</div></div>
-<div class='card'><h3>Correct answers</h3><div class='big ok'>78 %</div><div class='muted'>judge ≥ 4 on correctness</div></div>
-<div class='card'><h3>Mean rating</h3><div class='big info'>4.2</div><div class='muted'>personas rate after verifying a pointer; unverified ratings cap at 3</div></div>
-<div class='card'><h3>Judge κ vs oracle</h3><div class='big warn'>-0.28</div><div class='muted'>Cohen&#x27;s κ of the judge&#x27;s &#x27;located&#x27; against the execution oracle (gate 0.6)</div></div>
-<div class='card'><h3>Credits per correct answer</h3><div class='big info'>17.5</div><div class='muted'>credits are relative units, never currency</div></div>
-<div class='card'><h3>Version drift</h3><div class='big warn'>11 %</div><div class='muted'>bank rows answering differently after the last pack decision, not invalidated on purpose</div></div>
-<div class='card'><h3>Answers judged</h3><div class='big info'>54</div><div class='muted'>58 asks, 11 misses reported, 0 budget refusals</div></div>
-<div class='card'><h3>Honest abstention</h3><div class='big ok'>100 %</div><div class='muted'>all 31 %, false 0 %</div></div>
+<div class='card'><h3>Grounded answers</h3><div class='big ok'>94 %</div><div class='muted'>judge ≥ 4 on grounding, share of judged answers</div></div>
+<div class='card'><h3>Correct answers</h3><div class='big ok'>90 %</div><div class='muted'>judge ≥ 4 on correctness</div></div>
+<div class='card'><h3>Mean rating</h3><div class='big info'>3.9</div><div class='muted'>personas rate after verifying a pointer; unverified ratings cap at 3</div></div>
+<div class='card'><h3>Judge vs oracle</h3><div class='big ok'>κ 0.45 · AC1 0.90</div><div class='muted'>Cohen&#x27;s κ and Gwet&#x27;s AC1 of the judge&#x27;s &#x27;located&#x27; against the execution oracle on 24 rows; agreement 92 %, oracle yes-rate 92 %; gate 0.6 on κ, or on AC1 with agreement ≥ 80 % when the yes-rate is past 85 % (κ&#x27;s prevalence paradox); basis: ac1</div></div>
+<div class='card'><h3>Credits per correct answer</h3><div class='big info'>15.6</div><div class='muted'>credits are relative units, never currency</div></div>
+<div class='card'><h3>Version drift</h3><div class='big warn'>31 %</div><div class='muted'>bank rows answering differently after the last pack decision, not invalidated on purpose</div></div>
+<div class='card'><h3>Answers judged</h3><div class='big info'>154</div><div class='muted'>166 asks, 36 misses reported, 1 budget refusals</div></div>
+<div class='card'><h3>Honest abstention</h3><div class='big ok'>98 %</div><div class='muted'>all 26 %, false 2 %</div></div>
 </div>
 <h2>Night over night</h2>
 <div class='grid'>
-<div class='card'><h3>Grounded</h3><div class='big info'>87 %</div><svg class="spark" viewBox="0 0 220 48" role="img"><path d="M 6.0 9.1 L 214.0 10.7"/><circle cx="6.0" cy="9.1" r="3"/><circle cx="214.0" cy="10.7" r="3"/></svg><div class='muted'>2 night(s)</div></div>
-<div class='card'><h3>Correct</h3><div class='big info'>78 %</div><svg class="spark" viewBox="0 0 220 48" role="img"><path d="M 6.0 15.3 L 214.0 14.0"/><circle cx="6.0" cy="15.3" r="3"/><circle cx="214.0" cy="14.0" r="3"/></svg><div class='muted'>2 night(s)</div></div>
-<div class='card'><h3>Mean rating (of 5)</h3><div class='big info'>4.2</div><svg class="spark" viewBox="0 0 220 48" role="img"><path d="M 6.0 6.0 L 214.0 42.0"/><circle cx="6.0" cy="6.0" r="3"/><circle cx="214.0" cy="42.0" r="3"/></svg><div class='muted'>2 night(s)</div></div>
-<div class='card'><h3>Pointer-verified ratings</h3><div class='big info'>98 %</div><svg class="spark" viewBox="0 0 220 48" role="img"><path d="M 6.0 6.0 L 214.0 6.6"/><circle cx="6.0" cy="6.0" r="3"/><circle cx="214.0" cy="6.6" r="3"/></svg><div class='muted'>2 night(s)</div></div>
-<div class='card'><h3>Version drift</h3><div class='big info'>11 %</div><svg class="spark" viewBox="0 0 220 48" role="img"><path d="M 6.0 38.1 L 214.0 38.1"/><circle cx="6.0" cy="38.1" r="3"/><circle cx="214.0" cy="38.1" r="3"/></svg><div class='muted'>2 night(s)</div></div>
-<div class='card'><h3>Credits per correct answer</h3><div class='big info'>17.5</div><svg class="spark" viewBox="0 0 220 48" role="img"><path d="M 6.0 6.0 L 214.0 42.0"/><circle cx="6.0" cy="6.0" r="3"/><circle cx="214.0" cy="42.0" r="3"/></svg><div class='muted'>2 night(s)</div></div>
+<div class='card'><h3>Grounded</h3><div class='big info'>94 %</div><svg class="spark" viewBox="0 0 220 48" role="img"><path d="M 6.0 9.1 L 58.0 10.7 L 110.0 13.8 L 162.0 11.1 L 214.0 8.1"/><circle cx="6.0" cy="9.1" r="3"/><circle cx="58.0" cy="10.7" r="3"/><circle cx="110.0" cy="13.8" r="3"/><circle cx="162.0" cy="11.1" r="3"/><circle cx="214.0" cy="8.1" r="3"/></svg><div class='muted'>5 night(s)</div></div>
+<div class='card'><h3>Correct</h3><div class='big info'>90 %</div><svg class="spark" viewBox="0 0 220 48" role="img"><path d="M 6.0 15.3 L 58.0 14.0 L 110.0 14.8 L 162.0 14.6 L 214.0 9.5"/><circle cx="6.0" cy="15.3" r="3"/><circle cx="58.0" cy="14.0" r="3"/><circle cx="110.0" cy="14.8" r="3"/><circle cx="162.0" cy="14.6" r="3"/><circle cx="214.0" cy="9.5" r="3"/></svg><div class='muted'>5 night(s)</div></div>
+<div class='card'><h3>Mean rating (of 5)</h3><div class='big info'>3.9</div><svg class="spark" viewBox="0 0 220 48" role="img"><path d="M 6.0 6.0 L 58.0 22.2 L 110.0 30.6 L 162.0 42.0 L 214.0 35.1"/><circle cx="6.0" cy="6.0" r="3"/><circle cx="58.0" cy="22.2" r="3"/><circle cx="110.0" cy="30.6" r="3"/><circle cx="162.0" cy="42.0" r="3"/><circle cx="214.0" cy="35.1" r="3"/></svg><div class='muted'>5 night(s)</div></div>
+<div class='card'><h3>Pointer-verified ratings</h3><div class='big info'>97 %</div><svg class="spark" viewBox="0 0 220 48" role="img"><path d="M 6.0 6.0 L 58.0 6.6 L 110.0 6.7 L 162.0 7.6 L 214.0 7.1"/><circle cx="6.0" cy="6.0" r="3"/><circle cx="58.0" cy="6.6" r="3"/><circle cx="110.0" cy="6.7" r="3"/><circle cx="162.0" cy="7.6" r="3"/><circle cx="214.0" cy="7.1" r="3"/></svg><div class='muted'>5 night(s)</div></div>
+<div class='card'><h3>Version drift</h3><div class='big info'>31 %</div><svg class="spark" viewBox="0 0 220 48" role="img"><path d="M 6.0 30.7 L 58.0 30.7 L 110.0 30.7 L 162.0 30.7 L 214.0 30.7"/><circle cx="6.0" cy="30.7" r="3"/><circle cx="58.0" cy="30.7" r="3"/><circle cx="110.0" cy="30.7" r="3"/><circle cx="162.0" cy="30.7" r="3"/><circle cx="214.0" cy="30.7" r="3"/></svg><div class='muted'>5 night(s)</div></div>
+<div class='card'><h3>Credits per correct answer</h3><div class='big info'>15.6</div><svg class="spark" viewBox="0 0 220 48" role="img"><path d="M 6.0 6.0 L 58.0 30.5 L 110.0 13.6 L 162.0 42.0 L 214.0 36.9"/><circle cx="6.0" cy="6.0" r="3"/><circle cx="58.0" cy="30.5" r="3"/><circle cx="110.0" cy="13.6" r="3"/><circle cx="162.0" cy="42.0" r="3"/><circle cx="214.0" cy="36.9" r="3"/></svg><div class='muted'>5 night(s)</div></div>
 </div>
 <h2>Who asked — the synthetic users</h2>
 <div class='tablewrap'><table><tr><th>persona</th><th class='n'>conversations</th><th class='n'>turns</th><th class='n'>credits</th><th class='n'>mean rating</th><th class='n'>misses</th></tr>
-<tr><td><code>haiku-ops</code></td><td class='n'>4</td><td class='n'>82</td><td class='n'>104.1</td><td class='n'>4.6</td><td class='n'>3</td></tr>
-<tr><td><code>haiku-pm</code></td><td class='n'>4</td><td class='n'>48</td><td class='n'>95.2</td><td class='n'>4.7</td><td class='n'>0</td></tr>
-<tr><td><code>opus-architect</code></td><td class='n'>2</td><td class='n'>55</td><td class='n'>327.6</td><td class='n'>3.8</td><td class='n'>4</td></tr>
-<tr><td><code>opus-reviewer</code></td><td class='n'>2</td><td class='n'>68</td><td class='n'>37.9</td><td class='n'>3.0</td><td class='n'>9</td></tr>
-<tr><td><code>sonnet-bugfixer</code></td><td class='n'>3</td><td class='n'>56</td><td class='n'>78.0</td><td class='n'>4.1</td><td class='n'>0</td></tr>
-<tr><td><code>sonnet-newcomer</code></td><td class='n'>3</td><td class='n'>58</td><td class='n'>91.6</td><td class='n'>4.0</td><td class='n'>2</td></tr>
+<tr><td><code>haiku-ops</code></td><td class='n'>12</td><td class='n'>229</td><td class='n'>201.7</td><td class='n'>4.7</td><td class='n'>1</td></tr>
+<tr><td><code>haiku-pm</code></td><td class='n'>12</td><td class='n'>168</td><td class='n'>206.9</td><td class='n'>4.5</td><td class='n'>2</td></tr>
+<tr><td><code>opus-architect</code></td><td class='n'>3</td><td class='n'>74</td><td class='n'>369.1</td><td class='n'>3.6</td><td class='n'>4</td></tr>
+<tr><td><code>opus-reviewer</code></td><td class='n'>8</td><td class='n'>222</td><td class='n'>551.3</td><td class='n'>3.5</td><td class='n'>14</td></tr>
+<tr><td><code>sonnet-bugfixer</code></td><td class='n'>17</td><td class='n'>265</td><td class='n'>288.0</td><td class='n'>3.3</td><td class='n'>12</td></tr>
+<tr><td><code>sonnet-newcomer</code></td><td class='n'>19</td><td class='n'>228</td><td class='n'>226.1</td><td class='n'>4.4</td><td class='n'>2</td></tr>
 </table></div>
 <h2>What it cost — in credits and tokens, never currency</h2><div class='grid'>
 <div class='card'><h3>Credits by user</h3>
-<div class="bar"><span class="bar-label">opus-architect</span><span class="bar-track"><span class="bar-fill" style="width:44.6%"></span></span><span class="bar-value">327.6</span></div>
-<div class="bar"><span class="bar-label">haiku-ops</span><span class="bar-track"><span class="bar-fill" style="width:14.2%"></span></span><span class="bar-value">104.1</span></div>
-<div class="bar"><span class="bar-label">haiku-pm</span><span class="bar-track"><span class="bar-fill" style="width:13.0%"></span></span><span class="bar-value">95.2</span></div>
-<div class="bar"><span class="bar-label">sonnet-newcomer</span><span class="bar-track"><span class="bar-fill" style="width:12.5%"></span></span><span class="bar-value">91.6</span></div>
-<div class="bar"><span class="bar-label">sonnet-bugfixer</span><span class="bar-track"><span class="bar-fill" style="width:10.6%"></span></span><span class="bar-value">78.0</span></div>
-<div class="bar"><span class="bar-label">opus-reviewer</span><span class="bar-track"><span class="bar-fill" style="width:5.2%"></span></span><span class="bar-value">37.9</span></div>
+<div class="bar"><span class="bar-label">opus-reviewer</span><span class="bar-track"><span class="bar-fill" style="width:25.4%"></span></span><span class="bar-value">551.3</span></div>
+<div class="bar"><span class="bar-label">opus-architect</span><span class="bar-track"><span class="bar-fill" style="width:17.0%"></span></span><span class="bar-value">369.1</span></div>
+<div class="bar"><span class="bar-label">judge</span><span class="bar-track"><span class="bar-fill" style="width:15.1%"></span></span><span class="bar-value">327.0</span></div>
+<div class="bar"><span class="bar-label">sonnet-bugfixer</span><span class="bar-track"><span class="bar-fill" style="width:13.3%"></span></span><span class="bar-value">288.0</span></div>
+<div class="bar"><span class="bar-label">sonnet-newcomer</span><span class="bar-track"><span class="bar-fill" style="width:10.4%"></span></span><span class="bar-value">226.1</span></div>
+<div class="bar"><span class="bar-label">haiku-pm</span><span class="bar-track"><span class="bar-fill" style="width:9.5%"></span></span><span class="bar-value">206.9</span></div>
+<div class="bar"><span class="bar-label">haiku-ops</span><span class="bar-track"><span class="bar-fill" style="width:9.3%"></span></span><span class="bar-value">201.7</span></div>
 </div>
 <div class='card'><h3>Tokens</h3>
-<div class='bar'><span class='bar-label'>cached</span><span></span><span class='bar-value'>9,212,640</span></div>
-<div class='bar'><span class='bar-label'>cache_creation</span><span></span><span class='bar-value'>397,890</span></div>
-<div class='bar'><span class='bar-label'>completion</span><span></span><span class='bar-value'>85,650</span></div>
-<div class='bar'><span class='bar-label'>prompt</span><span></span><span class='bar-value'>428</span></div>
-<div class='muted'>cache-read ratio 96 % · p95 latency 41,280 ms</div></div>
-<div class='card'><h3>Gains vs no-CodeMap baselines</h3><div class='big info'>0 pairs</div><div class='muted'>tokens ratio — · turns Δ — · seconds Δ —; a gain without its baseline row is ungated</div></div>
+<div class='bar'><span class='bar-label'>cached</span><span></span><span class='bar-value'>31,492,243</span></div>
+<div class='bar'><span class='bar-label'>cache_creation</span><span></span><span class='bar-value'>1,107,073</span></div>
+<div class='bar'><span class='bar-label'>completion</span><span></span><span class='bar-value'>242,951</span></div>
+<div class='bar'><span class='bar-label'>prompt</span><span></span><span class='bar-value'>1,232</span></div>
+<div class='muted'>cache-read ratio 97 % · p95 latency 47,550 ms</div></div>
+<div class='card'><h3>Gain campaign (pairs across nights)</h3><div class='big ok'>35 / 30 pairs</div><div class='muted'>tokens ratio 0.63 · turns Δ -3.5 · seconds Δ -88.5 · rated at least as well 29 % · fewer tokens 17 %; the row flips at thirty pairs</div></div>
+<div class='card'><h3>Gains vs no-CodeMap baselines (this night)</h3><div class='big info'>31 pairs</div><div class='muted'>tokens ratio 0.64 · turns Δ -3.9 · seconds Δ -94.2; a gain without its baseline row is ungated</div></div>
 </div>
 <h2>The graph follows the code — decisions on the pull request</h2>
 <div class='tablewrap'><table><tr><th>pack</th><th>repo @ head</th><th>decision</th><th>by</th><th class='n'>placed</th><th>new subsystems</th><th class='n'>FAQ invalidated</th><th class='n'>drift</th><th>reclued</th></tr>
 <tr><td><code>1.0.1</code></td><td>backend @ <code>ff43730</code></td><td><span class='tag ok'>accept</span></td><td>RamzesX</td><td class='n'>7</td><td>JUnit test-execution harness</td><td class='n'>10</td><td class='n'>6/55 (11 %)</td><td>—</td></tr>
+<tr><td><code>1.1.0</code></td><td>backend+frontend @ <code>ff43730</code></td><td><span class='tag ok'>accept</span></td><td>RamzesX</td><td class='n'>174</td><td>codemap-trajectory-viewer</td><td class='n'>12</td><td class='n'>17/54 (31 %)</td><td>0, 3, 4, 6, 8, 9, 10, 11, 16, 170, 171, 174, 175, 176, 178, 205, 206</td></tr>
 </table></div>
 <h2>The prompt improves on request — GEPA runs</h2>
 <div class='tablewrap'><table><tr><th>run</th><th>mode</th><th>where</th><th class='n'>seed (val)</th><th class='n'>best (val)</th><th class='n'>candidates</th><th class='n'>metric calls</th><th>outcome</th></tr>
