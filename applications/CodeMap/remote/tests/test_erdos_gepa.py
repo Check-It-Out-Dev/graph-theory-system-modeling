@@ -118,6 +118,26 @@ class EvaluateTests(unittest.TestCase):
             self.assertEqual((seen["judge"], noise["problems"], noise["graph_use"]), (2, 1, 0.0))
 
 
+class ReflectorTests(unittest.TestCase):
+    def test_the_reflector_passes_timeout_and_effort_and_logs_each_call(self):
+        seen = {}
+
+        def runner(cmd, env=None, cwd=None, timeout=None):
+            seen["cmd"], seen["timeout"] = cmd, timeout
+            import subprocess
+            return subprocess.CompletedProcess(cmd, 0, json.dumps({"result": "```new manual```", "is_error": False,
+                                                                   "usage": {"output_tokens": 7}}), "")
+
+        with tempfile.TemporaryDirectory() as d:
+            log = os.path.join(d, "log.jsonl")
+            teacher = erdos_gepa.reflection_lm("claude-opus-5", timeout=2400, effort="high", log_path=log, runner=runner)
+            self.assertEqual(teacher("prompt"), "```new manual```")
+            self.assertEqual(seen["timeout"], 2400)
+            self.assertEqual(seen["cmd"][seen["cmd"].index("--effort") + 1], "high")
+            self.assertEqual((teacher.usage["calls"], teacher.usage["output_tokens"]), (1, 7))
+            self.assertEqual(json.loads(open(log, encoding="utf-8").read())["event"], "reflect")
+
+
 class SeedRunTests(unittest.TestCase):
     def test_seed_runs_are_imported_only_for_the_same_manual(self):
         seed = erdos_prompt.skill_body()

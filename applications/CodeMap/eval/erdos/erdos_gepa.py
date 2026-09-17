@@ -298,6 +298,36 @@ class ErdosAdapter:
         return {c: rows for c in components_to_update}
 
 
+# ----------------------------------------------------------------------------- the reflector
+
+def reflection_lm(model, timeout=2400, effort=None, log_path=None, runner=None):
+    """GEPA's teacher: one tool-less `claude -p` per reflection, on the subscription (role reflector). A reflection
+    returns the whole manual, so it can think and write for many minutes: the timeout is long, and each call's
+    seconds and output tokens are logged."""
+    import claude_cli
+    usage = {"calls": 0, "output_tokens": 0, "seconds": 0.0, "failures": 0}
+
+    def call(prompt):
+        if not isinstance(prompt, str):
+            prompt = "\n\n".join(m.get("content", "") if isinstance(m, dict) else str(m) for m in prompt)
+        t0 = time.time()
+        res = claude_cli.run(prompt, model, role="reflector", max_turns=1, timeout=timeout, runner=runner, tools=[], effort=effort)
+        seconds = round(time.time() - t0, 1)
+        usage["calls"] += 1
+        usage["seconds"] += seconds
+        usage["output_tokens"] += int((res.get("usage") or {}).get("output_tokens", 0) or 0)
+        usage["failures"] += 1 if res.get("is_error") else 0
+        if log_path:
+            with open(log_path, "a", encoding="utf-8") as f:
+                f.write(json.dumps({"event": "reflect", "is_error": res.get("is_error"), "chars": len(res.get("text") or ""),
+                                    "seconds": seconds, "prompt_chars": len(prompt)}) + "\n")
+        if res.get("is_error"):
+            raise RuntimeError(f"reflection failed: {res.get('error')}")
+        return res.get("text") or ""
+    call.usage = usage
+    return call
+
+
 # ----------------------------------------------------------------------------- seed runs and judge noise
 
 def import_seed_runs(label, seed_body, run_dir, problem_ids, runs_dir=None):
@@ -366,6 +396,8 @@ def main(argv=None):
     ap.add_argument("--no-judge-repeat", action="store_true", help="skip grading the seed's answers twice")
     ap.add_argument("--dry-run", action="store_true", help="check the seed and the seed runs; no model call")
     ap.add_argument("--resume", action="store_true", help="continue the run saved under this label")
+    ap.add_argument("--reflection-timeout", type=int, default=2400)
+    ap.add_argument("--reflection-effort", default=None, help="low, medium, high, xhigh or max; the CLI default when omitted")
     a = ap.parse_args(argv)
     problems = run_pairs.load_problems()
     run_dir = os.path.join(HERE, "runs", a.label)
@@ -392,8 +424,7 @@ def main(argv=None):
     print("judge noise on the seed (mean absolute difference between two gradings):", noise, flush=True)
 
     import gepa
-    import adapter as nav_adapter  # eval/optimize: the tool-less claude -p reflection LM
-    teacher = nav_adapter.reflection_lm(a.reflection_model, log_path=log_path, timeout=900)
+    teacher = reflection_lm(a.reflection_model, timeout=a.reflection_timeout, effort=a.reflection_effort, log_path=log_path)
     result = gepa.optimize(seed_candidate={COMPONENT: seed_body}, trainset=data, valset=data, adapter=ad, reflection_lm=teacher,
                            max_metric_calls=a.max_metric_calls, reflection_minibatch_size=a.minibatch, seed=a.seed,
                            reflection_prompt_template={COMPONENT: REFLECTION_TEMPLATE},
