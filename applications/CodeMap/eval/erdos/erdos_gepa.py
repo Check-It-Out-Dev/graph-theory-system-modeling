@@ -223,12 +223,21 @@ class ErdosAdapter:
         sha, cand_dir = self.candidate_dir(body)
         problem = self.problems[pid]
         events_path = os.path.join(cand_dir, f"{pid}.erdos.events.jsonl")
-        if not run_pairs.finished(events_path):  # a candidate already run on a problem is not run twice
-            manual = erdos_prompt.assemble(body)
-            context = run_pairs.context_dir(os.path.join(self.context_root, sha), manual)
-            cmd = run_pairs.command("erdos", problem, self.model, self.max_turns, {"mcp": self.mcp_path, "context": context})
-            self.runner(cmd, self.workspace, events_path, self.timeout)
-        events = erdos_phases.load(events_path)
+        events = None
+        for _ in range(2):
+            if not run_pairs.finished(events_path):  # a candidate already run on a problem is not run twice
+                manual = erdos_prompt.assemble(body)
+                context = run_pairs.context_dir(os.path.join(self.context_root, sha), manual)
+                cmd = run_pairs.command("erdos", problem, self.model, self.max_turns, {"mcp": self.mcp_path, "context": context})
+                self.runner(cmd, self.workspace, events_path, self.timeout)
+            try:
+                events = erdos_phases.load(events_path)
+                break
+            except ValueError:                      # a damaged stream: run it once more from scratch
+                self._log({"event": "damaged_stream", "candidate": sha, "problem": pid})
+                os.remove(events_path)
+        if events is None:
+            raise RuntimeError(f"the run of {sha} on {pid} left a damaged stream twice")
         answer = erdos_phases.split(events)["answer"] or ""
         adherence = erdos_adherence.check_run(events, answer, self.keys[pid])
         verdict, err = self.judged(pid, answer, erdos_adherence.trace_text(events), os.path.join(cand_dir, f"{pid}.verdict-r3.json"))
@@ -247,25 +256,33 @@ class ErdosAdapter:
             EvaluationBatch = _EvaluationBatch
         body = candidate[COMPONENT]
         problems = check(body, self.identifiers)
-        pids = [inst["id"] if isinstance(inst, dict) else inst for inst in batch]
+        pids = [inst["id"] if isinstance(inst, dict) else inst for inst in batch]      # a minibatch can repeat a problem
         if problems:
             outs = [{"problem": pid, "score": 0.0, "refused": problems} for pid in pids]
             self._log({"event": "refused", "candidate": sha16(body), "problems": problems})
             return EvaluationBatch(outputs=outs, scores=[0.0] * len(pids),
                                    trajectories=[{"out": o, "feedback": "refused before running: " + "; ".join(problems)} for o in outs]
                                    if capture_traces else None)
-        results = [None] * len(pids)
+        done, failed = {}, {}
         sem = threading.Semaphore(self.parallel)
 
-        def work(i, pid):
+        def work(pid):
             with sem:
-                results[i] = self._one(body, pid)
+                try:
+                    done[pid] = self._one(body, pid)
+                except Exception as ex:           # one broken run must not take the batch down
+                    failed[pid] = f"{type(ex).__name__}: {ex}"
 
-        threads = [threading.Thread(target=work, args=(i, pid)) for i, pid in enumerate(pids)]
+        threads = [threading.Thread(target=work, args=(pid,)) for pid in dict.fromkeys(pids)]   # each problem runs once
         for t in threads:
             t.start()
         for t in threads:
             t.join()
+        for pid, why in failed.items():
+            self._log({"event": "failed", "candidate": sha16(body), "problem": pid, "error": why})
+            done[pid] = {"problem": pid, "candidate": sha16(body), "score": 0.0, "verdict": None, "judge_error": True,
+                         "adherence": {"score": 0.0, "checks": {}}, "failed": why}
+        results = [done[pid] for pid in pids]
         self.calls += len(pids)
         return EvaluationBatch(outputs=results, scores=[r["score"] for r in results],
                                trajectories=[{"out": r, "feedback": self.feedback(r)} for r in results] if capture_traces else None)

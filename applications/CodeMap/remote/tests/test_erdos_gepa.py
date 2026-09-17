@@ -118,6 +118,49 @@ class EvaluateTests(unittest.TestCase):
             self.assertEqual((seen["judge"], noise["problems"], noise["graph_use"]), (2, 1, 0.0))
 
 
+class BatchTests(unittest.TestCase):
+    def test_a_repeated_problem_runs_once_and_a_damaged_stream_runs_again(self):
+        problems = run_pairs.load_problems()[:1]
+        pid = problems[0]["id"]
+        calls = {"runs": 0}
+
+        def runner(cmd, cwd, events_path, timeout):
+            calls["runs"] += 1
+            _write_events(events_path)
+            if calls["runs"] == 1:                                               # the first stream arrives interleaved
+                with open(events_path, "a", encoding="utf-8") as f:
+                    f.write('{"t": 9.0, "event": {"type": "assistant", "outp{"t": 9.1}\n')
+            return 1.0
+
+        def judge(problem, answer, trace, model):
+            return dict(PERFECT), {}, False
+
+        with tempfile.TemporaryDirectory() as d:
+            ad = erdos_gepa.ErdosAdapter(problems, "C:/ws", os.path.join(R, "graph", "pack"), d, runner=runner, judge=judge,
+                                         parallel=3, context_root=os.path.join(d, "ctx"))
+            eb = ad.evaluate([{"id": pid}, {"id": pid}], {erdos_gepa.COMPONENT: erdos_prompt.skill_body()})
+            self.assertEqual(len(eb.scores), 2)
+            self.assertEqual(eb.scores[0], eb.scores[1])
+            self.assertGreater(eb.scores[0], 0.0)
+            self.assertEqual(calls["runs"], 2)                                  # one run, one rerun of the damaged stream
+
+    def test_a_failing_problem_scores_zero_without_stopping_the_batch(self):
+        problems = run_pairs.load_problems()[:2]
+
+        def runner(cmd, cwd, events_path, timeout):
+            if problems[0]["prompt"] in " ".join(cmd):
+                raise OSError("claude not found")
+            _write_events(events_path)
+            return 1.0
+
+        with tempfile.TemporaryDirectory() as d:
+            ad = erdos_gepa.ErdosAdapter(problems, "C:/ws", os.path.join(R, "graph", "pack"), d, runner=runner,
+                                         judge=lambda *a: (dict(PERFECT), {}, False), parallel=2, context_root=os.path.join(d, "ctx"))
+            eb = ad.evaluate([{"id": p["id"]} for p in problems], {erdos_gepa.COMPONENT: erdos_prompt.skill_body()})
+            self.assertEqual(eb.scores[0], 0.0)
+            self.assertGreater(eb.scores[1], 0.0)
+
+
 class ReflectorTests(unittest.TestCase):
     def test_the_reflector_passes_timeout_and_effort_and_logs_each_call(self):
         seen = {}
