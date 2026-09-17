@@ -32,8 +32,8 @@ def cohen_kappa(pairs):
     pa = sum(1 for a, _ in pairs if a) / n
     pb = sum(1 for _, b in pairs if b) / n
     pe = pa * pb + (1 - pa) * (1 - pb)
-    if pe == 1.0:
-        return 1.0 if po == 1.0 else 0.0
+    if abs(1.0 - pe) < 1e-12:  # no variance: agreement is all there is
+        return 1.0 if abs(1.0 - po) < 1e-12 else 0.0
     return round((po - pe) / (1 - pe), 4)
 
 
@@ -46,7 +46,7 @@ def gwet_ac1(pairs):
     po = sum(1 for a, b in pairs if a == b) / n
     pi = (sum(1 for a, _ in pairs if a) / n + sum(1 for _, b in pairs if b) / n) / 2
     pe = 2 * pi * (1 - pi)
-    if pe == 1.0:
+    if abs(1.0 - pe) < 1e-12:
         return None
     return round((po - pe) / (1 - pe), 4)
 

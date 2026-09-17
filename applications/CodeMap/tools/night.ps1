@@ -34,9 +34,9 @@ New-Item -ItemType Directory -Force -Path "eval\humans\runs", "eval\judge\runs",
 "[$(Get-Date -Format s)] night $Date starts" | Tee-Object -FilePath $log -Append
 
 # 1. the personas (the runner syncs the miss backlog and refuses to overrun the caps)
-$args = @("eval\humans\run_night.py", "--date", $Date, "--max-credits", "$MaxCredits", "--baseline-share", "$BaselineShare")
-if ($Conversations -gt 0) { $args += @("--conversations", "$Conversations") }
-if ($HaikuOnly) { $args += "--haiku-only" }
+$nightArgs = @("eval\humans\run_night.py", "--date", $Date, "--max-credits", "$MaxCredits", "--baseline-share", "$BaselineShare")
+if ($Conversations -gt 0) { $nightArgs += @("--conversations", "$Conversations") }
+if ($HaikuOnly) { $nightArgs += "--haiku-only" }
 python @args 2>&1 | Tee-Object -FilePath $log -Append
 
 # 1b. the bank pass: exact bank questions and probes as the judge user, so the night's own κ rests on enough oracle rows
