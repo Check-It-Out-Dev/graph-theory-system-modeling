@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] — 1.2.0, CodeMap Remote
 
 ### Added
+- `build_release.py` keeps the commits a pack indexes; `pack-1.1.1` records both public main heads (D-R22)
 - The README row "Measuring the quality of an AI system in production" is ✅: night 2026-09-20's judge calibrated on its own rows (AC1 0.90) and 35 baseline pairs, gated by claims rows over the night and campaign artifacts; `docs/08-success-story.md` finished (D-R21)
 - Campaign nights plan past the budget (`--conversations`); a baseline runs only when the day's budget still pays for its partner (D-R20)
 - Pair campaign: a skipped partner is no pair; the runner schedules paired conversations first per persona so the daily budget reaches the partner (D-R19)

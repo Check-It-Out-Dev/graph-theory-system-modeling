@@ -45,6 +45,23 @@ def counts(pack):
             "hyperedges": max(0, lines("hyperedges.csv") - 1), "l2": lines("l2_navigators.jsonl"), "mfq": lines("mfq.jsonl")}
 
 
+def resolve_indexed(pack, pairs):
+    """The commits the pack indexes: the pack's own manifest first (apply wrote the heads it scanned),
+    then any `repo=sha` given on the command line on top. Without the carry-over a release rewrote the
+    manifest with an empty map and the delta job lost its base (packs 1.0.1 and 1.1.0 shipped `{}`)."""
+    indexed = {}
+    try:
+        with open(os.path.join(pack, "manifest.json"), encoding="utf-8") as f:
+            indexed = {k: v for k, v in (json.load(f).get("indexed_sha") or {}).items() if v}
+    except (OSError, ValueError):
+        pass
+    for kv in pairs or []:
+        k, _, v = kv.partition("=")
+        if v:
+            indexed[k] = v
+    return indexed
+
+
 def write_manifest(pack, version, indexed, note=None):
     files = {}
     for name in PACK_FILES + OPTIONAL_FILES:
@@ -116,10 +133,7 @@ def main():
     ap.add_argument("--publish", action="store_true")
     ap.add_argument("--repo", default=REPO)
     a = ap.parse_args()
-    indexed = {}
-    for kv in a.indexed:
-        k, _, v = kv.partition("=")
-        indexed[k] = v or None
+    indexed = resolve_indexed(a.pack, a.indexed)
     tar_path, digest, man = build(a.pack, a.version, a.out, indexed, a.note)
     print(f"built {tar_path} ({os.path.getsize(tar_path)//1024} KB) sha256 {digest}")
     print(json.dumps(man["counts"]))
