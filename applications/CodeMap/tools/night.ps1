@@ -37,7 +37,7 @@ New-Item -ItemType Directory -Force -Path "eval\humans\runs", "eval\judge\runs",
 $nightArgs = @("eval\humans\run_night.py", "--date", $Date, "--max-credits", "$MaxCredits", "--baseline-share", "$BaselineShare")
 if ($Conversations -gt 0) { $nightArgs += @("--conversations", "$Conversations") }
 if ($HaikuOnly) { $nightArgs += "--haiku-only" }
-python @args 2>&1 | Tee-Object -FilePath $log -Append
+python @nightArgs 2>&1 | Tee-Object -FilePath $log -Append
 
 # 1b. the bank pass: exact bank questions and probes as the judge user, so the night's own κ rests on enough oracle rows
 if ($BankPass -gt 0) {
