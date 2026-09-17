@@ -59,6 +59,42 @@ class GeneratedFilesTests(unittest.TestCase):
                 self.assertTrue(os.path.exists(os.path.join(ROOT, rel)), f"{name} reads {rel}")
 
 
+class ErdosManualTests(unittest.TestCase):
+    """The manual is one XML document in a fixed order: orientation and rules, graph data, working instructions,
+    closing reminder, then the checksum a harness asks for to prove the whole file reached the model."""
+
+    def test_includes_expand_and_comments_disappear(self):
+        body = '<m>\n<!-- maintainer -->\n<include file="references/x.md"/>\n</m>'
+        text = sync_agents.render_manual(body, sources={"references/x.md": "<!-- generated -->\nDATA\n"})
+        self.assertTrue(text.startswith("<m>\nDATA\n</m>\n<manual_checksum value="))
+
+    def test_the_rendered_manual_nests_and_keeps_its_order(self):
+        if not os.path.exists(os.path.join(PACK, "codemap.lbdb")):
+            self.skipTest("no pack")
+        refs = ("references/tools.md", "references/topology.md", "references/graph-map.md")
+        text = sync_agents.render_manual(sources={rel: open(os.path.join(sync_agents.ERDOS, *rel.split("/")), encoding="utf-8").read()
+                                                  for rel in refs})
+        self.assertNotIn("<include ", text)
+        self.assertNotIn("<!--", text)
+        opener = re.compile(r"^<([a-z_]+)(?: [^<>]*)?>$")
+        closer = re.compile(r"^</([a-z_]+)>$")
+        lone = re.compile(r"^<[a-z_]+(?: [^<>]*)?/>$")
+        stack, top = [], []
+        for line in text.split("\n"):
+            s = line.strip()
+            if lone.match(s):
+                continue
+            if opener.match(s):
+                stack.append(opener.match(s).group(1))
+                if len(stack) == 2:
+                    top.append(stack[-1])
+            elif closer.match(s):
+                self.assertEqual(stack.pop(), closer.match(s).group(1))
+        self.assertEqual(stack, [])
+        self.assertEqual(top, ["orientation", "core_rules", "ladybug_graph", "working_instructions", "closing_reminder"])
+        self.assertTrue(text.rstrip().split("\n")[-1].startswith("<manual_checksum value="))
+
+
 class DialectAndReviewerTests(unittest.TestCase):
     def test_the_dialect_reference_carries_the_packs_generated_notes(self):
         notes = os.path.join(PACK, "DIALECT_NOTES.md")

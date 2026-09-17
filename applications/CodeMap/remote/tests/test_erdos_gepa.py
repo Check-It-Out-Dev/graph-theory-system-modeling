@@ -77,11 +77,14 @@ class EvaluateTests(unittest.TestCase):
                      "equivalent": True, "better": "tie", "why": "RedisUserCache claim unverified"}, {}, False)
 
         with tempfile.TemporaryDirectory() as d:
-            ad = erdos_gepa.ErdosAdapter(problems, "2026-09-17", "C:/ws", os.path.join(R, "graph", "pack"), d, runner=runner, judge=judge, parallel=1)
+            ad = erdos_gepa.ErdosAdapter(problems, "2026-09-17", "C:/ws", os.path.join(R, "graph", "pack"), d, runner=runner, judge=judge,
+                                         parallel=1, context_root=os.path.join(d, "ctx"))
             eb = ad.evaluate([{"id": pid}], {erdos_gepa.COMPONENT: erdos_prompt.skill_body()}, capture_traces=True)
             self.assertEqual(len(eb.scores), 1)
             self.assertGreater(eb.scores[0], 0.8)                       # parity reached, and cheaper than the reference
-            self.assertIn("--append-system-prompt-file", seen["cmd"])
+            ctx = seen["cmd"][seen["cmd"].index("--add-dir") + 1]
+            self.assertEqual(os.listdir(ctx), ["CLAUDE.md"])
+            self.assertIn("mcp__graph__*", seen["cmd"][seen["cmd"].index("--allowedTools") + 1])
             fb = eb.trajectories[0]["feedback"]
             self.assertNotIn("RedisUserCache", fb)
             rows = ad.make_reflective_dataset({}, eb, [erdos_gepa.COMPONENT])[erdos_gepa.COMPONENT]

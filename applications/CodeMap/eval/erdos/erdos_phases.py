@@ -102,7 +102,7 @@ def _aggregate(part, t_start, t_end):
     return {"calls": len(part), "tokens": tokens, "tokens_sum": sum(tokens.values()),
             "tokens_weighted": round(sum(tokens[k] * WEIGHTS[k] for k in KEYS), 1),
             "tool_calls": sum(tools.values()), "tools": dict(sorted(tools.items())),
-            "graph_tool_calls": sum(n for name, n in tools.items() if name.startswith("mcp__engine__")),
+            "graph_tool_calls": sum(n for name, n in tools.items() if name.startswith(("mcp__engine__", "mcp__graph__"))),
             "result_bytes": sum(c["result_bytes"] for c in part),
             "seconds": round(max(0.0, t_end - t_start), 1) if part else 0.0}
 

@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] — 1.2.0, CodeMap Remote
 
 ### Added
+- Erdős 2.0 (`remote/ladybug_mcp.py`, `.agents/skills/erdos-architect/`): direct read-only Cypher over the pack, an XML operating manual delivered as CLAUDE.md with a loading preflight, and a one-pass task card for both arms (D-R25)
 - Erdős pairs 2026-09-17 (`eval/erdos/`): five complex problems with code-built answer keys; Erdős spent 0.42 of the general agent's solve tokens and 0.59 of its time but was judged worse on all five (overall 3.0 against 4.2) (D-R24)
 - `.agents/`: LadybugDB-native agent skills (`ladybug-graph`, `hypatia-indexer`, `grothendieck-organizer`, `erdos-architect`) in the Agent Skills format, generated Claude Code shims, schema, tool contract and graph map (`tools/agents/sync_agents.py`); the proposal reviewer reads the whole Grothendieck skill (D-R23)
 - `build_release.py` keeps the commits a pack indexes; `pack-1.1.1` records both public main heads (D-R22)

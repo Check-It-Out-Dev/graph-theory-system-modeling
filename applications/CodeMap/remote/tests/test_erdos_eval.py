@@ -3,6 +3,7 @@ is the only difference), the assembled prompt, the deterministic checks and the 
 
 import json
 import os
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -41,7 +42,7 @@ def _result(content):
 # one event per content block, the final usage on message_delta: the shape a real stream has
 STREAM = [
     (0.0, {"type": "system", "subtype": "init"}),
-    (0.9, _start("m1")), (1.0, _block("m1", tool="mcp__engine__engine_step")), (1.1, _delta(10)),
+    (0.9, _start("m1")), (1.0, _block("m1", tool="mcp__graph__graph_query")), (1.1, _delta(10)),
     (1.5, _result("x" * 500)),
     (1.9, _start("m2")), (2.0, _block("m2", tool="Read")), (2.1, _delta(10)),
     (2.5, _result([{"type": "text", "text": "y" * 300}])),
@@ -60,7 +61,8 @@ class PhaseTests(unittest.TestCase):
         self.assertTrue(s["verified_marker"])
         self.assertEqual((s["solve"]["calls"], s["verify"]["calls"], s["total"]["calls"]), (3, 2, 5))
         self.assertEqual(s["solve"]["graph_tool_calls"], 1)
-        self.assertEqual(s["solve"]["tools"], {"Read": 1, "mcp__engine__engine_step": 1})
+        self.assertEqual(s["solve"]["tools"], {"Read": 1, "mcp__graph__graph_query": 1})
+        self.assertEqual(s["solve"]["graph_tool_calls"], 1)
         self.assertEqual(s["verify"]["tools"], {"Grep": 1})
         self.assertEqual(s["solve"]["result_bytes"], 800)
         self.assertEqual(s["verify"]["result_bytes"], 50)
@@ -98,7 +100,7 @@ class PhaseTests(unittest.TestCase):
 class ArmTests(unittest.TestCase):
     def test_the_graph_is_the_only_difference(self):
         problem = {"id": "p", "prompt": "Design X."}
-        files = {"mcp": "engine.json", "prompt": "erdos.md"}
+        files = {"mcp": "graph.json", "context": "ctx"}
         g = run_pairs.command("general", problem, "claude-opus-5", 100, files, exe="claude")
         e = run_pairs.command("erdos", problem, "claude-opus-5", 100, files, exe="claude")
         for cmd in (g, e):
@@ -108,37 +110,75 @@ class ArmTests(unittest.TestCase):
             self.assertEqual(cmd[cmd.index("--tools") + 1], "Read,Grep,Glob")
             self.assertEqual(cmd[cmd.index("--model") + 1], "claude-opus-5")
         self.assertNotIn("--mcp-config", g)
-        self.assertNotIn("--append-system-prompt-file", g)
-        self.assertEqual(e[e.index("--mcp-config") + 1], "engine.json")
-        self.assertEqual(e[e.index("--append-system-prompt-file") + 1], "erdos.md")
-        self.assertIn("mcp__engine__*", e[e.index("--allowedTools") + 1])
-        self.assertNotIn("mcp__engine__*", g[g.index("--allowedTools") + 1])
+        self.assertNotIn("--add-dir", g)
+        self.assertEqual(e[e.index("--mcp-config") + 1], "graph.json")
+        self.assertEqual(e[e.index("--add-dir") + 1], "ctx")
+        self.assertIn("mcp__graph__*", e[e.index("--allowedTools") + 1])
+        self.assertNotIn("mcp__graph__*", g[g.index("--allowedTools") + 1])
         extra = [x for x in e if x not in g]
-        self.assertEqual(sorted(extra), sorted(["--mcp-config", "engine.json", "Read,Grep,Glob,mcp__engine__*",
-                                                "--append-system-prompt-file", "erdos.md"]))
+        self.assertEqual(sorted(extra), sorted(["--mcp-config", "graph.json", "Read,Grep,Glob,mcp__graph__*", "--add-dir", "ctx"]))
+        self.assertNotIn("--append-system-prompt-file", e)
+        self.assertEqual(run_pairs.RUN_ENV, {"CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD": "1"})
 
-    def test_the_task_card_names_both_markers(self):
+    def test_the_task_card_has_one_phase(self):
         self.assertIn(phases.SOLVED, run_pairs.TASK_CARD)
-        self.assertIn(phases.VERIFIED, run_pairs.TASK_CARD)
+        self.assertNotIn(phases.VERIFIED, run_pairs.TASK_CARD)            # no verification round (owner, 2026-09-17)
+        self.assertNotIn("Phase 2", run_pairs.TASK_CARD)
 
-    def test_the_engine_config_uses_absolute_paths(self):
-        cfg = run_pairs.engine_config("graph/pack")["mcpServers"]["engine"]
+    def test_the_preflight_passes_only_on_the_checksum(self):
+        files = {"context": "ctx"}
+        cmd = run_pairs.preflight_command(files, exe="claude")
+        for flag in ("--restricted", "--strict-mcp-config", "--add-dir"):
+            self.assertIn(flag, cmd)
+        self.assertEqual(cmd[cmd.index("--add-dir") + 1], "ctx")
+
+        def fake(said, is_error=False):
+            def run(cmd, **kw):
+                self.assertEqual(kw["env"]["CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD"], "1")
+                for name in run_pairs.BLOCKING_ENV + ("ANTHROPIC_API_KEY",):
+                    self.assertNotIn(name, kw["env"])
+                return subprocess.CompletedProcess(cmd, 0, json.dumps({"result": said, "is_error": is_error,
+                                                                       "usage": {"input_tokens": 3, "cache_read_input_tokens": 20000}}), "")
+            return run
+
+        os.environ["CLAUDE_CODE_DISABLE_CLAUDE_MDS"] = "1"
+        try:
+            self.assertTrue(run_pairs.preflight(files, "0123456789abcdef", ".", run=fake("0123456789abcdef"))[0])
+            self.assertFalse(run_pairs.preflight(files, "0123456789abcdef", ".", run=fake("NONE"))[0])
+            self.assertFalse(run_pairs.preflight(files, "0123456789abcdef", ".", run=fake("0123456789abcdef", True))[0])
+            self.assertFalse(run_pairs.preflight(files, None, ".", run=fake("None"))[0])
+        finally:
+            del os.environ["CLAUDE_CODE_DISABLE_CLAUDE_MDS"]
+
+    def test_the_context_directory_holds_only_claude_md(self):
+        with tempfile.TemporaryDirectory() as d:
+            ctx = run_pairs.context_dir(d, "<erdos/>")
+            self.assertEqual(os.listdir(ctx), ["CLAUDE.md"])
+
+    def test_the_graph_config_uses_absolute_paths(self):
+        cfg = run_pairs.graph_config("graph/pack")["mcpServers"]["graph"]
+        self.assertTrue(cfg["args"][0].endswith("ladybug_mcp.py"))
         self.assertTrue(os.path.isabs(cfg["args"][0]))
         self.assertTrue(os.path.isabs(cfg["env"]["CODEMAP_PACK_DIR"]))
 
 
 class PromptTests(unittest.TestCase):
-    def test_the_prompt_is_the_skill_with_its_attachments(self):
-        text = prompt.assemble()
-        body = prompt.skill_body()
-        self.assertTrue(text.startswith(body))
-        self.assertFalse(body.startswith("---"))
-        self.assertIn("# Attached: references/graph-map.md", text)
-        self.assertIn("## L1 — subsystem index", text)
-        self.assertIn("# Attached: references/tools.md", text)
-        self.assertNotIn("<!--", text)
+    def test_a_candidate_body_renders_with_the_checksum_last(self):
+        text = prompt.assemble(body="<erdos_manual>\n<!-- note -->\nCANDIDATE\n</erdos_manual>")
+        self.assertTrue(text.startswith("<erdos_manual>\nCANDIDATE\n</erdos_manual>\n<manual_checksum value="))
+        above = text[:text.index("<manual_checksum")]
+        self.assertEqual(prompt.checksum(text), prompt.hashlib.sha256(above.encode("utf-8")).hexdigest()[:16])
+        self.assertIsNone(prompt.checksum(above))
         self.assertTrue(prompt.version(text).startswith("erdos@"))
-        self.assertTrue(prompt.assemble(body="CANDIDATE").startswith("CANDIDATE\n\n# Attached"))
+
+    def test_the_committed_manual_is_the_rendered_skill(self):
+        if not os.path.exists(os.path.join(R, "graph", "pack", "codemap.lbdb")):
+            self.skipTest("no pack")
+        with open(prompt.MANUAL, encoding="utf-8") as f:
+            committed = f.read().replace("\r\n", "\n")
+        self.assertEqual(committed, prompt.assemble())
+        self.assertFalse(prompt.skill_body().startswith("---"))
+        self.assertIsNotNone(prompt.checksum(committed))
 
 
 class JudgeTests(unittest.TestCase):

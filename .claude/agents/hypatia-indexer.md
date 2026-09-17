@@ -11,4 +11,4 @@ Before anything else, read these files in full and follow them; together they ar
 1. `.agents/skills/ladybug-graph/SKILL.md`
 2. `.agents/skills/hypatia-indexer/SKILL.md`
 
-Paths are relative to the root of the graph-theory-system-modeling repository. When a file and this note disagree, the file wins. Return the report or answer the manual defines.
+Paths are relative to the root of the graph-theory-system-modeling repository. A long file may need several Read calls with offset and limit; read every part. When a file and this note disagree, the file wins. Return the report or answer the manual defines.

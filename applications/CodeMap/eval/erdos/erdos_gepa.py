@@ -44,6 +44,7 @@ import run_pairs  # noqa: E402
 import take_gold  # noqa: E402
 
 COMPONENT = "erdos_skill"
+REQUIRED_INCLUDES = ("references/tools.md", "references/topology.md", "references/graph-map.md")
 MAX_CHARS = 24000
 FILE_RX = re.compile(r"[A-Za-z0-9_\-]+\.(?:java|ts|html|scss|yml|yaml|xml|properties|feature|sql|js|json|md)\b")
 CAMEL_RX = re.compile(r"\b[A-Z][a-z0-9]+(?:[A-Z][a-z0-9]+){1,}\b")
@@ -75,8 +76,9 @@ def check(body, identifiers):
         problems.append("empty skill body")
     if len(body) > MAX_CHARS:
         problems.append(f"skill body longer than {MAX_CHARS} characters ({len(body)})")
-    if "references/graph-map.md" not in body:
-        problems.append("the skill no longer points at the attached graph map (references/graph-map.md)")
+    for ref in REQUIRED_INCLUDES:
+        if f'<include file="{ref}"/>' not in body:
+            problems.append(f"the skill no longer includes {ref}")
     leaked = sorted({i for i in identifiers if re.search(r"(?<![A-Za-z0-9_])" + re.escape(i) + r"(?![A-Za-z0-9_])", body)})
     if leaked:
         problems.append("the skill names code from the answer keys (memorising, not behaviour): " + ", ".join(leaked[:8]))
@@ -118,7 +120,7 @@ class ErdosAdapter:
     propose_new_texts = None  # gepa 0.1.4 reads it: None = the default reflective proposal
 
     def __init__(self, problems, reference_label, workspace, pack, run_dir, model="claude-opus-5", judge_model="claude-opus-5",
-                 max_turns=100, timeout=3600, parallel=2, runner=None, judge=None, log_path=None):
+                 max_turns=100, timeout=3600, parallel=2, runner=None, judge=None, log_path=None, context_root=None):
         self.problems = {p["id"]: p for p in problems}
         self.identifiers = key_identifiers(problems)
         ref = json.load(open(os.path.join(HERE, "runs", f"{reference_label}.json"), encoding="utf-8"))
@@ -131,9 +133,11 @@ class ErdosAdapter:
         self.log_path = log_path
         self.calls = 0
         os.makedirs(run_dir, exist_ok=True)
-        self.mcp_path = os.path.join(run_dir, "engine_mcp.json")
+        self.mcp_path = os.path.join(run_dir, "graph_mcp.json")
         with open(self.mcp_path, "w", encoding="utf-8", newline="\n") as f:
-            json.dump(run_pairs.engine_config(pack), f, indent=1)
+            json.dump(run_pairs.graph_config(pack), f, indent=1)
+        # candidate manuals become CLAUDE.md files, so they live outside the repository (run_pairs.context_dir)
+        self.context_root = context_root or os.path.join(run_pairs.tempfile.gettempdir(), "codemap-erdos", "gepa")
 
     def _log(self, rec):
         if self.log_path:
@@ -145,13 +149,15 @@ class ErdosAdapter:
         problem = self.problems[pid]
         cand_dir = os.path.join(self.run_dir, sha)
         os.makedirs(cand_dir, exist_ok=True)
-        prompt_path = os.path.join(cand_dir, "erdos_prompt.md")
-        if not os.path.exists(prompt_path):
-            with open(prompt_path, "w", encoding="utf-8", newline="\n") as f:
-                f.write(erdos_prompt.assemble(body))
+        manual = erdos_prompt.assemble(body)
+        record = os.path.join(cand_dir, "erdos-manual.md")          # what ran, under a name no harness loads
+        if not os.path.exists(record):
+            with open(record, "w", encoding="utf-8", newline="\n") as f:
+                f.write(manual)
+        context = run_pairs.context_dir(os.path.join(self.context_root, sha), manual)
         events = os.path.join(cand_dir, f"{pid}.erdos.events.jsonl")
         if not run_pairs.finished(events):  # a candidate already evaluated on a problem is not run twice
-            cmd = run_pairs.command("erdos", problem, self.model, self.max_turns, {"mcp": self.mcp_path, "prompt": prompt_path})
+            cmd = run_pairs.command("erdos", problem, self.model, self.max_turns, {"mcp": self.mcp_path, "context": context})
             self.runner(cmd, self.workspace, events, self.timeout)
         split = erdos_phases.split(erdos_phases.load(events))
         answer = split["answer"] + ("\n\n## Corrections after verification\n\n" + split["corrections"] if split["corrections"] else "")
