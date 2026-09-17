@@ -35,6 +35,7 @@ import shutil
 import sys
 import threading
 import time
+from collections import defaultdict
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 R = os.path.dirname(os.path.dirname(HERE))
@@ -396,6 +397,53 @@ def judge_noise(ad, seed_body):
     return out
 
 
+def finalize(ad, run_dir, label, seed_body, noise=None, note=None, runs_dir=None, reflection_model=None):
+    """Write the summary of a run from what it left on disk, without a model call: GEPA's accepted candidates
+    (`gepa/candidates.json`), the adapter's log (every graded run, refusal and reflection) and the judge-noise files.
+    For a run stopped before GEPA returned. -> the summary document."""
+    runs_dir = runs_dir or os.path.join(HERE, "runs")
+    with open(os.path.join(run_dir, "gepa", "candidates.json"), encoding="utf-8") as f:
+        accepted = [c[COMPONENT] if isinstance(c, dict) else str(c) for c in json.load(f)]
+    graded, refused, reflections, seconds = defaultdict(dict), [], [], 0.0
+    log_path = os.path.join(run_dir, "gepa.log.jsonl")
+    for line in (open(log_path, encoding="utf-8") if os.path.exists(log_path) else []):
+        if not line.strip():
+            continue
+        rec = json.loads(line)
+        if rec.get("event") == "eval":
+            graded[rec["candidate"]][rec["problem"]] = rec["score"]
+        elif rec.get("event") == "refused":
+            refused.append(rec.get("candidate"))
+        elif rec.get("event") == "reflect":
+            reflections.append(rec)
+            seconds += rec.get("seconds") or 0.0
+
+    def val_score(sha):
+        got = graded.get(sha, {})
+        return round(sum(got[p] for p in ad.problems) / len(ad.problems), 4) if all(p in got for p in ad.problems) else None
+
+    shas = [sha16(b) for b in accepted]
+    scores = [val_score(sha) for sha in shas]
+    best_idx = max(range(len(accepted)), key=lambda i: -1 if scores[i] is None else scores[i]) if accepted else 0
+    with open(os.path.join(run_dir, "best_skill_body.md"), "w", encoding="utf-8", newline="\n") as f:
+        f.write(accepted[best_idx])
+    rejected = [sha for sha in graded if sha not in shas]
+    doc = {"schema": 2, "label": label, "mission": MISSION, "weights": WEIGHTS, "model": ad.model, "judge_model": ad.judge_model,
+           "judge_rubric": erdos_judge.POINTWISE_RUBRIC, "reflection_model": reflection_model, "judge_noise": noise, "note": note, "stopped_early": True,
+           "candidates": [{"index": i, "sha": sha, "val_score": scores[i], "chars": len(accepted[i])} for i, sha in enumerate(shas)],
+           "rejected": [{"sha": sha, "problems_graded": sorted(graded[sha]), "scores": graded[sha]} for sha in rejected],
+           "refused": sorted(set(refused)), "seed_val_score": scores[0] if scores else None, "best_idx": best_idx,
+           "best_val_score": scores[best_idx] if scores else None, "best_check": check(accepted[best_idx], ad.identifiers),
+           "reflections": {"calls": len(reflections), "failures": sum(1 for r in reflections if r.get("is_error")),
+                           "seconds": round(seconds, 1)},
+           "in_sample": True, "improved": bool(best_idx != 0 and scores and scores[best_idx] is not None
+                                               and scores[0] is not None and scores[best_idx] > scores[0]),
+           "seed_sha": sha16(seed_body)}
+    with open(os.path.join(runs_dir, f"{label}.json"), "w", encoding="utf-8", newline="\n") as f:
+        json.dump(doc, f, indent=1, sort_keys=True, default=str)
+    return doc
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--label", required=True)
@@ -414,11 +462,13 @@ def main(argv=None):
     ap.add_argument("--dry-run", action="store_true", help="check the seed and the seed runs; no model call")
     ap.add_argument("--resume", action="store_true", help="continue the run saved under this label")
     ap.add_argument("--reflection-timeout", type=int, default=2400)
+    ap.add_argument("--finalize", action="store_true", help="write the summary of a stopped run from its files; no model call")
+    ap.add_argument("--note", default=None, help="a sentence recorded with --finalize, for example why the run stopped")
     ap.add_argument("--reflection-effort", default=None, help="low, medium, high, xhigh or max; the CLI default when omitted")
     a = ap.parse_args(argv)
     problems = run_pairs.load_problems()
     run_dir = os.path.join(HERE, "runs", a.label)
-    if os.path.exists(os.path.join(run_dir, "gepa")) and not a.resume:
+    if os.path.exists(os.path.join(run_dir, "gepa")) and not (a.resume or a.finalize):
         raise SystemExit(f"{run_dir}/gepa exists: GEPA would resume that run silently; pass --resume or pick a new label")
     os.makedirs(run_dir, exist_ok=True)
     log_path = os.path.join(run_dir, "gepa.log.jsonl")
@@ -429,6 +479,11 @@ def main(argv=None):
     print(f"identifiers guarded: {len(ad.identifiers)}; seed {sha16(seed_body)} check: {seed_problems or 'ok'}")
     if seed_problems:
         raise SystemExit("the seed skill violates the guard")
+    if a.finalize:
+        ad.judge = lambda *args: (None, None, True)              # finalize reads verdicts from disk and never asks the judge
+        doc = finalize(ad, run_dir, a.label, seed_body, noise=judge_noise(ad, seed_body), note=a.note, reflection_model=a.reflection_model)
+        print(json.dumps({k: doc[k] for k in ("seed_val_score", "best_idx", "best_val_score", "improved", "rejected", "refused")}))
+        return 0
     seeded = import_seed_runs(a.seed_runs, seed_body, run_dir, [p["id"] for p in problems]) if a.seed_runs else "not asked"
     print("seed runs imported:", seeded)
     if a.dry_run:

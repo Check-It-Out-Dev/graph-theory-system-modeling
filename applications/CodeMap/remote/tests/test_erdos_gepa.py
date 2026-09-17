@@ -197,6 +197,31 @@ class SeedRunTests(unittest.TestCase):
             self.assertTrue(os.path.exists(os.path.join(run_dir, erdos_gepa.sha16(seed), "p.erdos.events.jsonl")))
 
 
+class FinalizeTests(unittest.TestCase):
+    def test_a_stopped_run_is_summarised_from_its_files(self):
+        problems = run_pairs.load_problems()[:2]
+        seed = erdos_prompt.skill_body()
+        better = seed.replace("Solve in one pass.", "Solve in one pass, listing every route.")
+        with tempfile.TemporaryDirectory() as d:
+            run_dir = os.path.join(d, "g")
+            os.makedirs(os.path.join(run_dir, "gepa"))
+            with open(os.path.join(run_dir, "gepa", "candidates.json"), "w", encoding="utf-8") as f:
+                json.dump([{erdos_gepa.COMPONENT: seed}, {erdos_gepa.COMPONENT: better}], f)
+            with open(os.path.join(run_dir, "gepa.log.jsonl"), "w", encoding="utf-8") as f:
+                for sha, values in ((erdos_gepa.sha16(seed), (0.7, 0.8)), (erdos_gepa.sha16(better), (0.9, 0.9)), ("rejected0000000", (0.5,))):
+                    for p, v in zip(problems, values):
+                        f.write(json.dumps({"event": "eval", "candidate": sha, "problem": p["id"], "score": v}) + "\n")
+                f.write(json.dumps({"event": "reflect", "is_error": False, "seconds": 200.0}) + "\n")
+            ad = erdos_gepa.ErdosAdapter(problems, "C:/ws", os.path.join(R, "graph", "pack"), run_dir,
+                                         judge=lambda *a: (None, None, True), context_root=os.path.join(d, "ctx"))
+            doc = erdos_gepa.finalize(ad, run_dir, "g", seed, runs_dir=d)
+            self.assertEqual((doc["seed_val_score"], doc["best_idx"], doc["best_val_score"], doc["improved"]), (0.75, 1, 0.9, True))
+            self.assertEqual(doc["rejected"][0]["sha"], "rejected0000000")
+            self.assertEqual(doc["reflections"]["calls"], 1)
+            with open(os.path.join(run_dir, "best_skill_body.md"), encoding="utf-8") as f:
+                self.assertEqual(f.read(), better)
+
+
 class ReportTests(unittest.TestCase):
     def test_the_report_reads_the_log_and_the_best_candidates_change(self):
         import erdos_gepa_report

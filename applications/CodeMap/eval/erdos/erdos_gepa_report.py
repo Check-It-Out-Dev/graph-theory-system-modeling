@@ -88,8 +88,13 @@ def build(label, runs_dir=None):
                   f"Models: Erdős `{doc.get('model')}`, judge `{doc.get('judge_model')}` (rubric {doc.get('judge_rubric')}), "
                   f"reflector `{doc.get('reflection_model')}`.", "",
                   f"Seed validation score {doc.get('seed_val_score')}; best candidate {doc.get('best_idx')} at {doc.get('best_val_score')}; "
-                  f"improved: {doc.get('improved')}. Metric calls {doc.get('metric_calls')}, reflections {reflections}, "
-                  f"{round((doc.get('seconds') or 0) / 60)} minutes. In-sample: the five problems are the training and the validation set.", ""]
+                  f"improved: {doc.get('improved')}. " +
+                  (f"Metric calls {doc.get('metric_calls')}, {round((doc.get('seconds') or 0) / 60)} minutes. " if doc.get("metric_calls") else "") +
+                  f"Reflections {reflections}" + (f", {round((doc.get('reflections') or {}).get('seconds', 0) / 60)} minutes of reflecting"
+                                                  if isinstance(doc.get("reflections"), dict) else "") +
+                  ". In-sample: the five problems are the training and the validation set.", ""]
+        if doc.get("note"):
+            lines += [f"Note: {doc['note']}.", ""]
         noise = doc.get("judge_noise") or {}
         if noise:
             lines += ["Judge noise on the seed (the same answers graded twice, mean absolute difference): " +
