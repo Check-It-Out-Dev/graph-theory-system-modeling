@@ -74,7 +74,8 @@ def blind_order(problem_id):
 
 
 def key_for_judge(problem):
-    g = problem.get("gold") or {}
+    import take_gold
+    g = problem.get("gold") or take_gold.load(problem["id"]) or {}
     return {k: g.get(k) for k in ("must_find", "key_facts", "gaps", "invariants", "good_designs", "red_flags")}
 
 
@@ -128,7 +129,7 @@ def main(argv=None):
         if not all((p["id"], arm) in by for arm in ("general", "erdos")):
             continue
         answers = {arm: open(os.path.join(R, by[(p["id"], arm)]["answer_file"]), encoding="utf-8").read() for arm in ("general", "erdos")}
-        must = (p.get("gold") or {}).get("must_find") or []
+        must = key_for_judge(p).get("must_find") or []
         det = {arm: {"must_find": recall(answers[arm], must), "files": unknown_files(answers[arm], index)} for arm in answers}
         order = blind_order(p["id"])
         verdict, usage, err = ask(p, answers[order[0]], answers[order[1]], a.model)

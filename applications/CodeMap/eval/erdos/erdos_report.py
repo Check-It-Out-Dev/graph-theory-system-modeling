@@ -20,6 +20,11 @@ def _cell(v):
     return "" if v is None else (f"{v:,}" if isinstance(v, int) else (f"{v:,.1f}" if isinstance(v, float) else str(v)))
 
 
+def _recall(det):
+    r = (det.get("must_find") or {}).get("recall")
+    return "" if r is None else f"{r:.2f}"
+
+
 def build(runs, judge=None):
     judged = {j["problem"]: j for j in (judge or {}).get("problems", [])}
     lines = [f"# Erdős pairs — {runs['label']}", "",
@@ -36,7 +41,7 @@ def build(runs, judge=None):
             files = ph["tool_calls"] - ph["graph_tool_calls"]
             lines.append(f"| {r['problem']} | {r['arm']} | {phase} | {ph['calls']} | {ph['graph_tool_calls']} | {files} | "
                          f"{ph['result_bytes'] / 1000:.1f} | {_cell(ph['tokens_sum'])} | {_cell(ph['tokens_weighted'])} | {ph['seconds']} | "
-                         f"{_cell(score) if phase == 'solve' else ''} | {_cell((det.get('must_find') or {}).get('recall')) if phase == 'solve' else ''} | "
+                         f"{_cell(score) if phase == 'solve' else ''} | {_recall(det) if phase == 'solve' else ''} | "
                          f"{len((det.get('files') or {}).get('unknown') or []) if phase == 'solve' and det else ''} |")
             t = totals.setdefault((r["arm"], phase), {"calls": 0, "tokens": 0, "weighted": 0.0, "seconds": 0.0, "graph": 0, "files": 0})
             t["calls"] += ph["calls"]; t["tokens"] += ph["tokens_sum"]; t["weighted"] += ph["tokens_weighted"]
@@ -50,10 +55,20 @@ def build(runs, judge=None):
             ratio = lambda k: round(e[k] / g[k], 2) if g[k] else None
             lines.append(f"| erdos / general | {phase} | {ratio('calls')} | | | {ratio('tokens')} | {ratio('weighted')} | {ratio('seconds')} |")
     if judged:
-        lines += ["", "| problem | better | equivalent | why |", "|---|---|---|---|"]
+        lines += ["", "The judge saw the answers as A and B; its reasons use those letters.", "",
+                  "| problem | A was | better | equivalent | why |", "|---|---|---|---|---|"]
         for pid, j in sorted(judged.items()):
             v = j.get("judge") or {}
-            lines.append(f"| {pid} | {v.get('better')} | {v.get('equivalent')} | {(v.get('why') or '').replace('|', '/')} |")
+            lines.append(f"| {pid} | {(j.get('blind_order') or {}).get('A')} | {v.get('better')} | {v.get('equivalent')} | "
+                         f"{(v.get('why') or '').replace('|', '/')} |")
+        keys = ("overall", "correctness", "design", "plan", "must_find_hits", "key_facts_supported", "gaps_found", "red_flags_made")
+        lines += ["", "| arm (mean over problems) | overall | correctness | design | plan | must_find hits | key facts | gaps found | red flags |",
+                  "|---|---|---|---|---|---|---|---|---|"]
+        for arm in ("general", "erdos"):
+            rows = [((j.get("judge") or {}).get("scores") or {}).get(arm) or {} for j in judged.values()]
+            if rows:
+                m = [round(sum(r.get(k) or 0 for r in rows) / len(rows), 2) for k in keys]
+                lines.append(f"| {arm} | " + " | ".join(str(x) for x in m) + " |")
     return "\n".join(lines) + "\n"
 
 

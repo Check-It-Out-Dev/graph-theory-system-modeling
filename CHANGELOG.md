@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] — 1.2.0, CodeMap Remote
 
 ### Added
+- Erdős pairs 2026-09-17 (`eval/erdos/`): five complex problems with code-built answer keys; Erdős spent 0.42 of the general agent's solve tokens and 0.59 of its time but was judged worse on all five (overall 3.0 against 4.2) (D-R24)
 - `.agents/`: LadybugDB-native agent skills (`ladybug-graph`, `hypatia-indexer`, `grothendieck-organizer`, `erdos-architect`) in the Agent Skills format, generated Claude Code shims, schema, tool contract and graph map (`tools/agents/sync_agents.py`); the proposal reviewer reads the whole Grothendieck skill (D-R23)
 - `build_release.py` keeps the commits a pack indexes; `pack-1.1.1` records both public main heads (D-R22)
 - The README row "Measuring the quality of an AI system in production" is ✅: night 2026-09-20's judge calibrated on its own rows (AC1 0.90) and 35 baseline pairs, gated by claims rows over the night and campaign artifacts; `docs/08-success-story.md` finished (D-R21)
