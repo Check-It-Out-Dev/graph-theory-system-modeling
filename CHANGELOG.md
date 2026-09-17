@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] — 1.2.0, CodeMap Remote
 
 ### Added
+- The README row "Measuring the quality of an AI system in production" is ✅: night 2026-09-20's judge calibrated on its own rows (AC1 0.90) and 35 baseline pairs, gated by claims rows over the night and campaign artifacts; `docs/08-success-story.md` finished (D-R21)
 - Campaign nights plan past the budget (`--conversations`); a baseline runs only when the day's budget still pays for its partner (D-R20)
 - Pair campaign: a skipped partner is no pair; the runner schedules paired conversations first per persona so the daily budget reaches the partner (D-R19)
 - Judge calibration reports raw agreement, prevalence and Gwet's AC1 beside Cohen's κ; a second verdict route for a skewed oracle, named in the artifact (`eval/judge/calibrate.py`, D-R18)

@@ -1,6 +1,6 @@
 # CodeMap Remote — the success story, with its numbers
 
-_Written 2026-09-16/17 while the last nights ran. Every figure here has one home in a committed artifact named beside it; the decision log (`07-ai-quality-governance.md`, D-R1…D-R17) says why each choice was made. Status: **the green box is earned by two conditions** (a night whose judge is calibrated on its own rows, and a gain measured in thirty baseline pairs) — the section "The night that flipped the row" is filled in when it happens._
+_Written 2026-09-16/17 while the nights ran. Every figure here has one home in a committed artifact named beside it, and the ones the README leans on are re-read by `eval/ci/test_published_numbers.py` on every push; the decision log (`07-ai-quality-governance.md`, D-R1…D-R21) says why each choice was made. Status: **green since night 2026-09-20** — a judge calibrated on that night's own rows, and a gain measured on 35 baseline pairs. Green means measured: the pairs say CodeMap, as served today, costs an agent more than grep, and the sections below say why._
 
 ## The ask, in the owner's words
 
@@ -30,6 +30,8 @@ _Written 2026-09-16/17 while the last nights ran. Every figure here has one home
 | 19:05 | **the full reindex on the box**: both repositories at their public heads, 174 entities placed by Grothendieck in chunks, 22 subsystems reclued, Release `pack-1.1.0` served | 1,594 entities, 34 navigators, coverage 100 % of eligible files |
 | 20:30 | the judge calibrated on a night's own rows — and κ's paradox under a skewed oracle named, measured, and reported beside AC1 | `eval/judge/runs/2026-09-18.json` (agreement 0.85, AC1 0.82, κ 0.25), D-R18 |
 | 20:45 | the pair count corrected (skipped partners are no pair), paired conversations first, one night per UTC day; the cost measured by hand | D-R19, the tables below |
+| 21:00 | campaign nights plan past the budget and skip a baseline whose partner the day cannot pay for; the night's events fetched as the server sent them | D-R20 |
+| **02:02–05:19 (09-17)** | **the night that flipped the row**: 71 persona conversations, 154 navigator answers judged, 31 pairs in one night | `eval/*/runs/2026-09-20.*`, `eval/quality/runs/campaign.json` |
 
 ## What the numbers say (and do not say)
 
@@ -50,7 +52,7 @@ The first condition of the green box was met on 2026-09-18, and not the way the 
 
 ## Where the cost goes — the pairs, and a measurement by hand
 
-The pair campaign is the claim that matters to a team: the same persona, the same question, the same checkout, once with grep only and once with CodeMap. Four real pairs exist (night 2026-09-18; night 2026-09-19 lost every Haiku and Opus partner to the daily credit budget, D-R19), and they do not flatter the graph:
+The pair campaign is the claim that matters to a team: the same persona, the same question, the same checkout, once with grep only and once with CodeMap. The first four real pairs (night 2026-09-18; night 2026-09-19 lost every Haiku and Opus partner to the daily credit budget, D-R19) already did not flatter the graph, and the thirty-one that followed on the flip night confirmed them (next section):
 
 | pair | tokens without / with CodeMap | turns | rating |
 |---|---|---|---|
@@ -79,7 +81,33 @@ Two to twenty times fewer bytes per hop, and the impact question is the one grep
 
 ## The night that flipped the row
 
-_(to be written from the artifact of the qualifying night: κ_oracle on ≥ 30 of its own rows, the campaign's thirty pairs, the claims rows that gate the README)_
+Night 2026-09-20 started at 02:02 CEST on 2026-09-17, two minutes after the servers' daily credit budgets reset, and ended at 05:19 without a hand on it: the runner planned ten conversations per persona, all but the first paired, and let each persona's published budget stop it (D-R20). 34 baselines and 37 CodeMap conversations ran; 20 baselines were skipped before they started because their partner could no longer be paid for, and 3 partners met an exhausted budget. The navigator answered 154 questions (32.8 M tokens on the VPS, 2,170 credits), the personas left 131 ratings and 36 misses, the judge read every answer, and the script committed the artifacts itself.
+
+**The first condition — a judge calibrated on the night's own rows.** 24 oracle rows (the bank pass plus the personas' bank hits): judge and oracle agree on 22, the oracle says "yes" on 92 %, κ is 0.45 and Gwet's AC1 is 0.90 — calibrated on the skewed-oracle route that D-R18 fixed before this night ran, and on which 2026-09-17 still fails. The night's rates, from `eval/quality/runs/2026-09-20.json`: grounded 0.94, correct 0.90, located 0.95, mean rating 3.89, 15.6 credits per correct answer, oracle success 0.92 — the best night of the five, on pack 1.1.0 and prompt v2.
+
+**The second condition — thirty pairs.** 31 on this night, 35 across nights (`eval/quality/runs/campaign.json`):
+
+| per pair, mean | value |
+|---|---|
+| persona tokens, baseline ÷ CodeMap | 0.63 (CodeMap conversations used 1.6× the tokens: 38.7 M against 22.6 M) |
+| turns, baseline − CodeMap | −3.5 (CodeMap conversations took 3.5 more turns) |
+| seconds, baseline − CodeMap | −88.5 (CodeMap conversations ran 88.5 seconds longer) |
+| pairs where CodeMap used fewer tokens / fewer turns | 17 % / 26 % |
+
+| persona | pairs | tokens ratio | turns Δ | where it lands |
+|---|---|---|---|---|
+| haiku-ops | 7 | 0.75 | +0.9 | fewer turns in 4 of 7 — config and flag questions |
+| haiku-pm | 6 | 0.79 | −0.7 | closest to even: the vocabulary-mismatch persona |
+| sonnet-newcomer | 9 | 0.62 | −4.4 | |
+| sonnet-bugfixer | 9 | 0.36 | −9.6 | the most expensive: verifies every pointer, then keeps asking |
+| opus-reviewer | 3 | 0.90 | +1.7 | fewer tokens in 2 of 3 — impact questions |
+| opus-architect | 1 | 0.56 | −5.0 | |
+
+The two conditions are about measurement, and both are met: the row is green because the quality of a served AI system is now measured by an instrument that is itself calibrated, on enough pairs to say something. What it says is not the story this document was drafted to tell. Served through `codemap_ask`, the graph costs an agent that already has the checkout more tokens, more turns and more time — the persona's context carries every prose answer forward, and the persona still opens the files to verify them. Where it comes close to even is where the draft said it would: the product owner asking in task nouns, the operator asking for a flag, the reviewer asking what depends on a file. And the hand measurement above shows the model-free engine returning two to twenty times fewer bytes per hop than grep. The cost is in the layer between them.
+
+Three things the numbers do not settle, said here rather than left for a reader to find. The two rating columns are not the same instrument — a baseline's rating is the persona's confidence in its own answer, a CodeMap rating is the persona's verdict on someone else's (4.46 against 4.05) — so ratings are reported, not compared. The judge scores the navigator's answers, not the baselines', so correctness is not yet a pair metric. And the personas' own estimate of minutes saved (10.2 on average) is contradicted by the clock (88.5 seconds lost): self-reported savings are not a gain.
+
+What the pairs point at next, and what this arc does not build: expose the engine's `find`, `impact` and `flow` to agents as model-free MCP tools, so the 1–5 KB of structure reaches the agent without a 210 k-token navigator in between, keep `codemap_ask` for the questions a model must translate, and run the same campaign again — the instrument is ready for it.
 
 ## How to run it yourself
 

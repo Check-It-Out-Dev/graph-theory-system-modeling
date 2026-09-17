@@ -106,7 +106,9 @@ def test_the_document_still_says_the_night_figure(claim):
 
 @pytest.mark.parametrize("claim", CLAIMS.get("night", []), ids=_label)
 def test_the_night_artifact_still_supports_it(claim):
-    path = harness.os.path.join(harness.CODEMAP, "eval", "quality", "runs", f"{claim['night']}.json")
+    # a night's rates live in its quality artifact; a figure across nights (the pair campaign) names its own
+    path = harness.os.path.join(harness.CODEMAP, *claim["artifact"].split("/")) if claim.get("artifact") else \
+        harness.os.path.join(harness.CODEMAP, "eval", "quality", "runs", f"{claim['night']}.json")
     with open(path, encoding="utf-8") as fh:
         night = json.load(fh)
     actual = _night_lookup(night, claim["metric"])
