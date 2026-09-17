@@ -47,6 +47,20 @@ class GuardTests(unittest.TestCase):
         self.assertIn("the skill no longer includes references/topology.md", erdos_gepa.check(dropped, self.ids))
         self.assertTrue(erdos_gepa.check(seed + "x" * erdos_gepa.MAX_CHARS, self.ids))
 
+    def test_generic_file_suffixes_are_not_identifiers(self):
+        for generic in ("spec.ts", "component.ts", "service.ts", "component.html"):
+            self.assertNotIn(generic, self.ids)
+        self.assertIn("StorageRateLimitService", self.ids)
+
+    def test_the_reflection_prompt_asks_for_behaviour_within_the_structure(self):
+        template = erdos_gepa.REFLECTION_TEMPLATE
+        for placeholder in ("<curr_param>", "<side_info>"):
+            self.assertEqual(template.count(placeholder), 1)
+        for rule in ("Change behaviour, not knowledge", "every <include file=", "28,000 characters", "no separate verification"):
+            self.assertIn(rule, template)
+        self.assertLess(erdos_gepa.TARGET_CHARS, erdos_gepa.MAX_CHARS)
+        self.assertLess(len(erdos_prompt.skill_body()), erdos_gepa.TARGET_CHARS)
+
     def test_feedback_masks_code_names(self):
         masked = erdos_gepa.mask("B wrongly says RedisUserCache.getTokenVersion fails open; see step_up_token in StepUpAuthService.java")
         for name in ("RedisUserCache", "getTokenVersion", "step_up_token", "StepUpAuthService"):
@@ -118,6 +132,36 @@ class SeedRunTests(unittest.TestCase):
                 json.dump({"meta": {"prompt_version": erdos_prompt.version(erdos_prompt.assemble(seed))}}, f)
             self.assertEqual(erdos_gepa.import_seed_runs("old", seed, run_dir, ["p"], runs_dir=runs), ["p"])
             self.assertTrue(os.path.exists(os.path.join(run_dir, erdos_gepa.sha16(seed), "p.erdos.events.jsonl")))
+
+
+class ReportTests(unittest.TestCase):
+    def test_the_report_reads_the_log_and_the_best_candidates_change(self):
+        import erdos_gepa_report
+        seed = "<m>\n<core_rules>\none\n</core_rules>\n<method>\nread\n</method>\n</m>\n"
+        best = "<m>\n<core_rules>\none\n</core_rules>\n<method>\nquery first, then read\n</method>\n</m>\n"
+        with tempfile.TemporaryDirectory() as d:
+            run = os.path.join(d, "g")
+            for sha, body in (("s0", seed), ("c1", best)):
+                os.makedirs(os.path.join(run, sha))
+                with open(os.path.join(run, sha, "skill_body.md"), "w", encoding="utf-8") as f:
+                    f.write(body)
+            checks = {"graph_pass": 0.8, "key_files_read": 0.5, "facts_grounded": 1.0, "one_pass": 1.0, "contract": 1.0}
+            with open(os.path.join(run, "gepa.log.jsonl"), "w", encoding="utf-8") as f:
+                for sha, value in (("s0", 0.6), ("c1", 0.8)):
+                    f.write(json.dumps({"event": "eval", "candidate": sha, "problem": "p", "score": value, "adherence": 0.9, "checks": checks,
+                                        "scores": {"correctness": 4, "completeness": 3, "architecture_fit": 4, "graph_use": 5}}) + "\n")
+                f.write(json.dumps({"event": "refused", "candidate": "x", "problems": ["the skill names code"]}) + "\n")
+            with open(os.path.join(d, "g.json"), "w", encoding="utf-8") as f:
+                json.dump({"mission": "m", "weights": erdos_gepa.WEIGHTS, "seed_val_score": 0.6, "best_idx": 1, "best_val_score": 0.8,
+                           "candidates": [{"sha": "s0", "val_score": 0.6}, {"sha": "c1", "val_score": 0.8}], "improved": True,
+                           "judge_noise": {"correctness": 0.4, "score": 0.05, "problems": 5}}, f)
+            text = erdos_gepa_report.build("g", runs_dir=d)
+            self.assertIn("| 1 | `c1` | 0.8 | 0.8 | 4.0 | 3.0 | 4.0 | 5.0 | 0.9 |", text)
+            self.assertIn("| method | 3 | 3 | yes |", text)
+            self.assertIn("| core_rules | 3 | 3 |  |", text)
+            self.assertIn("+query first, then read", text)
+            self.assertIn("Judge noise on the seed", text)
+            self.assertIn("## Refused candidates (1)", text)
 
 
 if __name__ == "__main__":
