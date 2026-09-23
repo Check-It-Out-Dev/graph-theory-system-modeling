@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] — 1.2.0, CodeMap Remote
 
 ### Added
+- Prompt under test, S8 (ahead of S7): `run.py` with the modes smoke, baseline, gepa, certify and report; score, statistics, plateau stopper, GEPA adapter with its guard, certification with the ceiling test, promotion gate, reports; `eval/put/METRICS.md` (D-R29g)
 - Prompt under test, S6: the blind judge (`put_judge.py`, rubric r4: correctness, convention fit, design fit, test quality, graph use) (D-R29f)
 - Prompt under test, S5: the deterministic checks (`put_checks.py`, `put_diff.py`), 26 fixtures from real worktrees (`put_fixtures.py`: ten references, sixteen single-rule breakages) and `test_put_checks.py` (D-R29e)
 - Prompt under test, S4: the coding runner (`put_runner.py`: worktree, restricted session with a Bash allowlist, output-token budget, diff, after/ snapshot, own + hidden + pass-to-pass tests, calls.json) and the prompt renderer with its checksum (`put_prompt.py`); first real run `runs/s4-smoke` (D-R29d)
