@@ -1,0 +1,27 @@
+{
+ "_": [
+  "A sketch, not run: the second prompt a team should test the same way, the CI reviewer that comments on pull requests.",
+  "The prompt is checkitout-frontend tools/subsume/agent/reviewer.md, run by checkitout-backend .github/workflows/ai-review.yml",
+  "(anthropics/claude-code-action, Claude on the subscription). A task is a finished pull-request run: its reports",
+  "(invariant-report.json, governance-ledger.json, gains.md, diagram.md, subsume-report.json), the diff and the PR text,",
+  "frozen as a fixture. The output under test is the comment. Correctness has an oracle: the reports themselves.",
+  "Judge first: a reviewer's comment is mostly judged text, so the judge must be calibrated before any iteration."
+ ],
+ "instance": "pr-reviewer",
+ "status": "sketch",
+ "models": {"reviewer": "the claude-code-action default", "judge": "opus"},
+ "rules": [
+  {"id": "numbers_quoted", "kind": "deterministic",
+   "predicate": "every number in the comment appears byte for byte in one of the reports (the workflow's step I5, tools/subsume/pr-numbers-check.mjs, already fails the job otherwise)"},
+  {"id": "first_line", "kind": "deterministic", "predicate": "the comment starts with the fixed header line"},
+  {"id": "closing_line", "kind": "deterministic", "predicate": "the comment ends with 'I do not approve or merge; a person does.'"},
+  {"id": "section_order", "kind": "deterministic",
+   "predicate": "verdict, what changed, the diagram verbatim, look twice, not applied, diff hygiene, in that order; a non-PASS verdict leaves only the verdict and its lists"},
+  {"id": "verdict_matches", "kind": "deterministic", "predicate": "the verdict line states the invariant report's status and nothing else"},
+  {"id": "no_approval", "kind": "deterministic", "predicate": "no approve / request-changes wording, no merge advice"},
+  {"id": "diff_hygiene_complete", "kind": "judge", "predicate": "every hygiene condition present in the diff is reported, none invented"},
+  {"id": "plain_style", "kind": "judge", "predicate": "plain, specific, short; no praise, no hedging, no emoji; silent on what is fine"}
+ ],
+ "tasks": "10-20 frozen pull-request runs: PASS, FAIL and INCOMPLETE invariant reports, governance rounds with and without suspected subsumptions, a diff that deletes a test",
+ "weights": {"numbers_quoted": 0.3, "structure": 0.2, "verdict_matches": 0.2, "diff_hygiene_complete": 0.15, "plain_style": 0.15}
+}

@@ -4,6 +4,57 @@ _Arc 5, set by the owner 2026-09-23. Design of record: `~/.claude/plans/GOAL-pro
 
 The question is one: a team writes a prompt that tells coding agents how the code base is built (its conventions and design patterns), hands it to every agent, and wants proof that the agents follow it. This document is the long form of that proof: the pipeline, its statistics, the runs and what they showed. The graph appears once, as one of the rules ("look in the code graph before you edit"); whether the graph pays for itself is not asked here.
 
+## The problem
+
+Every coding agent writes code in its own dialect unless something tells it otherwise. A team that lets several
+agents (and several people with agents) into one repository gets field injection next to constructor injection,
+schema changes in two styles, side effects inside transactions in one feature and after commit in the next: the
+spaghetti the hot 2026 argument is about. The usual answer is a prompt: a `CLAUDE.md` or `AGENTS.md` that states the
+conventions. The usual gap is that nobody measures whether the agents follow it. This arc treats that prompt as an
+artifact under test: written once, measured per rule, improved automatically, certified on tasks it never saw, and
+shipped only through a gate.
+
+## The pipeline, element by element
+
+| element | role | where |
+|---|---|---|
+| prompt under test | the conventions manual; each rule a `<rule id>`; delivered as the agent's CLAUDE.md | `eval/put/instances/backend-conventions/prompt/` |
+| contract | every rule with its deterministic check or judge criterion, the weights, the thresholds — declared before any run | `contract.json` |
+| tasks | ten small, real changes in the backend (six training, four held out), each with hidden acceptance tests and a reference solution proven fail-on-base / pass-on-reference | `tasks/` |
+| runner | one coding session per (prompt, task, replicate): Claude Sonnet, fresh worktree, restricted tools, output-token budget | `put_runner.py` |
+| checks | one deterministic check per rule, scoped to the agent's diff | `put_checks.py` |
+| judge | Claude Opus, blind to the prompt, grades correctness, convention fit, design fit, test quality, graph use | `put_judge.py` |
+| score | the contract's weighted sum; deterministic share 0.65 | `put_score.py` |
+| optimiser | GEPA: reflective prompt evolution with a Pareto pool per task, masked feedback, a memorisation guard | `put_gepa.py` |
+| stop rule | K = 3 iterations without a gain above the noise floor delta | `put_stop.py` |
+| certification | seed and candidate replicated on all tasks; the hold-out verdict; the ceiling test | `put_certify.py` |
+| promotion | a gate, then `CLAUDE.md` on a branch of the backend | `put_promote.py` |
+| evidence | each campaign an Actions run on a self-hosted runner, with its job summary and artifacts | `checkitout-backend` `ci/prompt-eval` |
+
+## GEPA in plain terms
+
+GEPA keeps a pool of candidate prompts, starting from the seed. Each iteration it samples a minibatch of training
+tasks, runs the current candidate, and collects feedback text: which rules failed, which hidden tests failed, the
+judge's reasons with code names masked. A reflection model (Claude Opus through `claude -p`) reads only this
+behaviour-level feedback and proposes an edited manual; a guard refuses a proposal that names code from the tasks'
+hidden tests, references or interfaces, drops a rule id or an include, or exceeds the size limit. The proposal runs
+on the same minibatch and enters the pool only if it beats its parent there; accepted candidates are then scored on
+the whole training set. Selection is Pareto per task: a candidate survives if it is the best on at least one task,
+so a specialist that fixes one hard task stays alive instead of the pool collapsing to one average winner, and later
+proposals can combine what specialists learned. The budget is counted in metric calls (one coding run, its checks and
+its verdict = one call); the run stops on the budget or on the plateau rule. What this pipeline adds to stock GEPA:
+deterministic per-rule checks feeding the reflection, a blind judge, a reflection prompt that asks for behaviour
+instead of facts, the memorisation guard, delta as the acceptance floor of the stop rule, and the ceiling test that
+turns "the prompt cannot teach this" into a recommendation for tooling.
+
+## Two prompts, one method
+
+Two prompts in this estate deserve the same treatment: the coding agent's conventions manual, and the CI reviewer
+that comments on every pull request (`ai-review.yml`). Both should be tested, and the judge first, because a judge
+that is not calibrated turns every later number into its own opinion. This arc runs the coding agent. The reviewer
+is the same pipeline with different rules and tasks (`eval/put/instances/pr-reviewer/contract.json` sketches it; its
+strictest rule, quote every number byte for byte, is already checked by the workflow's step I5) and is not run here.
+
 ## S0 — provisioning and probes (2026-09-23)
 
 Every item below was run, not assumed. Raw transcripts: `eval/put/probes/s0/`.
