@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] — 1.2.0, CodeMap Remote
 
 ### Added
+- Prompt under test, S3: hidden acceptance tests and a reference solution per task, validated fail-on-base / pass-on-reference twice for all ten (40/40 arms); `put_tasks.py`, `put_worktree.py`, `put_maven.py` (D-R29c)
 - Prompt under test, S2: instance `backend-conventions`: seed conventions manual v1 (16 rule ids), `contract.json` (predicates, weights, statistics, runner), ten tasks from the real code split 6/4 with every rule tag on both sides, `put_contract.py` + `test_put_contract.py` (D-R29b)
 - Prompt under test, S1: the rolled-back ✅ row reverted on the branch, the success story moved to `docs/history/` as superseded, `eval/put/` skeleton and its tracking rules (D-R29a)
 - Prompt under test, S0 (`applications/CodeMap/eval/put/probes/`, `docs/09-prompt-under-test.md`): Sonnet and Opus ids pinned, Bash confinement probed (a narrow allowlist is required), worktree and build timings, a self-hosted runner in a group restricted to one workflow on the backend branch `ci/prompt-eval` (D-R29)
