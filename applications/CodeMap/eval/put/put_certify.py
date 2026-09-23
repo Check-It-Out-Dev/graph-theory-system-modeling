@@ -133,6 +133,7 @@ def main_from_cli(camp, label, contract, instance, base_repo, parallel, summary_
              "seed_runs": len(seed_recs), "candidate_runs": len(cand_recs),
              "seed_records": [{k: r[k] for k in ("task", "split", "rep", "score")} for r in seed_recs]}
     summary, path = put_cli.summarize(label, "certify", cand_body, camp["candidate"], cand_recs, contract, extra)
+    put_cli.log(f"telemetry: {put_cli.put_telemetry.push(summary)} gauge lines pushed")
     text = put_report.markdown(summary, contract) + certify_markdown(summary)
     put_cli.log(f"certification {path}: works={v['works']} ({v['why']}); ceiling {reason}")
     print(text)

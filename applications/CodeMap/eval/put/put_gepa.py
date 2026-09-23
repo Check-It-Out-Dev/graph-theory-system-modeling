@@ -295,6 +295,8 @@ def main_from_cli(camp, label, contract, instance, base_repo, parallel, summary_
            "in_sample": True, "runs": 0, "score": scores[best] if scores else None, "per_task": {}, "rules": {}}
     with open(os.path.join(put_paths.RUNS, f"{label}.json"), "w", encoding="utf-8", newline="\n") as f:
         json.dump(doc, f, indent=1, default=str)
+    import put_telemetry
+    print(f"telemetry: {put_telemetry.push(doc)} gauge lines pushed", flush=True)
     text = put_report.markdown(doc, contract)
     print(text)
     if summary_path:

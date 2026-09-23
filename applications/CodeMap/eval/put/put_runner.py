@@ -66,10 +66,11 @@ def child_env(role="coder", prompt_version=None, label=None):
     env = run_pairs.child_env()
     for k in ("ANTHROPIC_AUTH_TOKEN", "CLAUDECODE", "CLAUDE_CODE_ENTRYPOINT"):
         env.pop(k, None)
-    attrs = ["service.name=codemap-put", f"role={role}"]
+    base = os.environ.get("OTEL_RESOURCE_ATTRIBUTES", "service.name=codemap-put")      # set by put_telemetry.enable
+    attrs = [base, f"role={role}"]
     if prompt_version:
         attrs.append(f"prompt_version={prompt_version}")
-    if label:
+    if label and f"campaign={label}" not in base:
         attrs.append(f"campaign={label}")
     env["OTEL_RESOURCE_ATTRIBUTES"] = ",".join(attrs)
     return env

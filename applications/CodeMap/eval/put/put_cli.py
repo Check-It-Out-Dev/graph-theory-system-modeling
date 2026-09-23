@@ -33,6 +33,7 @@ import put_report
 import put_runner
 import put_score
 import put_stats
+import put_telemetry
 import run_pairs
 
 
@@ -149,14 +150,29 @@ def noise(records, contract):
             "delta": round(d, 4), "rule": contract["statistics"]["delta"]}
 
 
+def usage_totals(records):
+    """-> (runs that hit the output-token budget, output tokens of all sessions) from each run's meta.json."""
+    exhausted, tokens = 0, 0
+    for r in records:
+        p = os.path.join(r["run_dir"], "meta.json")
+        if os.path.exists(p):
+            with open(p, encoding="utf-8") as f:
+                meta = json.load(f)
+            exhausted += bool((meta.get("session") or {}).get("budget_exhausted"))
+            tokens += int((meta.get("usage") or {}).get("output_tokens") or 0)
+    return exhausted, tokens
+
+
 def summarize(label, mode, body, origin, records, contract, extra=None):
     per_task = {t: {"scores": [round(s, 4) for s in v], "mean": round(mean(v), 4)} for t, v in put_score.by_task(records).items()}
+    exhausted, tokens = usage_totals(records)
     out = {"schema": 1, "label": label, "mode": mode, "instance": contract["instance"], "base_sha": contract["base_sha"],
            "prompt_version": put_prompt.version(body), "prompt_origin": origin,
            "models": contract["models"], "weights": contract["weights"],
            "runs": len(records), "score": round(put_score.candidate_score(records), 4) if records else None,
            "per_task": per_task, "rules": put_score.rule_rates(records, contract),
            "unjudged": sum(1 for r in records if r.get("verdict") is None),
+           "budget_exhausted": exhausted, "output_tokens": tokens,
            "records": [{k: v for k, v in r.items() if k not in ("run_dir",)} | {"run": os.path.relpath(r["run_dir"], put_paths.RUNS)}
                        for r in records],
            "finished_at": time.strftime("%Y-%m-%dT%H:%M:%S%z")}
@@ -187,6 +203,7 @@ def main(argv=None):
     repo = put_checks.Repo(base_repo, contract["base_sha"])
     st = contract["statistics"]
     log(f"campaign {label}: mode {a.mode}, instance {instance}, base repo {base_repo}")
+    log(f"telemetry: {'on (Grafana Cloud, service codemap-put)' if put_telemetry.enable(label) else 'off (no Grafana token)'}")
 
     if a.mode == "gepa":
         import put_gepa
@@ -225,6 +242,7 @@ def main(argv=None):
     if a.mode == "baseline":
         extra["noise"] = noise(records, contract)
     summary, path = summarize(label, a.mode, body, origin, records, contract, extra)
+    log(f"telemetry: {put_telemetry.push(summary)} gauge lines pushed")
     text = put_report.markdown(summary, contract)
     log(f"summary {path}: score {summary['score']} over {summary['runs']} runs")
     if a.summary:

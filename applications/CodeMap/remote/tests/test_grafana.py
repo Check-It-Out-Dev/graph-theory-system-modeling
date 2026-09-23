@@ -21,8 +21,9 @@ class DashboardTests(unittest.TestCase):
     def setUpClass(cls):
         cls.docs = [d.build() for d in build_dashboards.build_all()]
 
-    def test_six_dashboards_lint_clean(self):
-        self.assertEqual(len(self.docs), 6)
+    def test_seven_dashboards_lint_clean(self):
+        # six for the served MCP, one for the prompt-under-test campaigns (arc 5)
+        self.assertEqual(len(self.docs), 7)
         for d in self.docs:
             self.assertEqual(lint.lint_doc(d, d["uid"]), [], d["uid"])
             self.assertEqual(d["templating"]["list"], [])

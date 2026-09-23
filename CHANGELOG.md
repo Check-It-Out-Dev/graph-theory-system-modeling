@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] — 1.2.0, CodeMap Remote
 
 ### Added
+- Prompt under test, S12: campaign telemetry (`put_telemetry.py`: Claude Code OTLP by role and campaign, per-rule gauges) and the seventh dashboard `codemap-prompt-under-test` (D-R29i)
 - Prompt under test: the evidence plane proven by `box-smoke-1` (Actions run 35884706660 on the self-hosted runner), `put_evidence.py` and `RUNS.md`, the runbook, the calibration tool, the PR-reviewer contract sketch, the method sections of `docs/09` (D-R29h)
 - Prompt under test, S8 (ahead of S7): `run.py` with the modes smoke, baseline, gepa, certify and report; score, statistics, plateau stopper, GEPA adapter with its guard, certification with the ceiling test, promotion gate, reports; `eval/put/METRICS.md` (D-R29g)
 - Prompt under test, S6: the blind judge (`put_judge.py`, rubric r4: correctness, convention fit, design fit, test quality, graph use) (D-R29f)
