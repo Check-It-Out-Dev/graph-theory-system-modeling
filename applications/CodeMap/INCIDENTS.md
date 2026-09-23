@@ -1,9 +1,10 @@
 # Incidents — what broke, what it cost, what gate now catches it
 
-Kept in the open on purpose. Dates are the box's clock (CEST). Last revised 2026-09-16.
+Kept in the open on purpose. Dates are the box's clock (CEST). Last revised 2026-09-23.
 
 | date | what | impact | fix | gate added |
 |---|---|---|---|---|
+| 2026-09-17 | a ✅ README row and `docs/08-success-story.md` claimed a measured gain from pairs that exercised the served navigator, not the graph (166 `codemap_ask` calls, 0 `codemap_step`) | a success claim resting on the wrong measurement reached main | owner rolled main back to `5fc6c86`; arc 5 S1 reverted the row on the branch to main's 🟡 text and moved the story to `docs/history/` with a superseded banner (D-R29) | the claims gate: the six README rows of night 2026-09-20 were removed with the text, so the ✅ wording cannot return without new claims |
 | 2026-09-16 | `fetch_pack.py` extracted a Release over an open LadybugDB on Windows; `codemap.lbdb` came out zero bytes | local engine dead until restored from the tarball | stage in `.incoming`, verify every manifest hash, `os.replace` per file | `remote/tests/test_reload.py` (swap under a live engine) |
 | 2026-09-16 | the VPS container's entrypoint failed: `git archive` on Windows produced CRLF scripts | deploy failed before the service started | `.gitattributes` LF pin, `git -c core.autocrtlf=false archive`, `sed -i 's/\r$//'` in the Dockerfile | deploy script checks the archive |
 | 2026-09-16 | certbot DNS-01 hooks hit Cloudflare error 971 (throttle) from the VPS | no certificate for `codemap.checkitout.app` | HTTP-01 webroot (`/var/www/le`) | `deploy.sh` cert check (`sudo test -f`) |

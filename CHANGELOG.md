@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] — 1.2.0, CodeMap Remote
 
 ### Added
+- Prompt under test, S1: the rolled-back ✅ row reverted on the branch, the success story moved to `docs/history/` as superseded, `eval/put/` skeleton and its tracking rules (D-R29a)
 - Prompt under test, S0 (`applications/CodeMap/eval/put/probes/`, `docs/09-prompt-under-test.md`): Sonnet and Opus ids pinned, Bash confinement probed (a narrow allowlist is required), worktree and build timings, a self-hosted runner in a group restricted to one workflow on the backend branch `ci/prompt-eval` (D-R29)
 - GEPA run `2026-09-17-gepa2` over Erdős's manual: the candidate from iteration 3 scores 0.871 against the seed's 0.776, better on all five problems (finding gaps by listing, a four-kind reading list, grounded negative claims); a behaviour-only reflection prompt, 40-minute reflections, one run per problem per batch, `--finalize` for a stopped run (D-R28)
 - Prompt evaluation for Erdős: deterministic adherence checks per manual rule (`eval/erdos/erdos_adherence.py`), a one-answer judge rubric r3 with the query trace (correctness, completeness, architecture fit, graph use), and GEPA optimising the manual against them, seeded with manual 2.1 and a judge-noise measurement (D-R27)
@@ -16,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Erdős pairs 2026-09-17 (`eval/erdos/`): five complex problems with code-built answer keys; Erdős spent 0.42 of the general agent's solve tokens and 0.59 of its time but was judged worse on all five (overall 3.0 against 4.2) (D-R24)
 - `.agents/`: LadybugDB-native agent skills (`ladybug-graph`, `hypatia-indexer`, `grothendieck-organizer`, `erdos-architect`) in the Agent Skills format, generated Claude Code shims, schema, tool contract and graph map (`tools/agents/sync_agents.py`); the proposal reviewer reads the whole Grothendieck skill (D-R23)
 - `build_release.py` keeps the commits a pack indexes; `pack-1.1.1` records both public main heads (D-R22)
-- The README row "Measuring the quality of an AI system in production" is ✅: night 2026-09-20's judge calibrated on its own rows (AC1 0.90) and 35 baseline pairs, gated by claims rows over the night and campaign artifacts; `docs/08-success-story.md` finished (D-R21)
+- ~~The README row "Measuring the quality of an AI system in production" is ✅ (D-R21)~~ — withdrawn by the owner 2026-09-17 (the pairs measured the navigator, not the graph); the row is back to 🟡 and the story lives in `applications/CodeMap/docs/history/08-success-story.md` as history (arc 5, S1)
 - Campaign nights plan past the budget (`--conversations`); a baseline runs only when the day's budget still pays for its partner (D-R20)
 - Pair campaign: a skipped partner is no pair; the runner schedules paired conversations first per persona so the daily budget reaches the partner (D-R19)
 - Judge calibration reports raw agreement, prevalence and Gwet's AC1 beside Cohen's κ; a second verdict route for a skewed oracle, named in the artifact (`eval/judge/calibrate.py`, D-R18)

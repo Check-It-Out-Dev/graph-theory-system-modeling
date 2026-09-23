@@ -1,3 +1,5 @@
+> **Superseded — kept as history (2026-09-23).** The owner rolled this story back on 2026-09-17 ("not a success story"): the pairs it counts measured personas calling `codemap_ask` 166 times and the raw graph tool 0 times, so they measured an agent operating the graph, not the graph, and the graph-versus-grep framing is withdrawn. Its figures stay gated against their artifacts so the record cannot drift. The current work asks a different question: `../09-prompt-under-test.md`.
+
 # CodeMap Remote — the success story, with its numbers
 
 _Written 2026-09-16/17 while the nights ran. Every figure here has one home in a committed artifact named beside it, and the ones the README leans on are re-read by `eval/ci/test_published_numbers.py` on every push; the decision log (`07-ai-quality-governance.md`, D-R1…D-R21) says why each choice was made. Status: **green since night 2026-09-20** — a judge calibrated on that night's own rows, and a gain measured on 35 baseline pairs. Green means measured: the pairs say CodeMap, as served today, costs an agent more than grep, and the sections below say why._
