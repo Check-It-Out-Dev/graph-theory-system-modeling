@@ -1,0 +1,75 @@
+diff --git a/src/main/java/com/sm/instagram/platform/support/ticket/models/SupportTicket.java b/src/main/java/com/sm/instagram/platform/support/ticket/models/SupportTicket.java
+index df875dd..97b20b6 100644
+--- a/src/main/java/com/sm/instagram/platform/support/ticket/models/SupportTicket.java
++++ b/src/main/java/com/sm/instagram/platform/support/ticket/models/SupportTicket.java
+@@ -149,6 +149,13 @@ public class SupportTicket implements UpdaterTracking {
+     @Size(max = 255, message = "Updater ID cannot exceed 255 characters")
+     private String updaterId;
+ 
++    /**
++     * Optimistic locking: concurrent updates of the same support ticket fail instead of overwriting each other.
++     */
++    @Version
++    @Column(name = "version")
++    private Long version;
++
+     /**
+      * Helper method to add a response to this ticket.
+      */
+diff --git a/src/main/resources/db/changelog/2026/09/02-09-2026-widen-ticket-reference-column.sql b/src/main/resources/db/changelog/2026/09/02-09-2026-widen-ticket-reference-column.sql
+index 534b138..e09c9fb 100644
+--- a/src/main/resources/db/changelog/2026/09/02-09-2026-widen-ticket-reference-column.sql
++++ b/src/main/resources/db/changelog/2026/09/02-09-2026-widen-ticket-reference-column.sql
+@@ -10,4 +10,6 @@
+ 
+ ALTER TABLE support_ticket ALTER COLUMN ticket_reference TYPE VARCHAR(32);
+ 
++ALTER TABLE support_ticket ADD COLUMN IF NOT EXISTS version BIGINT NOT NULL DEFAULT 0;
++
+ -- rollback ALTER TABLE support_ticket ALTER COLUMN ticket_reference TYPE VARCHAR(20);
+diff --git a/src/main/resources/db/changelog/changelog.xml b/src/main/resources/db/changelog/changelog.xml
+index 77f52d5..2b4f52b 100644
+--- a/src/main/resources/db/changelog/changelog.xml
++++ b/src/main/resources/db/changelog/changelog.xml
+@@ -184,4 +184,5 @@
+     <!-- June 2026: Widen ticket_reference to VARCHAR(32) — pentest 3.3 SecureRandom format is 21 chars -->
+     <include file="2026/09/02-09-2026-widen-ticket-reference-column.sql" relativeToChangelogFile="true"/>
+ 
++
+ </databaseChangeLog>
+diff --git a/src/test/java/com/sm/instagram/platform/unit/model/SupportTicketOptimisticLockUnitTest.java b/src/test/java/com/sm/instagram/platform/unit/model/SupportTicketOptimisticLockUnitTest.java
+new file mode 100644
+index 0000000..072dcb6
+--- /dev/null
++++ b/src/test/java/com/sm/instagram/platform/unit/model/SupportTicketOptimisticLockUnitTest.java
+@@ -0,0 +1,30 @@
++package com.sm.instagram.platform.unit.model;
++
++import com.sm.instagram.platform.support.ticket.models.SupportTicket;
++import jakarta.persistence.Column;
++import jakarta.persistence.Version;
++import org.junit.jupiter.api.Test;
++import org.junit.jupiter.api.extension.ExtendWith;
++import org.mockito.junit.jupiter.MockitoExtension;
++
++import java.lang.reflect.Field;
++
++import static org.assertj.core.api.Assertions.assertThat;
++
++@ExtendWith(MockitoExtension.class)
++class SupportTicketOptimisticLockUnitTest {
++
++    @Test
++    void versionFieldIsMappedForOptimisticLocking() throws NoSuchFieldException {
++        Field field = SupportTicket.class.getDeclaredField("version");
++
++        assertThat(field.getType()).isEqualTo(Long.class);
++        assertThat(field.isAnnotationPresent(Version.class)).isTrue();
++        assertThat(field.getAnnotation(Column.class).name()).isEqualTo("version");
++    }
++
++    @Test
++    void newTicketStartsWithoutVersion() {
++        assertThat(new SupportTicket().getVersion()).isNull();
++    }
++}
