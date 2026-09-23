@@ -1,0 +1,235 @@
+diff --git a/src/main/java/com/sm/instagram/platform/support/ticket/repositories/SupportTicketRepository.java b/src/main/java/com/sm/instagram/platform/support/ticket/repositories/SupportTicketRepository.java
+index 2538882a2f2..0167d1addf2 100644
+--- a/src/main/java/com/sm/instagram/platform/support/ticket/repositories/SupportTicketRepository.java
++++ b/src/main/java/com/sm/instagram/platform/support/ticket/repositories/SupportTicketRepository.java
+@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
+ import org.springframework.data.repository.query.Param;
+ import org.springframework.stereotype.Repository;
+ 
++import java.time.LocalDateTime;
+ import java.util.List;
+ import java.util.Optional;
+ 
+@@ -104,4 +105,13 @@ public interface SupportTicketRepository extends BaseRepository<SupportTicket, L
+             "LOWER(t.subject) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
+             "LOWER(t.description) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
+     Page<SupportTicket> search(@Param("searchTerm") String searchTerm, Pageable pageable);
++
++    /**
++     * Find tickets with the given status whose resolvedTime is before the given cutoff.
++     *
++     * @param status The ticket status to match
++     * @param cutoff The cutoff timestamp
++     * @return List of matching tickets
++     */
++    List<SupportTicket> findByStatusAndResolvedTimeBefore(TicketStatus status, LocalDateTime cutoff);
+ }
+\ No newline at end of file
+diff --git a/src/main/java/com/sm/instagram/platform/support/ticket/services/StaleTicketCloseCronJob.java b/src/main/java/com/sm/instagram/platform/support/ticket/services/StaleTicketCloseCronJob.java
+new file mode 100644
+index 00000000000..737a5ea543b
+--- /dev/null
++++ b/src/main/java/com/sm/instagram/platform/support/ticket/services/StaleTicketCloseCronJob.java
+@@ -0,0 +1,40 @@
++package com.sm.instagram.platform.support.ticket.services;
++
++import lombok.RequiredArgsConstructor;
++import lombok.extern.slf4j.Slf4j;
++import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
++import org.springframework.beans.factory.annotation.Value;
++import org.springframework.scheduling.annotation.Scheduled;
++import org.springframework.stereotype.Component;
++
++/**
++ * Nightly cron job that closes support tickets nobody reopened after they
++ * were resolved.
++ */
++@Slf4j
++@Component
++@RequiredArgsConstructor
++public class StaleTicketCloseCronJob {
++
++    private final SupportTicketService supportTicketService;
++
++    @Value("${support.ticket.stale-close.enabled:true}")
++    private boolean enabled;
++
++    @Value("${support.ticket.stale-close.days:14}")
++    private int olderThanDays;
++
++    @Scheduled(cron = "${support.ticket.stale-close.cron:0 30 3 * * *}")
++    @SchedulerLock(name = "support:staleTicketClose", lockAtMostFor = "30m", lockAtLeastFor = "1m")
++    public void closeStaleTickets() {
++        if (!enabled) {
++            return;
++        }
++        try {
++            int closed = supportTicketService.closeStaleResolvedTickets(olderThanDays);
++            log.info("Stale ticket close completed: closed={}", closed);
++        } catch (Exception e) {
++            log.error("Stale ticket close failed", e);
++        }
++    }
++}
+diff --git a/src/main/java/com/sm/instagram/platform/support/ticket/services/SupportTicketService.java b/src/main/java/com/sm/instagram/platform/support/ticket/services/SupportTicketService.java
+index 662c193a56e..3cb6d4e46e2 100644
+--- a/src/main/java/com/sm/instagram/platform/support/ticket/services/SupportTicketService.java
++++ b/src/main/java/com/sm/instagram/platform/support/ticket/services/SupportTicketService.java
+@@ -617,6 +617,27 @@ public class SupportTicketService {
+         return convertToDto(ticket);
+     }
+ 
++    /**
++     * Close every ticket that has been RESOLVED for longer than the given
++     * number of days. Runs from the stale-ticket-close cron job.
++     *
++     * @param olderThanDays How many days a ticket must have been resolved for
++     * @return The number of tickets closed
++     */
++    @Transactional
++    public int closeStaleResolvedTickets(int olderThanDays) {
++        LocalDateTime cutoff = LocalDateTime.now().minusDays(olderThanDays);
++        List<SupportTicket> staleTickets = ticketRepository.findByStatusAndResolvedTimeBefore(TicketStatus.RESOLVED, cutoff);
++
++        for (SupportTicket ticket : staleTickets) {
++            ticket.setStatus(TicketStatus.CLOSED);
++            ticket.setLastUpdateTime(LocalDateTime.now());
++            ticketRepository.save(ticket);
++        }
++
++        return staleTickets.size();
++    }
++
+     /**
+      * Get a ticket by ID.
+      *
+diff --git a/src/test/java/com/sm/instagram/platform/unit/service/StaleTicketCloseCronJobUnitTest.java b/src/test/java/com/sm/instagram/platform/unit/service/StaleTicketCloseCronJobUnitTest.java
+new file mode 100644
+index 00000000000..c14ccfef20f
+--- /dev/null
++++ b/src/test/java/com/sm/instagram/platform/unit/service/StaleTicketCloseCronJobUnitTest.java
+@@ -0,0 +1,71 @@
++package com.sm.instagram.platform.unit.service;
++
++import com.sm.instagram.platform.support.ticket.services.StaleTicketCloseCronJob;
++import com.sm.instagram.platform.support.ticket.services.SupportTicketService;
++import org.junit.jupiter.api.BeforeEach;
++import org.junit.jupiter.api.DisplayName;
++import org.junit.jupiter.api.Nested;
++import org.junit.jupiter.api.Test;
++import org.junit.jupiter.api.extension.ExtendWith;
++import org.mockito.Mock;
++import org.mockito.junit.jupiter.MockitoExtension;
++import org.mockito.junit.jupiter.MockitoSettings;
++import org.mockito.quality.Strictness;
++import org.springframework.test.util.ReflectionTestUtils;
++
++import static org.mockito.Mockito.*;
++
++@ExtendWith(MockitoExtension.class)
++@MockitoSettings(strictness = Strictness.LENIENT)
++@DisplayName("StaleTicketCloseCronJob Unit Tests")
++class StaleTicketCloseCronJobUnitTest {
++
++    @Mock
++    private SupportTicketService supportTicketService;
++
++    private StaleTicketCloseCronJob cronJob;
++
++    @BeforeEach
++    void setUp() {
++        cronJob = new StaleTicketCloseCronJob(supportTicketService);
++        ReflectionTestUtils.setField(cronJob, "olderThanDays", 14);
++    }
++
++    @Nested
++    @DisplayName("closeStaleTickets")
++    class CloseStaleTickets {
++
++        @Test
++        @DisplayName("should close stale tickets with the configured threshold when enabled")
++        void should_close_stale_tickets_when_enabled() {
++            ReflectionTestUtils.setField(cronJob, "enabled", true);
++            when(supportTicketService.closeStaleResolvedTickets(14)).thenReturn(3);
++
++            cronJob.closeStaleTickets();
++
++            verify(supportTicketService).closeStaleResolvedTickets(14);
++        }
++
++        @Test
++        @DisplayName("should skip when disabled")
++        void should_skip_when_disabled() {
++            ReflectionTestUtils.setField(cronJob, "enabled", false);
++
++            cronJob.closeStaleTickets();
++
++            verifyNoInteractions(supportTicketService);
++        }
++
++        @Test
++        @DisplayName("should catch and log exceptions without rethrowing")
++        void should_catch_and_log_exceptions_without_rethrowing() {
++            ReflectionTestUtils.setField(cronJob, "enabled", true);
++            doThrow(new RuntimeException("DB connection failed"))
++                    .when(supportTicketService).closeStaleResolvedTickets(14);
++
++            cronJob.closeStaleTickets();
++
++            verify(supportTicketService).closeStaleResolvedTickets(14);
++        }
++    }
++}
+diff --git a/src/test/java/com/sm/instagram/platform/unit/service/SupportTicketServiceUnitTest.java b/src/test/java/com/sm/instagram/platform/unit/service/SupportTicketServiceUnitTest.java
+index d9b38014c5a..9e4f30869c4 100644
+--- a/src/test/java/com/sm/instagram/platform/unit/service/SupportTicketServiceUnitTest.java
++++ b/src/test/java/com/sm/instagram/platform/unit/service/SupportTicketServiceUnitTest.java
+@@ -483,6 +483,48 @@ class SupportTicketServiceUnitTest {
+         }
+     }
+ 
++    @Nested
++    @DisplayName("closeStaleResolvedTickets")
++    class CloseStaleResolvedTicketsTests {
++
++        @Test
++        @DisplayName("should close every ticket resolved before the cutoff and return the count")
++        void shouldCloseStaleResolvedTickets() {
++            // Given
++            SupportTicket stale1 = new SupportTicket();
++            stale1.setStatus(TicketStatus.RESOLVED);
++            SupportTicket stale2 = new SupportTicket();
++            stale2.setStatus(TicketStatus.RESOLVED);
++            when(ticketRepository.findByStatusAndResolvedTimeBefore(eq(TicketStatus.RESOLVED), any(LocalDateTime.class)))
++                    .thenReturn(List.of(stale1, stale2));
++            when(ticketRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
++
++            // When
++            int closed = service.closeStaleResolvedTickets(14);
++
++            // Then
++            assertThat(closed).isEqualTo(2);
++            assertThat(stale1.getStatus()).isEqualTo(TicketStatus.CLOSED);
++            assertThat(stale2.getStatus()).isEqualTo(TicketStatus.CLOSED);
++            verify(ticketRepository, times(2)).save(any());
++        }
++
++        @Test
++        @DisplayName("should return zero and save nothing when there are no stale tickets")
++        void shouldReturnZeroWhenNoStaleTickets() {
++            // Given
++            when(ticketRepository.findByStatusAndResolvedTimeBefore(eq(TicketStatus.RESOLVED), any(LocalDateTime.class)))
++                    .thenReturn(List.of());
++
++            // When
++            int closed = service.closeStaleResolvedTickets(14);
++
++            // Then
++            assertThat(closed).isEqualTo(0);
++            verify(ticketRepository, never()).save(any());
++        }
++    }
++
+     // ==================== Customer Response Tests ====================
+ 
+     @Nested

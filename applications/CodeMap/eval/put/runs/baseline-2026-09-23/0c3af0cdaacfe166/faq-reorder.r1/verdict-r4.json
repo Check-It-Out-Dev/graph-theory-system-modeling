@@ -1,0 +1,29 @@
+{
+ "rubric": "r4",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 5,
+  "test_quality": 4,
+  "graph_use": 3,
+  "reasons": {
+   "correctness": "reorderCategory rejects missing, extra, duplicate and null ids with error.business.faq_reorder_mismatch, sets order i+1, saves each FAQ, keeps ResourceNotFoundException for an unknown category. PUT returns 204. Hidden tests 6/6, build green.",
+   "convention_fit": "Endpoint has @PreAuthorize ADMIN and inherits the class-level @RateLimit on FaqCategoryController. Explicit constructor injection. BusinessRuleTranslatableException key and validation key added to both messages_en and messages_pl. Body is FaqReorderDtoIn. MockitoExtension unit test.",
+   "design_fit": "Controller delegates to FaqService, which owns the logic. Reuses findByCategoryAndActiveTrue, BaseService.save and the existing not-found pattern. New code is confined to the support/faq package and the footprint is minimal.",
+   "test_quality": "FaqServiceUnitTest (7 tests, no Spring) covers happy path, any order, missing, foreign, duplicate, null and unknown category, and asserts the message key. It never verifies save() is called, and LENIENT strictness hides unused stubs.",
+   "graph_use": "One opening graph query listed the support/faq files. Finding existing unit-test examples, BaseService and the message keys relied on glob, grep and find commands rather than further graph queries."
+  },
+  "rubric": "r4",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 1082,
+  "cache_read_input_tokens": 1278,
+  "cache_creation_input_tokens": 26404
+ },
+ "is_error": false
+}

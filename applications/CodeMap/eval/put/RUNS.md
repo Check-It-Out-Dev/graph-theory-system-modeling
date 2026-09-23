@@ -5,3 +5,4 @@ Every prompt-under-test campaign that produced a committed number: its Actions r
 | date | label | mode | Actions run | artifact (id, digest) | prompt | runs | score | release asset |
 |---|---|---|---|---|---|---|---|---|
 | 2026-09-23 | box-smoke-1 | smoke | [35884706660](https://github.com/Check-It-Out-Dev/checkitout-backend/actions/runs/35884706660) | 10762652703, `f333340ca77053c8` | `put@0c3af0cdaacfe166` | 1 | 0.9125 | |
+| 2026-09-23 | baseline-2026-09-23 | baseline | [35885709905](https://github.com/Check-It-Out-Dev/checkitout-backend/actions/runs/35885709905) | 10765315832, `e0a71cb31d72126c` | `put@0c3af0cdaacfe166` | 18 | 0.9109 | |

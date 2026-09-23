@@ -1,0 +1,29 @@
+{
+ "rubric": "r4",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 4,
+  "convention_fit": 5,
+  "design_fit": 5,
+  "test_quality": 2,
+  "graph_use": 3,
+  "reasons": {
+   "correctness": "Column, entity field, DTO field and both mapping paths work; hidden tests 4/4. The changeset gives PLN 0, but every currency other than EUR/USD keeps default 0 and ties with PLN, so PLN-first is not guaranteed.",
+   "convention_fit": "The changeset is in 2026/09/ with the DD-MM-YYYY name, formatted-sql header, author:id and a rollback. It is included last with a month comment. The new test is a Mockito *UnitTest with no Spring context. Constructor callers in tests were updated.",
+   "design_fit": "The field is added in the currency feature package. It adds one setter line to the existing explicit mapping and relies on ModelMapper for toDto. No new mechanisms and a minimal footprint.",
+   "test_quality": "Both CurrencyServiceDisplayOrderUnitTest cases assert displayOrder 0, which is the int default. The paged test passes without the new setter. The toDto test stubs modelMapper to return the expected DTO, so it is tautological. LENIENT strictness hides unused stubs.",
+   "graph_use": "One graph query listed the currency feature files before the reads and edits. The changelog location, the existing changeset example and the constructor callers were found by grep/find/ls, not the graph."
+  },
+  "rubric": "r4",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 1202,
+  "cache_read_input_tokens": 1278,
+  "cache_creation_input_tokens": 25507
+ },
+ "is_error": false
+}

@@ -1,0 +1,29 @@
+{
+ "rubric": "r4",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 4,
+  "test_quality": 4,
+  "graph_use": 4,
+  "reasons": {
+   "correctness": "Implements all three interface names exactly: the repository derived query, the @Transactional service method with cutoff now minus days returning a count, and the cron job with property-driven enabled, days and cron. The disabled path returns early; the catch logs. Hidden tests pass 4/4.",
+   "convention_fit": "StaleTicketCloseCronJob follows the cron conventions: @SchedulerLock named support:staleTicketClose, cron and enabled flag from properties, *CronJob name. Injection is via @RequiredArgsConstructor. The new cron test uses MockitoExtension. The code stays in the support/ticket feature package.",
+   "design_fit": "Cohesive and in the right layers: the query is in the repository, logic in the service, scheduling in the cron job. The loop only sets CLOSED. It does not reuse any existing status-transition path, so side fields such as a closed timestamp may be skipped. It calls save per entity despite @Transactional.",
+   "test_quality": "Service tests cover close-and-count and the empty case. Cron tests cover the enabled, disabled and exception paths. The cutoff uses any(LocalDateTime.class), so the date arithmetic is not pinned. LENIENT strictness loosens the cron test.",
+   "graph_use": "The first graph query mapped the support/ticket package and the second found existing *CronJob files. That led to reading NoConsentAccountCleanupCronJob before writing the new job, and its structure was followed. Test discovery used find rather than the graph."
+  },
+  "rubric": "r4",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 1159,
+  "cache_read_input_tokens": 1278,
+  "cache_creation_input_tokens": 23233
+ },
+ "is_error": false
+}

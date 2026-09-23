@@ -1,0 +1,29 @@
+{
+ "rubric": "r4",
+ "verdict": {
+  "rules_violated": 1,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 4,
+  "design_fit": 4,
+  "test_quality": 2,
+  "graph_use": 3,
+  "reasons": {
+   "correctness": "Currency.displayOrder maps to display_order INT NOT NULL DEFAULT 0. The DTO field is filled in the service mapping and both controller mappings. The changeset seeds PLN=1. Build is green and hidden tests pass 4/4. Listing order is left to clients.",
+   "convention_fit": "The changeset path, file name, formatted-sql header, rollback line and September 2026 comment all conform. No new *UnitTest class was added for the mapping change. Tests were only appended to CurrencyServiceUnitTest and AddressAndCurrencyUnitTest.",
+   "design_fit": "The change is small and stays inside the currency/ package. It extends the controller's existing inline builder mappings. Those mappings duplicate service logic, but that duplication was already there and was not refactored. Seeding the order in the migration is reasonable.",
+   "test_quality": "New assertions cover only Lombok getters, setters and constructors on Currency and CurrencyDtoOut. No test runs CurrencyService.toDto or getDataPagedAndFilteredAsDtos to check that displayOrder is mapped.",
+   "graph_use": "One graph query listed the currency files first. After that the agent navigated with failed reads, find, repeated greps and ls on the changelog directories. It found the example changeset by listing directories, not through the graph."
+  },
+  "rubric": "r4",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 1485,
+  "cache_read_input_tokens": 1278,
+  "cache_creation_input_tokens": 24695
+ },
+ "is_error": false
+}
