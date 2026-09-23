@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] — 1.2.0, CodeMap Remote
 
 ### Added
+- Prompt under test, S0 (`applications/CodeMap/eval/put/probes/`, `docs/09-prompt-under-test.md`): Sonnet and Opus ids pinned, Bash confinement probed (a narrow allowlist is required), worktree and build timings, a self-hosted runner in a group restricted to one workflow on the backend branch `ci/prompt-eval` (D-R29)
 - GEPA run `2026-09-17-gepa2` over Erdős's manual: the candidate from iteration 3 scores 0.871 against the seed's 0.776, better on all five problems (finding gaps by listing, a four-kind reading list, grounded negative claims); a behaviour-only reflection prompt, 40-minute reflections, one run per problem per batch, `--finalize` for a stopped run (D-R28)
 - Prompt evaluation for Erdős: deterministic adherence checks per manual rule (`eval/erdos/erdos_adherence.py`), a one-answer judge rubric r3 with the query trace (correctness, completeness, architecture fit, graph use), and GEPA optimising the manual against them, seeded with manual 2.1 and a judge-noise measurement (D-R27)
 - Erdős 2.1 and judge rubric r2: a required graph pass before any file tool, answer keys with code-built architecture sections, a judge that scores architectural fit and neutralises arm-revealing wording (D-R26)
