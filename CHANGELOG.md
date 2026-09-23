@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] — 1.2.0, CodeMap Remote
 
 ### Added
+- Prompt under test, S6: the blind judge (`put_judge.py`, rubric r4: correctness, convention fit, design fit, test quality, graph use) (D-R29f)
 - Prompt under test, S5: the deterministic checks (`put_checks.py`, `put_diff.py`), 26 fixtures from real worktrees (`put_fixtures.py`: ten references, sixteen single-rule breakages) and `test_put_checks.py` (D-R29e)
 - Prompt under test, S4: the coding runner (`put_runner.py`: worktree, restricted session with a Bash allowlist, output-token budget, diff, after/ snapshot, own + hidden + pass-to-pass tests, calls.json) and the prompt renderer with its checksum (`put_prompt.py`); first real run `runs/s4-smoke` (D-R29d)
 - Prompt under test, S3: hidden acceptance tests and a reference solution per task, validated fail-on-base / pass-on-reference twice for all ten (40/40 arms); `put_tasks.py`, `put_worktree.py`, `put_maven.py` (D-R29c)
