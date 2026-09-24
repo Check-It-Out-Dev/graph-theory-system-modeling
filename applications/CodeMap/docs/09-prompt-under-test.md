@@ -55,6 +55,30 @@ that is not calibrated turns every later number into its own opinion. This arc r
 is the same pipeline with different rules and tasks (`eval/put/instances/pr-reviewer/contract.json` sketches it; its
 strictest rule, quote every number byte for byte, is already checked by the workflow's step I5) and is not run here.
 
+## Calibrating the judge: checking its scores against our own
+
+A third of the score comes from an LLM judge, so the judge is graded before its numbers are used. The shape of the
+process matters more than who does the grading: a person (here the owner for the scores the owner gave after reading the
+evidence, and an independent reviewer the owner delegated for the rest) re-grades a sample of the same changes, blind to
+the judge, and every disagreement is argued on the code before anything changes. `eval/put/METRICS.md` §7a is the
+normative text; the record is `eval/put/judge/reference-scores.json` and `calibration-r4.json` / `calibration-r5.json`.
+
+| step | what happened here |
+|---|---|
+| Anchors | 8 baseline runs at even steps of the judge's range. They were all good (the seed writes good code): every reference score for convention and design fit was ≥ 4, κ was 0 on convention fit whatever the judge did. So 4 degraded variants of training tasks joined them, one broken rule each: field injection, a missing lock, a service importing the adapter, an in-transaction listener. |
+| Blind grading | Convention fit, design fit and test quality, 1–5 on the judge's own rubric, from the task, the diff, the test results and the unchanged code base. The owner's own decision on the first contested cell (a flawless diff without a new test is a 4, not a 3: test quality charges the missing test) became an instruction for the rest. |
+| Comparison, r4 | Pooled over 36 cells: exact 0.72, binarised agreement 0.94, AC1 0.90, Spearman 0.87. Design fit was the weak one: exact 0.58, Spearman 0.65, and every repeated gap had the judge above the reference. |
+| Adjudication | The judge was blind to duplication of unchanged code (a new FAQ method repeating `getFaqsByCategory` was praised as reuse), rated convention breaks that are structural defects as mild smells (an unlocked job that runs on every instance), docked a package the task itself mandated, and charged a missing test twice. Differences of taste (4 vs 5 on test quality) were left alone. |
+| Revision, r5 | The judge now receives the unchanged text of the files a diff modifies; the design anchors name duplication against it and structural breaks; a missing test costs at most one point of convention fit; mandated placement is not graded. Spot-checked on the three anchors it should move and one it must not, then the baseline's 18 runs and the 4 degraded anchors were re-judged twice on the box. |
+| Comparison, r5 | Design fit exact 0.92, Spearman 0.97, mean difference 0.08; pooled exact 0.83, Spearman 0.92; the judge's own test-retest noise halved (MAD of score 0.017 → 0.009). Binarised AC1 fell 0.90 → 0.85: of the three cells that now cross the ≥ 4 line, two flip back on the judge's second pass, and on one (a service importing an adapter) the judge counts the broken rule and still gives 4 — which the deterministic `ports_adapters` check fails regardless. δ re-measured: 0.030. |
+| Stop | r5 is frozen. A third revision fitted to the same 12 anchors would make them training data for the rubric; the next revision needs new anchors. |
+
+What this calibration cannot show: the reviewer and the judge are one model family, which inflates agreement where
+they share a blind spot; 12 anchors will not surface an error on a rare kind of change (a controller holding business
+logic, a parallel mechanism beside an existing one); and the owner graded the cells the owner chose, not all 36. In a team
+the reviewer is the engineer who owns the conventions, the sample is refreshed from each campaign's runs, and the
+same five steps run whenever the rubric or the judge model changes.
+
 ## S0 — provisioning and probes (2026-09-23)
 
 Every item below was run, not assumed. Raw transcripts: `eval/put/probes/s0/`.

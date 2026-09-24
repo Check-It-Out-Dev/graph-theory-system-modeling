@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 1,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 4,
+  "convention_fit": 3,
+  "design_fit": 3,
+  "test_quality": 3,
+  "graph_use": 2,
+  "reasons": {
+   "correctness": "Repository query, closeStaleResolvedTickets and the disabled and failure paths match the interface. Acceptance tests pass 4/4. Without a lock the nightly close runs concurrently on every instance.",
+   "convention_fit": "StaleTicketCloseCronJob#closeStaleTickets has @Scheduled but no @SchedulerLock(name = \"support:...\"). The SchedulerLock import is present but unused. Cron and enabled flag come from properties, and constructor injection is used.",
+   "design_fit": "Logic sits in the service and the job only delegates, which is correct layering. The missing ShedLock is a structural defect because the job executes on every instance. The unused import is left behind.",
+   "test_quality": "StaleTicketCloseCronJobUnitTest covers the enabled, disabled and swallowed-failure paths with Mockito. No unit test pins closeStaleResolvedTickets: cutoff calculation, the status change to CLOSED, save calls or the returned count. The test command was run with -Dtest=X, a placeholder.",
+   "graph_use": "Only one trivial graph query (MATCH (e:Entity) RETURN e.file_path LIMIT 1), which located nothing. The agent went straight to reading DeferredDeletionCronJob. Its structure was copied without that file's lock, if it has one."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 982,
+  "cache_read_input_tokens": 36121,
+  "cache_creation_input_tokens": 0
+ },
+ "is_error": false
+}

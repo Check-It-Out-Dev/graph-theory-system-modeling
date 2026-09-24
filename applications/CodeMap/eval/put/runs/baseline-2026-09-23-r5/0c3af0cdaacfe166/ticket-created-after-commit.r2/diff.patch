@@ -1,0 +1,323 @@
+diff --git a/src/main/java/com/sm/instagram/platform/support/ticket/event/SupportTicketCreatedEvent.java b/src/main/java/com/sm/instagram/platform/support/ticket/event/SupportTicketCreatedEvent.java
+new file mode 100644
+index 00000000000..995833b88b6
+--- /dev/null
++++ b/src/main/java/com/sm/instagram/platform/support/ticket/event/SupportTicketCreatedEvent.java
+@@ -0,0 +1,32 @@
++package com.sm.instagram.platform.support.ticket.event;
++
++import lombok.Getter;
++import org.springframework.context.ApplicationEvent;
++
++/**
++ * Published when a SupportTicket is created and its confirmation e-mail needs to be sent.
++ * Handled by SupportTicketCreatedEventListener AFTER_COMMIT — so the ticket exists in DB
++ * before the reporter is handed a reference to it.
++ */
++@Getter
++public class SupportTicketCreatedEvent extends ApplicationEvent {
++
++    private final Long ticketId;
++    private final String contactEmail;
++    private final String ticketReference;
++    private final String subject;
++    private final String language;
++    private final String statusToken;
++
++    public SupportTicketCreatedEvent(Object source, Long ticketId, String contactEmail,
++                                      String ticketReference, String subject, String language,
++                                      String statusToken) {
++        super(source);
++        this.ticketId = ticketId;
++        this.contactEmail = contactEmail;
++        this.ticketReference = ticketReference;
++        this.subject = subject;
++        this.language = language;
++        this.statusToken = statusToken;
++    }
++}
+diff --git a/src/main/java/com/sm/instagram/platform/support/ticket/event/SupportTicketCreatedEventListener.java b/src/main/java/com/sm/instagram/platform/support/ticket/event/SupportTicketCreatedEventListener.java
+new file mode 100644
+index 00000000000..9f13754aca4
+--- /dev/null
++++ b/src/main/java/com/sm/instagram/platform/support/ticket/event/SupportTicketCreatedEventListener.java
+@@ -0,0 +1,37 @@
++package com.sm.instagram.platform.support.ticket.event;
++
++import com.sm.instagram.platform.support.common.EmailService;
++import lombok.RequiredArgsConstructor;
++import lombok.extern.slf4j.Slf4j;
++import org.springframework.stereotype.Component;
++import org.springframework.transaction.event.TransactionPhase;
++import org.springframework.transaction.event.TransactionalEventListener;
++
++/**
++ * Listens for SupportTicketCreatedEvent and sends the confirmation e-mail.
++ * AFTER_COMMIT ensures the ticket is persisted before the reporter is sent a link to it.
++ * Failures are caught and logged — the transaction has already committed.
++ */
++@Slf4j
++@Component
++@RequiredArgsConstructor
++public class SupportTicketCreatedEventListener {
++
++    private final EmailService emailService;
++
++    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
++    public void onTicketCreated(SupportTicketCreatedEvent event) {
++        try {
++            emailService.sendTicketCreationConfirmation(
++                    event.getContactEmail(),
++                    event.getTicketReference(),
++                    event.getSubject(),
++                    event.getLanguage(),
++                    event.getStatusToken()
++            );
++        } catch (Exception e) {
++            log.warn("Failed to send ticket creation confirmation: ticketId={}, error={}",
++                    event.getTicketId(), e.getMessage());
++        }
++    }
++}
+diff --git a/src/main/java/com/sm/instagram/platform/support/ticket/services/SupportTicketService.java b/src/main/java/com/sm/instagram/platform/support/ticket/services/SupportTicketService.java
+index 662c193a56e..d9edfc7c299 100644
+--- a/src/main/java/com/sm/instagram/platform/support/ticket/services/SupportTicketService.java
++++ b/src/main/java/com/sm/instagram/platform/support/ticket/services/SupportTicketService.java
+@@ -6,6 +6,7 @@ import com.sm.instagram.platform.common.exceptions.BusinessRuleTranslatableExcep
+ import com.sm.instagram.platform.common.exceptions.InsufficientPermissionsException;
+ import com.sm.instagram.platform.common.exceptions.ResourceNotFoundException;
+ import com.sm.instagram.platform.support.common.EmailService;
++import com.sm.instagram.platform.support.ticket.event.SupportTicketCreatedEvent;
+ import com.sm.instagram.platform.support.ticket.dtos.*;
+ import com.sm.instagram.platform.support.ticket.models.*;
+ import com.sm.instagram.platform.support.ticket.repositories.ResponseAttachmentRepository;
+@@ -17,6 +18,7 @@ import com.sm.instagram.platform.user.User;
+ import com.sm.instagram.platform.user.UserRepository;
+ import lombok.extern.slf4j.Slf4j;
+ import org.springframework.beans.factory.annotation.Autowired;
++import org.springframework.context.ApplicationEventPublisher;
+ import org.springframework.context.i18n.LocaleContextHolder;
+ import org.springframework.data.domain.Page;
+ import org.springframework.data.domain.Pageable;
+@@ -45,6 +47,7 @@ public class SupportTicketService {
+     private final PermissionUtils permissionUtils;
+     private final SignedUrlService signedUrlService;
+     private final TicketAccessTokenService accessTokenService;
++    private final ApplicationEventPublisher eventPublisher;
+ 
+     @Autowired
+     public SupportTicketService(
+@@ -57,7 +60,8 @@ public class SupportTicketService {
+             EmailService emailService,
+             PermissionUtils permissionUtils,
+             SignedUrlService signedUrlService,
+-            TicketAccessTokenService accessTokenService) {
++            TicketAccessTokenService accessTokenService,
++            ApplicationEventPublisher eventPublisher) {
+         this.ticketRepository = ticketRepository;
+         this.responseRepository = responseRepository;
+         this.userRepository = userRepository;
+@@ -66,6 +70,7 @@ public class SupportTicketService {
+         this.permissionUtils = permissionUtils;
+         this.signedUrlService = signedUrlService;
+         this.accessTokenService = accessTokenService;
++        this.eventPublisher = eventPublisher;
+     }
+ 
+     /**
+@@ -150,18 +155,20 @@ public class SupportTicketService {
+                 currentUserId != null ? currentUserId : "anonymous",
+                 savedTicket.getTicketReference());
+ 
+-        // Send confirmation email with a one-click magic link (signed access
+-        // token) so the reporter can reach the ticket without re-entering the
+-        // reference + email (pentest 3.2/3.3 — the token is the authorization).
++        // Publish the confirmation e-mail (one-click magic link, signed access
++        // token) as an AFTER_COMMIT event so the reporter is never handed a
++        // reference to a ticket that a rolled-back transaction never created.
+         String language = LocaleContextHolder.getLocale().getLanguage();
+         String statusToken = accessTokenService.mint(savedTicket.getId());
+-        emailService.sendTicketCreationConfirmation(
++        eventPublisher.publishEvent(new SupportTicketCreatedEvent(
++                this,
++                savedTicket.getId(),
+                 savedTicket.getContactEmail(),
+                 savedTicket.getTicketReference(),
+                 savedTicket.getSubject(),
+                 language,
+                 statusToken
+-        );
++        ));
+ 
+         return savedTicket;
+     }
+diff --git a/src/test/java/com/sm/instagram/platform/integration/service/supportticket/SupportTicketService_Create_IntegrationTest.java b/src/test/java/com/sm/instagram/platform/integration/service/supportticket/SupportTicketService_Create_IntegrationTest.java
+index 538a84cd4ee..f21e21a207b 100644
+--- a/src/test/java/com/sm/instagram/platform/integration/service/supportticket/SupportTicketService_Create_IntegrationTest.java
++++ b/src/test/java/com/sm/instagram/platform/integration/service/supportticket/SupportTicketService_Create_IntegrationTest.java
+@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
+ 
+ import static org.assertj.core.api.Assertions.assertThat;
+ import static org.mockito.ArgumentMatchers.anyString;
++import static org.mockito.Mockito.never;
+ import static org.mockito.Mockito.verify;
+ 
+ /**
+@@ -90,14 +91,19 @@ class SupportTicketService_Create_IntegrationTest extends SupportTicketServiceIn
+         }
+ 
+         @Test
+-        @DisplayName("sends confirmation email on ticket creation")
+-        void sendsConfirmationEmailOnTicketCreation() {
++        @DisplayName("does not send confirmation email before the transaction commits")
++        void doesNotSendConfirmationEmailSynchronously() {
++            // The confirmation is published as a SupportTicketCreatedEvent and sent by
++            // SupportTicketCreatedEventListener AFTER_COMMIT, so within this still-open
++            // @Transactional test it must not have gone out yet. AFTER_COMMIT handlers
++            // don't fire in @Transactional test context (rollback, no commit) — the
++            // listener itself is unit-tested separately.
+             String email = generateTestEmail();
+             SupportTicketDtoIn dto = createTicketDtoIn(email, "Subject", "Description");
+ 
+-            SupportTicket result = supportTicketService.createTicket(dto, TEST_IP_ADDRESS);
++            supportTicketService.createTicket(dto, TEST_IP_ADDRESS);
+ 
+-            verify(emailService).sendTicketCreationConfirmation(
++            verify(emailService, never()).sendTicketCreationConfirmation(
+                     anyString(),
+                     anyString(),
+                     anyString(),
+diff --git a/src/test/java/com/sm/instagram/platform/unit/service/SupportTicketCreatedEventListenerUnitTest.java b/src/test/java/com/sm/instagram/platform/unit/service/SupportTicketCreatedEventListenerUnitTest.java
+new file mode 100644
+index 00000000000..9c3b3e56e2d
+--- /dev/null
++++ b/src/test/java/com/sm/instagram/platform/unit/service/SupportTicketCreatedEventListenerUnitTest.java
+@@ -0,0 +1,49 @@
++package com.sm.instagram.platform.unit.service;
++
++import com.sm.instagram.platform.support.common.EmailService;
++import com.sm.instagram.platform.support.ticket.event.SupportTicketCreatedEvent;
++import com.sm.instagram.platform.support.ticket.event.SupportTicketCreatedEventListener;
++import org.junit.jupiter.api.DisplayName;
++import org.junit.jupiter.api.Test;
++import org.junit.jupiter.api.extension.ExtendWith;
++import org.mockito.InjectMocks;
++import org.mockito.Mock;
++import org.mockito.junit.jupiter.MockitoExtension;
++
++import static org.mockito.Mockito.doThrow;
++import static org.mockito.Mockito.verify;
++
++@ExtendWith(MockitoExtension.class)
++@DisplayName("SupportTicketCreatedEventListener Unit Tests")
++class SupportTicketCreatedEventListenerUnitTest {
++
++    @Mock
++    private EmailService emailService;
++
++    @InjectMocks
++    private SupportTicketCreatedEventListener listener;
++
++    @Test
++    @DisplayName("should send confirmation email with the event's data")
++    void shouldSendConfirmationEmailWithEventData() {
++        SupportTicketCreatedEvent event = new SupportTicketCreatedEvent(
++                this, 42L, "reporter@example.com", "TKT-99999", "Help", "en", "magic-tok");
++
++        listener.onTicketCreated(event);
++
++        verify(emailService).sendTicketCreationConfirmation(
++                "reporter@example.com", "TKT-99999", "Help", "en", "magic-tok");
++    }
++
++    @Test
++    @DisplayName("should catch and log a failure instead of rethrowing")
++    void shouldCatchAndLogFailureInsteadOfRethrowing() {
++        SupportTicketCreatedEvent event = new SupportTicketCreatedEvent(
++                this, 42L, "reporter@example.com", "TKT-99999", "Help", "en", "magic-tok");
++        doThrow(new RuntimeException("mail server down"))
++                .when(emailService).sendTicketCreationConfirmation(
++                        "reporter@example.com", "TKT-99999", "Help", "en", "magic-tok");
++
++        listener.onTicketCreated(event);
++    }
++}
+diff --git a/src/test/java/com/sm/instagram/platform/unit/service/SupportTicketServiceUnitTest.java b/src/test/java/com/sm/instagram/platform/unit/service/SupportTicketServiceUnitTest.java
+index d9b38014c5a..9d13effd43c 100644
+--- a/src/test/java/com/sm/instagram/platform/unit/service/SupportTicketServiceUnitTest.java
++++ b/src/test/java/com/sm/instagram/platform/unit/service/SupportTicketServiceUnitTest.java
+@@ -6,6 +6,7 @@ import com.sm.instagram.platform.common.exceptions.InsufficientPermissionsExcept
+ import com.sm.instagram.platform.common.exceptions.ResourceNotFoundException;
+ import com.sm.instagram.platform.support.common.EmailService;
+ import com.sm.instagram.platform.support.ticket.dtos.*;
++import com.sm.instagram.platform.support.ticket.event.SupportTicketCreatedEvent;
+ import com.sm.instagram.platform.support.ticket.models.*;
+ import com.sm.instagram.platform.support.ticket.repositories.*;
+ import com.sm.instagram.platform.support.ticket.services.SupportTicketService;
+@@ -26,6 +27,7 @@ import org.mockito.Mock;
+ import org.mockito.junit.jupiter.MockitoExtension;
+ import org.mockito.junit.jupiter.MockitoSettings;
+ import org.mockito.quality.Strictness;
++import org.springframework.context.ApplicationEventPublisher;
+ 
+ import java.time.LocalDateTime;
+ import java.util.*;
+@@ -74,6 +76,9 @@ class SupportTicketServiceUnitTest {
+     @Mock
+     private TicketAccessTokenService accessTokenService;
+ 
++    @Mock
++    private ApplicationEventPublisher eventPublisher;
++
+     @InjectMocks
+     private SupportTicketService service;
+ 
+@@ -290,6 +295,48 @@ class SupportTicketServiceUnitTest {
+         }
+     }
+ 
++    // ==================== createTicket Tests ====================
++
++    @Nested
++    @DisplayName("createTicket")
++    class CreateTicketTests {
++
++        @Test
++        @DisplayName("should publish SupportTicketCreatedEvent instead of sending email directly")
++        void shouldPublishSupportTicketCreatedEvent() {
++            // Given
++            when(permissionUtils.getUserId()).thenReturn(null);
++            when(ticketRepository.save(any())).thenAnswer(inv -> {
++                SupportTicket saved = inv.getArgument(0);
++                saved.setId(42L);
++                return saved;
++            });
++            when(referenceService.generateTicketReference()).thenReturn("TKT-99999");
++            when(accessTokenService.mint(42L)).thenReturn("magic-tok");
++
++            SupportTicketDtoIn dto = new SupportTicketDtoIn();
++            dto.setContactEmail("reporter@example.com");
++            dto.setSubject("Help");
++            dto.setDescription("Something is broken");
++            dto.setCategory(TicketCategory.TECHNICAL_PROBLEM);
++
++            // When
++            SupportTicket result = service.createTicket(dto, "127.0.0.1");
++
++            // Then
++            assertThat(result.getId()).isEqualTo(42L);
++            verify(eventPublisher).publishEvent(argThat(event -> {
++                SupportTicketCreatedEvent createdEvent = (SupportTicketCreatedEvent) event;
++                return createdEvent.getTicketId().equals(42L)
++                        && createdEvent.getContactEmail().equals("reporter@example.com")
++                        && createdEvent.getTicketReference().equals("TKT-99999")
++                        && createdEvent.getSubject().equals("Help")
++                        && createdEvent.getStatusToken().equals("magic-tok");
++            }));
++            verifyNoInteractions(emailService);
++        }
++    }
++
+     // ==================== getTicketStatus Tests ====================
+ 
+     @Nested

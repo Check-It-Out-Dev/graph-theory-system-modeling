@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] — 1.2.0, CodeMap Remote
 
 ### Added
+- Prompt under test, S6 closed: the judge calibrated on 12 anchors (8 baseline runs + 4 degraded variants) against blind reference grades; every gap argued in `judge/reference-scores.json`; rubric r5 (base code in the judge's input, design anchors for duplication and structural breaks) re-measured on the box (Actions run 35986676711): design-fit agreement 0.58 → 0.92 exact, Spearman 0.65 → 0.97, judge noise halved; `put_calibrate extend|score`, `run.py rejudge`, the anchor bench page (D-R29k)
 - Prompt under test, S7: the seed's baseline on the self-hosted runner (Actions run 35885709905): score 0.911, delta 0.030, 18/18 hidden tests, `tests_written` 12/18 the main gap (D-R29j)
 - Prompt under test, S12: campaign telemetry (`put_telemetry.py`: Claude Code OTLP by role and campaign, per-rule gauges) and the seventh dashboard `codemap-prompt-under-test` (D-R29i)
 - Prompt under test: the evidence plane proven by `box-smoke-1` (Actions run 35884706660 on the self-hosted runner), `put_evidence.py` and `RUNS.md`, the runbook, the calibration tool, the PR-reviewer contract sketch, the method sections of `docs/09` (D-R29h)

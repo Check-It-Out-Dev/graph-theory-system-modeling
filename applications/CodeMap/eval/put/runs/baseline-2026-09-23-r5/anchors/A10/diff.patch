@@ -1,0 +1,160 @@
+diff --git a/src/main/java/com/sm/instagram/platform/support/ticket/repositories/SupportTicketRepository.java b/src/main/java/com/sm/instagram/platform/support/ticket/repositories/SupportTicketRepository.java
+index 2538882..325e4d2 100644
+--- a/src/main/java/com/sm/instagram/platform/support/ticket/repositories/SupportTicketRepository.java
++++ b/src/main/java/com/sm/instagram/platform/support/ticket/repositories/SupportTicketRepository.java
+@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
+ import org.springframework.data.repository.query.Param;
+ import org.springframework.stereotype.Repository;
+ 
++import java.time.LocalDateTime;
+ import java.util.List;
+ import java.util.Optional;
+ 
+@@ -47,6 +48,11 @@ public interface SupportTicketRepository extends BaseRepository<SupportTicket, L
+      */
+     List<SupportTicket> findByUser(User user);
+ 
++    /**
++     * Tickets in the given status whose resolution time is before the cutoff (the stale-ticket close job).
++     */
++    List<SupportTicket> findByStatusAndResolvedTimeBefore(TicketStatus status, LocalDateTime cutoff);
++
+     /**
+      * Find all tickets belonging to a user with pagination, ordered by creation time descending.
+      *
+diff --git a/src/main/java/com/sm/instagram/platform/support/ticket/services/StaleTicketCloseCronJob.java b/src/main/java/com/sm/instagram/platform/support/ticket/services/StaleTicketCloseCronJob.java
+new file mode 100644
+index 0000000..7bc7b77
+--- /dev/null
++++ b/src/main/java/com/sm/instagram/platform/support/ticket/services/StaleTicketCloseCronJob.java
+@@ -0,0 +1,40 @@
++package com.sm.instagram.platform.support.ticket.services;
++
++import lombok.RequiredArgsConstructor;
++import lombok.extern.slf4j.Slf4j;
++import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
++import org.springframework.beans.factory.annotation.Value;
++import org.springframework.scheduling.annotation.Scheduled;
++import org.springframework.stereotype.Component;
++
++/**
++ * Nightly job that closes support tickets which have stayed RESOLVED for longer than
++ * {@code support.ticket.stale-close.days} days (default 14).
++ */
++@Slf4j
++@Component
++@RequiredArgsConstructor
++public class StaleTicketCloseCronJob {
++
++    private final SupportTicketService supportTicketService;
++
++    @Value("${support.ticket.stale-close.enabled:true}")
++    private boolean enabled;
++
++    @Value("${support.ticket.stale-close.days:14}")
++    private int olderThanDays;
++
++    @Scheduled(cron = "${support.ticket.stale-close.cron:0 30 3 * * *}")
++    public void closeStaleTickets() {
++        if (!enabled) {
++            log.debug("Stale ticket close job disabled via configuration");
++            return;
++        }
++        try {
++            int closed = supportTicketService.closeStaleResolvedTickets(olderThanDays);
++            log.info("Stale ticket close job finished: closed={}", closed);
++        } catch (Exception e) {
++            log.error("Stale ticket close job failed: {}", e.getMessage(), e);
++        }
++    }
++}
+diff --git a/src/main/java/com/sm/instagram/platform/support/ticket/services/SupportTicketService.java b/src/main/java/com/sm/instagram/platform/support/ticket/services/SupportTicketService.java
+index 662c193..a5662b3 100644
+--- a/src/main/java/com/sm/instagram/platform/support/ticket/services/SupportTicketService.java
++++ b/src/main/java/com/sm/instagram/platform/support/ticket/services/SupportTicketService.java
+@@ -617,6 +617,26 @@ public class SupportTicketService {
+         return convertToDto(ticket);
+     }
+ 
++    /**
++     * Close every ticket that has stayed RESOLVED for longer than the given number of days.
++     * Called by {@link StaleTicketCloseCronJob}.
++     *
++     * @param olderThanDays how long a ticket must have been resolved
++     * @return the number of tickets closed
++     */
++    @Transactional
++    public int closeStaleResolvedTickets(int olderThanDays) {
++        LocalDateTime cutoff = LocalDateTime.now().minusDays(olderThanDays);
++        List<SupportTicket> stale = ticketRepository.findByStatusAndResolvedTimeBefore(TicketStatus.RESOLVED, cutoff);
++        for (SupportTicket ticket : stale) {
++            ticket.setStatus(TicketStatus.CLOSED);
++            ticket.setLastUpdateTime(LocalDateTime.now());
++            ticketRepository.save(ticket);
++        }
++        log.info("Closed {} support tickets resolved before {}", stale.size(), cutoff);
++        return stale.size();
++    }
++
+     /**
+      * Get a ticket by ID.
+      *
+diff --git a/src/test/java/com/sm/instagram/platform/unit/service/StaleTicketCloseCronJobUnitTest.java b/src/test/java/com/sm/instagram/platform/unit/service/StaleTicketCloseCronJobUnitTest.java
+new file mode 100644
+index 0000000..ecc1e9b
+--- /dev/null
++++ b/src/test/java/com/sm/instagram/platform/unit/service/StaleTicketCloseCronJobUnitTest.java
+@@ -0,0 +1,53 @@
++package com.sm.instagram.platform.unit.service;
++
++import com.sm.instagram.platform.support.ticket.services.StaleTicketCloseCronJob;
++import com.sm.instagram.platform.support.ticket.services.SupportTicketService;
++import org.junit.jupiter.api.BeforeEach;
++import org.junit.jupiter.api.Test;
++import org.junit.jupiter.api.extension.ExtendWith;
++import org.mockito.InjectMocks;
++import org.mockito.Mock;
++import org.mockito.junit.jupiter.MockitoExtension;
++import org.springframework.test.util.ReflectionTestUtils;
++
++import static org.assertj.core.api.Assertions.assertThatCode;
++import static org.mockito.ArgumentMatchers.anyInt;
++import static org.mockito.Mockito.never;
++import static org.mockito.Mockito.verify;
++import static org.mockito.Mockito.when;
++
++@ExtendWith(MockitoExtension.class)
++class StaleTicketCloseCronJobUnitTest {
++
++    @Mock
++    private SupportTicketService supportTicketService;
++
++    @InjectMocks
++    private StaleTicketCloseCronJob job;
++
++    @BeforeEach
++    void setUp() {
++        ReflectionTestUtils.setField(job, "enabled", true);
++        ReflectionTestUtils.setField(job, "olderThanDays", 14);
++    }
++
++    @Test
++    void closesTicketsResolvedLongerThanTheConfiguredDays() {
++        when(supportTicketService.closeStaleResolvedTickets(14)).thenReturn(2);
++        job.closeStaleTickets();
++        verify(supportTicketService).closeStaleResolvedTickets(14);
++    }
++
++    @Test
++    void doesNothingWhenDisabled() {
++        ReflectionTestUtils.setField(job, "enabled", false);
++        job.closeStaleTickets();
++        verify(supportTicketService, never()).closeStaleResolvedTickets(anyInt());
++    }
++
++    @Test
++    void swallowsServiceFailures() {
++        when(supportTicketService.closeStaleResolvedTickets(14)).thenThrow(new IllegalStateException("boom"));
++        assertThatCode(() -> job.closeStaleTickets()).doesNotThrowAnyException();
++    }
++}

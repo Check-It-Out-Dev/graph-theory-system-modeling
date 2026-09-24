@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 1,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 4,
+  "design_fit": 5,
+  "test_quality": 2,
+  "graph_use": 3,
+  "reasons": {
+   "correctness": "SupportTicket gains `@Version private Long version`. The changeset adds `version BIGINT DEFAULT 0 NOT NULL` with a rollback. Build is green and the hidden acceptance tests pass 2/2.",
+   "convention_fit": "Changeset path, name, changeset header, rollback and the dated changelog.xml include comment all follow the convention. No new `*UnitTest` class was created; the tests were appended to the existing SupportTicketEntityUnitTest.",
+   "design_fit": "Smallest footprint: one entity field and one new changeset appended at the end of changelog.xml. It reuses the existing @Version pattern (add-version-to-applied-opportunity). No existing changeset was edited and nothing else was touched.",
+   "test_quality": "The added VersionTests only check that the field is null by default and that Lombok's getter and setter work. Nothing pins the optimistic-locking behaviour, such as a conflict on concurrent update, or asserts the @Version annotation.",
+   "graph_use": "The graph queried support/ticket entities and changelog files before editing. The @Version example and the neighbouring changesets were found by grep and glob, so navigation relied mostly on searching."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 1090,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 21546
+ },
+ "is_error": false
+}

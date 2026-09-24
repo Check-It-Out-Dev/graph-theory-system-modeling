@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 1,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 3,
+  "design_fit": 3,
+  "test_quality": 3,
+  "graph_use": 2,
+  "reasons": {
+   "correctness": "The repository finder, `closeStaleResolvedTickets` (RESOLVED before the cutoff becomes CLOSED, saved, count returned) and the cron job's enabled/days/cron properties match the interface. Failures are logged, not thrown. Acceptance tests 4/4.",
+   "convention_fit": "`StaleTicketCloseCronJob#closeStaleTickets` has `@Scheduled` but no ShedLock `@SchedulerLock(name = \"support:...\")`, even though `SchedulerLock` is imported. Otherwise it uses constructor injection, property-driven cron and enabled flag, the `*CronJob` name and the feature package.",
+   "design_fit": "The job has no lock, so it runs on every instance and multiple instances would close the same tickets concurrently. The derived query sits in the repository and the transition logic in the service, which is correct layering.",
+   "test_quality": "`StaleTicketCloseCronJobUnitTest` covers the enabled, disabled and failure-swallowing paths of the job. `SupportTicketService#closeStaleResolvedTickets` has no test for the cutoff, the status change to CLOSED, the save or the returned count.",
+   "graph_use": "The only graph query was `MATCH (e:Entity) RETURN e.file_path LIMIT 1`, which located nothing relevant. The agent found the DeferredDeletionCronJob example and the files to edit by reading directly."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 916,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 34579
+ },
+ "is_error": false
+}

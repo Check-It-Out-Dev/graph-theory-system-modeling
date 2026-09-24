@@ -220,5 +220,42 @@
   ],
   "cost": "the 18 baseline runs and the 4 degraded anchors re-judged twice under r5 (Actions, mode rejudge); delta re-measured from the new verdicts; no coder run repeated",
   "not_changed": "the weights, the deterministic checks, the thresholds and the split (law 1); a deterministic clone check stays a recommendation"
+ },
+ "r5_review": {
+  "campaign": "baseline-2026-09-23-r5 (Actions run 35986676711): the 18 baseline runs and the 4 degraded anchors re-judged twice under r5",
+  "result": "design_fit exact 0.583 -> 0.917, Spearman 0.646 -> 0.970, mean abs diff 0.417 -> 0.083; pooled exact 0.722 -> 0.833, Spearman 0.865 -> 0.919; judge test-retest MAD of score 0.017 -> 0.009 (convention 0.22 -> 0.11, design 0.17 -> 0.11, graph use 0.50 -> 0.22); binarised pooled AC1 0.900 -> 0.848 (3 gaps cross the >= 4 line, 2 of them closed by the judge's own second pass)",
+  "remaining_gaps": [
+   {
+    "anchor": "A7",
+    "criterion": "convention_fit, test_quality",
+    "class": "repeatability",
+    "finding": "first pass 4 and 3, second pass 5 and 4 = the reference."
+   },
+   {
+    "anchor": "A9",
+    "criterion": "design_fit",
+    "class": "repeatability",
+    "finding": "first pass 3, second pass 4 = the reference."
+   },
+   {
+    "anchor": "A8",
+    "criterion": "test_quality",
+    "class": "defensible",
+    "finding": "4 vs 5 in both passes, as under r4: a difference of taste on the same side of the line."
+   },
+   {
+    "anchor": "A12",
+    "criterion": "convention_fit",
+    "class": "reference_stricter_than_the_anchor",
+    "finding": "the judge counts one broken convention and gives 3, which is the rubric's anchor for one broken convention; the reviewer's 2 weighted it as the convention the task is about. The judge follows the rubric here."
+   },
+   {
+    "anchor": "A11",
+    "criterion": "convention_fit",
+    "class": "judge_off_anchor",
+    "finding": "the judge counts one broken convention (the service imports the concrete adapter) and still gives 4, in both passes: below the rubric's own anchor. One anchor; the deterministic ports_adapters check fails this run regardless (weight 0.15 through conventions_det)."
+   }
+  ],
+  "decision": "r5 is frozen for the arc. It fixed the pattern it was written for on the criterion the showcase is about, and halved the judge's noise. What remains is one-anchor or within the judge's repeatability, one point, below delta (0.025 of score against delta 0.030), and on convention_fit, which the deterministic checks already measure rule by rule. A further revision fitted to the same 12 anchors would make them training data for the rubric: agreement on them would rise and mean less. The next revision needs new anchors."
  }
 }

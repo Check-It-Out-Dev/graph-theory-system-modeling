@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 4,
+  "test_quality": 4,
+  "graph_use": 5,
+  "reasons": {
+   "correctness": "Derived query findByStatusAndResolvedTimeBefore, @Transactional closeStaleResolvedTickets returning count, and StaleTicketCloseCronJob with enabled/olderThanDays/cron properties and defaults all match the interface. The job logs failures instead of rethrowing. Hidden tests pass 4/4.",
+   "convention_fit": "The @Scheduled method has @SchedulerLock named support:staleTicketClose. Cron and enabled flag come from properties. The class is named *CronJob and uses @RequiredArgsConstructor with a final field. It lives in the support/ticket feature package. New *UnitTest classes use MockitoExtension.",
+   "design_fit": "Clean and thin: the job delegates and the service owns the logic. The service method skips lastUpdateTime, which updateTicketStatus in BASE sets on every status change. It also bypasses canTransitionTo. The explicit save loop inside @Transactional is redundant.",
+   "test_quality": "Service tests cover the close-and-count case and the empty case. Cron tests cover enabled, disabled and swallowed exception. The cutoff is matched with any(LocalDateTime), so the olderThanDays arithmetic is not pinned. The cron test uses LENIENT strictness.",
+   "graph_use": "Graph queries found the support/ticket package files and the existing *CronJob classes. The agent then read NoConsentAccountCleanupCronJob as the template and mirrored its structure. It found tests with find."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 1229,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 37871
+ },
+ "is_error": false
+}

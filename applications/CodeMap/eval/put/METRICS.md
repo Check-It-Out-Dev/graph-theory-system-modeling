@@ -88,18 +88,41 @@ tasks is reported beside it; with four tasks its smallest p is 0.0625, so it is 
 0, and no rule obligatory for the seed stops being obligatory. Any part failing falsifies the claim, and the report
 says which part failed.
 
-## 7. The judge (`put_judge.py`, `judge/rubric-r4.md`)
+## 7. The judge (`put_judge.py`, `judge/rubric-r5.md`)
 
 Claude Opus, one run at a time, blind: it sees the task card, the conventions as the team wrote them (the rule texts
-of the seed v1, fixed for the arc), a summary of the agent's work from its tool calls, the measured test results, and
-the diff (at most 40,000 characters). It never sees the candidate prompt, its hash or its iteration. It returns five
-scores 1–5 with anchors at 5, 3 and 1, a reason of at most 40 words each, and three counts.
+of the seed v1, fixed for the arc), a summary of the agent's work from its tool calls, the measured test results, the
+diff (at most 40,000 characters) and, since r5, the unchanged text of the production Java files the diff modifies
+(BASE CODE, at most 36,000 characters a file and 60,000 in all). It never sees the candidate prompt, its hash or its
+iteration. It returns five scores 1–5 with anchors at 5, 3 and 1, a reason of at most 40 words each, and three counts.
 
-Calibration against a human: runs from the baseline, chosen to span the judge's range, are scored by the owner on the
-same five criteria. Per criterion, binarised at ≥ 4, the report gives the agreement p_o, the prevalence (yes-rate),
-Cohen's κ = (p_o − p_e)/(1 − p_e) with p_e = Σ_c p₁c·p₂c, and Gwet's AC1 = (p_o − p_e^γ)/(1 − p_e^γ) with
-p_e^γ = 2π(1 − π), π the mean yes-rate; and Spearman's ρ on the raw scores. κ alone collapses under a skewed
-prevalence (a lesson of this repository's navigator judge, D-R18), so the four numbers travel together.
+### 7a. Calibration: teaching the judge by checking its scores against our own (`put_calibrate.py`)
+
+The judge's numbers enter the score only after a person has re-graded a sample of the same changes and the two have
+been compared, disagreement by disagreement. The loop:
+
+1. **Anchors.** Real runs from the baseline, chosen at even steps of the judge's own range, **plus degraded variants**
+   of training tasks that each break one rule (`put_calibrate extend`). A good seed writes good code; anchors drawn
+   only from it give the judge no bad change to be measured on, and agreement on them says nothing about whether the
+   judge would catch a bad one.
+2. **Blind grading.** The reviewer grades convention fit, design fit and test quality from the same evidence the judge
+   gets, plus the unchanged code base, without seeing the judge's verdicts (`judge/bench/` renders the evidence as a
+   page to score on). Correctness and graph use have deterministic signals beside them (hidden tests, graph_first).
+3. **Comparison** (`put_calibrate score --rubric rN`). Per criterion and pooled: exact agreement; agreement p_o
+   binarised at ≥ 4 with its prevalence (yes-rate); Cohen's κ = (p_o − p_e)/(1 − p_e), p_e = Σ_c p₁c·p₂c; Gwet's
+   AC1 = (p_o − p_e^γ)/(1 − p_e^γ), p_e^γ = 2π(1 − π), π the mean yes-rate; Spearman's ρ on the raw 1–5; the mean
+   absolute difference. κ alone collapses under a skewed prevalence (D-R18), so the numbers travel together. Every
+   cell where the judge differs is listed with its second pass: a gap the second pass closes is the judge's
+   repeatability; a gap that repeats is bias or a blind spot.
+4. **Adjudication** (`judge/reference-scores.json`). Each gap is argued on the code and classified (judge error,
+   blind spot, rubric overlap, defensible difference of taste); the reviewer can be wrong too, and the file says so
+   where the judge's reading holds.
+5. **Revision, only when it pays.** The rubric or the judge's input changes when a pattern repeats across anchors
+   and both passes, and sits on a criterion that steers the optimisation; one-off gaps of taste stay. A revision is
+   spot-checked on the anchors it should change and one it must not, then the finished runs are re-judged twice
+   (`run.py rejudge`, no coder run repeated), δ is re-measured, and the comparison is run again. Weights, checks,
+   thresholds and the split never move (law 1).
+
 Repeatability is the same batch judged twice in shuffled order (δ_judge above). A change of rubric re-measures both.
 
 ## 8. What the numbers do not show

@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 1,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 4,
+  "design_fit": 5,
+  "test_quality": 1,
+  "graph_use": 3,
+  "reasons": {
+   "correctness": "SupportTicket gets `@Version private Long version`. The new changeset adds `version BIGINT NOT NULL DEFAULT 0` and is included in changelog.xml. Build green, hidden tests 2/2, existing touched tests 229/229.",
+   "convention_fit": "The changeset follows the convention: 2026/09 path, DD-MM-YYYY kebab name, header, rollback, and a month comment on its include. The existing changeset is untouched. No new *UnitTest class was added, which breaks the testing convention.",
+   "design_fit": "Minimal footprint: one annotated field reusing the existing `jakarta.persistence.*` import, one changeset, one include. It mirrors the existing `@Version` pattern from AppliedOpportunityContent. Nothing to restructure.",
+   "test_quality": "No unit test was written (0/0). Nothing pins the version field or its annotation. The agent only reran existing SupportTicket unit tests.",
+   "graph_use": "One graph query listed the support/ticket files. The existing changeset example and the `@Version` precedent were found by glob and grep, and navigation relied mostly on reading and grepping files."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 777,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 20981
+ },
+ "is_error": false
+}
