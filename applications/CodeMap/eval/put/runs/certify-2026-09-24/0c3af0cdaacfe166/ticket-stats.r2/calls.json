@@ -1,0 +1,460 @@
+[
+ {
+  "i": 1,
+  "name": "mcp__graph__graph_query",
+  "input": {
+   "statement": "MATCH (e:Entity) WHERE e.file_path STARTS WITH 'backend/src/main/java/com/sm/instagram/platform/support/ticket' RETURN e.file_path, e.layer, e.name ORDER BY e.file_path"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "{\"columns\": [\"e.file_path\", \"e.layer\", \"e.name\"], \"rows\": [[\"backend/src/main/java/com/sm/instagram/platform/support/ticket/SupportTicketController.java\", \"Actor\", \"SupportTicketController.java\"], [\"b"
+ },
+ {
+  "i": 2,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-stats.r2\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\SupportTicketController.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.support.ticket;\n2\t\n3\timport com.sm.instagram.platform.common.exceptions.AuthenticationTranslatableException;\n4\timport com.sm.instagram.platform.common.exceptions.Re"
+ },
+ {
+  "i": 3,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-stats.r2\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\services\\SupportTicketService.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.support.ticket.services;\n2\t\n3\timport com.sm.instagram.platform.common.authorization.PermissionUtils;\n4\timport com.sm.instagram.platform.common.exceptions.Authentica"
+ },
+ {
+  "i": 4,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-stats.r2\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\repositories\\SupportTicketRepository.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.support.ticket.repositories;\n2\t\n3\timport com.sm.instagram.platform.common.base.BaseRepository;\n4\timport com.sm.instagram.platform.support.ticket.models.SupportTicke"
+ },
+ {
+  "i": 5,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-stats.r2\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\models\\TicketStatus.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.support.ticket.models;\n2\t\n3\timport org.springframework.context.MessageSource;\n4\timport java.util.Locale;\n5\t\n6\t/**\n7\t * Enum representing the possible states of a su"
+ },
+ {
+  "i": 6,
+  "name": "Bash",
+  "input": {
+   "command": "grep -n \"invalid_date_range\\|error.validation\" src/main/resources/messages_en.properties | head -30",
+   "description": "Search for existing date range validation message key"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "9:error.validation=Validation failed\n20:error.validation.required_field=This field is required\n21:error.validation.invalid_email=Invalid email format\n22:error.validation.missing_parameter={0} is requi"
+ },
+ {
+  "i": 7,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-stats.r2\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\dtos\\SupportTicketDtoOut.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.support.ticket.dtos;\n2\t\n3\timport com.sm.instagram.platform.support.ticket.models.TicketCategory;\n4\timport com.sm.instagram.platform.support.ticket.models.TicketStat"
+ },
+ {
+  "i": 8,
+  "name": "Bash",
+  "input": {
+   "command": "find src/main/java/com/sm/instagram/platform/common/exceptions -iname \"ValidationTranslatableException.java\" -o -iname \"InsufficientPermissionsException.java\" | xargs -I{} echo {}",
+   "description": "Locate exception classes"
+  },
+  "after_marker": false,
+  "is_error": true,
+  "result_head": "Permission to use Bash has been denied because Claude Code is running in don't ask mode. IMPORTANT: You *may* attempt to accomplish this action using other tools that might naturally be used to accomp"
+ },
+ {
+  "i": 9,
+  "name": "Glob",
+  "input": {
+   "pattern": "**/ValidationTranslatableException.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "src\\main\\java\\com\\sm\\instagram\\platform\\common\\exceptions\\ValidationTranslatableException.java"
+ },
+ {
+  "i": 10,
+  "name": "Glob",
+  "input": {
+   "pattern": "**/InsufficientPermissionsException.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "src\\main\\java\\com\\sm\\instagram\\platform\\common\\exceptions\\InsufficientPermissionsException.java"
+ },
+ {
+  "i": 11,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-stats.r2\\src\\main\\java\\com\\sm\\instagram\\platform\\common\\exceptions\\ValidationTranslatableException.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.common.exceptions;\n2\t\n3\timport java.io.Serializable;\n4\t\n5\t/**\n6\t * Exception for validation errors.\n7\t * <p>\n8\t * Use this exception when input validation fails, re"
+ },
+ {
+  "i": 12,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-stats.r2\\src\\main\\java\\com\\sm\\instagram\\platform\\common\\exceptions\\InsufficientPermissionsException.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.common.exceptions;\n2\t\n3\timport lombok.Getter;\n4\t\n5\t/**\n6\t * Exception thrown when a user lacks sufficient permissions for an operation.\n7\t * Used for domain-specifi"
+ },
+ {
+  "i": 13,
+  "name": "Glob",
+  "input": {
+   "pattern": "**/messages_pl.properties"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "src\\main\\resources\\messages_pl.properties"
+ },
+ {
+  "i": 14,
+  "name": "Glob",
+  "input": {
+   "pattern": "**/SupportTicketServiceUnitTest.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\SupportTicketServiceUnitTest.java"
+ },
+ {
+  "i": 15,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-stats.r2\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\SupportTicketServiceUnitTest.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.unit.service;\n2\t\n3\timport com.sm.instagram.platform.common.authorization.PermissionUtils;\n4\timport com.sm.instagram.platform.common.exceptions.BusinessRuleTranslata"
+ },
+ {
+  "i": 16,
+  "name": "Write",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-stats.r2\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\dtos\\TicketStatsDtoOut.java",
+   "content": "<713 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "File created successfully at: C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-stats.r2\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\dtos\\TicketStatsDtoOut.java (file state is current in"
+ },
+ {
+  "i": 17,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-stats.r2\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\repositories\\SupportTicketRepository.java",
+   "old_string": "<49 chars>",
+   "new_string": "<81 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-stats.r2\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\repositories\\SupportTicketRepository.java has been updated successfully. ("
+ },
+ {
+  "i": 18,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-stats.r2\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\repositories\\SupportTicketRepository.java",
+   "old_string": "<301 chars>",
+   "new_string": "<684 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-stats.r2\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\repositories\\SupportTicketRepository.java has been updated successfully. ("
+ },
+ {
+  "i": 19,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-stats.r2\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\services\\SupportTicketService.java",
+   "old_string": "<145 chars>",
+   "new_string": "<227 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-stats.r2\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\services\\SupportTicketService.java has been updated successfully. (file st"
+ },
+ {
+  "i": 20,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-stats.r2\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\services\\SupportTicketService.java",
+   "old_string": "<77 chars>",
+   "new_string": "<161 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-stats.r2\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\services\\SupportTicketService.java has been updated successfully. (file st"
+ },
+ {
+  "i": 21,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-stats.r2\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\services\\SupportTicketService.java",
+   "old_string": "<156 chars>",
+   "new_string": "<1545 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-stats.r2\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\services\\SupportTicketService.java has been updated successfully. (file st"
+ },
+ {
+  "i": 22,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-stats.r2\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\SupportTicketController.java",
+   "old_string": "<22 chars>",
+   "new_string": "<50 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-stats.r2\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\SupportTicketController.java has been updated successfully. (file state is"
+ },
+ {
+  "i": 23,
+  "name": "Grep",
+  "input": {
+   "pattern": "DateTimeFormat.*ISO.DATE|@RequestParam.*LocalDate",
+   "path": "src/main/java",
+   "output_mode": "content",
+   "-n": true
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "src\\main\\java\\com\\sm\\instagram\\platform\\common\\security\\GeoIpStorageService.java:155:                        LocalDate.now().format(DateTimeFormatter.ISO_DATE)"
+ },
+ {
+  "i": 24,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-stats.r2\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\SupportTicketController.java",
+   "old_string": "<49 chars>",
+   "new_string": "<787 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-stats.r2\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\SupportTicketController.java has been updated successfully. (file state is"
+ },
+ {
+  "i": 25,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-stats.r2\\src\\main\\resources\\messages_en.properties",
+   "offset": 1,
+   "limit": 40
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\terror.general=An unexpected error occurred\n2\terror.internal=Something went wrong, please contact support.\n3\terror.not_found=The requested resource was not found.\n4\terror.invalid_input=Invalid input "
+ },
+ {
+  "i": 26,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-stats.r2\\src\\main\\resources\\messages_en.properties",
+   "old_string": "<90 chars>",
+   "new_string": "<172 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-stats.r2\\src\\main\\resources\\messages_en.properties has been updated successfully."
+ },
+ {
+  "i": 27,
+  "name": "Grep",
+  "input": {
+   "pattern": "error.validation.invalid_enum_value",
+   "path": "src/main/resources/messages_pl.properties",
+   "-n": true
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "Found 1 file\nsrc\\main\\resources\\messages_pl.properties"
+ },
+ {
+  "i": 28,
+  "name": "Grep",
+  "input": {
+   "pattern": "error.validation.invalid_enum_value",
+   "path": "src/main/resources/messages_pl.properties",
+   "-n": true,
+   "output_mode": "content"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "37:error.validation.invalid_enum_value=Nieprawidłowa wartość ''{0}''. Sprawdź dozwolone wartości"
+ },
+ {
+  "i": 29,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-stats.r2\\src\\main\\resources\\messages_pl.properties",
+   "offset": 37,
+   "limit": 2
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "37\terror.validation.invalid_enum_value=Nieprawidłowa wartość ''{0}''. Sprawdź dozwolone wartości\n38\t"
+ },
+ {
+  "i": 30,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-stats.r2\\src\\main\\resources\\messages_pl.properties",
+   "old_string": "<93 chars>",
+   "new_string": "<186 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-stats.r2\\src\\main\\resources\\messages_pl.properties has been updated successfully."
+ },
+ {
+  "i": 31,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-stats.r2\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\SupportTicketServiceUnitTest.java",
+   "old_string": "<77 chars>",
+   "new_string": "<161 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-stats.r2\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\SupportTicketServiceUnitTest.java has been updated successfully. (file state"
+ },
+ {
+  "i": 32,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-stats.r2\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\SupportTicketServiceUnitTest.java",
+   "old_string": "<51 chars>",
+   "new_string": "<79 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-stats.r2\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\SupportTicketServiceUnitTest.java has been updated successfully. (file state"
+ },
+ {
+  "i": 33,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-stats.r2\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\SupportTicketServiceUnitTest.java",
+   "old_string": "<76 chars>",
+   "new_string": "<3245 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-stats.r2\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\SupportTicketServiceUnitTest.java has been updated successfully. (file state"
+ },
+ {
+  "i": 34,
+  "name": "Bash",
+  "input": {
+   "command": "./mvnw -q test -Ptest -Dtest=SupportTicketServiceUnitTest -Dsurefire.failIfNoSpecifiedTests=false 2>&1 | tail -100",
+   "description": "Run SupportTicketServiceUnitTest",
+   "timeout": 300000
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's docu"
+ },
+ {
+  "i": 35,
+  "name": "Bash",
+  "input": {
+   "command": "./mvnw -q test -Ptest -Dtest=SupportTicketServiceUnitTest -Dsurefire.failIfNoSpecifiedTests=false 2>&1 | grep -E \"Tests run|ERROR|FAIL|BUILD\"",
+   "description": "Check test summary",
+   "timeout": 180000
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "(Bash completed with no output)"
+ },
+ {
+  "i": 36,
+  "name": "Bash",
+  "input": {
+   "command": "find target/surefire-reports -iname \"*SupportTicketServiceUnitTest*\" | xargs -I{} cat {}",
+   "description": "Show surefire report for SupportTicketServiceUnitTest"
+  },
+  "after_marker": false,
+  "is_error": true,
+  "result_head": "Permission to use Bash has been denied because Claude Code is running in don't ask mode. IMPORTANT: You *may* attempt to accomplish this action using other tools that might naturally be used to accomp"
+ },
+ {
+  "i": 37,
+  "name": "Glob",
+  "input": {
+   "pattern": "target/surefire-reports/*SupportTicketServiceUnitTest*.txt"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "target\\surefire-reports\\com.sm.instagram.platform.unit.service.SupportTicketServiceUnitTest$TicketResponseEntityTests.txt\ntarget\\surefire-reports\\com.sm.instagram.platform.unit.service.SupportTicketSe"
+ },
+ {
+  "i": 38,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-stats.r2\\target\\surefire-reports\\com.sm.instagram.platform.unit.service.SupportTicketServiceUnitTest.txt"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\t-------------------------------------------------------------------------------\n2\tTest set: com.sm.instagram.platform.unit.service.SupportTicketServiceUnitTest\n3\t------------------------------------"
+ },
+ {
+  "i": 39,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-stats.r2\\target\\surefire-reports\\com.sm.instagram.platform.unit.service.SupportTicketServiceUnitTest$GetTicketStatsTests.txt"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\t-------------------------------------------------------------------------------\n2\tTest set: com.sm.instagram.platform.unit.service.SupportTicketServiceUnitTest$GetTicketStatsTests\n3\t----------------"
+ },
+ {
+  "i": 40,
+  "name": "Bash",
+  "input": {
+   "command": "./mvnw -q -Ptest compile test-compile 2>&1 | tail -80",
+   "description": "Compile main and test sources",
+   "timeout": 180000
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "(Bash completed with no output)"
+ }
+]

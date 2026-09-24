@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 5,
+  "test_quality": 5,
+  "graph_use": 5,
+  "reasons": {
+   "correctness": "updateTicketStatus publishes SupportTicketResolvedEvent only on RESOLVED. The listener catches port failures and logs them. The adapter puts the reference in the subject. Build green, hidden tests 5/5, existing tests 55/55.",
+   "convention_fit": "Listener uses @TransactionalEventListener(AFTER_COMMIT) with catch/log. TicketNotificationPort sits in port/, EmailTicketNotificationAdapter in adapter/. Injection is constructor-based via @RequiredArgsConstructor and the existing constructor. New *UnitTest classes use MockitoExtension and were run.",
+   "design_fit": "The service depends only on ApplicationEventPublisher and the listener only on the port type, so the channel is swappable. It reuses EmailService#sendEmail. The footprint is minimal, all within support/ticket, with no duplicated lookup or mapping.",
+   "test_quality": "Service tests capture the event fields for RESOLVED and assert no publish for IN_PROGRESS. Listener tests cover the success path and a port exception being swallowed. The adapter test checks the recipient and that the subject contains the reference. No Spring context.",
+   "graph_use": "Graph queries listed the support package and existing Port/Adapter/EventListener files, and a TESTED_BY query found SupportTicketServiceUnitTest. The agent read the found exemplars before writing, and the new files mirror them."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 982,
+  "cache_read_input_tokens": 0,
+  "cache_creation_input_tokens": 41404
+ },
+ "is_error": false
+}

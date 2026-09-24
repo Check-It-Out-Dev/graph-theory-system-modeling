@@ -26,6 +26,16 @@ PREFACE = ("<!-- Distributed by the prompt-under-test pipeline (graph-theory-sys
            "If this session has no `graph` tool, skip the code-graph steps below and find files with search instead.\n\n")
 
 
+def candidate_path(cert):
+    """The certified body file: as recorded, or inside this repository when it was recorded from the runner's workspace
+    (`graph/applications/...`)."""
+    p = cert["candidate_file"]
+    if os.path.exists(p):
+        return p
+    tail = p.replace("\\", "/").split("applications/CodeMap/", 1)[-1]
+    return os.path.join(put_paths.CODEMAP, *tail.split("/"))
+
+
 def load(label):
     with open(os.path.join(put_paths.RUNS, f"{label}.json"), encoding="utf-8") as f:
         return json.load(f)
@@ -62,7 +72,7 @@ def render_for_repo(body, instance, label):
 
 def apply(cert_label, instance, target_repo, branch=None, push=False, base="origin/main"):
     cert = load(cert_label)
-    with open(cert["candidate_file"], encoding="utf-8") as f:
+    with open(candidate_path(cert), encoding="utf-8") as f:
         body = f.read()
     version = put_prompt.version(body)
     branch = branch or f"prompt/backend-conventions-{version.split('@')[1][:8]}"
@@ -105,7 +115,7 @@ def main(argv=None):
     contract = put_contract.load(a.instance)
     cert = load(a.certify)
     gepa = load(a.gepa) if a.gepa else None
-    with open(cert["candidate_file"], encoding="utf-8") as f:
+    with open(candidate_path(cert), encoding="utf-8") as f:
         cand = f.read()
     ok, reasons = decide(cert, contract, gepa, put_prompt.load_body(a.instance, "v1"), cand)
     print(json.dumps({"promote": ok, "reasons": reasons}, indent=1))

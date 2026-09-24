@@ -1,0 +1,399 @@
+[
+ {
+  "i": 1,
+  "name": "mcp__graph__graph_query",
+  "input": {
+   "statement": "MATCH (e:Entity) WHERE e.file_path STARTS WITH 'backend/' AND lower(e.file_path) CONTAINS 'support/ticket' RETURN e.file_path, e.layer, e.curated, e.line_count ORDER BY e.file_path"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "{\"columns\": [\"e.file_path\", \"e.layer\", \"e.curated\", \"e.line_count\"], \"rows\": [[\"backend/src/main/java/com/sm/instagram/platform/support/ticket/SupportTicketController.java\", \"Actor\", 15, 400], [\"backe"
+ },
+ {
+  "i": 2,
+  "name": "mcp__graph__graph_query",
+  "input": {
+   "statement": "MATCH (e:Entity) WHERE e.file_path STARTS WITH 'backend/src/main/' AND e.name ENDS WITH 'CronJob.java' RETURN e.name, e.file_path ORDER BY e.name"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "{\"columns\": [\"e.name\", \"e.file_path\"], \"rows\": [[\"AnonymousConsentCleanupCronJob.java\", \"backend/src/main/java/com/sm/instagram/platform/legal/AnonymousConsentCleanupCronJob.java\"], [\"ConsentEnforceme"
+ },
+ {
+  "i": 3,
+  "name": "mcp__graph__graph_query",
+  "input": {
+   "statement": "MATCH (e:Entity)-[r:Dep]->(t:Entity) WHERE r.rel = 'TESTED_BY' AND e.file_path IN ['backend/src/main/java/com/sm/instagram/platform/support/ticket/services/SupportTicketService.java', 'backend/src/main/java/com/sm/instagram/platform/support/ticket/repositories/SupportTicketRepository.java'] RETURN e.name, t.file_path ORDER BY e.name, t.file_path"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "{\"columns\": [\"e.name\", \"t.file_path\"], \"rows\": [[\"SupportTicketService.java\", \"backend/src/test/java/com/sm/instagram/platform/unit/service/SupportTicketServiceUnitTest.java\"]], \"row_count\": 1, \"trunc"
+ },
+ {
+  "i": 4,
+  "name": "mcp__graph__graph_query",
+  "input": {
+   "statement": "MATCH (e:Entity) WHERE e.file_path = 'backend/src/main/java/com/sm/instagram/platform/legal/NoConsentAccountCleanupCronJob.java' OR e.file_path = 'backend/src/main/java/com/sm/instagram/platform/legal/AnonymousConsentCleanupCronJob.java' RETURN e.file_path, e.curated"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "{\"columns\": [\"e.file_path\", \"e.curated\"], \"rows\": [[\"backend/src/main/java/com/sm/instagram/platform/legal/AnonymousConsentCleanupCronJob.java\", 11], [\"backend/src/main/java/com/sm/instagram/platform/"
+ },
+ {
+  "i": 5,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-stale-ticket-close.r2\\src\\main\\java\\com\\sm\\instagram\\platform\\legal\\NoConsentAccountCleanupCronJob.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.legal;\n2\t\n3\timport lombok.RequiredArgsConstructor;\n4\timport lombok.extern.slf4j.Slf4j;\n5\timport net.javacrumbs.shedlock.spring.annotation.SchedulerLock;\n6\timport or"
+ },
+ {
+  "i": 6,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-stale-ticket-close.r2\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\repositories\\SupportTicketRepository.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.support.ticket.repositories;\n2\t\n3\timport com.sm.instagram.platform.common.base.BaseRepository;\n4\timport com.sm.instagram.platform.support.ticket.models.SupportTicke"
+ },
+ {
+  "i": 7,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-stale-ticket-close.r2\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\services\\SupportTicketService.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.support.ticket.services;\n2\t\n3\timport com.sm.instagram.platform.common.authorization.PermissionUtils;\n4\timport com.sm.instagram.platform.common.exceptions.Authentica"
+ },
+ {
+  "i": 8,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-stale-ticket-close.r2\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\models\\SupportTicket.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.support.ticket.models;\n2\t\n3\timport com.sm.instagram.platform.common.base.UpdaterTracking;\n4\timport com.sm.instagram.platform.user.User;\n5\timport jakarta.persistence"
+ },
+ {
+  "i": 9,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-stale-ticket-close.r2\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\models\\TicketStatus.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.support.ticket.models;\n2\t\n3\timport org.springframework.context.MessageSource;\n4\timport java.util.Locale;\n5\t\n6\t/**\n7\t * Enum representing the possible states of a su"
+ },
+ {
+  "i": 10,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-stale-ticket-close.r2\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\SupportTicketServiceUnitTest.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.unit.service;\n2\t\n3\timport com.sm.instagram.platform.common.authorization.PermissionUtils;\n4\timport com.sm.instagram.platform.common.exceptions.BusinessRuleTranslata"
+ },
+ {
+  "i": 11,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-stale-ticket-close.r2\\src\\test\\java\\com\\sm\\instagram\\platform\\support\\ticket\\services\\TicketAccessTokenServiceUnitTest.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.support.ticket.services;\n2\t\n3\timport com.sm.instagram.platform.auth.filter.HmacUtils;\n4\timport org.junit.jupiter.api.BeforeEach;\n5\timport org.junit.jupiter.api.Test"
+ },
+ {
+  "i": 12,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-stale-ticket-close.r2\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\services\\TicketAccessTokenService.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.support.ticket.services;\n2\t\n3\timport com.sm.instagram.platform.auth.filter.HmacUtils;\n4\timport lombok.extern.slf4j.Slf4j;\n5\timport org.springframework.beans.factory"
+ },
+ {
+  "i": 13,
+  "name": "mcp__graph__graph_query",
+  "input": {
+   "statement": "MATCH (e:Entity)-[r:Dep]->(t:Entity) WHERE r.rel = 'TESTED_BY' AND e.file_path IN ['backend/src/main/java/com/sm/instagram/platform/legal/NoConsentAccountCleanupCronJob.java', 'backend/src/main/java/com/sm/instagram/platform/subscription/cron/InvoiceRetryCronJob.java', 'backend/src/main/java/com/sm/instagram/platform/subscription/cron/TrialExpiryNotifierCronJob.java', 'backend/src/main/java/com/sm/instagram/platform/legal/AnonymousConsentCleanupCronJob.java'] RETURN e.name, t.file_path ORDER BY e.name"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "{\"columns\": [\"e.name\", \"t.file_path\"], \"rows\": [[\"AnonymousConsentCleanupCronJob.java\", \"backend/src/test/java/com/sm/instagram/platform/unit/service/AnonymousConsentCleanupCronJobUnitTest.java\"]], \"r"
+ },
+ {
+  "i": 14,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-stale-ticket-close.r2\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\AnonymousConsentCleanupCronJobUnitTest.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.unit.service;\n2\t\n3\timport com.sm.instagram.platform.legal.AnonymousConsentCleanupCronJob;\n4\timport com.sm.instagram.platform.legal.LegalConsentService;\n5\timport org"
+ },
+ {
+  "i": 15,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-stale-ticket-close.r2\\src\\main\\java\\com\\sm\\instagram\\platform\\subscription\\cron\\InvoiceRetryCronJob.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.subscription.cron;\n2\t\n3\timport com.sm.instagram.platform.subscription.invoicing.InvoiceRetryService;\n4\timport lombok.RequiredArgsConstructor;\n5\timport lombok.extern"
+ },
+ {
+  "i": 16,
+  "name": "Bash",
+  "input": {
+   "command": "grep -rn \"no-consent-cleanup\\|invoice-retry\\|stale-close\" src/main/resources/*.yml src/main/resources/*.properties 2>/dev/null"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "src/main/resources/application.yml:670:  invoice-retry:"
+ },
+ {
+  "i": 17,
+  "name": "Bash",
+  "input": {
+   "command": "grep -n \"cron\\|enabled\" src/main/resources/application.yml | grep -i -A2 -B2 \"invoice-retry\\|consent\" | head -50"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "(Bash completed with no output)"
+ },
+ {
+  "i": 18,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-stale-ticket-close.r2\\src\\main\\resources\\application.yml",
+   "offset": 655,
+   "limit": 40
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "655\t  read-timeout-ms: 15000\n656\t\n657\t# =============================================================================\n658\t# SUBSCRIPTION CRONS\n659\t# ==================================================="
+ },
+ {
+  "i": 19,
+  "name": "Bash",
+  "input": {
+   "command": "grep -n \"^support:\\|^  ticket:\" src/main/resources/application.yml"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "(Bash completed with no output)"
+ },
+ {
+  "i": 20,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-stale-ticket-close.r2\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\repositories\\SupportTicketRepository.java",
+   "old_string": "<301 chars>",
+   "new_string": "<757 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-stale-ticket-close.r2\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\repositories\\SupportTicketRepository.java has been updated successfu"
+ },
+ {
+  "i": 21,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-stale-ticket-close.r2\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\repositories\\SupportTicketRepository.java",
+   "old_string": "<100 chars>",
+   "new_string": "<132 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-stale-ticket-close.r2\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\repositories\\SupportTicketRepository.java has been updated successfu"
+ },
+ {
+  "i": 22,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-stale-ticket-close.r2\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\services\\SupportTicketService.java",
+   "old_string": "<156 chars>",
+   "new_string": "<1051 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-stale-ticket-close.r2\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\services\\SupportTicketService.java has been updated successfully. (f"
+ },
+ {
+  "i": 23,
+  "name": "Write",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-stale-ticket-close.r2\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\services\\StaleTicketCloseCronJob.java",
+   "content": "<1472 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "File created successfully at: C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-stale-ticket-close.r2\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\services\\StaleTicketCloseCronJob.java (file sta"
+ },
+ {
+  "i": 24,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-stale-ticket-close.r2\\src\\main\\resources\\application.yml",
+   "old_string": "<164 chars>",
+   "new_string": "<446 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-stale-ticket-close.r2\\src\\main\\resources\\application.yml has been updated successfully."
+ },
+ {
+  "i": 25,
+  "name": "Write",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-stale-ticket-close.r2\\src\\test\\java\\com\\sm\\instagram\\platform\\support\\ticket\\services\\SupportTicketServiceStaleTicketCloseUnitTest.java",
+   "content": "<5207 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "File created successfully at: C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-stale-ticket-close.r2\\src\\test\\java\\com\\sm\\instagram\\platform\\support\\ticket\\services\\SupportTicketServiceStaleTicketCloseUn"
+ },
+ {
+  "i": 26,
+  "name": "Write",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-stale-ticket-close.r2\\src\\test\\java\\com\\sm\\instagram\\platform\\support\\ticket\\services\\StaleTicketCloseCronJobUnitTest.java",
+   "content": "<2472 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "File created successfully at: C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-stale-ticket-close.r2\\src\\test\\java\\com\\sm\\instagram\\platform\\support\\ticket\\services\\StaleTicketCloseCronJobUnitTest.java ("
+ },
+ {
+  "i": 27,
+  "name": "Bash",
+  "input": {
+   "command": "cd \"C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-stale-ticket-close.r2\" && ./mvnw -q test -Ptest -Dtest=SupportTicketServiceStaleTicketCloseUnitTest,StaleTicketCloseCronJobUnitTest,SupportTicketServiceUnitTest -Dsurefire.failIfNoSpecifiedTests=false 2>&1 | tail -150",
+   "timeout": 300000
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's docu"
+ },
+ {
+  "i": 28,
+  "name": "Bash",
+  "input": {
+   "command": "cd \"C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-stale-ticket-close.r2\" && ./mvnw -q test -Ptest -Dtest=SupportTicketServiceStaleTicketCloseUnitTest,StaleTicketCloseCronJobUnitTest,SupportTicketServiceUnitTest -Dsurefire.failIfNoSpecifiedTests=false 2>&1 | grep -E \"Tests run|BUILD|ERROR.*Test|FAIL\"",
+   "timeout": 300000
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "(Bash completed with no output)"
+ },
+ {
+  "i": 29,
+  "name": "Bash",
+  "input": {
+   "command": "cd \"C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-stale-ticket-close.r2\" && echo \"exit code check\" && ./mvnw -q test -Ptest -Dtest=SupportTicketServiceStaleTicketCloseUnitTest,StaleTicketCloseCronJobUnitTest,SupportTicketServiceUnitTest -Dsurefire.failIfNoSpecifiedTests=false >/tmp/testout.log 2>&1; echo \"EXIT:$?\"",
+   "timeout": 300000
+  },
+  "after_marker": false,
+  "is_error": true,
+  "result_head": "Permission to use Bash has been denied because Claude Code is running in don't ask mode. IMPORTANT: You *may* attempt to accomplish this action using other tools that might naturally be used to accomp"
+ },
+ {
+  "i": 30,
+  "name": "Bash",
+  "input": {
+   "command": "cd \"C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-stale-ticket-close.r2\" && ./mvnw test -Ptest -Dtest=SupportTicketServiceStaleTicketCloseUnitTest,StaleTicketCloseCronJobUnitTest,SupportTicketServiceUnitTest -Dsurefire.failIfNoSpecifiedTests=false 2>&1 | tail -40",
+   "timeout": 300000
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "12:51:20.858 [main] INFO  c.s.i.p.s.t.s.SupportTicketService - GDPR: Operation=updateTicketStatus, FirebaseUID=admin-uid, TicketID=1, NewStatus=IN_PROGRESS, Purpose=support_management, DataModified=ti"
+ },
+ {
+  "i": 31,
+  "name": "Bash",
+  "input": {
+   "command": "cd \"C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-stale-ticket-close.r2\" && ./mvnw -q test-compile -Ptest 2>&1 | tail -60",
+   "timeout": 300000
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "(Bash completed with no output)"
+ },
+ {
+  "i": 32,
+  "name": "Bash",
+  "input": {
+   "command": "cd \"C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-stale-ticket-close.r2\" && \\\necho \"--- SchedulerLock ---\" && grep -n \"@SchedulerLock(name = \\\"\" src/main/java/com/sm/instagram/platform/support/ticket/services/StaleTicketCloseCronJob.java && \\\necho \"--- adapter import outside adapter pkg (n/a for this task) ---\" && \\\necho \"--- new tests MockitoExtension ---\" && grep -l \"@ExtendWith(MockitoExtension.class)\" src/test/java/com/sm/instagram/platform/support/ticket/services/SupportTicketServiceStaleTicketCloseUnitTest.java src/test/java/com/sm/instagram/platform/support/ticket/services/StaleTicketCloseCronJobUnitTest.java && \\\necho \"--- LENIENT check ---\" && grep -rn \"LENIENT\\|lenient(\" src/test/java/com/sm/instagram/platform/support/ticket/services/SupportTicketServiceStaleTicketCloseUnitTest.java src/test/java/com/sm/instagram/platform/support/ticket/services/StaleTicketCloseCronJobUnitTest.java || echo \"none found\" && \\\necho \"--- package lines ---\" && grep -n \"^package\" src/test/java/com/sm/instagram/platform/support/ticket/services/SupportTicketServiceStaleTicketCloseUnitTest.java src/test/java/com/sm/instagram/platform/support/ticket/services/StaleTicketCloseCronJobUnitTest.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "--- SchedulerLock ---\nnone found\n--- package lines ---\nsrc/test/java/com/sm/instagram/platform/support/ticket/services/SupportTicketServiceStaleTicketCloseUnitTest.java:1:package com.sm.instagram.plat"
+ },
+ {
+  "i": 33,
+  "name": "Bash",
+  "input": {
+   "command": "cd \"C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-stale-ticket-close.r2\" && grep -n \"@SchedulerLock(name = \\\"\" src/main/java/com/sm/instagram/platform/support/ticket/services/StaleTicketCloseCronJob.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "(Bash completed with no output)"
+ },
+ {
+  "i": 34,
+  "name": "Bash",
+  "input": {
+   "command": "cd \"C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-stale-ticket-close.r2\" && grep -l \"@ExtendWith(MockitoExtension.class)\" src/test/java/com/sm/instagram/platform/support/ticket/services/SupportTicketServiceStaleTicketCloseUnitTest.java src/test/java/com/sm/instagram/platform/support/ticket/services/StaleTicketCloseCronJobUnitTest.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "src/test/java/com/sm/instagram/platform/support/ticket/services/SupportTicketServiceStaleTicketCloseUnitTest.java\nsrc/test/java/com/sm/instagram/platform/support/ticket/services/StaleTicketCloseCronJo"
+ },
+ {
+  "i": 35,
+  "name": "Bash",
+  "input": {
+   "command": "cd \"C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-stale-ticket-close.r2\" && grep -n \"LENIENT\\|lenient(\" src/test/java/com/sm/instagram/platform/support/ticket/services/SupportTicketServiceStaleTicketCloseUnitTest.java src/test/java/com/sm/instagram/platform/support/ticket/services/StaleTicketCloseCronJobUnitTest.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "(Bash completed with no output)"
+ },
+ {
+  "i": 36,
+  "name": "Grep",
+  "input": {
+   "pattern": "@SchedulerLock\\(name = \"",
+   "path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-stale-ticket-close.r2\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\services\\StaleTicketCloseCronJob.java",
+   "output_mode": "content"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "No matches found"
+ },
+ {
+  "i": 37,
+  "name": "Grep",
+  "input": {
+   "pattern": "SchedulerLock",
+   "path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-stale-ticket-close.r2\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\services\\StaleTicketCloseCronJob.java",
+   "output_mode": "content",
+   "-A": 3
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "5:import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;\n6-import org.springframework.beans.factory.annotation.Value;\n7-import org.springframework.scheduling.annotation.Scheduled;\n8-import or"
+ }
+]

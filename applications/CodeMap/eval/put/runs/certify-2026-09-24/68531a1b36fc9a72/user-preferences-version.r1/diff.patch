@@ -1,0 +1,132 @@
+diff --git a/src/main/java/com/sm/instagram/platform/userpreferences/UserPreferences.java b/src/main/java/com/sm/instagram/platform/userpreferences/UserPreferences.java
+index 9084061dcc8..32642719061 100644
+--- a/src/main/java/com/sm/instagram/platform/userpreferences/UserPreferences.java
++++ b/src/main/java/com/sm/instagram/platform/userpreferences/UserPreferences.java
+@@ -113,4 +113,8 @@ public class UserPreferences {
+      */
+     @Column(name = "notification_email_support_enabled")
+     private Boolean notificationEmailSupportEnabled = true;
++
++    @Version
++    @Column(name = "version")
++    private Long version;
+ }
+\ No newline at end of file
+diff --git a/src/main/java/com/sm/instagram/platform/userpreferences/UserPreferencesDtoOut.java b/src/main/java/com/sm/instagram/platform/userpreferences/UserPreferencesDtoOut.java
+index 240fd21c1e6..bc7afc5e858 100644
+--- a/src/main/java/com/sm/instagram/platform/userpreferences/UserPreferencesDtoOut.java
++++ b/src/main/java/com/sm/instagram/platform/userpreferences/UserPreferencesDtoOut.java
+@@ -33,4 +33,5 @@ public class UserPreferencesDtoOut {
+     private LocalDateTime createdTime;
+     private LocalDateTime lastUpdateTime;
+     private String updaterId;
++    private Long version;
+ }
+\ No newline at end of file
+diff --git a/src/main/resources/db/changelog/2026/09/24-09-2026-add-version-to-user-preferences.sql b/src/main/resources/db/changelog/2026/09/24-09-2026-add-version-to-user-preferences.sql
+new file mode 100644
+index 00000000000..7309730f4e6
+--- /dev/null
++++ b/src/main/resources/db/changelog/2026/09/24-09-2026-add-version-to-user-preferences.sql
+@@ -0,0 +1,5 @@
++--liquibase formatted sql
++--changeset norbert:add-version-to-user-preferences
++ALTER TABLE public.user_preferences ADD COLUMN version BIGINT NOT NULL DEFAULT 0;
++
++-- rollback ALTER TABLE public.user_preferences DROP COLUMN version;
+diff --git a/src/main/resources/db/changelog/changelog.xml b/src/main/resources/db/changelog/changelog.xml
+index 77f52d5e094..4492f036cad 100644
+--- a/src/main/resources/db/changelog/changelog.xml
++++ b/src/main/resources/db/changelog/changelog.xml
+@@ -184,4 +184,7 @@
+     <!-- June 2026: Widen ticket_reference to VARCHAR(32) — pentest 3.3 SecureRandom format is 21 chars -->
+     <include file="2026/09/02-09-2026-widen-ticket-reference-column.sql" relativeToChangelogFile="true"/>
+ 
++    <!-- September 2026: Add JPA @Version column to user_preferences for optimistic locking protection -->
++    <include file="2026/09/24-09-2026-add-version-to-user-preferences.sql" relativeToChangelogFile="true"/>
++
+ </databaseChangeLog>
+diff --git a/src/test/java/com/sm/instagram/platform/unit/service/UserPreferencesVersionUnitTest.java b/src/test/java/com/sm/instagram/platform/unit/service/UserPreferencesVersionUnitTest.java
+new file mode 100644
+index 00000000000..4b05e77611e
+--- /dev/null
++++ b/src/test/java/com/sm/instagram/platform/unit/service/UserPreferencesVersionUnitTest.java
+@@ -0,0 +1,78 @@
++package com.sm.instagram.platform.unit.service;
++
++import com.sm.instagram.platform.user.User;
++import com.sm.instagram.platform.userpreferences.UserPreferences;
++import com.sm.instagram.platform.userpreferences.UserPreferencesDtoIn;
++import com.sm.instagram.platform.userpreferences.UserPreferencesDtoOut;
++import jakarta.persistence.Version;
++import org.junit.jupiter.api.DisplayName;
++import org.junit.jupiter.api.Test;
++import org.junit.jupiter.api.extension.ExtendWith;
++import org.modelmapper.ModelMapper;
++import org.mockito.junit.jupiter.MockitoExtension;
++
++import java.lang.reflect.Field;
++
++import static org.assertj.core.api.Assertions.assertThat;
++
++@ExtendWith(MockitoExtension.class)
++@DisplayName("UserPreferences optimistic locking Unit Tests")
++class UserPreferencesVersionUnitTest {
++
++    @Test
++    @DisplayName("version field carries @Version and is a Long")
++    void versionFieldCarriesVersionAnnotationAndIsLong() throws NoSuchFieldException {
++        // Given
++        Field versionField = UserPreferences.class.getDeclaredField("version");
++
++        // Then
++        assertThat(versionField.getType()).isEqualTo(Long.class);
++        assertThat(versionField.getAnnotation(Version.class)).isNotNull();
++    }
++
++    @Test
++    @DisplayName("mapping a DtoIn onto an existing entity preserves its version")
++    void mappingDtoInOntoExistingEntityPreservesVersion() {
++        // Given
++        User user = new User();
++        user.setId(1L);
++
++        UserPreferences preferences = new UserPreferences();
++        preferences.setId(1L);
++        preferences.setUser(user);
++        preferences.setVersion(7L);
++        preferences.setLanguage("en");
++        preferences.setDarkModeEnabled(false);
++
++        UserPreferencesDtoIn dtoIn = new UserPreferencesDtoIn();
++        dtoIn.setLanguage("pl");
++        dtoIn.setDarkModeEnabled(true);
++
++        // When - exactly what UserPreferencesService#updateCurrentUserPreferences does
++        new ModelMapper().map(dtoIn, preferences);
++
++        // Then - the fields the client sent are applied, but the version is untouched by the mapper
++        assertThat(preferences.getLanguage()).isEqualTo("pl");
++        assertThat(preferences.getDarkModeEnabled()).isTrue();
++        assertThat(preferences.getVersion()).isEqualTo(7L);
++    }
++
++    @Test
++    @DisplayName("mapping an entity to its DtoOut carries the version to the client")
++    void mappingEntityToDtoOutCarriesVersion() {
++        // Given
++        User user = new User();
++        user.setId(2L);
++
++        UserPreferences preferences = new UserPreferences();
++        preferences.setId(2L);
++        preferences.setUser(user);
++        preferences.setVersion(42L);
++
++        // When
++        UserPreferencesDtoOut dtoOut = new ModelMapper().map(preferences, UserPreferencesDtoOut.class);
++
++        // Then
++        assertThat(dtoOut.getVersion()).isEqualTo(42L);
++    }
++}

@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 4,
+  "test_quality": 4,
+  "graph_use": 4,
+  "reasons": {
+   "correctness": "reorderCategory rejects a null list, a wrong size, duplicates and foreign ids with error.business.faq_reorder_mismatch. It assigns i+1 and saves each FAQ. An unknown category still throws ResourceNotFoundException. PUT returns 204. Hidden tests pass 6/6.",
+   "convention_fit": "The endpoint has @PreAuthorize ADMIN and inherits the class-level @RateLimit. The body is a *DtoIn. The controller gets a constructor-injected FaqService. BusinessRuleTranslatableException carries a key present in both messages_en and messages_pl. A MockitoExtension unit test was added and run.",
+   "design_fit": "reorderCategory repeats getFaqsByCategory's category lookup and active-FAQ query instead of calling it. The size check before the set comparison is redundant. Otherwise the logic sits in the service, the controller only delegates, and the footprint is small.",
+   "test_quality": "FaqServiceReorderUnitTest covers the happy path, a missing id, a duplicate, a foreign id and an unknown category, with no Spring context. Only one test asserts the message key. Strictness is LENIENT. A null list is not tested.",
+   "graph_use": "One graph query listed the support/faq files. The agent then read the service, controllers and entity it went on to edit. It found existing exception and test examples by grep and find, not the graph."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 1177,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 33637
+ },
+ "is_error": false
+}

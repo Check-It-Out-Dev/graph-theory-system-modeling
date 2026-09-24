@@ -9,3 +9,4 @@ Every prompt-under-test campaign that produced a committed number: its Actions r
 | 2026-09-23 | hosted-smoke-1 | smoke | [35886327924](https://github.com/Check-It-Out-Dev/checkitout-backend/actions/runs/35886327924) | 10764554776, `ca079d6121cf0aeb` | `put@0c3af0cdaacfe166` | 1 | 0.9875 | |
 | 2026-09-24 | baseline-2026-09-23-r5 | rejudge | [35986676711](https://github.com/Check-It-Out-Dev/checkitout-backend/actions/runs/35986676711) | 10802815732, `11712ad7ba58b1fa` | `put@0c3af0cdaacfe166` | 18 | 0.9074 | |
 | 2026-09-24 | gepa-2026-09-24 | gepa | [35987646721](https://github.com/Check-It-Out-Dev/checkitout-backend/actions/runs/35987646721) | 10805832219, `26967d2c278b8f42` | `put@68531a1b36fc9a72` | 0 | 0.9792 | |
+| 2026-09-24 | certify-2026-09-24 | certify | [35995327027](https://github.com/Check-It-Out-Dev/checkitout-backend/actions/runs/35995327027) | 10811422522, `b102093d235b6085` | `put@68531a1b36fc9a72` | 40 | 0.9679 | |
