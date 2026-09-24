@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 4,
+  "convention_fit": 5,
+  "design_fit": 4,
+  "test_quality": 4,
+  "graph_use": 5,
+  "reasons": {
+   "correctness": "updateTicketStatus publishes SupportTicketResolvedEvent only on RESOLVED; listener and port match the interface. EmailTicketNotificationAdapter adds a MessageSource dependency the interface does not name, which fits the one failed hidden test (4/5).",
+   "convention_fit": "Listener uses @TransactionalEventListener(AFTER_COMMIT) and catches and logs. Port and adapter sit in support/ticket/port and support/ticket/adapter. Injection is by constructor. New keys are in both messages_en and messages_pl.",
+   "design_fit": "The service depends only on ApplicationEventPublisher, with a clean port and adapter split. The adapter hard-codes Locale.ENGLISH, so the added Polish keys are never used. The extra MessageSource makes the adapter's constructor wider than needed.",
+   "test_quality": "Listener tests cover the happy path and the swallowed port failure. The service test captures the event fields and checks no publish on CLOSED. The adapter test stubs MessageSource to return the reference, so its assertion proves little.",
+   "graph_use": "Graph queries found the support package, existing event, listener and port files, and SupportTicketService dependents and TESTED_BY links before any edit. The agent then read InvoiceCreatedEventListener and FakturowniaAdapter as examples."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 1236,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 44068
+ },
+ "is_error": false
+}

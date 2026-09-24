@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 5,
+  "test_quality": 3,
+  "graph_use": 4,
+  "reasons": {
+   "correctness": "SupportTicket gains `@Version private Long version` and the changeset adds `version BIGINT DEFAULT 0 NOT NULL`, matching the interface. Build is green, acceptance 2/2, existing tests 229/229.",
+   "convention_fit": "Changeset 2026/09/24-09-2026-add-version-to-support-ticket.sql has the formatted-sql header, a `--changeset` line and a `-- rollback`. It is included last in changelog.xml under a Month YYYY comment. No existing changeset was edited.",
+   "design_fit": "Minimal footprint: one annotated field, one changeset, one include. It follows the existing PartnershipOpportunity @Version pattern and adds no new mechanism and no unrelated edits.",
+   "test_quality": "SupportTicketVersionUnitTest uses MockitoExtension and no Spring context, but has one reflection check of the annotation and field type. No behaviour is pinned, for example the version being carried through a save or a stale-version conflict.",
+   "graph_use": "Graph queries located the SupportTicket files, their dependents and TESTED_BY tests, and the PartnershipOpportunity @Version exemplar before editing. The changelog layout and test patterns were found with ls and grep."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 826,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 25970
+ },
+ "is_error": false
+}

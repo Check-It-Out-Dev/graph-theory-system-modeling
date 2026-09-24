@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 4,
+  "test_quality": 5,
+  "graph_use": 4,
+  "reasons": {
+   "correctness": "reorderCategory rejects duplicates, missing ids, foreign ids and null lists by combining a size check with set equality, sets displayOrder i+1 and saves. Unknown category throws ResourceNotFoundException. Endpoint returns 204. Acceptance tests 6/6.",
+   "convention_fit": "The endpoint has @PreAuthorize ADMIN and inherits the class-level @RateLimit. Injection is by constructor. BusinessRuleTranslatableException uses a key present in both messages_en and messages_pl. The request body is FaqReorderDtoIn. Code stays in support/faq.",
+   "design_fit": "The method repeats the category lookup and findByCategoryAndActiveTrueOrderByDisplayOrderAsc that getFaqsByCategory(categoryId) already does, instead of calling it. Otherwise the logic sits in the service, the controller is thin, and there is no new mechanism.",
+   "test_quality": "FaqServiceUnitTest uses MockitoExtension with no Spring context. It covers the reorder happy path with a captor, plus missing, duplicate, foreign-id and unknown-category cases, each asserting the message key and no save. SecurityContextHolder is set but never cleared.",
+   "graph_use": "The first graph queries located the support/faq files, their dependents and TESTED_BY links, and a later query checked who depends on the FaqCategoryController constructor. Navigation after that relied heavily on grep and reads."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 1305,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 36739
+ },
+ "is_error": false
+}

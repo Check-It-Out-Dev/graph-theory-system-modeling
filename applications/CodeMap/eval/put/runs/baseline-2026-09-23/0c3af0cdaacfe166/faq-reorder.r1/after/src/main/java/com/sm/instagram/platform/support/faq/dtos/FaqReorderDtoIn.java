@@ -1,0 +1,25 @@
+package com.sm.instagram.platform.support.faq.dtos;
+
+import jakarta.validation.constraints.NotEmpty;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.List;
+
+/**
+ * DTO for reordering the FAQs of a category in one request.
+ */
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class FaqReorderDtoIn {
+
+    /**
+     * Ids of the category's active FAQs, in the desired display order.
+     */
+    @NotEmpty(message = "{validation.faq.faqIds.required}")
+    private List<Long> faqIds;
+}

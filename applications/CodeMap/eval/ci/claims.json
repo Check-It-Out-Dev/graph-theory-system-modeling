@@ -226,6 +226,21 @@
    "doc": "training/PIPELINE.md",
    "text": "104 AUTONOMOUS multi-step sessions",
    "reason": "the loop-tier measurement wrote LOOP_r22_cpu.json, which is not committed; the frozen runs that ARE committed are the prompt-transfer ladder"
+  },
+  {
+   "doc": "../../Readme.md",
+   "text": "7 of 40\nentities carry `@Version`, 9 of 23 `@Scheduled` methods a lock, and 69 fields are still `@Autowired`",
+   "reason": "a census of the backend at ff43730b taken for D-R29 (grep over src/main); a property of the code base under test, not of an evaluation artifact"
+  },
+  {
+   "doc": "../../Readme.md",
+   "text": "77 minutes",
+   "reason": "the GEPA run's wall time, `seconds` 4608 in eval/put/runs/gepa-2026-09-24.json, written in minutes"
+  },
+  {
+   "doc": "../../Readme.md",
+   "text": "in four candidates",
+   "reason": "the count of proposals in the candidates list of eval/put/runs/gepa-2026-09-24.json (five entries, the seed first); a list length, which the dotted-path lookup does not compute"
   }
  ],
  "night": [
@@ -277,11 +292,283 @@
    "night": "2026-09-16",
    "metric": "codemap_judge_kappa.oracle",
    "value": 0.84
+  },
+  {
+   "doc": "docs/history/08-success-story.md",
+   "text": "grounded 0.94, correct 0.90",
+   "night": "2026-09-20",
+   "metric": "codemap_grounded_rate",
+   "value": 0.94
+  },
+  {
+   "doc": "docs/history/08-success-story.md",
+   "text": "grounded 0.94, correct 0.90",
+   "night": "2026-09-20",
+   "metric": "codemap_correct_rate",
+   "value": 0.9
+  },
+  {
+   "doc": "docs/history/08-success-story.md",
+   "text": "88.5 seconds longer",
+   "night": "2026-09-20",
+   "artifact": "eval/quality/runs/campaign.json",
+   "metric": "seconds_delta_mean",
+   "value": -88.5
+  },
+  {
+   "doc": "docs/history/08-success-story.md",
+   "text": "3.5 more turns",
+   "night": "2026-09-20",
+   "artifact": "eval/quality/runs/campaign.json",
+   "metric": "turns_delta_mean",
+   "value": -3.5
   }
  ],
  "_night": [
   "A night claim names the nightly quality artifact (eval/quality/runs/<night>.json) and the metric inside it;",
   "the test asserts the text is still in the document AND the artifact still rounds to the value at the claim's precision.",
   "Nothing is re-scored: the artifact is the record of that night, so a night claim is descriptive, never a trend."
+ ],
+ "put": [
+  {
+   "doc": "../../Readme.md",
+   "text": "| training tasks (in-sample, best-of-k) | 0.907 | 0.970 |",
+   "artifact": "eval/put/runs/certify-2026-09-24.json",
+   "metric": "verdict.train.seed",
+   "value": 0.907,
+   "decimals": 3
+  },
+  {
+   "doc": "../../Readme.md",
+   "text": "| training tasks (in-sample, best-of-k) | 0.907 | 0.970 |",
+   "artifact": "eval/put/runs/certify-2026-09-24.json",
+   "metric": "verdict.train.candidate",
+   "value": 0.97,
+   "decimals": 3
+  },
+  {
+   "doc": "../../Readme.md",
+   "text": "| hold-out tasks (never seen by GEPA) | 0.902 | 0.965 |",
+   "artifact": "eval/put/runs/certify-2026-09-24.json",
+   "metric": "verdict.holdout.seed",
+   "value": 0.902,
+   "decimals": 3
+  },
+  {
+   "doc": "../../Readme.md",
+   "text": "| hold-out tasks (never seen by GEPA) | 0.902 | 0.965 |",
+   "artifact": "eval/put/runs/certify-2026-09-24.json",
+   "metric": "verdict.holdout.candidate",
+   "value": 0.965,
+   "decimals": 3
+  },
+  {
+   "doc": "../../Readme.md",
+   "text": "hold-out gain is 0.063 (95 % CI −0.007 to 0.135; δ 0.030)",
+   "artifact": "eval/put/runs/certify-2026-09-24.json",
+   "metric": "verdict.gain_holdout.mean",
+   "value": 0.063,
+   "decimals": 3
+  },
+  {
+   "doc": "../../Readme.md",
+   "text": "hold-out gain is 0.063 (95 % CI −0.007 to 0.135; δ 0.030)",
+   "artifact": "eval/put/runs/certify-2026-09-24.json",
+   "metric": "verdict.gain_holdout.ci.0",
+   "value": -0.007,
+   "decimals": 3
+  },
+  {
+   "doc": "../../Readme.md",
+   "text": "hold-out gain is 0.063 (95 % CI −0.007 to 0.135; δ 0.030)",
+   "artifact": "eval/put/runs/certify-2026-09-24.json",
+   "metric": "verdict.gain_holdout.ci.1",
+   "value": 0.135,
+   "decimals": 3
+  },
+  {
+   "doc": "../../Readme.md",
+   "text": "hold-out gain is 0.063 (95 % CI −0.007 to 0.135; δ 0.030)",
+   "artifact": "eval/put/runs/certify-2026-09-24.json",
+   "metric": "verdict.gain_holdout.delta",
+   "value": 0.03,
+   "decimals": 3
+  },
+  {
+   "doc": "../../Readme.md",
+   "text": "`tests_written` 18/30 → 37/40",
+   "artifact": "eval/put/runs/certify-2026-09-24.json",
+   "metric": "rules_seed.tests_written.rate",
+   "value": 0.6,
+   "decimals": 3
+  },
+  {
+   "doc": "../../Readme.md",
+   "text": "`tests_written` 18/30 → 37/40",
+   "artifact": "eval/put/runs/certify-2026-09-24.json",
+   "metric": "rules_candidate.tests_written.rate",
+   "value": 0.925,
+   "decimals": 3
+  },
+  {
+   "doc": "../../Readme.md",
+   "text": "a new unit-test class in 18 of 30 seed runs",
+   "artifact": "eval/put/runs/certify-2026-09-24.json",
+   "metric": "rules_seed.tests_written.rate",
+   "value": 0.6,
+   "decimals": 3
+  },
+  {
+   "doc": "../../Readme.md",
+   "text": "Obligatory for the candidate over 40 runs",
+   "artifact": "eval/put/runs/certify-2026-09-24.json",
+   "metric": "candidate_runs",
+   "value": 40,
+   "decimals": 0
+  },
+  {
+   "doc": "../../Readme.md",
+   "text": "two hold-out tasks rose by about 0.15 and 0.11",
+   "artifact": "eval/put/runs/promote-2026-09-24.json",
+   "metric": "per_task_holdout_gain.ticket-stats",
+   "value": 0.15,
+   "decimals": 2
+  },
+  {
+   "doc": "../../Readme.md",
+   "text": "two hold-out tasks rose by about 0.15 and 0.11",
+   "artifact": "eval/put/runs/promote-2026-09-24.json",
+   "metric": "per_task_holdout_gain.user-preferences-version",
+   "value": 0.11,
+   "decimals": 2
+  },
+  {
+   "doc": "../../Readme.md",
+   "text": "0.917 → 0.979 on the training tasks",
+   "artifact": "eval/put/runs/gepa-2026-09-24.json",
+   "metric": "seed_val_score",
+   "value": 0.917,
+   "decimals": 3
+  },
+  {
+   "doc": "../../Readme.md",
+   "text": "0.917 → 0.979 on the training tasks",
+   "artifact": "eval/put/runs/gepa-2026-09-24.json",
+   "metric": "best_val_score",
+   "value": 0.979,
+   "decimals": 3
+  },
+  {
+   "doc": "../../Readme.md",
+   "text": "(54 coding",
+   "artifact": "eval/put/runs/gepa-2026-09-24.json",
+   "metric": "metric_calls",
+   "value": 54,
+   "decimals": 0
+  },
+  {
+   "doc": "../../Readme.md",
+   "text": "design-fit agreement went from 0.58 to 0.92 exact",
+   "artifact": "eval/put/judge/calibration-r4.json",
+   "metric": "criteria.design_fit.exact",
+   "value": 0.58,
+   "decimals": 2
+  },
+  {
+   "doc": "../../Readme.md",
+   "text": "design-fit agreement went from 0.58 to 0.92 exact",
+   "artifact": "eval/put/judge/calibration-r5.json",
+   "metric": "criteria.design_fit.exact",
+   "value": 0.92,
+   "decimals": 2
+  },
+  {
+   "doc": "../../Readme.md",
+   "text": "(Spearman 0.65 → 0.97)",
+   "artifact": "eval/put/judge/calibration-r4.json",
+   "metric": "criteria.design_fit.spearman",
+   "value": 0.65,
+   "decimals": 2
+  },
+  {
+   "doc": "../../Readme.md",
+   "text": "(Spearman 0.65 → 0.97)",
+   "artifact": "eval/put/judge/calibration-r5.json",
+   "metric": "criteria.design_fit.spearman",
+   "value": 0.97,
+   "decimals": 2
+  },
+  {
+   "doc": "../../Readme.md",
+   "text": "Re-measured on the same twelve anchors",
+   "artifact": "eval/put/judge/calibration-r5.json",
+   "metric": "n_anchors",
+   "value": 12,
+   "decimals": 0
+  },
+  {
+   "doc": "../../Readme.md",
+   "text": "(MAD of score 0.017 → 0.009)",
+   "artifact": "eval/put/runs/baseline-2026-09-23.json",
+   "metric": "noise.judge_mad_score",
+   "value": 0.017,
+   "decimals": 3
+  },
+  {
+   "doc": "../../Readme.md",
+   "text": "(MAD of score 0.017 → 0.009)",
+   "artifact": "eval/put/runs/baseline-2026-09-23-r5.json",
+   "metric": "noise.judge_mad_score",
+   "value": 0.009,
+   "decimals": 3
+  },
+  {
+   "doc": "../../Readme.md",
+   "text": "(AC1 0.90 → 0.85)",
+   "artifact": "eval/put/judge/calibration-r4.json",
+   "metric": "pooled.ac1",
+   "value": 0.9,
+   "decimals": 2
+  },
+  {
+   "doc": "../../Readme.md",
+   "text": "(AC1 0.90 → 0.85)",
+   "artifact": "eval/put/judge/calibration-r5.json",
+   "metric": "pooled.ac1",
+   "value": 0.85,
+   "decimals": 2
+  },
+  {
+   "doc": "../../Readme.md",
+   "text": "because three cells now sit on the other side",
+   "artifact": "eval/put/judge/calibration-r5.json",
+   "metric": "gap_summary.crossing_the_line",
+   "value": 3,
+   "decimals": 0
+  },
+  {
+   "doc": "../../Readme.md",
+   "text": "8 to 12 runs per rule",
+   "artifact": "eval/put/runs/certify-2026-09-24.json",
+   "metric": "rules_candidate.scheduler_lock.n",
+   "value": 8,
+   "decimals": 0
+  },
+  {
+   "doc": "../../Readme.md",
+   "text": "8 to 12 runs per rule",
+   "artifact": "eval/put/runs/certify-2026-09-24.json",
+   "metric": "rules_candidate.liquibase_changeset.n",
+   "value": 12,
+   "decimals": 0
+  },
+  {
+   "doc": "../../Readme.md",
+   "text": "grows past 24,000 characters",
+   "artifact": "eval/put/instances/backend-conventions/contract.json",
+   "metric": "prompt.max_body_chars",
+   "value": 24000,
+   "decimals": 0
+  }
  ]
 }

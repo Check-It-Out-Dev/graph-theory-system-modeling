@@ -7,7 +7,10 @@ param(
     [string]$Date = (Get-Date).ToUniversalTime().ToString("yyyy-MM-dd"),
     [switch]$NoPush,
     [switch]$HaikuOnly,
-    [int]$MaxCredits = 3000
+    [int]$MaxCredits = 3000,
+    [double]$BaselineShare = 0.5,
+    [int]$BankPass = 24,
+    [int]$Conversations = 0
 )
 $ErrorActionPreference = "Stop"
 $env:PYTHONUTF8 = "1"; $env:PYTHONIOENCODING = "utf-8"
@@ -31,21 +34,29 @@ New-Item -ItemType Directory -Force -Path "eval\humans\runs", "eval\judge\runs",
 "[$(Get-Date -Format s)] night $Date starts" | Tee-Object -FilePath $log -Append
 
 # 1. the personas (the runner syncs the miss backlog and refuses to overrun the caps)
-$args = @("eval\humans\run_night.py", "--date", $Date, "--max-credits", "$MaxCredits")
-if ($HaikuOnly) { $args += "--haiku-only" }
-python @args 2>&1 | Tee-Object -FilePath $log -Append
+$nightArgs = @("eval\humans\run_night.py", "--date", $Date, "--max-credits", "$MaxCredits", "--baseline-share", "$BaselineShare")
+if ($Conversations -gt 0) { $nightArgs += @("--conversations", "$Conversations") }
+if ($HaikuOnly) { $nightArgs += "--haiku-only" }
+python @nightArgs 2>&1 | Tee-Object -FilePath $log -Append
+
+# 1b. the bank pass: exact bank questions and probes as the judge user, so the night's own κ rests on enough oracle rows
+if ($BankPass -gt 0) {
+    python eval\judge\bank_pass.py --url $env:CODEMAP_URL --token $env:CODEMAP_TOKEN --user judge --n $BankPass --probes 6 --seed ([int]$Date.Replace("-", "") % 1000) 2>&1 | Tee-Object -FilePath $log -Append
+}
 
 # 2. the night's events from the VPS (the server's artifact of record), then the judge
-$hdr = @{ Authorization = "Bearer $env:CODEMAP_TOKEN"; "X-CodeMap-Admin" = $env:CODEMAP_ADMIN_TOKEN }
-$ev = Invoke-RestMethod -Uri "$env:CODEMAP_URL/admin/events?since=${Date}T00:00:00Z&limit=5000" -Headers $hdr
-$ev.events | ForEach-Object { $_ | ConvertTo-Json -Compress -Depth 12 } | Set-Content -Encoding utf8 "eval\judge\runs\events-$Date.jsonl"
-"events fetched: $($ev.count)" | Tee-Object -FilePath $log -Append
+# the window opens where the personas started; events are written as the server sent them (fetch_events.py)
+python eval\judge\fetch_events.py --date $Date 2>&1 | Tee-Object -FilePath $log -Append
+if ($LASTEXITCODE -ne 0) { "[$(Get-Date -Format s)] no events in the window; the judge is not run" | Tee-Object -FilePath $log -Append; exit 2 }
 python eval\judge\judge.py --events "eval\judge\runs\events-$Date.jsonl" --out "eval\judge\runs\$Date.json" --backend claude --modal 2>&1 | Tee-Object -FilePath $log -Append
 python eval\judge\calibrate.py --run "eval\judge\runs\$Date.json" 2>&1 | Tee-Object -FilePath $log -Append
 
 # 3. quality: one artifact per night, pushed as codemap_quality_* gauges
 python eval\quality\quality.py --date $Date --events "eval\judge\runs\events-$Date.jsonl" --judge "eval\judge\runs\$Date.json" `
     --humans "eval\humans\runs\$Date.jsonl" --out "eval\quality\runs\$Date.json" --push 2>&1 | Tee-Object -FilePath $log -Append
+
+# 3b. the pair campaign across nights (the README's gain condition counts pairs cumulatively)
+python eval\quality\campaign.py 2>&1 | Tee-Object -FilePath $log -Append
 
 # 4. the artifacts become history (the public quality page reads them)
 git -C $Repo add "applications/CodeMap/eval/humans/runs" "applications/CodeMap/eval/judge/runs" "applications/CodeMap/eval/quality/runs" "applications/CodeMap/graph/delta/backlog.jsonl" 2>$null

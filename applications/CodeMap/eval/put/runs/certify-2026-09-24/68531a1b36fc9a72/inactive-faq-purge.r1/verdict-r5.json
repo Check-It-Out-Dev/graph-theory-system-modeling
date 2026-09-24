@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 5,
+  "test_quality": 5,
+  "graph_use": 5,
+  "reasons": {
+   "correctness": "Implements the interface exactly: repository derived query, FaqService#purgeInactiveOlderThan returns the deleted count, and InactiveFaqPurgeCronJob has the enabled/olderThanDays properties, the cron default and catch-and-log. Build green, 4/4 acceptance tests pass.",
+   "convention_fit": "@SchedulerLock(name=\"faq:inactivePurge\"), cron and enabled flag from properties, *CronJob naming, @RequiredArgsConstructor with private final FaqService, code placed in support/faq, new *UnitTest classes run with MockitoExtension.",
+   "design_fit": "Minimal footprint that mirrors AnonymousConsentCleanupCronJob. Selection logic sits in the repository, deletion in a transactional service method, and the job only delegates. The application.yml block matches the consent cleanup config.",
+   "test_quality": "FaqServiceUnitTest captures the cutoff within 5 seconds, verifies deleteAll and the count, and covers the empty case. The cron test covers enabled with configured days, disabled with no interactions, and a service exception not rethrown.",
+   "graph_use": "Graph queries found the faq files, existing CronJob classes, TESTED_BY tests and dependents of FaqRepository/FaqService before any edit. The agent then read AnonymousConsentCleanupCronJob and its unit test and followed them."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 1022,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 33034
+ },
+ "is_error": false
+}

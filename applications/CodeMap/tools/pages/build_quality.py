@@ -51,7 +51,8 @@ def collect(root=R):
             "pointer_verified": d.get("codemap_pointer_verified_rate"), "rating_mean": d.get("codemap_rating_mean"),
             "rating_ge4": d.get("codemap_rating_ge4_rate"), "credits_per_correct": d.get("codemap_credits_per_correct_answer"),
             "credits_total": d.get("codemap_credits_total") or {}, "tokens": d.get("codemap_tokens_total") or {},
-            "requests": d.get("codemap_requests_total") or {}, "kappa": kappa, "disputes": d.get("codemap_disputes_total"),
+            "requests": d.get("codemap_requests_total") or {}, "kappa": kappa, "calibrated": d.get("codemap_judge_calibrated"),
+            "disputes": d.get("codemap_disputes_total"),
             "drift_rate": d.get("codemap_version_drift_rate"), "drift": d.get("codemap_version_drift") or {},
             "coverage": d.get("codemap_graph_coverage_ratio") or {}, "gain": {k: gain.get(k) for k in ("n_pairs", "tokens_ratio_mean", "turns_delta_mean", "seconds_delta_mean")},
             "cache_read_ratio": d.get("codemap_cache_read_ratio"), "latency_p95": d.get("codemap_latency_ms_p95"),
@@ -101,8 +102,13 @@ def collect(root=R):
             if m:
                 dashboards.append({"title": m.group(1).strip(), "uid": m.group(2), "url": m.group(3)})
     proofs = [os.path.basename(p) for p in sorted(glob.glob(os.path.join(root, "docs", "proofs", "*.jpg")))]
+    campaign = jload(os.path.join(root, "eval", "quality", "runs", "campaign.json")) or {}
+    campaign = {k: campaign.get(k) for k in ("n_pairs", "nights", "tokens_ratio_mean", "turns_delta_mean", "seconds_delta_mean",
+                                           "rating_baseline_mean", "rating_codemap_mean", "share_fewer_tokens", "share_fewer_turns",
+                                           "share_rated_at_least_as_well", "gated")} if campaign else {}
     return {"schema": 1, "built_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "nights": nights, "decisions": decisions,
-            "optimizer_runs": runs, "prompts": prompts, "dashboards": dashboards, "proofs": proofs, "mcp_url": MCP_URL, "repo": REPO_URL}
+            "optimizer_runs": runs, "prompts": prompts, "dashboards": dashboards, "proofs": proofs, "campaign": campaign,
+            "mcp_url": MCP_URL, "repo": REPO_URL}
 
 
 # ----------------------------------------------------------------------------- rendering
@@ -193,7 +199,11 @@ def render(data):
             ("Grounded answers", pct(last.get("grounded")), "ok", "judge ≥ 4 on grounding, share of judged answers"),
             ("Correct answers", pct(last.get("correct")), "ok", "judge ≥ 4 on correctness"),
             ("Mean rating", num(last.get("rating_mean")), "info", "personas rate after verifying a pointer; unverified ratings cap at 3"),
-            ("Judge κ vs oracle", num(kappa, 2), "ok" if (kappa or 0) >= 0.6 else "warn", "Cohen's κ of the judge's 'located' against the execution oracle (gate 0.6)"),
+            ("Judge vs oracle", f"κ {num(kappa, 2)} · AC1 {num((last.get('kappa') or {}).get('oracle_ac1'), 2)}",
+             "ok" if last.get("calibrated") else "warn",
+             f"Cohen's κ and Gwet's AC1 of the judge's 'located' against the execution oracle on {num((last.get('kappa') or {}).get('oracle_n'))} rows; "
+             f"agreement {pct((last.get('kappa') or {}).get('oracle_agreement'))}, oracle yes-rate {pct((last.get('kappa') or {}).get('oracle_prevalence'))}; "
+             f"gate 0.6 on κ, or on AC1 with agreement ≥ 80 % when the yes-rate is past 85 % (κ's prevalence paradox); basis: {(last.get('kappa') or {}).get('basis') or 'none'}"),
             ("Credits per correct answer", num(last.get("credits_per_correct")), "info", "credits are relative units, never currency"),
             ("Version drift", pct(last.get("drift_rate")), "warn" if (last.get("drift_rate") or 0) > 0.05 else "ok", "bank rows answering differently after the last pack decision, not invalidated on purpose"),
             ("Answers judged", num(n.get("judged")), "info", f"{num(n.get('asks'))} asks, {num(n.get('misses'))} misses reported, {num(n.get('refusals'))} budget refusals"),
@@ -240,8 +250,15 @@ def render(data):
             if k in tk:
                 out.append(f"<div class='bar'><span class='bar-label'>{esc(k)}</span><span></span><span class='bar-value'>{num(tk[k])}</span></div>")
         out.append(f"<div class='muted'>cache-read ratio {pct(last.get('cache_read_ratio'))} · p95 latency {num(last.get('latency_p95'))} ms</div></div>")
+        camp = data.get("campaign") or {}
+        if camp:
+            cls = "ok" if camp.get("gated") else "warn"
+            out.append(f"<div class='card'><h3>Gain campaign (pairs across nights)</h3><div class='big {cls}'>{num(camp.get('n_pairs'))} / 30 pairs</div>"
+                       f"<div class='muted'>tokens ratio {num(camp.get('tokens_ratio_mean'), 2)} · turns Δ {num(camp.get('turns_delta_mean'))} · seconds Δ {num(camp.get('seconds_delta_mean'))} · "
+                       f"rated at least as well {pct(camp.get('share_rated_at_least_as_well'))} · fewer tokens {pct(camp.get('share_fewer_tokens'))}; "
+                       f"the row flips at thirty pairs</div></div>")
         g = last.get("gain") or {}
-        out.append(f"<div class='card'><h3>Gains vs no-CodeMap baselines</h3><div class='big info'>{num(g.get('n_pairs'))} pairs</div>"
+        out.append(f"<div class='card'><h3>Gains vs no-CodeMap baselines (this night)</h3><div class='big info'>{num(g.get('n_pairs'))} pairs</div>"
                    f"<div class='muted'>tokens ratio {num(g.get('tokens_ratio_mean'), 2)} · turns Δ {num(g.get('turns_delta_mean'))} · seconds Δ {num(g.get('seconds_delta_mean'))}; "
                    f"a gain without its baseline row is ungated</div></div>")
         out.append("</div>")

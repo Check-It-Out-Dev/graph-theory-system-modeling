@@ -1,0 +1,29 @@
+{
+ "rubric": "r4",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 4,
+  "convention_fit": 5,
+  "design_fit": 4,
+  "test_quality": 2,
+  "graph_use": 3,
+  "reasons": {
+   "correctness": "Column, entity field and DTO field exist; the paged mapping sets displayOrder and hidden tests pass 4/4. The seed gives PLN 0, but the column default is also 0, so any other currency ties with PLN.",
+   "convention_fit": "The changeset sits under 2026/09/ with a DD-MM-YYYY kebab name, the formatted-sql header, a changeset id and a rollback line. It is included last in changelog.xml under a 'September 2026' comment. Constructor-built tests were updated, and the new test uses MockitoExtension.",
+   "design_fit": "The change is minimal and stays in the currency package, adding one setter in the existing mapping lambda. The seed ordering (PLN=0 equals the default) leaves the order ambiguous; PLN should be below the default, or the other rows seeded.",
+   "test_quality": "Both tests in CurrencyServiceDisplayOrderUnitTest assert displayOrder == 0, which is the int default, so both would pass without the change. The toDto test stubs modelMapper to return the expected DTO, which is tautological. LENIENT strictness hides unused stubs.",
+   "graph_use": "One graph query listed the currency files before reading them. After that, finding the changelog, the constructor call sites and the BaseService internals relied on grep, find and ls rather than further graph queries."
+  },
+  "rubric": "r4",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 1176,
+  "cache_read_input_tokens": 1278,
+  "cache_creation_input_tokens": 25711
+ },
+ "is_error": false
+}

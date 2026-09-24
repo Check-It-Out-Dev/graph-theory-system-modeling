@@ -95,7 +95,10 @@ def compute(date, events, judge_doc=None, humans_rows=None, drift=None, coverage
                                       "false": _rate([r["judge"]["abstain"] < 4 for r in abst]) if abst else None}
     out["codemap_oracle_success_rate"] = _rate([r["oracle"]["success"] for r in jrows if r.get("oracle", {}).get("has")])
     out["codemap_judge_kappa"] = {"oracle": cal.get("kappa_oracle"), "human": cal.get("kappa_human"),
-                                  "anchor_now": (cal.get("anchors") or {}).get("kappa_now")}
+                                  "anchor_now": (cal.get("anchors") or {}).get("kappa_now"),
+                                  "oracle_n": cal.get("n_oracle"), "oracle_agreement": cal.get("agreement_oracle"),
+                                  "oracle_prevalence": cal.get("prevalence_oracle"), "oracle_ac1": cal.get("ac1_oracle"),
+                                  "basis": cal.get("basis")}
     out["codemap_judge_agreement"] = cal.get("agreement_rr")
     out["codemap_judge_calibrated"] = cal.get("calibrated")
     out["codemap_disputes_total"] = sum(1 for r in jrows if r.get("disputed"))
@@ -155,8 +158,9 @@ def gains(rows):
         u = r.get("usage") or {}
         return (u.get("input_tokens", 0) or 0) + (u.get("output_tokens", 0) or 0) + (u.get("cache_read_input_tokens", 0) or 0) \
             + (u.get("cache_creation_input_tokens", 0) or 0)
-    base = {(r["persona"], r["seed_id"]): r for r in rows if r.get("mode") == "baseline" and not r.get("is_error")}
-    cm = {(r["persona"], r["seed_id"]): r for r in rows if r.get("mode") == "codemap" and not r.get("is_error")}
+    ran = [r for r in rows if not r.get("is_error") and not r.get("skipped") and r.get("usage")]  # a skipped row is no half of a pair
+    base = {(r["persona"], r["seed_id"]): r for r in ran if r.get("mode") == "baseline"}
+    cm = {(r["persona"], r["seed_id"]): r for r in ran if r.get("mode") == "codemap"}
     pairs = [(base[k], cm[k]) for k in base if k in cm]
     ratios, turns, secs = [], [], []
     for b, c in pairs:

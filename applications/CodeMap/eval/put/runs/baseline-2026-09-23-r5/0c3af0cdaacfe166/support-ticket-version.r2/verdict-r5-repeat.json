@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 1,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 4,
+  "design_fit": 5,
+  "test_quality": 2,
+  "graph_use": 3,
+  "reasons": {
+   "correctness": "SupportTicket gets `@Version private Long version`. A changeset adds `version BIGINT DEFAULT 0 NOT NULL` with a rollback and is included in changelog.xml. Build is green and hidden tests pass 2/2.",
+   "convention_fit": "The changeset path, name, header, rollback and dated include comment follow the Liquibase convention. The @Version field matches the locking rule. The only gap is that no new *UnitTest class was created; tests were appended to the existing SupportTicketEntityUnitTest.",
+   "design_fit": "The change is minimal: one entity field, one new changeset, one include line. It follows the existing add-version-to-applied-opportunity changeset. There is no new mechanism and no unrelated edits.",
+   "test_quality": "The added VersionTests only check that the field starts null and that a getter/setter round-trip works. Nothing tests concurrent modification or conflict behaviour, and there is no new MockitoExtension test class.",
+   "graph_use": "Graph queries found the support/ticket files and changelog paths early. The locking example and the changelog tail were then found with grep, tail and file reads, so text search did most of the navigation."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 929,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 21892
+ },
+ "is_error": false
+}

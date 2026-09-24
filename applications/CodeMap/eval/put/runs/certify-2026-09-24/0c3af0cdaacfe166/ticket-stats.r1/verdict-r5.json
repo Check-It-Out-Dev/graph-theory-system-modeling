@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 1,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 4,
+  "design_fit": 4,
+  "test_quality": 4,
+  "graph_use": 3,
+  "reasons": {
+   "correctness": "Endpoint, service, repository method and DTO match the interface. The service checks admin with the same key as updateTicketStatus and throws ValidationTranslatableException on from>to. Every status is filled via EnumMap. Hidden tests pass 5/5.",
+   "convention_fit": "The endpoint has @PreAuthorize and is covered by the class-level @RateLimit. The new i18n key is in both property files and the response is a DtoOut. The tests extend the existing SupportTicketServiceUnitTest instead of adding a new *UnitTest class.",
+   "design_fit": "Logic sits in the service and the query in a derived repository method. The controller copies the neighbours' SecurityContextHolder auth/GDPR boilerplate, which duplicates the service-side permission check. Repository Javadoc calls the Between end exclusive, but JPA Between is inclusive.",
+   "test_quality": "Three Mockito tests cover the non-admin denial, the from>to rejection with its message key, and the per-status counts plus total with exact start/end stubs. No Spring context. They were added to an existing class, and there is no single-day or from==to case.",
+   "graph_use": "One graph query listed the support/ticket files up front. Navigation then relied on failed reads, globs and greps. No graph lookup of an existing example or of the dependents before editing."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 1027,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 47258
+ },
+ "is_error": false
+}

@@ -4,6 +4,7 @@ retry, κ by hand, disputes, anchors and drift, and the events export route."""
 import json
 import os
 import sys
+import tempfile
 import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -118,6 +119,39 @@ class CalibrationTests(unittest.TestCase):
                          "human": {"rating": 5 if good else 2}, "rr_equiv": 0.9 if good else 0.1, "terminal": "answer"})
         return rows
 
+    def test_events_window_opens_where_the_personas_started(self):
+        sys.path.insert(0, os.path.join(R, "eval", "judge"))
+        import fetch_events
+        with tempfile.TemporaryDirectory() as d:
+            self.assertEqual(fetch_events.window_start("2026-09-20", d), "2026-09-20T00:00:00Z")
+            json.dump({"started": "2026-09-17T00:02:10Z"}, open(os.path.join(d, "2026-09-20.summary.json"), "w", encoding="utf-8"))
+            self.assertEqual(fetch_events.window_start("2026-09-20", d), "2026-09-17T00:02:10Z")
+            self.assertEqual(fetch_events.window_start("2026-09-20", d, since="2026-09-17T01:00:00Z"), "2026-09-17T01:00:00Z")
+        seen = {}
+        doc = fetch_events.fetch("https://x/", "t", "a", "2026-09-17T00:02:10Z", 10,
+                                 opener=lambda req: seen.update(url=req.full_url, h=dict(req.header_items())) or {"events": []})
+        self.assertEqual(doc, {"events": []})
+        self.assertIn("/admin/events?since=2026-09-17T00%3A02%3A10Z&limit=10", seen["url"])
+        self.assertEqual(seen["h"].get("X-codemap-admin"), "a")
+
+    def test_ac1_and_the_prevalence_paradox(self):
+        # night 2026-09-18 by hand: 28 (yes,yes), 5 (no,yes), 1 (no,no) -> agreement 0.85, κ 0.25, AC1 0.82
+        pairs = [(True, True)] * 28 + [(False, True)] * 5 + [(False, False)]
+        self.assertAlmostEqual(calibrate.cohen_kappa(pairs), 0.2478, places=3)
+        st = calibrate.agreement_stats(pairs)
+        self.assertAlmostEqual(st["agreement"], 0.8529, places=3)
+        self.assertAlmostEqual(st["prevalence"], 0.8971, places=3)
+        self.assertAlmostEqual(st["ac1"], 0.8196, places=3)
+        self.assertEqual(calibrate.verdict(0.2478, st), (True, "ac1"))
+        # the AC1 route is closed when prevalence is balanced: κ alone decides
+        balanced = [(True, True)] * 6 + [(False, False)] * 3 + [(True, False)] * 3 + [(False, True)] * 3
+        stb = calibrate.agreement_stats(balanced)
+        self.assertEqual(calibrate.verdict(calibrate.cohen_kappa(balanced), stb), (False, None))
+        # and agreement below 0.8 never passes on AC1 even when skewed
+        weak = [(True, True)] * 20 + [(False, True)] * 8
+        self.assertEqual(calibrate.verdict(calibrate.cohen_kappa(weak), calibrate.agreement_stats(weak)), (False, None))
+        self.assertEqual(calibrate.verdict(0.7, {"prevalence": 0.5, "agreement": 0.5, "ac1": 0.1}), (True, "kappa"))
+
     def test_calibrate_gate_and_disputes(self):
         rows = self._rows()
         n = judge.flag_disputes(rows)
@@ -173,7 +207,7 @@ class SeedJoinTests(unittest.TestCase):
         rows = judge.rows_from_events([ev], bank, [], humans=None)
         self.assertEqual((rows[0]["kind"], rows[0]["oracle"]["has"]), (None, False))
         rows = judge.rows_from_events([ev], bank, [], humans=humans)
-        self.assertEqual((rows[0]["kind"], rows[0]["qid"], rows[0]["oracle"]), ("bank", "BE01", {"has": True, "success": True}))
+        self.assertEqual((rows[0]["kind"], rows[0]["qid"], rows[0]["oracle"]["has"], rows[0]["oracle"]["success"], rows[0]["oracle"]["answered"]), ("bank", "BE01", True, True, True))
 
 
 if __name__ == "__main__":

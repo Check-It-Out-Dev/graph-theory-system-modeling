@@ -1,0 +1,46 @@
+diff --git a/src/main/java/com/sm/instagram/platform/support/ticket/models/SupportTicket.java b/src/main/java/com/sm/instagram/platform/support/ticket/models/SupportTicket.java
+index df875dd5d8e..c3c99623183 100644
+--- a/src/main/java/com/sm/instagram/platform/support/ticket/models/SupportTicket.java
++++ b/src/main/java/com/sm/instagram/platform/support/ticket/models/SupportTicket.java
+@@ -149,6 +149,14 @@ public class SupportTicket implements UpdaterTracking {
+     @Size(max = 255, message = "Updater ID cannot exceed 255 characters")
+     private String updaterId;
+ 
++    /**
++     * Optimistic locking version, so a concurrent admin status change and
++     * customer reply do not silently overwrite one another.
++     */
++    @Version
++    @Column(name = "version")
++    private Long version;
++
+     /**
+      * Helper method to add a response to this ticket.
+      */
+diff --git a/src/main/resources/db/changelog/2026/09/24-09-2026-add-version-to-support-ticket.sql b/src/main/resources/db/changelog/2026/09/24-09-2026-add-version-to-support-ticket.sql
+new file mode 100644
+index 00000000000..13f76712ed3
+--- /dev/null
++++ b/src/main/resources/db/changelog/2026/09/24-09-2026-add-version-to-support-ticket.sql
+@@ -0,0 +1,9 @@
++-- liquibase formatted sql
++-- changeset norbert:add-version-to-support-ticket
++
++-- Add JPA @Version column to support_ticket for optimistic locking.
++-- Prevents lost updates when an admin status change and a customer reply
++-- happen at the same time.
++ALTER TABLE support_ticket ADD COLUMN version BIGINT DEFAULT 0 NOT NULL;
++
++-- rollback ALTER TABLE support_ticket DROP COLUMN version;
+diff --git a/src/main/resources/db/changelog/changelog.xml b/src/main/resources/db/changelog/changelog.xml
+index 77f52d5e094..549709917fa 100644
+--- a/src/main/resources/db/changelog/changelog.xml
++++ b/src/main/resources/db/changelog/changelog.xml
+@@ -184,4 +184,7 @@
+     <!-- June 2026: Widen ticket_reference to VARCHAR(32) — pentest 3.3 SecureRandom format is 21 chars -->
+     <include file="2026/09/02-09-2026-widen-ticket-reference-column.sql" relativeToChangelogFile="true"/>
+ 
++    <!-- September 2026: Add version column to support_ticket for optimistic locking -->
++    <include file="2026/09/24-09-2026-add-version-to-support-ticket.sql" relativeToChangelogFile="true"/>
++
+ </databaseChangeLog>

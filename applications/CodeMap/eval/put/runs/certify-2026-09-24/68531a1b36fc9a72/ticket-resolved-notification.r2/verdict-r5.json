@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 5,
+  "test_quality": 5,
+  "graph_use": 5,
+  "reasons": {
+   "correctness": "updateTicketStatus publishes SupportTicketResolvedEvent only for RESOLVED. The listener calls the port and logs failures. EmailTicketNotificationAdapter puts the reference in the subject. Every interface name matches. Build green, 5/5 acceptance.",
+   "convention_fit": "The listener uses @TransactionalEventListener(AFTER_COMMIT) with try/catch and logging. Port and adapter sit in support/ticket/port and adapter. Injection is by constructor (@RequiredArgsConstructor, and a parameter on the explicit constructor). New *UnitTest classes use MockitoExtension.",
+   "design_fit": "The service depends only on ApplicationEventPublisher, not on the adapter. The listener depends on the port type, and the adapter wraps the existing EmailService. Service change is a minimal conditional publish after save, and it follows the existing event/listener pattern.",
+   "test_quality": "Listener tests cover delegation and a swallowed port failure. The adapter test captures subject and text. Service tests cover publish with captured fields for RESOLVED, and no publish for IN_PROGRESS and CLOSED. No Spring context.",
+   "graph_use": "Before editing, graph queries found the support package files and existing Event/Listener/Port/Adapter examples. Further queries found SupportTicketService's tests and dependents. The agent read those examples and followed them; later TESTED_BY queries located a model test."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 822,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 43060
+ },
+ "is_error": false
+}

@@ -1,0 +1,7 @@
+- New `event` package: `SupportTicketCreatedEvent` and `SupportTicketCreatedEventListener` (AFTER_COMMIT, catches/logs failures, calls `EmailService#sendTicketCreationConfirmation`).
+- `SupportTicketService.java`: constructor now takes `ApplicationEventPublisher`; `createTicket` publishes `SupportTicketCreatedEvent` after save instead of calling `EmailService` directly.
+- `SupportTicketServiceUnitTest.java`: added `eventPublisher` mock and a `CreateTicketTests` case asserting the captured event's fields and that `emailService` is never called directly.
+- `SupportTicketService_Create_IntegrationTest.java`: replaced the now-invalid "sends email" assertion with one verifying no direct `EmailService` interaction (AFTER_COMMIT never fires in the rollback-based integration test, matching the existing `NotificationService_AccountActivation_IntegrationTest` convention).
+- New `SupportTicketCreatedEventListenerUnitTest.java`: verifies the listener forwards event data to `EmailService` and swallows failures without rethrowing.
+
+Tests run: `SupportTicketServiceUnitTest`, `SupportTicketCreatedEventListenerUnitTest`, `SupportTicketControllerFullUnitTest`, `SupportTicketEntityUnitTest`, `SupportTicketModelsUnitTest` — all passed. `./mvnw -q test-compile -Ptest` is green.

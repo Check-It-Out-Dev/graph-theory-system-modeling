@@ -87,8 +87,10 @@ def oracle(ev, kind, row):
         if row.get("archetype") not in WHERE_ARCHETYPES:
             return False, None
         ptrs = [p.get("name") for p in (ev.get("pointers") or [])[:TOP_POINTERS]]
-        hit = bool(set(ptrs) & gold) and ev.get("terminal") == "answer"
-        return True, hit
+        # WHERE, and only where: a gold entity among the first pointers. Whether the navigator then answered
+        # or abstained is a different question (the `answered` flag beside it); the judge's `located` is
+        # calibrated against this, its `correct` against answered-and-located.
+        return True, bool(set(ptrs) & gold)
     if kind == "probe":
         return True, (ev.get("terminal") == row.get("expect"))
     return False, None
@@ -96,7 +98,25 @@ def oracle(ev, kind, row):
 
 # ----------------------------------------------------------------------------- rows
 
+def load_jsonl(path):
+    return [json.loads(l) for l in open(path, encoding="utf-8") if l.strip()]  # NOSONAR - operator's own path; see sonar-project.properties
+
+
+def invalidated_ids():
+    """Bank rows the pack or the curated invalidation marks stale: their gold predates the graph they would judge."""
+    out = set()
+    for p in (os.path.join(R, "graph", "pack", "INVALIDATED_delta.json"), os.path.join(R, "eval", "q", "INVALIDATED_2026-09-02.json")):
+        if os.path.exists(p):
+            try:
+                j = json.load(open(p, encoding="utf-8"))
+                out |= {r["id"] if isinstance(r, dict) else r for r in (j if isinstance(j, list) else j.get("invalidated", []))}
+            except (OSError, ValueError):
+                pass
+    return out
+
+
 def rows_from_events(events, bank, probes, humans=None, limit=None):
+    stale = invalidated_ids()
     ratings = {}
     for ev in events:
         if ev.get("event_type") == "feedback" and ev.get("rating") is not None:
@@ -124,13 +144,17 @@ def rows_from_events(events, bank, probes, humans=None, limit=None):
         if not kind and ev.get("request_id") in seed_of and seed_of[ev["request_id"]] in by_id:
             kind, row = by_id[seed_of[ev["request_id"]]]
         has, success = oracle(ev, kind, row) if kind else (False, None)
+        if kind == "bank" and row.get("id") in stale:
+            has, success = False, None  # invalidated: the gold predates the pack
+        answered = ev.get("terminal") == "answer"
         out.append({"id": ev["request_id"], "request_id": ev["request_id"], "user": ev.get("user"), "tier": ev.get("tier"),
                     "model": ev.get("model"), "prompt_version": ev.get("prompt_version"), "pack_version": ev.get("pack_version"),
                     "q": ev.get("q"), "answer": ev.get("answer"), "pointers": [p.get("name") for p in ev.get("pointers") or []],
                     "terminal": ev.get("terminal"), "qid": row["id"] if row else None, "kind": kind,
                     "reference": (row.get("gold_answer") if kind == "bank" else None),
                     "expect": (row.get("expect") if kind == "probe" else "answer"),
-                    "oracle": {"has": has, "success": success},
+                    "oracle": {"has": has, "success": success, "answered": answered,
+                               "answered_and_located": (bool(success) and answered) if has else None},
                     "human": ratings.get(ev["request_id"]), "credits": ev.get("credits"), "steps": ev.get("steps")})
     if limit:
         out = out[:limit]

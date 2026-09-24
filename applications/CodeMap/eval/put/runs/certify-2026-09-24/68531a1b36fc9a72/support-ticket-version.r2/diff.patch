@@ -1,0 +1,111 @@
+diff --git a/src/main/java/com/sm/instagram/platform/support/ticket/models/SupportTicket.java b/src/main/java/com/sm/instagram/platform/support/ticket/models/SupportTicket.java
+index df875dd5d8e..2f635cf9971 100644
+--- a/src/main/java/com/sm/instagram/platform/support/ticket/models/SupportTicket.java
++++ b/src/main/java/com/sm/instagram/platform/support/ticket/models/SupportTicket.java
+@@ -149,6 +149,14 @@ public class SupportTicket implements UpdaterTracking {
+     @Size(max = 255, message = "Updater ID cannot exceed 255 characters")
+     private String updaterId;
+ 
++    /**
++     * JPA version for optimistic locking.
++     * Prevents lost updates when an admin and a customer modify the same ticket concurrently.
++     */
++    @Version
++    @Column(name = "version")
++    private Long version;
++
+     /**
+      * Helper method to add a response to this ticket.
+      */
+diff --git a/src/main/resources/db/changelog/2026/09/24-09-2026-add-version-to-support-ticket.sql b/src/main/resources/db/changelog/2026/09/24-09-2026-add-version-to-support-ticket.sql
+new file mode 100644
+index 00000000000..a0079b316ac
+--- /dev/null
++++ b/src/main/resources/db/changelog/2026/09/24-09-2026-add-version-to-support-ticket.sql
+@@ -0,0 +1,9 @@
++--liquibase formatted sql
++--changeset norbert:add-version-to-support-ticket-table
++
++-- Add JPA @Version column to support_ticket table for optimistic locking protection
++-- Prevents lost updates when an admin and a customer modify the same ticket concurrently
++ALTER TABLE support_ticket
++ADD COLUMN version BIGINT DEFAULT 0 NOT NULL;
++
++-- rollback ALTER TABLE support_ticket DROP COLUMN version;
+diff --git a/src/main/resources/db/changelog/changelog.xml b/src/main/resources/db/changelog/changelog.xml
+index 77f52d5e094..44b679511b8 100644
+--- a/src/main/resources/db/changelog/changelog.xml
++++ b/src/main/resources/db/changelog/changelog.xml
+@@ -184,4 +184,7 @@
+     <!-- June 2026: Widen ticket_reference to VARCHAR(32) — pentest 3.3 SecureRandom format is 21 chars -->
+     <include file="2026/09/02-09-2026-widen-ticket-reference-column.sql" relativeToChangelogFile="true"/>
+ 
++    <!-- September 2026: Add version column to support_ticket for optimistic locking, preventing lost updates -->
++    <include file="2026/09/24-09-2026-add-version-to-support-ticket.sql" relativeToChangelogFile="true"/>
++
+ </databaseChangeLog>
+diff --git a/src/test/java/com/sm/instagram/platform/unit/service/SupportTicketVersionUnitTest.java b/src/test/java/com/sm/instagram/platform/unit/service/SupportTicketVersionUnitTest.java
+new file mode 100644
+index 00000000000..ef0f28826a3
+--- /dev/null
++++ b/src/test/java/com/sm/instagram/platform/unit/service/SupportTicketVersionUnitTest.java
+@@ -0,0 +1,59 @@
++package com.sm.instagram.platform.unit.service;
++
++import com.sm.instagram.platform.support.ticket.models.SupportTicket;
++import jakarta.persistence.Column;
++import jakarta.persistence.Version;
++import org.junit.jupiter.api.DisplayName;
++import org.junit.jupiter.api.Test;
++import org.junit.jupiter.api.extension.ExtendWith;
++import org.mockito.junit.jupiter.MockitoExtension;
++
++import java.lang.reflect.Field;
++
++import static org.assertj.core.api.Assertions.assertThat;
++
++/**
++ * Unit tests protecting SupportTicket's optimistic locking field.
++ * Fails if the @Version annotation or its Long type is removed from the entity.
++ */
++@ExtendWith(MockitoExtension.class)
++@DisplayName("SupportTicket Version Unit Tests")
++class SupportTicketVersionUnitTest {
++
++    @Test
++    @DisplayName("version field is annotated with @Version and typed as Long")
++    void versionFieldCarriesVersionAnnotationAndLongType() throws NoSuchFieldException {
++        Field versionField = SupportTicket.class.getDeclaredField("version");
++
++        assertThat(versionField.isAnnotationPresent(Version.class)).isTrue();
++        assertThat(versionField.getType()).isEqualTo(Long.class);
++    }
++
++    @Test
++    @DisplayName("version field maps to the version column")
++    void versionFieldMapsToVersionColumn() throws NoSuchFieldException {
++        Field versionField = SupportTicket.class.getDeclaredField("version");
++
++        Column column = versionField.getAnnotation(Column.class);
++        assertThat(column).isNotNull();
++        assertThat(column.name()).isEqualTo("version");
++    }
++
++    @Test
++    @DisplayName("version is null until the entity is persisted")
++    void versionIsNullBeforePersistence() {
++        SupportTicket ticket = new SupportTicket();
++
++        assertThat(ticket.getVersion()).isNull();
++    }
++
++    @Test
++    @DisplayName("version can be set to reflect a persisted row")
++    void versionReflectsPersistedRow() {
++        SupportTicket ticket = new SupportTicket();
++
++        ticket.setVersion(7L);
++
++        assertThat(ticket.getVersion()).isEqualTo(7L);
++    }
++}

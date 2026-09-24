@@ -1,0 +1,3203 @@
+{
+ "schema": 1,
+ "label": "baseline-2026-09-23-r5",
+ "mode": "rejudge",
+ "instance": "backend-conventions",
+ "base_sha": "ff43730b75b7a40f4874f811251c5b72311dbbc9",
+ "prompt_version": "put@0c3af0cdaacfe166",
+ "prompt_origin": "the runs of baseline-2026-09-23",
+ "models": {
+  "coder": "sonnet",
+  "judge": "opus",
+  "reflector": "opus",
+  "preflight": "claude-haiku-4-5-20251001"
+ },
+ "weights": {
+  "hidden_pass": 0.3,
+  "conventions_det": 0.15,
+  "tests_written": 0.1,
+  "process_det": 0.1,
+  "convention_fit": 0.1,
+  "design_fit": 0.1,
+  "correctness": 0.05,
+  "test_quality": 0.05,
+  "graph_use": 0.05
+ },
+ "rubric": "r5",
+ "runs": 18,
+ "score": 0.9074,
+ "per_task": {
+  "stale-ticket-close": {
+   "scores": [
+    0.975,
+    0.9625,
+    0.975
+   ],
+   "mean": 0.9708
+  },
+  "support-ticket-version": {
+   "scores": [
+    0.8,
+    0.8,
+    0.8125
+   ],
+   "mean": 0.8042
+  },
+  "ticket-created-after-commit": {
+   "scores": [
+    0.9875,
+    0.9375,
+    0.9875
+   ],
+   "mean": 0.9708
+  },
+  "exchange-rate-port": {
+   "scores": [
+    1.0,
+    0.8833,
+    0.9125
+   ],
+   "mean": 0.9319
+  },
+  "faq-reorder": {
+   "scores": [
+    0.9625,
+    0.9375,
+    0.9375
+   ],
+   "mean": 0.9458
+  },
+  "currency-display-order": {
+   "scores": [
+    0.775,
+    0.7625,
+    0.925
+   ],
+   "mean": 0.8208
+  }
+ },
+ "rules": {
+  "graph_first": {
+   "passed": 18,
+   "n": 18,
+   "rate": 1.0,
+   "wilson": [
+    0.8241,
+    1.0
+   ],
+   "obligatory": false,
+   "mean_value": 1.0
+  },
+  "exemplar_read": {
+   "passed": 17,
+   "n": 18,
+   "rate": 0.9444444444444444,
+   "wilson": [
+    0.7424,
+    0.9901
+   ],
+   "obligatory": false,
+   "mean_value": 0.9444444444444444
+  },
+  "feature_first": {
+   "passed": 18,
+   "n": 18,
+   "rate": 1.0,
+   "wilson": [
+    0.8241,
+    1.0
+   ],
+   "obligatory": false,
+   "mean_value": 1.0
+  },
+  "constructor_injection": {
+   "passed": 18,
+   "n": 18,
+   "rate": 1.0,
+   "wilson": [
+    0.8241,
+    1.0
+   ],
+   "obligatory": false,
+   "mean_value": 1.0
+  },
+  "after_commit_listener": {
+   "passed": 3,
+   "n": 3,
+   "rate": 1.0,
+   "wilson": [
+    0.4385,
+    1.0
+   ],
+   "obligatory": false,
+   "mean_value": 1.0
+  },
+  "scheduler_lock": {
+   "passed": 3,
+   "n": 3,
+   "rate": 1.0,
+   "wilson": [
+    0.4385,
+    1.0
+   ],
+   "obligatory": false,
+   "mean_value": 1.0
+  },
+  "ports_adapters": {
+   "passed": 3,
+   "n": 3,
+   "rate": 1.0,
+   "wilson": [
+    0.4385,
+    1.0
+   ],
+   "obligatory": false,
+   "mean_value": 1.0
+  },
+  "translatable_errors": {
+   "passed": 6,
+   "n": 6,
+   "rate": 1.0,
+   "wilson": [
+    0.6097,
+    1.0
+   ],
+   "obligatory": false,
+   "mean_value": 1.0
+  },
+  "liquibase_changeset": {
+   "passed": 6,
+   "n": 6,
+   "rate": 1.0,
+   "wilson": [
+    0.6097,
+    1.0
+   ],
+   "obligatory": false,
+   "mean_value": 1.0
+  },
+  "version_field": {
+   "passed": 3,
+   "n": 3,
+   "rate": 1.0,
+   "wilson": [
+    0.4385,
+    1.0
+   ],
+   "obligatory": false,
+   "mean_value": 1.0
+  },
+  "controller_guards": {
+   "passed": 3,
+   "n": 3,
+   "rate": 1.0,
+   "wilson": [
+    0.4385,
+    1.0
+   ],
+   "obligatory": false,
+   "mean_value": 1.0
+  },
+  "dto_naming": {
+   "passed": 3,
+   "n": 3,
+   "rate": 1.0,
+   "wilson": [
+    0.4385,
+    1.0
+   ],
+   "obligatory": false,
+   "mean_value": 1.0
+  },
+  "tests_written": {
+   "passed": 12,
+   "n": 18,
+   "rate": 0.6666666666666666,
+   "wilson": [
+    0.4375,
+    0.8372
+   ],
+   "obligatory": false,
+   "mean_value": 0.7129611111111112
+  },
+  "build_green": {
+   "passed": 18,
+   "n": 18,
+   "rate": 1.0,
+   "wilson": [
+    0.8241,
+    1.0
+   ],
+   "obligatory": false,
+   "mean_value": 1.0
+  },
+  "scope": {
+   "passed": 18,
+   "n": 18,
+   "rate": 1.0,
+   "wilson": [
+    0.8241,
+    1.0
+   ],
+   "obligatory": false,
+   "mean_value": 1.0
+  },
+  "marker": {
+   "passed": 18,
+   "n": 18,
+   "rate": 1.0,
+   "wilson": [
+    0.8241,
+    1.0
+   ],
+   "obligatory": false,
+   "mean_value": 1.0
+  },
+  "hidden_pass": {
+   "passed": 18,
+   "n": 18,
+   "rate": 1.0,
+   "wilson": [
+    0.8241,
+    1.0
+   ],
+   "obligatory": false,
+   "mean_value": 1.0
+  }
+ },
+ "unjudged": 0,
+ "budget_exhausted": 0,
+ "output_tokens": 233114,
+ "records": [
+  {
+   "task": "stale-ticket-close",
+   "split": "train",
+   "rep": 0,
+   "checks": {
+    "graph_first": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "2 graph queries before the first edit (2 in all)"
+    },
+    "exemplar_read": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "read before the first edit: NoConsentAccountCleanupCronJob.java"
+    },
+    "feature_first": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "1 of 1 new main files under the feature package"
+    },
+    "constructor_injection": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "0 added @Autowired lines; 0 new beans with final fields and no constructor"
+    },
+    "after_commit_listener": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "scheduler_lock": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "StaleTicketCloseCronJob.closeStaleTickets: lock=True, area:job name=True, cron property=True, enabled flag=True, *CronJob=True"
+    },
+    "ports_adapters": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "translatable_errors": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "liquibase_changeset": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "version_field": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "controller_guards": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "dto_naming": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "tests_written": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "1 new unit test classes; Mockito without a Spring context=1/1; compiles=True; pass=True"
+    },
+    "build_green": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "test-compile green"
+    },
+    "scope": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "5 files changed; 0 outside src/main and src/test; 0 tests deleted"
+    },
+    "marker": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "marker=present, 0 tool calls after it"
+    },
+    "hidden_pass": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "hidden 4/4, pass-to-pass 55/55"
+    }
+   },
+   "verdict": {
+    "rules_violated": 0,
+    "files_out_of_scope": 0,
+    "parallel_mechanisms": 0,
+    "correctness": 5,
+    "convention_fit": 5,
+    "design_fit": 5,
+    "test_quality": 4,
+    "graph_use": 4,
+    "reasons": {
+     "correctness": "Repository derived query, @Transactional closeStaleResolvedTickets returning count, and StaleTicketCloseCronJob with the enabled flag, days and cron properties and their defaults all match the interface. It catches and logs service failures. Hidden tests 4/4, build green.",
+     "convention_fit": "The cron job carries @SchedulerLock named support:staleTicketClose, reads cron and enabled from properties, uses the *CronJob name, and gets its service through @RequiredArgsConstructor with a private final field. It sits in support/ticket. No @Autowired added.",
+     "design_fit": "The job only delegates to the service, the service owns the status change, and the repository owns the query. It reuses ShedLock and follows the NoConsentAccountCleanupCronJob structure. Small footprint, no duplicated lookup.",
+     "test_quality": "New StaleTicketCloseCronJobUnitTest covers the enabled, disabled and exception paths. Service tests cover closing tickets and the empty case. The cutoff date is never asserted (any(LocalDateTime)), and LENIENT strictness weakens the mocks.",
+     "graph_use": "Graph queries located the support/ticket package files and existing *CronJob classes before editing, and the agent read NoConsentAccountCleanupCronJob as the template. Test files were found with find rather than the graph."
+    },
+    "rubric": "r5",
+    "model": "claude-opus-5-5"
+   },
+   "verdict_repeat": {
+    "rules_violated": 0,
+    "files_out_of_scope": 0,
+    "parallel_mechanisms": 0,
+    "correctness": 5,
+    "convention_fit": 5,
+    "design_fit": 4,
+    "test_quality": 4,
+    "graph_use": 5,
+    "reasons": {
+     "correctness": "Derived query findByStatusAndResolvedTimeBefore, @Transactional closeStaleResolvedTickets returning count, and StaleTicketCloseCronJob with enabled/olderThanDays/cron properties and defaults all match the interface. The job logs failures instead of rethrowing. Hidden tests pass 4/4.",
+     "convention_fit": "The @Scheduled method has @SchedulerLock named support:staleTicketClose. Cron and enabled flag come from properties. The class is named *CronJob and uses @RequiredArgsConstructor with a final field. It lives in the support/ticket feature package. New *UnitTest classes use MockitoExtension.",
+     "design_fit": "Clean and thin: the job delegates and the service owns the logic. The service method skips lastUpdateTime, which updateTicketStatus in BASE sets on every status change. It also bypasses canTransitionTo. The explicit save loop inside @Transactional is redundant.",
+     "test_quality": "Service tests cover the close-and-count case and the empty case. Cron tests cover enabled, disabled and swallowed exception. The cutoff is matched with any(LocalDateTime), so the olderThanDays arithmetic is not pinned. The cron test uses LENIENT strictness.",
+     "graph_use": "Graph queries found the support/ticket package files and the existing *CronJob classes. The agent then read NoConsentAccountCleanupCronJob as the template and mirrored its structure. It found tests with find."
+    },
+    "rubric": "r5",
+    "model": "claude-opus-5-5"
+   },
+   "score": 0.975,
+   "components": {
+    "hidden_pass": 1.0,
+    "conventions_det": 1.0,
+    "tests_written": 1.0,
+    "process_det": 1.0,
+    "convention_fit": 1.0,
+    "design_fit": 1.0,
+    "correctness": 1.0,
+    "test_quality": 0.75,
+    "graph_use": 0.75
+   },
+   "score_repeat": 0.9625,
+   "run": "baseline-2026-09-23-r5\\0c3af0cdaacfe166\\stale-ticket-close.r0"
+  },
+  {
+   "task": "support-ticket-version",
+   "split": "train",
+   "rep": 0,
+   "checks": {
+    "graph_first": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "1 graph queries before the first edit (1 in all)"
+    },
+    "exemplar_read": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "read before the first edit: 02-09-2026-widen-ticket-reference-column.sql, 20-12-2025-add-version-to-applied-opportunity.sql, AppliedOpportunity.java"
+    },
+    "feature_first": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "0 of 0 new main files under the feature package"
+    },
+    "constructor_injection": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "0 added @Autowired lines; 0 new beans with final fields and no constructor"
+    },
+    "after_commit_listener": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "scheduler_lock": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "ports_adapters": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "translatable_errors": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "liquibase_changeset": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "path=True, header=True, changeset id=True, rollback=True, include with month comment=True, no existing changeset edited=True, adds support_ticket.version=True"
+    },
+    "version_field": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "@Version field on the contended entity=True, changeset adds the column=True"
+    },
+    "controller_guards": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "dto_naming": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "tests_written": {
+     "value": 0.0,
+     "applicable": true,
+     "passed": false,
+     "seen": "no new *UnitTest class"
+    },
+    "build_green": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "test-compile green"
+    },
+    "scope": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "3 files changed; 0 outside src/main and src/test; 0 tests deleted"
+    },
+    "marker": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "marker=present, 0 tool calls after it"
+    },
+    "hidden_pass": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "hidden 2/2, pass-to-pass 229/229"
+    }
+   },
+   "verdict": {
+    "rules_violated": 1,
+    "files_out_of_scope": 0,
+    "parallel_mechanisms": 0,
+    "correctness": 5,
+    "convention_fit": 4,
+    "design_fit": 5,
+    "test_quality": 1,
+    "graph_use": 3,
+    "reasons": {
+     "correctness": "SupportTicket gains @Version Long version. The changeset adds version BIGINT DEFAULT 0 NOT NULL to support_ticket, matching the interface exactly. Build is green, hidden tests pass 2/2 and existing tests pass 229/229.",
+     "convention_fit": "The changeset has the right path, name, header, changeset line and rollback, and is included last in changelog.xml under a month comment. No existing changeset was edited. No new *UnitTest class was added for the locking change.",
+     "design_fit": "Minimal footprint: one annotated field and one changeset. It follows the existing AppliedOpportunity @Version pattern and its version changeset. No new mechanisms and no unrelated edits.",
+     "test_quality": "No unit tests were added (0/0). Nothing pins the @Version mapping or how a concurrent update conflict is handled. The agent only re-ran existing SupportTicket tests.",
+     "graph_use": "One graph query listed the support/ticket files up front. The @Version example, the applied_opportunity changeset and changelog.xml were all found by grep, glob and reading directories."
+    },
+    "rubric": "r5",
+    "model": "claude-opus-5-5"
+   },
+   "verdict_repeat": {
+    "rules_violated": 0,
+    "files_out_of_scope": 0,
+    "parallel_mechanisms": 0,
+    "correctness": 5,
+    "convention_fit": 5,
+    "design_fit": 5,
+    "test_quality": 1,
+    "graph_use": 3,
+    "reasons": {
+     "correctness": "SupportTicket gets `@Version private Long version`, and a changeset adds `version BIGINT DEFAULT 0 NOT NULL`, exactly as the interface states. Build is green, hidden tests 2/2, and the 229 existing tests pass.",
+     "convention_fit": "The new changeset 2026/09/23-09-2026-add-version-to-support-ticket.sql has the right name, folder, header, changeset line and rollback. It is appended at the end of changelog.xml under a Month YYYY comment. No existing changeset was edited.",
+     "design_fit": "The change is minimal: one entity field plus one changeset, mirroring the add-version-to-applied-opportunity example. It adds no parallel mechanism and no unrelated edits. The agent checked for callers of the @AllArgsConstructor.",
+     "test_quality": "The agent wrote no new *UnitTest class (0/0 own tests). Nothing pins the version mapping or the conflict behaviour. It only re-ran existing SupportTicket unit tests.",
+     "graph_use": "One graph query listed the support/ticket files before editing. The existing @Version example (AppliedOpportunity) and its changeset were then found through grep and reads, not through the graph."
+    },
+    "rubric": "r5",
+    "model": "claude-opus-5-5"
+   },
+   "score": 0.8,
+   "components": {
+    "hidden_pass": 1.0,
+    "conventions_det": 1.0,
+    "tests_written": 0.0,
+    "process_det": 1.0,
+    "convention_fit": 0.75,
+    "design_fit": 1.0,
+    "correctness": 1.0,
+    "test_quality": 0.0,
+    "graph_use": 0.5
+   },
+   "score_repeat": 0.825,
+   "run": "baseline-2026-09-23-r5\\0c3af0cdaacfe166\\support-ticket-version.r0"
+  },
+  {
+   "task": "ticket-created-after-commit",
+   "split": "train",
+   "rep": 0,
+   "checks": {
+    "graph_first": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "2 graph queries before the first edit (2 in all)"
+    },
+    "exemplar_read": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "read before the first edit: InvoiceCreatedEventListener.java"
+    },
+    "feature_first": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "2 of 2 new main files under the feature package"
+    },
+    "constructor_injection": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "0 added @Autowired lines; 0 new beans with final fields and no constructor"
+    },
+    "after_commit_listener": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "onTicketCreated: after-commit, catches"
+    },
+    "scheduler_lock": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "ports_adapters": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "translatable_errors": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "liquibase_changeset": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "version_field": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "controller_guards": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "dto_naming": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "tests_written": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "1 new unit test classes; Mockito without a Spring context=1/1; compiles=True; pass=True"
+    },
+    "build_green": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "test-compile green"
+    },
+    "scope": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "6 files changed; 0 outside src/main and src/test; 0 tests deleted"
+    },
+    "marker": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "marker=present, 0 tool calls after it"
+    },
+    "hidden_pass": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "hidden 3/3, pass-to-pass 54/54"
+    }
+   },
+   "verdict": {
+    "rules_violated": 0,
+    "files_out_of_scope": 0,
+    "parallel_mechanisms": 0,
+    "correctness": 5,
+    "convention_fit": 5,
+    "design_fit": 5,
+    "test_quality": 4,
+    "graph_use": 5,
+    "reasons": {
+     "correctness": "createTicket publishes SupportTicketCreatedEvent with all six values. The listener sends via sendTicketCreationConfirmation under AFTER_COMMIT. Interface names match exactly. Build green, hidden tests 3/3.",
+     "convention_fit": "Listener is in support/ticket/event with @RequiredArgsConstructor and @TransactionalEventListener(AFTER_COMMIT), and catches and logs its failures. The publisher is constructor-injected. A new MockitoExtension unit test was added and run.",
+     "design_fit": "Reuses Spring's ApplicationEventPublisher and follows the InvoiceCreatedEvent/Listener pattern. Service logic is otherwise unchanged; EmailService stays for addAdminResponse. Minimal footprint, clear names.",
+     "test_quality": "SupportTicketCreatedEventListenerUnitTest covers delegation and the swallowed failure, though the failure test has no explicit assertion. The service unit test verifies publishing and no email. The integration test was updated for event recording.",
+     "graph_use": "Graph queries listed the support/ticket package and existing *EventListener files. The agent then read InvoiceCreatedEventListener and InvoiceCreatedEvent before writing, and the new classes mirror that example."
+    },
+    "rubric": "r5",
+    "model": "claude-opus-5-5"
+   },
+   "verdict_repeat": {
+    "rules_violated": 0,
+    "files_out_of_scope": 0,
+    "parallel_mechanisms": 0,
+    "correctness": 5,
+    "convention_fit": 5,
+    "design_fit": 5,
+    "test_quality": 4,
+    "graph_use": 5,
+    "reasons": {
+     "correctness": "SupportTicketCreatedEvent matches the interface constructor and six getters. The listener uses @TransactionalEventListener(AFTER_COMMIT) and calls sendTicketCreationConfirmation. createTicket publishes through ApplicationEventPublisher instead of calling EmailService. Hidden tests pass 3/3.",
+     "convention_fit": "Event and listener sit in the support/ticket/event package. The listener uses @RequiredArgsConstructor with a private final EmailService and catches and logs failures. The publisher is added to the existing explicit constructor. A new MockitoExtension unit test class was added and run.",
+     "design_fit": "The change reuses Spring's ApplicationEvent mechanism, following the InvoiceCreatedEventListener structure. It adds a single publish call in the service; the emailService field stays for addAdminResponse. The footprint is minimal: no duplicated logic, no new mechanism.",
+     "test_quality": "SupportTicketCreatedEventListenerUnitTest checks the forwarded arguments and the swallow path. SupportTicketServiceUnitTest verifies the published event fields and that emailService is untouched. The failure test asserts only that nothing is thrown and does not verify the call happened.",
+     "graph_use": "Graph queries listed the support/ticket files and found the existing *EventListener classes before any edit. The agent then read InvoiceCreatedEventListener and InvoiceCreatedEvent and mirrored their structure in the new files."
+    },
+    "rubric": "r5",
+    "model": "claude-opus-5-5"
+   },
+   "score": 0.9875,
+   "components": {
+    "hidden_pass": 1.0,
+    "conventions_det": 1.0,
+    "tests_written": 1.0,
+    "process_det": 1.0,
+    "convention_fit": 1.0,
+    "design_fit": 1.0,
+    "correctness": 1.0,
+    "test_quality": 0.75,
+    "graph_use": 1.0
+   },
+   "score_repeat": 0.9875,
+   "run": "baseline-2026-09-23-r5\\0c3af0cdaacfe166\\ticket-created-after-commit.r0"
+  },
+  {
+   "task": "exchange-rate-port",
+   "split": "train",
+   "rep": 0,
+   "checks": {
+    "graph_first": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "3 graph queries before the first edit (3 in all)"
+    },
+    "exemplar_read": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "read before the first edit: BusinessRuleTranslatableException.java, VatRegistryPort.java"
+    },
+    "feature_first": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "4 of 4 new main files under the feature package"
+    },
+    "constructor_injection": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "0 added @Autowired lines; 0 new beans with final fields and no constructor"
+    },
+    "after_commit_listener": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "scheduler_lock": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "ports_adapters": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "port interface=True, adapter implementing it=True, adapter imports outside the adapter package=0"
+    },
+    "translatable_errors": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "1 of 1 added throws are translatable; 1 of 1 message keys in both bundles"
+    },
+    "liquibase_changeset": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "version_field": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "controller_guards": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "dto_naming": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "tests_written": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "2 new unit test classes; Mockito without a Spring context=2/2; compiles=True; pass=True"
+    },
+    "build_green": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "test-compile green"
+    },
+    "scope": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "9 files changed; 0 outside src/main and src/test; 0 tests deleted"
+    },
+    "marker": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "marker=present, 0 tool calls after it"
+    },
+    "hidden_pass": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "hidden 5/5, pass-to-pass 41/41"
+    }
+   },
+   "verdict": {
+    "rules_violated": 0,
+    "files_out_of_scope": 0,
+    "parallel_mechanisms": 0,
+    "correctness": 5,
+    "convention_fit": 5,
+    "design_fit": 5,
+    "test_quality": 5,
+    "graph_use": 5,
+    "reasons": {
+     "correctness": "The port, properties bound to currency.fixed-rates, and the adapter match the interface. The adapter matches case-insensitively and always returns 1 for PLN. toPln multiplies and rounds HALF_UP to 2 decimals and throws the stated key with the ISO code. Hidden tests 5/5.",
+     "convention_fit": "ExchangeRatePort sits in currency/port and FixedExchangeRateAdapter in currency/adapter. Both classes use explicit constructor injection. BusinessRuleTranslatableException carries a key added to messages_en and messages_pl. The unit tests use MockitoExtension.",
+     "design_fit": "CurrencyConversionService depends only on ExchangeRatePort, so swapping the provider needs no change there. Rates come from the existing @ConfigurationProperties pattern. The footprint is small and the classes are cohesive. The properties class uses @Configuration, which is a minor style choice.",
+     "test_quality": "The adapter tests cover PLN in either case, case-insensitive lookup and a missing code. The service tests cover multiplication, the HALF_UP boundary, and the exception's key and args. All run without a Spring context. A null ISO code is not tested.",
+     "graph_use": "Before editing, graph queries found the existing *Port/*Adapter files, the currency entities and the TranslatableException subclasses. The agent then read VatRegistryPort and BialaListaVatAdapter as examples, and the new classes follow their structure."
+    },
+    "rubric": "r5",
+    "model": "claude-opus-5-5"
+   },
+   "verdict_repeat": {
+    "rules_violated": 0,
+    "files_out_of_scope": 0,
+    "parallel_mechanisms": 0,
+    "correctness": 5,
+    "convention_fit": 5,
+    "design_fit": 5,
+    "test_quality": 5,
+    "graph_use": 5,
+    "reasons": {
+     "correctness": "The port, properties, adapter and CurrencyConversionService match the interface. Codes match case-insensitively, PLN returns 1, and results use scale 2 HALF_UP. A missing rate throws BusinessRuleTranslatableException(key, isoCode). Hidden tests 5/5 and build green.",
+     "convention_fit": "ExchangeRatePort sits in currency/port and FixedExchangeRateAdapter in currency/adapter. Dependencies come in through explicit constructors. The key is added to messages_en and messages_pl. Both unit test classes use MockitoExtension. No convention broken.",
+     "design_fit": "The service depends only on the port. Config-backed rates sit with the adapter, and the existing VatRegistryPort/RegistryProperties pattern is reused. The footprint is minimal. Minor: the linear map scan and the redundant PLN entry in application.yml.",
+     "test_quality": "CurrencyConversionServiceUnitTest checks multiplication, the HALF_UP boundary, and the exception key and args. FixedExchangeRateAdapterUnitTest checks PLN=1 in both cases, case-insensitive lookup, and an unknown code. No Spring context. The null isoCode path is not tested.",
+     "graph_use": "Graph queries found the existing Port/Adapter files, the currency entities and the TranslatableException classes before any edit. The agent then read VatRegistryPort, BialaListaVatAdapter and RegistryProperties as examples and mirrored their structure."
+    },
+    "rubric": "r5",
+    "model": "claude-opus-5-5"
+   },
+   "score": 1.0,
+   "components": {
+    "hidden_pass": 1.0,
+    "conventions_det": 1.0,
+    "tests_written": 1.0,
+    "process_det": 1.0,
+    "convention_fit": 1.0,
+    "design_fit": 1.0,
+    "correctness": 1.0,
+    "test_quality": 1.0,
+    "graph_use": 1.0
+   },
+   "score_repeat": 1.0,
+   "run": "baseline-2026-09-23-r5\\0c3af0cdaacfe166\\exchange-rate-port.r0"
+  },
+  {
+   "task": "faq-reorder",
+   "split": "train",
+   "rep": 0,
+   "checks": {
+    "graph_first": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "1 graph queries before the first edit (1 in all)"
+    },
+    "exemplar_read": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "read before the first edit: BusinessRuleTranslatableException.java, FaqController.java"
+    },
+    "feature_first": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "1 of 1 new main files under the feature package"
+    },
+    "constructor_injection": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "0 added @Autowired lines; 0 new beans with final fields and no constructor"
+    },
+    "after_commit_listener": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "scheduler_lock": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "ports_adapters": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "translatable_errors": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "2 of 2 added throws are translatable; 2 of 2 message keys in both bundles"
+    },
+    "liquibase_changeset": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "version_field": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "controller_guards": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "reorderFaqs: PreAuthorize=True, RateLimit=True"
+    },
+    "dto_naming": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "reorderFaqs: body FaqReorderDtoIn, returns Void"
+    },
+    "tests_written": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "1 new unit test classes; Mockito without a Spring context=1/1; compiles=True; pass=True"
+    },
+    "build_green": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "test-compile green"
+    },
+    "scope": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "6 files changed; 0 outside src/main and src/test; 0 tests deleted"
+    },
+    "marker": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "marker=present, 0 tool calls after it"
+    },
+    "hidden_pass": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "hidden 6/6, pass-to-pass 65/65"
+    }
+   },
+   "verdict": {
+    "rules_violated": 0,
+    "files_out_of_scope": 0,
+    "parallel_mechanisms": 0,
+    "correctness": 5,
+    "convention_fit": 5,
+    "design_fit": 4,
+    "test_quality": 5,
+    "graph_use": 4,
+    "reasons": {
+     "correctness": "reorderCategory rejects missing, foreign, duplicate and null ids with error.business.faq_reorder_mismatch, sets display order i+1 and saves each FAQ, and keeps ResourceNotFoundException for an unknown category. PUT returns 204. Hidden tests 6/6.",
+     "convention_fit": "Endpoint has @PreAuthorize and inherits the class-level @RateLimit. Body is FaqReorderDtoIn. Errors use BusinessRuleTranslatableException; both new keys are in messages_en and messages_pl. Constructor injection and a MockitoExtension unit test are present.",
+     "design_fit": "reorderCategory repeats the category findById plus findByCategoryAndActiveTrueOrderByDisplayOrderAsc lookup that getFaqsByCategory already performs, instead of calling it. Otherwise it is layered correctly: the controller delegates and FaqService owns the logic.",
+     "test_quality": "FaqServiceReorderUnitTest covers the happy path, with display-order assertions and save count, plus missing, foreign and duplicate ids and unknown category. Message keys are asserted. No Spring context. Null list is not tested.",
+     "graph_use": "One graph query listed the faq feature files, which led to FaqController, FaqService and FaqCategoryController before editing. The existing test example and the exception pattern were found by grep and file reads, not by the graph."
+    },
+    "rubric": "r5",
+    "model": "claude-opus-5-5"
+   },
+   "verdict_repeat": {
+    "rules_violated": 0,
+    "files_out_of_scope": 0,
+    "parallel_mechanisms": 0,
+    "correctness": 5,
+    "convention_fit": 5,
+    "design_fit": 4,
+    "test_quality": 4,
+    "graph_use": 4,
+    "reasons": {
+     "correctness": "PUT /{categoryId}/order returns 204. reorderCategory rejects missing, foreign and duplicate ids with error.business.faq_reorder_mismatch, sets displayOrder i+1, saves each FAQ and keeps ResourceNotFoundException for an unknown category. Acceptance tests pass 6/6.",
+     "convention_fit": "Endpoint has @PreAuthorize and inherits the class-level @RateLimit. Body is a *DtoIn. Uses BusinessRuleTranslatableException. Both new keys are in messages_en and messages_pl. The dependency is constructor-injected. The unit test uses MockitoExtension.",
+     "design_fit": "reorderCategory repeats the category findById plus findByCategoryAndActiveTrueOrderByDisplayOrderAsc lookup that getFaqsByCategory already does, instead of calling it. Otherwise the logic is in the service and the endpoint sits correctly in FaqCategoryController.",
+     "test_quality": "FaqServiceReorderUnitTest covers reordering, missing id, foreign id, duplicate id and unknown category, and asserts the message key and display orders. It uses blanket LENIENT strictness and has no null-list case.",
+     "graph_use": "One graph query listed the faq files before any reads, and the edits went to the controller, service and DTO it found. The existing example tests and the exception class were found by grep."
+    },
+    "rubric": "r5",
+    "model": "claude-opus-5-5"
+   },
+   "score": 0.9625,
+   "components": {
+    "hidden_pass": 1.0,
+    "conventions_det": 1.0,
+    "tests_written": 1.0,
+    "process_det": 1.0,
+    "convention_fit": 1.0,
+    "design_fit": 0.75,
+    "correctness": 1.0,
+    "test_quality": 1.0,
+    "graph_use": 0.75
+   },
+   "score_repeat": 0.95,
+   "run": "baseline-2026-09-23-r5\\0c3af0cdaacfe166\\faq-reorder.r0"
+  },
+  {
+   "task": "currency-display-order",
+   "split": "train",
+   "rep": 0,
+   "checks": {
+    "graph_first": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "1 graph queries before the first edit (1 in all)"
+    },
+    "exemplar_read": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "read before the first edit: 02-09-2026-widen-ticket-reference-column.sql, 21-03-2026-add-display-order-to-consent-definition.sql"
+    },
+    "feature_first": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "0 of 0 new main files under the feature package"
+    },
+    "constructor_injection": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "0 added @Autowired lines; 0 new beans with final fields and no constructor"
+    },
+    "after_commit_listener": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "scheduler_lock": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "ports_adapters": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "translatable_errors": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "liquibase_changeset": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "path=True, header=True, changeset id=True, rollback=True, include with month comment=True, no existing changeset edited=True, adds currency.display_order=True"
+    },
+    "version_field": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "controller_guards": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "dto_naming": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "tests_written": {
+     "value": 0.0,
+     "applicable": true,
+     "passed": false,
+     "seen": "no new *UnitTest class"
+    },
+    "build_green": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "test-compile green"
+    },
+    "scope": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "8 files changed; 0 outside src/main and src/test; 0 tests deleted"
+    },
+    "marker": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "marker=present, 0 tool calls after it"
+    },
+    "hidden_pass": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "hidden 4/4, pass-to-pass 103/103"
+    }
+   },
+   "verdict": {
+    "rules_violated": 1,
+    "files_out_of_scope": 0,
+    "parallel_mechanisms": 0,
+    "correctness": 4,
+    "convention_fit": 4,
+    "design_fit": 4,
+    "test_quality": 2,
+    "graph_use": 3,
+    "reasons": {
+     "correctness": "Entity column, DTO field, paged mapping and both controller builders carry displayOrder; toDto gets it through ModelMapper. Hidden tests 4/4. But the seed gives PLN 0 and all unlisted currencies default 0, so PLN is not guaranteed first.",
+     "convention_fit": "The changeset follows the path, naming, header, rollback and dated changelog.xml comment, and edits no existing changeset. No new *UnitTest class was added; the agent only extended CurrencyServiceUnitTest.",
+     "design_fit": "Minimal footprint that reuses the existing mapping paths. The seed data ties PLN with every unseeded currency at 0, which undercuts the stated ordering goal. A reviewer would ask for PLN below the default or for the others to be seeded.",
+     "test_quality": "The added asserts only check the Lombok getter, setter and constructor on Currency and CurrencyDtoOut. No test checks that toDto or getDataPagedAndFilteredAsDtos fills displayOrder.",
+     "graph_use": "One graph query listed the currency files at the start. After that, navigation for changesets and constructor callers relied on ls, grep and find."
+    },
+    "rubric": "r5",
+    "model": "claude-opus-5-5"
+   },
+   "verdict_repeat": {
+    "rules_violated": 1,
+    "files_out_of_scope": 0,
+    "parallel_mechanisms": 0,
+    "correctness": 4,
+    "convention_fit": 4,
+    "design_fit": 4,
+    "test_quality": 2,
+    "graph_use": 3,
+    "reasons": {
+     "correctness": "Entity column, DTO field and both CurrencyService paths are covered; toDto gets it via ModelMapper. Hidden tests 4/4. The seed sets PLN=0 but leaves other currencies at the default 0, so PLN ties with them.",
+     "convention_fit": "The changeset follows the rules: 2026/09 path, DD-MM-YYYY name, formatted header, rollback, and a month comment at the end of changelog.xml. No new *UnitTest class was added; existing tests were edited instead.",
+     "design_fit": "Minimal field additions in the currency package. The CurrencyController builder mappings needed the field too. It extends the controller's existing duplicated mapping instead of reusing the service's, but adds no new mechanism.",
+     "test_quality": "Tests only check Lombok getters and setters and the constructor default in CurrencyServiceUnitTest. Nothing checks that toDto or getDataPagedAndFilteredAsDtos fills displayOrder. No new MockitoExtension test class.",
+     "graph_use": "One graph query found the currency files. After that, navigation relied on grep and ls over changelog directories and on reading neighbouring files; the graph was not used for dependents or examples."
+    },
+    "rubric": "r5",
+    "model": "claude-opus-5-5"
+   },
+   "score": 0.775,
+   "components": {
+    "hidden_pass": 1.0,
+    "conventions_det": 1.0,
+    "tests_written": 0.0,
+    "process_det": 1.0,
+    "convention_fit": 0.75,
+    "design_fit": 0.75,
+    "correctness": 0.75,
+    "test_quality": 0.25,
+    "graph_use": 0.5
+   },
+   "score_repeat": 0.775,
+   "run": "baseline-2026-09-23-r5\\0c3af0cdaacfe166\\currency-display-order.r0"
+  },
+  {
+   "task": "stale-ticket-close",
+   "split": "train",
+   "rep": 1,
+   "checks": {
+    "graph_first": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "2 graph queries before the first edit (2 in all)"
+    },
+    "exemplar_read": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "read before the first edit: DeferredDeletionCronJob.java, NoConsentAccountCleanupCronJob.java"
+    },
+    "feature_first": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "1 of 1 new main files under the feature package"
+    },
+    "constructor_injection": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "0 added @Autowired lines; 0 new beans with final fields and no constructor"
+    },
+    "after_commit_listener": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "scheduler_lock": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "StaleTicketCloseCronJob.closeStaleTickets: lock=True, area:job name=True, cron property=True, enabled flag=True, *CronJob=True"
+    },
+    "ports_adapters": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "translatable_errors": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "liquibase_changeset": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "version_field": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "controller_guards": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "dto_naming": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "tests_written": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "1 new unit test classes; Mockito without a Spring context=1/1; compiles=True; pass=True"
+    },
+    "build_green": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "test-compile green"
+    },
+    "scope": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "5 files changed; 0 outside src/main and src/test; 0 tests deleted"
+    },
+    "marker": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "marker=present, 0 tool calls after it"
+    },
+    "hidden_pass": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "hidden 4/4, pass-to-pass 55/55"
+    }
+   },
+   "verdict": {
+    "rules_violated": 0,
+    "files_out_of_scope": 0,
+    "parallel_mechanisms": 0,
+    "correctness": 5,
+    "convention_fit": 5,
+    "design_fit": 4,
+    "test_quality": 4,
+    "graph_use": 5,
+    "reasons": {
+     "correctness": "Implements the repository finder, `closeStaleResolvedTickets` (RESOLVED before now minus days, set CLOSED, save, return count) and `StaleTicketCloseCronJob` with its enabled flag, days, cron default and swallowed failures. Interface exact; hidden tests 4/4.",
+     "convention_fit": "`@Scheduled` cron and enabled/days come from properties. Carries `@SchedulerLock(name=\"support:staleTicketClose\")`, `*CronJob` name, `@RequiredArgsConstructor` with a private final service. Code stays in the support/ticket feature; no field injection.",
+     "design_fit": "Small footprint: a derived query, a transactional service method, and a thin job delegating to the service. It does not update `lastUpdateTime` when closing, unlike the other status transitions in `SupportTicketService`. Minor inconsistency.",
+     "test_quality": "Mockito-only tests cover enabled, disabled, exception swallowed, bulk close and empty list. The cutoff argument is matched with `any(LocalDateTime)`, so the days-to-cutoff arithmetic is never pinned. `LENIENT` strictness is not needed.",
+     "graph_use": "Graph queries listed the support/ticket package and every `*CronJob` before any edit. The agent then read `NoConsentAccountCleanupCronJob` and `DeferredDeletionCronJob` as examples, and the new job mirrors their structure."
+    },
+    "rubric": "r5",
+    "model": "claude-opus-5-5"
+   },
+   "verdict_repeat": {
+    "rules_violated": 0,
+    "files_out_of_scope": 0,
+    "parallel_mechanisms": 0,
+    "correctness": 5,
+    "convention_fit": 5,
+    "design_fit": 4,
+    "test_quality": 4,
+    "graph_use": 5,
+    "reasons": {
+     "correctness": "Derived repository method, the @Transactional closeStaleResolvedTickets returning a count, and StaleTicketCloseCronJob all match the interface. The job has the enabled/days/cron property defaults, a disabled short-circuit and catch-and-log. Hidden tests 4/4, build green.",
+     "convention_fit": "@SchedulerLock(name=\"support:staleTicketClose\") is present. Cron and enabled flag come from properties, the class is named *CronJob, and it uses @RequiredArgsConstructor with private final. The job sits in the support/ticket feature package. New MockitoExtension unit test added.",
+     "design_fit": "Layering is clean: the job calls the service, the service owns the logic, the repository query is derived. Closing a ticket does not set lastUpdateTime, unlike updateTicketStatus in the same service. A per-entity save() on managed entities is redundant but harmless.",
+     "test_quality": "Cron tests cover enabled, disabled and exception-swallowed paths. Service tests cover N closed and zero found. The cutoff passed to the repository is never captured or asserted (any(LocalDateTime)). Class-wide LENIENT strictness weakens stub checks.",
+     "graph_use": "Graph queries listed the support/ticket package files and every *CronJob before editing. The agent read NoConsentAccountCleanupCronJob and DeferredDeletionCronJob as examples, and its edits followed their structure."
+    },
+    "rubric": "r5",
+    "model": "claude-opus-5-5"
+   },
+   "score": 0.9625,
+   "components": {
+    "hidden_pass": 1.0,
+    "conventions_det": 1.0,
+    "tests_written": 1.0,
+    "process_det": 1.0,
+    "convention_fit": 1.0,
+    "design_fit": 0.75,
+    "correctness": 1.0,
+    "test_quality": 0.75,
+    "graph_use": 1.0
+   },
+   "score_repeat": 0.9625,
+   "run": "baseline-2026-09-23-r5\\0c3af0cdaacfe166\\stale-ticket-close.r1"
+  },
+  {
+   "task": "support-ticket-version",
+   "split": "train",
+   "rep": 1,
+   "checks": {
+    "graph_first": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "1 graph queries before the first edit (1 in all)"
+    },
+    "exemplar_read": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "read before the first edit: 01-03-2026-add-version-to-content.sql"
+    },
+    "feature_first": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "0 of 0 new main files under the feature package"
+    },
+    "constructor_injection": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "0 added @Autowired lines; 0 new beans with final fields and no constructor"
+    },
+    "after_commit_listener": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "scheduler_lock": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "ports_adapters": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "translatable_errors": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "liquibase_changeset": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "path=True, header=True, changeset id=True, rollback=True, include with month comment=True, no existing changeset edited=True, adds support_ticket.version=True"
+    },
+    "version_field": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "@Version field on the contended entity=True, changeset adds the column=True"
+    },
+    "controller_guards": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "dto_naming": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "tests_written": {
+     "value": 0.0,
+     "applicable": true,
+     "passed": false,
+     "seen": "no new *UnitTest class"
+    },
+    "build_green": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "test-compile green"
+    },
+    "scope": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "3 files changed; 0 outside src/main and src/test; 0 tests deleted"
+    },
+    "marker": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "marker=present, 0 tool calls after it"
+    },
+    "hidden_pass": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "hidden 2/2, pass-to-pass 229/229"
+    }
+   },
+   "verdict": {
+    "rules_violated": 1,
+    "files_out_of_scope": 0,
+    "parallel_mechanisms": 0,
+    "correctness": 5,
+    "convention_fit": 4,
+    "design_fit": 5,
+    "test_quality": 1,
+    "graph_use": 3,
+    "reasons": {
+     "correctness": "SupportTicket gets `@Version private Long version`. The new changeset adds `version BIGINT NOT NULL DEFAULT 0` and is included in changelog.xml. Build green, hidden tests 2/2, existing touched tests 229/229.",
+     "convention_fit": "The changeset follows the convention: 2026/09 path, DD-MM-YYYY kebab name, header, rollback, and a month comment on its include. The existing changeset is untouched. No new *UnitTest class was added, which breaks the testing convention.",
+     "design_fit": "Minimal footprint: one annotated field reusing the existing `jakarta.persistence.*` import, one changeset, one include. It mirrors the existing `@Version` pattern from AppliedOpportunityContent. Nothing to restructure.",
+     "test_quality": "No unit test was written (0/0). Nothing pins the version field or its annotation. The agent only reran existing SupportTicket unit tests.",
+     "graph_use": "One graph query listed the support/ticket files. The existing changeset example and the `@Version` precedent were found by glob and grep, and navigation relied mostly on reading and grepping files."
+    },
+    "rubric": "r5",
+    "model": "claude-opus-5-5"
+   },
+   "verdict_repeat": {
+    "rules_violated": 1,
+    "files_out_of_scope": 0,
+    "parallel_mechanisms": 0,
+    "correctness": 5,
+    "convention_fit": 4,
+    "design_fit": 5,
+    "test_quality": 1,
+    "graph_use": 3,
+    "reasons": {
+     "correctness": "SupportTicket gains a @Version Long version. The changeset adds support_ticket.version as BIGINT NOT NULL DEFAULT 0. Build is green, 2/2 hidden acceptance tests and 229/229 existing tests pass.",
+     "convention_fit": "The changeset file name, path, liquibase header, rollback line and changelog.xml include with a month comment all follow the conventions. No new *UnitTest class was added, which the testing convention requires.",
+     "design_fit": "Minimal footprint: one annotated field, one changeset and one include. It copies the existing @Version pattern from AppliedOpportunityContent and adds no new mechanism.",
+     "test_quality": "The agent wrote no unit test (0/0). It ran the existing SupportTicket tests but added nothing that pins the version field or its mapping.",
+     "graph_use": "One graph query listed the support/ticket files at the start. The version example and changelog layout were then found by glob and grep, not through the graph."
+    },
+    "rubric": "r5",
+    "model": "claude-opus-5-5"
+   },
+   "score": 0.8,
+   "components": {
+    "hidden_pass": 1.0,
+    "conventions_det": 1.0,
+    "tests_written": 0.0,
+    "process_det": 1.0,
+    "convention_fit": 0.75,
+    "design_fit": 1.0,
+    "correctness": 1.0,
+    "test_quality": 0.0,
+    "graph_use": 0.5
+   },
+   "score_repeat": 0.8,
+   "run": "baseline-2026-09-23-r5\\0c3af0cdaacfe166\\support-ticket-version.r1"
+  },
+  {
+   "task": "ticket-created-after-commit",
+   "split": "train",
+   "rep": 1,
+   "checks": {
+    "graph_first": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "2 graph queries before the first edit (2 in all)"
+    },
+    "exemplar_read": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "read before the first edit: InvoiceCreatedEventListener.java"
+    },
+    "feature_first": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "2 of 2 new main files under the feature package"
+    },
+    "constructor_injection": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "0 added @Autowired lines; 0 new beans with final fields and no constructor"
+    },
+    "after_commit_listener": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "onTicketCreated: after-commit, catches"
+    },
+    "scheduler_lock": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "ports_adapters": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "translatable_errors": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "liquibase_changeset": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "version_field": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "controller_guards": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "dto_naming": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "tests_written": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "1 new unit test classes; Mockito without a Spring context=1/1; compiles=True; pass=True"
+    },
+    "build_green": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "test-compile green"
+    },
+    "scope": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "4 files changed; 0 outside src/main and src/test; 0 tests deleted"
+    },
+    "marker": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "marker=present, 0 tool calls after it"
+    },
+    "hidden_pass": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "hidden 3/3, pass-to-pass 53/53"
+    }
+   },
+   "verdict": {
+    "rules_violated": 1,
+    "files_out_of_scope": 0,
+    "parallel_mechanisms": 0,
+    "correctness": 5,
+    "convention_fit": 4,
+    "design_fit": 5,
+    "test_quality": 3,
+    "graph_use": 4,
+    "reasons": {
+     "correctness": "Event and listener match the interface exactly. The listener uses @TransactionalEventListener(AFTER_COMMIT). createTicket publishes via ApplicationEventPublisher and no longer calls EmailService. Build green; hidden tests 3/3, existing 53/53.",
+     "convention_fit": "Constructor injection, feature package support/ticket/event, and AFTER_COMMIT with catch-and-log all follow the conventions. The agent changed SupportTicketService's constructor but never ran that class's existing unit tests, only its new test and a compile.",
+     "design_fit": "Mirrors the existing InvoiceCreatedEvent/Listener pattern and reuses Spring's ApplicationEventPublisher. EmailService stays in the service only because addAdminResponse still uses it. Minimal footprint, no duplicated logic.",
+     "test_quality": "SupportTicketCreatedEventListenerUnitTest covers the send path and the swallowed failure, with MockitoExtension and no Spring context. No test pins that createTicket publishes the event and no longer calls EmailService.",
+     "graph_use": "Graph queries mapped the support package and located the existing *EventListener files before any edit. The agent then read InvoiceCreatedEventListener as its model. Later steps relied on grep and glob."
+    },
+    "rubric": "r5",
+    "model": "claude-opus-5-5"
+   },
+   "verdict_repeat": {
+    "rules_violated": 0,
+    "files_out_of_scope": 0,
+    "parallel_mechanisms": 0,
+    "correctness": 5,
+    "convention_fit": 5,
+    "design_fit": 5,
+    "test_quality": 4,
+    "graph_use": 4,
+    "reasons": {
+     "correctness": "createTicket publishes SupportTicketCreatedEvent and no longer calls EmailService. The listener's onTicketCreated runs AFTER_COMMIT and sends the confirmation with all five arguments. The interface matches exactly. Build green, 3/3 acceptance, 53/53 existing.",
+     "convention_fit": "Event and listener sit in support/ticket/event. The listener uses @TransactionalEventListener(phase = AFTER_COMMIT), catches and logs its own failure, and uses @RequiredArgsConstructor. The publisher is added through the existing explicit constructor. A new MockitoExtension unit test was added and run.",
+     "design_fit": "Minimal footprint that reuses Spring's ApplicationEventPublisher and follows the InvoiceCreatedEvent/Listener pattern. EmailService stays in the service only because addAdminResponse still uses it. Small nit: log.warn records only e.getMessage() and drops the stack trace.",
+     "test_quality": "SupportTicketCreatedEventListenerUnitTest covers the send with exact arguments and a swallowed mail failure. No unit test checks that createTicket publishes the event and no longer calls EmailService directly.",
+     "graph_use": "Graph queries listed the support package and the existing *EventListener files, which led to InvoiceCreatedEventListener before editing. After that, navigation relied on failed reads, globs and greps to find paths and publisher usage."
+    },
+    "rubric": "r5",
+    "model": "claude-opus-5-5"
+   },
+   "score": 0.9375,
+   "components": {
+    "hidden_pass": 1.0,
+    "conventions_det": 1.0,
+    "tests_written": 1.0,
+    "process_det": 1.0,
+    "convention_fit": 0.75,
+    "design_fit": 1.0,
+    "correctness": 1.0,
+    "test_quality": 0.5,
+    "graph_use": 0.75
+   },
+   "score_repeat": 0.975,
+   "run": "baseline-2026-09-23-r5\\0c3af0cdaacfe166\\ticket-created-after-commit.r1"
+  },
+  {
+   "task": "exchange-rate-port",
+   "split": "train",
+   "rep": 1,
+   "checks": {
+    "graph_first": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "3 graph queries before the first edit (3 in all)"
+    },
+    "exemplar_read": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "read before the first edit: CompanyRegistryPort.java"
+    },
+    "feature_first": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "4 of 4 new main files under the feature package"
+    },
+    "constructor_injection": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "0 added @Autowired lines; 0 new beans with final fields and no constructor"
+    },
+    "after_commit_listener": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "scheduler_lock": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "ports_adapters": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "port interface=True, adapter implementing it=True, adapter imports outside the adapter package=0"
+    },
+    "translatable_errors": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "1 of 1 added throws are translatable; 1 of 1 message keys in both bundles"
+    },
+    "liquibase_changeset": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "version_field": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "controller_guards": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "dto_naming": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "tests_written": {
+     "value": 0.8333,
+     "applicable": true,
+     "passed": false,
+     "seen": "2 new unit test classes; Mockito without a Spring context=1/2; compiles=True; pass=True"
+    },
+    "build_green": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "test-compile green"
+    },
+    "scope": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "9 files changed; 0 outside src/main and src/test; 0 tests deleted"
+    },
+    "marker": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "marker=present, 0 tool calls after it"
+    },
+    "hidden_pass": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "hidden 5/5, pass-to-pass 41/41"
+    }
+   },
+   "verdict": {
+    "rules_violated": 1,
+    "files_out_of_scope": 0,
+    "parallel_mechanisms": 0,
+    "correctness": 3,
+    "convention_fit": 4,
+    "design_fit": 4,
+    "test_quality": 4,
+    "graph_use": 4,
+    "reasons": {
+     "correctness": "Port, adapter, PLN=1, case-insensitive match, HALF_UP scale 2 and error key all work; 5/5 hidden tests pass. But the application.yml insertion split `cors:`, so `max-age: 86400` now binds as `currency.max-age`, silently dropping the CORS setting.",
+     "convention_fit": "The port sits in `currency/port` and the adapter in `currency/adapter`. The service depends on the port, uses constructor injection, and throws `BusinessRuleTranslatableException` with keys in both message files. The yml edit changes untouched `cors` config, breaking the change-only-what-is-needed rule.",
+     "design_fit": "Cohesive layout and the service depends only on the port type. The adapter scans the rates map with `equalsIgnoreCase` on every call instead of normalising keys once. The misplaced yml block corrupts an unrelated config section.",
+     "test_quality": "`CurrencyConversionServiceUnitTest` covers the rate, HALF_UP rounding and the missing-rate key with its args. `FixedExchangeRateAdapterUnitTest` covers PLN, case-insensitivity and unknown codes but lacks `@ExtendWith(MockitoExtension.class)`. There is no null-ISO test.",
+     "graph_use": "Graph queries for `*Port.java`, currency entities and the registry package came before any edit and led to the CompanyRegistryPort/adapter example. Later navigation (config binding, yml, messages) relied on grep and reads."
+    },
+    "rubric": "r5",
+    "model": "claude-opus-5-5"
+   },
+   "verdict_repeat": {
+    "rules_violated": 1,
+    "files_out_of_scope": 0,
+    "parallel_mechanisms": 0,
+    "correctness": 3,
+    "convention_fit": 4,
+    "design_fit": 3,
+    "test_quality": 4,
+    "graph_use": 4,
+    "reasons": {
+     "correctness": "Port, adapter, service, rounding and exception key match the interface; tests all pass. The application.yml block was inserted before cors `max-age: 86400`, which now binds as currency.max-age and drops cors.max-age.",
+     "convention_fit": "Port in currency/port, adapter in currency/adapter, constructor injection, BusinessRuleTranslatableException with the key in both messages files. FixedExchangeRateAdapterUnitTest lacks @ExtendWith(MockitoExtension.class).",
+     "design_fit": "The service depends only on ExchangeRatePort and properties are cohesive. The yml edit silently corrupts the cors section. The adapter upper-cases the code, then loops with equalsIgnoreCase; one of the two is redundant.",
+     "test_quality": "Service tests cover rate multiplication, HALF_UP rounding and the missing-rate exception key and args. Adapter tests cover PLN, case-insensitive match and an unknown code. No null-code test and no property-binding check.",
+     "graph_use": "Graph queries for *Port.java and currency entities before editing led to CompanyRegistryPort and the registry adapter package, which were read as the example. Later configuration discovery relied on grep."
+    },
+    "rubric": "r5",
+    "model": "claude-opus-5-5"
+   },
+   "score": 0.88333,
+   "components": {
+    "hidden_pass": 1.0,
+    "conventions_det": 1.0,
+    "tests_written": 0.8333,
+    "process_det": 1.0,
+    "convention_fit": 0.75,
+    "design_fit": 0.75,
+    "correctness": 0.5,
+    "test_quality": 0.75,
+    "graph_use": 0.75
+   },
+   "score_repeat": 0.85833,
+   "run": "baseline-2026-09-23-r5\\0c3af0cdaacfe166\\exchange-rate-port.r1"
+  },
+  {
+   "task": "faq-reorder",
+   "split": "train",
+   "rep": 1,
+   "checks": {
+    "graph_first": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "1 graph queries before the first edit (1 in all)"
+    },
+    "exemplar_read": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "read before the first edit: BusinessRuleTranslatableException.java, FaqController.java"
+    },
+    "feature_first": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "1 of 1 new main files under the feature package"
+    },
+    "constructor_injection": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "0 added @Autowired lines; 0 new beans with final fields and no constructor"
+    },
+    "after_commit_listener": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "scheduler_lock": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "ports_adapters": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "translatable_errors": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "2 of 2 added throws are translatable; 2 of 2 message keys in both bundles"
+    },
+    "liquibase_changeset": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "version_field": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "controller_guards": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "reorderFaqs: PreAuthorize=True, RateLimit=True"
+    },
+    "dto_naming": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "reorderFaqs: body FaqReorderDtoIn, returns Void"
+    },
+    "tests_written": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "1 new unit test classes; Mockito without a Spring context=1/1; compiles=True; pass=True"
+    },
+    "build_green": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "test-compile green"
+    },
+    "scope": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "6 files changed; 0 outside src/main and src/test; 0 tests deleted"
+    },
+    "marker": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "marker=present, 0 tool calls after it"
+    },
+    "hidden_pass": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "hidden 6/6, pass-to-pass 65/65"
+    }
+   },
+   "verdict": {
+    "rules_violated": 0,
+    "files_out_of_scope": 0,
+    "parallel_mechanisms": 0,
+    "correctness": 5,
+    "convention_fit": 5,
+    "design_fit": 4,
+    "test_quality": 4,
+    "graph_use": 3,
+    "reasons": {
+     "correctness": "PUT /{categoryId}/order returns 204 and calls FaqService#reorderCategory. It rejects missing, extra, duplicate and null ids with error.business.faq_reorder_mismatch, sets order i+1 and saves each FAQ. Unknown category still throws ResourceNotFoundException. Acceptance tests 6/6.",
+     "convention_fit": "The endpoint has @PreAuthorize ADMIN and inherits the class-level @RateLimit. The body is FaqReorderDtoIn. The error is BusinessRuleTranslatableException with its key in messages_en and messages_pl. FaqService is constructor-injected. The new unit test class exists.",
+     "design_fit": "Validation and ordering logic sit in FaqService and the controller only delegates. The category findById/orElseThrow lookup repeats the one in getFaqsByCategory instead of reusing it. Otherwise the footprint is small and cohesive.",
+     "test_quality": "FaqServiceUnitTest uses MockitoExtension with no Spring context. Seven cases cover ordering, any order, missing, foreign, duplicate and null ids, and unknown category, with messageKey assertions. No test verifies save() is called, and LENIENT strictness hides unused stubs.",
+     "graph_use": "One initial graph query listed the support/faq files. After that, navigation relied on glob, grep and reads to find BusinessRuleTranslatableException, BaseService and example unit tests."
+    },
+    "rubric": "r5",
+    "model": "claude-opus-5-5"
+   },
+   "verdict_repeat": {
+    "rules_violated": 0,
+    "files_out_of_scope": 0,
+    "parallel_mechanisms": 0,
+    "correctness": 5,
+    "convention_fit": 5,
+    "design_fit": 4,
+    "test_quality": 4,
+    "graph_use": 3,
+    "reasons": {
+     "correctness": "reorderCategory rejects missing, foreign, duplicate and null ids with error.business.faq_reorder_mismatch. It keeps ResourceNotFoundException for an unknown category and sets displayOrder i+1. The PUT endpoint returns 204. Hidden tests 6/6 and build green.",
+     "convention_fit": "The endpoint has @PreAuthorize ADMIN and inherits class-level @RateLimit. FaqReorderDtoIn is a *DtoIn. The code throws BusinessRuleTranslatableException, both keys are in messages_en and messages_pl, and the controller is constructor-injected. The *UnitTest uses MockitoExtension.",
+     "design_fit": "reorderCategory repeats the category findById/orElseThrow and active-FAQ lookup that getFaqsByCategory already performs, instead of reusing it. Otherwise the logic sits in FaqService and the controller only delegates. The footprint is small.",
+     "test_quality": "FaqServiceUnitTest has 7 fast Mockito tests covering order assignment, missing, foreign, duplicate and null ids, and unknown category, with messageKey asserted. No test verifies that save is called. Lenient strictness and the unneeded SecurityContext setup add noise.",
+     "graph_use": "One graph query listed the support/faq package files at the start. After that the agent navigated by glob, grep and reads for exceptions, BaseService and test examples. The graph was not used for dependents or examples."
+    },
+    "rubric": "r5",
+    "model": "claude-opus-5-5"
+   },
+   "score": 0.9375,
+   "components": {
+    "hidden_pass": 1.0,
+    "conventions_det": 1.0,
+    "tests_written": 1.0,
+    "process_det": 1.0,
+    "convention_fit": 1.0,
+    "design_fit": 0.75,
+    "correctness": 1.0,
+    "test_quality": 0.75,
+    "graph_use": 0.5
+   },
+   "score_repeat": 0.9375,
+   "run": "baseline-2026-09-23-r5\\0c3af0cdaacfe166\\faq-reorder.r1"
+  },
+  {
+   "task": "currency-display-order",
+   "split": "train",
+   "rep": 1,
+   "checks": {
+    "graph_first": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "1 graph queries before the first edit (1 in all)"
+    },
+    "exemplar_read": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "read before the first edit: 21-03-2026-add-display-order-to-consent-definition.sql"
+    },
+    "feature_first": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "0 of 0 new main files under the feature package"
+    },
+    "constructor_injection": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "0 added @Autowired lines; 0 new beans with final fields and no constructor"
+    },
+    "after_commit_listener": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "scheduler_lock": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "ports_adapters": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "translatable_errors": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "liquibase_changeset": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "path=True, header=True, changeset id=True, rollback=True, include with month comment=True, no existing changeset edited=True, adds currency.display_order=True"
+    },
+    "version_field": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "controller_guards": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "dto_naming": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "tests_written": {
+     "value": 0.0,
+     "applicable": true,
+     "passed": false,
+     "seen": "no new *UnitTest class"
+    },
+    "build_green": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "test-compile green"
+    },
+    "scope": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "8 files changed; 0 outside src/main and src/test; 0 tests deleted"
+    },
+    "marker": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "marker=present, 0 tool calls after it"
+    },
+    "hidden_pass": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "hidden 4/4, pass-to-pass 103/103"
+    }
+   },
+   "verdict": {
+    "rules_violated": 1,
+    "files_out_of_scope": 0,
+    "parallel_mechanisms": 0,
+    "correctness": 4,
+    "convention_fit": 4,
+    "design_fit": 4,
+    "test_quality": 2,
+    "graph_use": 2,
+    "reasons": {
+     "correctness": "Column, entity field, DTO field and both service mapping paths are done; hidden tests pass 4/4. Unseeded currencies default to 0, which puts them ahead of PLN=1. No query orders by display_order.",
+     "convention_fit": "Changeset follows every rule: path, date-based name, formatted-sql header, rollback, and a dated comment above the include in changelog.xml. No new *UnitTest class was added; only existing test classes were edited.",
+     "design_fit": "Minimal footprint that reuses the existing mappings in CurrencyService and CurrencyController. The seed values leave non-seeded currencies sorting before PLN, a small data-design gap.",
+     "test_quality": "Edits only assert getters, setters and constructors on Currency and CurrencyDtoOut. Neither toDto nor getDataPagedAndFilteredAsDtos is tested for filling displayOrder, and the changeset seed is not checked.",
+     "graph_use": "One graph query listed the currency files, but reads of those paths failed. Navigation then relied on find, grep, ls and tail for the changelog, and no graph query found dependents or an example changeset."
+    },
+    "rubric": "r5",
+    "model": "claude-opus-5-5"
+   },
+   "verdict_repeat": {
+    "rules_violated": 1,
+    "files_out_of_scope": 0,
+    "parallel_mechanisms": 0,
+    "correctness": 5,
+    "convention_fit": 4,
+    "design_fit": 4,
+    "test_quality": 2,
+    "graph_use": 2,
+    "reasons": {
+     "correctness": "Currency.displayOrder is mapped to display_order INT NOT NULL DEFAULT 0. CurrencyDtoOut.displayOrder is filled by toDto (ModelMapper, by name) and by getDataPagedAndFilteredAsDtos. The controller builders pass it to clients. PLN is seeded first. Acceptance tests pass 4/4.",
+     "convention_fit": "The changeset 2026/09/23-09-2026-add-display-order-to-currency.sql follows the rules: formatted header, changeset id, rollback, and an include with a month comment at the end of changelog.xml. The only break is that no new *UnitTest class was added; existing test classes were extended instead.",
+     "design_fit": "The change adds one entity field, one DTO field and one mapping line in each existing mapping path. CurrencyController repeats the service's DTO mapping; that duplication already existed and was extended, not introduced. The footprint is minimal.",
+     "test_quality": "Only getter/setter and constructor assertions were added to CurrencyServiceUnitTest and AddressAndCurrencyUnitTest. No test checks that getDataPagedAndFilteredAsDtos or toDto copies displayOrder into CurrencyDtoOut. No new MockitoExtension unit test class was written.",
+     "graph_use": "One graph query listed the currency files. The reads that followed failed on wrong paths, and navigation then relied on find, repeated greps and ls of the changelog directories to locate the files and an example changeset."
+    },
+    "rubric": "r5",
+    "model": "claude-opus-5-5"
+   },
+   "score": 0.7625,
+   "components": {
+    "hidden_pass": 1.0,
+    "conventions_det": 1.0,
+    "tests_written": 0.0,
+    "process_det": 1.0,
+    "convention_fit": 0.75,
+    "design_fit": 0.75,
+    "correctness": 0.75,
+    "test_quality": 0.25,
+    "graph_use": 0.25
+   },
+   "score_repeat": 0.775,
+   "run": "baseline-2026-09-23-r5\\0c3af0cdaacfe166\\currency-display-order.r1"
+  },
+  {
+   "task": "stale-ticket-close",
+   "split": "train",
+   "rep": 2,
+   "checks": {
+    "graph_first": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "2 graph queries before the first edit (2 in all)"
+    },
+    "exemplar_read": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "read before the first edit: AnonymousConsentCleanupCronJob.java, TrialExpiryNotifierCronJob.java"
+    },
+    "feature_first": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "1 of 1 new main files under the feature package"
+    },
+    "constructor_injection": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "0 added @Autowired lines; 0 new beans with final fields and no constructor"
+    },
+    "after_commit_listener": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "scheduler_lock": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "StaleTicketCloseCronJob.closeStaleTickets: lock=True, area:job name=True, cron property=True, enabled flag=True, *CronJob=True"
+    },
+    "ports_adapters": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "translatable_errors": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "liquibase_changeset": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "version_field": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "controller_guards": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "dto_naming": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "tests_written": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "1 new unit test classes; Mockito without a Spring context=1/1; compiles=True; pass=True"
+    },
+    "build_green": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "test-compile green"
+    },
+    "scope": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "5 files changed; 0 outside src/main and src/test; 0 tests deleted"
+    },
+    "marker": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "marker=present, 0 tool calls after it"
+    },
+    "hidden_pass": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "hidden 4/4, pass-to-pass 55/55"
+    }
+   },
+   "verdict": {
+    "rules_violated": 0,
+    "files_out_of_scope": 0,
+    "parallel_mechanisms": 0,
+    "correctness": 5,
+    "convention_fit": 5,
+    "design_fit": 5,
+    "test_quality": 4,
+    "graph_use": 4,
+    "reasons": {
+     "correctness": "The repository derives the finder `findByStatusAndResolvedTimeBefore`. `closeStaleResolvedTickets` marks RESOLVED tickets CLOSED, saves them and returns the count. The cron job honours enabled, days and cron properties with their defaults and logs service failures. Hidden tests pass 4/4.",
+     "convention_fit": "`StaleTicketCloseCronJob` has `@SchedulerLock(name=\"support:staleTicketClose\")`, a cron from a property and `@Value` enabled/days flags. It uses `@RequiredArgsConstructor` with a `private final` service and the `*CronJob` name. It adds no field injection and no side effects outside the database.",
+     "design_fit": "The cron job only delegates. The service owns the close logic inside `@Transactional`. The repository uses a derived query. The footprint is minimal and adds no duplicated lookup. Minor: `LocalDateTime.now()` is called per ticket instead of once.",
+     "test_quality": "`StaleTicketCloseCronJobUnitTest` covers the enabled, disabled and exception-swallowed paths. The service tests assert the CLOSED status, the returned count and the empty case. No test checks the cutoff argument (the matcher is `any(LocalDateTime)`), so the days arithmetic is unpinned.",
+     "graph_use": "Graph queries listed the support/ticket package and existing `*CronJob` files before editing. The agent read `AnonymousConsentCleanupCronJob` as the example and followed it. It found existing tests with find/grep rather than the graph."
+    },
+    "rubric": "r5",
+    "model": "claude-opus-5-5"
+   },
+   "verdict_repeat": {
+    "rules_violated": 0,
+    "files_out_of_scope": 0,
+    "parallel_mechanisms": 0,
+    "correctness": 5,
+    "convention_fit": 5,
+    "design_fit": 5,
+    "test_quality": 4,
+    "graph_use": 5,
+    "reasons": {
+     "correctness": "Implements the repository derived query, the RESOLVED-to-CLOSED loop with lastUpdateTime and count, and the cron job with enabled guard, catch-and-log, and property defaults. Matches the interface; hidden tests 4/4 green.",
+     "convention_fit": "The @Scheduled cron comes from a property, @SchedulerLock is named support:staleTicketClose, and the enabled flag uses @Value with a default. Injection is constructor-based via @RequiredArgsConstructor, the class is named *CronJob, and new unit tests use MockitoExtension.",
+     "design_fit": "Adds a small derived query in the repository, keeps the logic in SupportTicketService and a thin CronJob delegating to it, and reuses ShedLock. No duplicated lookup, no new mechanism, minimal footprint.",
+     "test_quality": "Covers the cron job's enabled, disabled and failure paths, and the service's close-and-count and empty cases. The service test matches any(LocalDateTime), so it never checks the cutoff (now minus days). The failure test only verifies the call.",
+     "graph_use": "Graph queries listed the support/ticket package files and the existing *CronJob classes before any edit. The agent then read AnonymousConsentCleanupCronJob as the example and followed its structure. Test files were located with find."
+    },
+    "rubric": "r5",
+    "model": "claude-opus-5-5"
+   },
+   "score": 0.975,
+   "components": {
+    "hidden_pass": 1.0,
+    "conventions_det": 1.0,
+    "tests_written": 1.0,
+    "process_det": 1.0,
+    "convention_fit": 1.0,
+    "design_fit": 1.0,
+    "correctness": 1.0,
+    "test_quality": 0.75,
+    "graph_use": 0.75
+   },
+   "score_repeat": 0.9875,
+   "run": "baseline-2026-09-23-r5\\0c3af0cdaacfe166\\stale-ticket-close.r2"
+  },
+  {
+   "task": "support-ticket-version",
+   "split": "train",
+   "rep": 2,
+   "checks": {
+    "graph_first": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "2 graph queries before the first edit (2 in all)"
+    },
+    "exemplar_read": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "read before the first edit: 02-09-2026-widen-ticket-reference-column.sql, 20-12-2025-add-version-to-applied-opportunity.sql"
+    },
+    "feature_first": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "0 of 0 new main files under the feature package"
+    },
+    "constructor_injection": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "0 added @Autowired lines; 0 new beans with final fields and no constructor"
+    },
+    "after_commit_listener": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "scheduler_lock": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "ports_adapters": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "translatable_errors": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "liquibase_changeset": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "path=True, header=True, changeset id=True, rollback=True, include with month comment=True, no existing changeset edited=True, adds support_ticket.version=True"
+    },
+    "version_field": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "@Version field on the contended entity=True, changeset adds the column=True"
+    },
+    "controller_guards": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "dto_naming": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "tests_written": {
+     "value": 0.0,
+     "applicable": true,
+     "passed": false,
+     "seen": "no new *UnitTest class"
+    },
+    "build_green": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "test-compile green"
+    },
+    "scope": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "4 files changed; 0 outside src/main and src/test; 0 tests deleted"
+    },
+    "marker": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "marker=present, 0 tool calls after it"
+    },
+    "hidden_pass": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "hidden 2/2, pass-to-pass 231/231"
+    }
+   },
+   "verdict": {
+    "rules_violated": 1,
+    "files_out_of_scope": 0,
+    "parallel_mechanisms": 0,
+    "correctness": 5,
+    "convention_fit": 4,
+    "design_fit": 5,
+    "test_quality": 2,
+    "graph_use": 3,
+    "reasons": {
+     "correctness": "SupportTicket gains `@Version private Long version`. The changeset adds `version BIGINT DEFAULT 0 NOT NULL` with a rollback. Build is green and the hidden acceptance tests pass 2/2.",
+     "convention_fit": "Changeset path, name, changeset header, rollback and the dated changelog.xml include comment all follow the convention. No new `*UnitTest` class was created; the tests were appended to the existing SupportTicketEntityUnitTest.",
+     "design_fit": "Smallest footprint: one entity field and one new changeset appended at the end of changelog.xml. It reuses the existing @Version pattern (add-version-to-applied-opportunity). No existing changeset was edited and nothing else was touched.",
+     "test_quality": "The added VersionTests only check that the field is null by default and that Lombok's getter and setter work. Nothing pins the optimistic-locking behaviour, such as a conflict on concurrent update, or asserts the @Version annotation.",
+     "graph_use": "The graph queried support/ticket entities and changelog files before editing. The @Version example and the neighbouring changesets were found by grep and glob, so navigation relied mostly on searching."
+    },
+    "rubric": "r5",
+    "model": "claude-opus-5-5"
+   },
+   "verdict_repeat": {
+    "rules_violated": 1,
+    "files_out_of_scope": 0,
+    "parallel_mechanisms": 0,
+    "correctness": 5,
+    "convention_fit": 4,
+    "design_fit": 5,
+    "test_quality": 2,
+    "graph_use": 3,
+    "reasons": {
+     "correctness": "SupportTicket gets `@Version private Long version`. A changeset adds `version BIGINT DEFAULT 0 NOT NULL` with a rollback and is included in changelog.xml. Build is green and hidden tests pass 2/2.",
+     "convention_fit": "The changeset path, name, header, rollback and dated include comment follow the Liquibase convention. The @Version field matches the locking rule. The only gap is that no new *UnitTest class was created; tests were appended to the existing SupportTicketEntityUnitTest.",
+     "design_fit": "The change is minimal: one entity field, one new changeset, one include line. It follows the existing add-version-to-applied-opportunity changeset. There is no new mechanism and no unrelated edits.",
+     "test_quality": "The added VersionTests only check that the field starts null and that a getter/setter round-trip works. Nothing tests concurrent modification or conflict behaviour, and there is no new MockitoExtension test class.",
+     "graph_use": "Graph queries found the support/ticket files and changelog paths early. The locking example and the changelog tail were then found with grep, tail and file reads, so text search did most of the navigation."
+    },
+    "rubric": "r5",
+    "model": "claude-opus-5-5"
+   },
+   "score": 0.8125,
+   "components": {
+    "hidden_pass": 1.0,
+    "conventions_det": 1.0,
+    "tests_written": 0.0,
+    "process_det": 1.0,
+    "convention_fit": 0.75,
+    "design_fit": 1.0,
+    "correctness": 1.0,
+    "test_quality": 0.25,
+    "graph_use": 0.5
+   },
+   "score_repeat": 0.8125,
+   "run": "baseline-2026-09-23-r5\\0c3af0cdaacfe166\\support-ticket-version.r2"
+  },
+  {
+   "task": "ticket-created-after-commit",
+   "split": "train",
+   "rep": 2,
+   "checks": {
+    "graph_first": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "2 graph queries before the first edit (2 in all)"
+    },
+    "exemplar_read": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "read before the first edit: InvoiceCreatedEventListener.java"
+    },
+    "feature_first": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "2 of 2 new main files under the feature package"
+    },
+    "constructor_injection": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "0 added @Autowired lines; 0 new beans with final fields and no constructor"
+    },
+    "after_commit_listener": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "onTicketCreated: after-commit, catches"
+    },
+    "scheduler_lock": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "ports_adapters": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "translatable_errors": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "liquibase_changeset": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "version_field": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "controller_guards": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "dto_naming": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "tests_written": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "1 new unit test classes; Mockito without a Spring context=1/1; compiles=True; pass=True"
+    },
+    "build_green": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "test-compile green"
+    },
+    "scope": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "6 files changed; 0 outside src/main and src/test; 0 tests deleted"
+    },
+    "marker": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "marker=present, 0 tool calls after it"
+    },
+    "hidden_pass": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "hidden 3/3, pass-to-pass 54/54"
+    }
+   },
+   "verdict": {
+    "rules_violated": 0,
+    "files_out_of_scope": 0,
+    "parallel_mechanisms": 0,
+    "correctness": 5,
+    "convention_fit": 5,
+    "design_fit": 5,
+    "test_quality": 4,
+    "graph_use": 5,
+    "reasons": {
+     "correctness": "createTicket publishes SupportTicketCreatedEvent through ApplicationEventPublisher and no longer calls EmailService. The listener sends the confirmation in the AFTER_COMMIT phase. Interface names and the constructor match. Build is green; hidden tests 3/3 pass.",
+     "convention_fit": "Event and listener live in support/ticket/event. The listener uses @RequiredArgsConstructor with private final fields, @TransactionalEventListener(AFTER_COMMIT), and catch-and-log. It follows the structure of InvoiceCreatedEventListener, which the agent read first.",
+     "design_fit": "Reuses Spring's event mechanism the way subscription/event already does. Adds one constructor parameter. EmailService stays in the service only for the admin-response path. Small footprint, no duplicated logic.",
+     "test_quality": "SupportTicketCreatedEventListenerUnitTest covers the send and the swallowed failure, but the failure test asserts nothing beyond not throwing. The service test verifies the published event but not its language field. The integration test was adapted to never().",
+     "graph_use": "Graph queries located the support/ticket package and the existing */event/ listeners before editing. The agent then read InvoiceCreatedEvent and InvoiceCreatedEventListener and mirrored their structure in the new files."
+    },
+    "rubric": "r5",
+    "model": "claude-opus-5-5"
+   },
+   "verdict_repeat": {
+    "rules_violated": 0,
+    "files_out_of_scope": 0,
+    "parallel_mechanisms": 0,
+    "correctness": 5,
+    "convention_fit": 5,
+    "design_fit": 5,
+    "test_quality": 4,
+    "graph_use": 5,
+    "reasons": {
+     "correctness": "createTicket now publishes SupportTicketCreatedEvent through ApplicationEventPublisher. The listener sends the confirmation with @TransactionalEventListener(AFTER_COMMIT). The interface matches exactly. Build green, hidden tests 3/3, existing tests 54/54.",
+     "convention_fit": "The listener uses AFTER_COMMIT and catches and logs failures. @RequiredArgsConstructor injects final fields. The event sits in the feature package support/ticket/event. The service keeps its explicit constructor. New MockitoExtension unit test added, and the service unit test updated for the new constructor.",
+     "design_fit": "Mirrors the InvoiceCreatedEvent/Listener pattern it read. Minimal footprint: the service keeps emailService only for addAdminResponse. No duplicated logic and no new mechanism. The integration test's assertion was flipped to never(), which the behaviour change justifies.",
+     "test_quality": "The listener unit test covers the send path and the swallowed-exception path. The failure test has no explicit assertion (no assertDoesNotThrow, no verify). The service test checks the published event fields but not the language, and uses verifyNoInteractions(emailService).",
+     "graph_use": "Graph queries located the support/ticket package and existing *EventListener and event classes before any edit. The agent then read InvoiceCreatedEvent and InvoiceCreatedEventListener as examples and followed their structure."
+    },
+    "rubric": "r5",
+    "model": "claude-opus-5-5"
+   },
+   "score": 0.9875,
+   "components": {
+    "hidden_pass": 1.0,
+    "conventions_det": 1.0,
+    "tests_written": 1.0,
+    "process_det": 1.0,
+    "convention_fit": 1.0,
+    "design_fit": 1.0,
+    "correctness": 1.0,
+    "test_quality": 0.75,
+    "graph_use": 1.0
+   },
+   "score_repeat": 0.9875,
+   "run": "baseline-2026-09-23-r5\\0c3af0cdaacfe166\\ticket-created-after-commit.r2"
+  },
+  {
+   "task": "exchange-rate-port",
+   "split": "train",
+   "rep": 2,
+   "checks": {
+    "graph_first": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "1 graph queries before the first edit (1 in all)"
+    },
+    "exemplar_read": {
+     "value": 0.0,
+     "applicable": true,
+     "passed": false,
+     "seen": "no existing file of the task's kinds was read before the first edit"
+    },
+    "feature_first": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "4 of 4 new main files under the feature package"
+    },
+    "constructor_injection": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "0 added @Autowired lines; 0 new beans with final fields and no constructor"
+    },
+    "after_commit_listener": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "scheduler_lock": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "ports_adapters": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "port interface=True, adapter implementing it=True, adapter imports outside the adapter package=0"
+    },
+    "translatable_errors": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "1 of 1 added throws are translatable; 1 of 1 message keys in both bundles"
+    },
+    "liquibase_changeset": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "version_field": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "controller_guards": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "dto_naming": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "tests_written": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "2 new unit test classes; Mockito without a Spring context=2/2; compiles=True; pass=True"
+    },
+    "build_green": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "test-compile green"
+    },
+    "scope": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "9 files changed; 0 outside src/main and src/test; 0 tests deleted"
+    },
+    "marker": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "marker=present, 0 tool calls after it"
+    },
+    "hidden_pass": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "hidden 5/5, pass-to-pass 41/41"
+    }
+   },
+   "verdict": {
+    "rules_violated": 0,
+    "files_out_of_scope": 0,
+    "parallel_mechanisms": 0,
+    "correctness": 5,
+    "convention_fit": 5,
+    "design_fit": 5,
+    "test_quality": 4,
+    "graph_use": 3,
+    "reasons": {
+     "correctness": "Port, adapter, properties and service match the interface exactly. Adapter matches case-insensitively, PLN returns 1, service rounds to 2 decimals HALF_UP, and the exception carries the key and ISO argument. Acceptance 5/5, build green.",
+     "convention_fit": "ExchangeRatePort sits in currency/port and FixedExchangeRateAdapter in currency/adapter. Injection is by explicit constructor. BusinessRuleTranslatableException key is added to messages_en and messages_pl. The agent read VatRegistryPort and its adapter before writing. Both new classes are *UnitTest with MockitoExtension.",
+     "design_fit": "CurrencyConversionService depends only on ExchangeRatePort, so the rate source can be swapped. Rates are bound through @ConfigurationProperties and defaults live in application.yml. Footprint is small and cohesive, with no duplicated lookup and no parallel mechanism.",
+     "test_quality": "Adapter tests cover configured rate, case-insensitivity, PLN=1 and an unknown code. Service tests cover conversion and the missing-rate exception key and args. The rounding test (10×3.955=39.550) never exercises a HALF_UP boundary, and null isoCode is untested.",
+     "graph_use": "One graph query listed the existing *Port/*Adapter files and led the agent to VatRegistryPort. After that, navigation relied on find, cat and grep over directories, properties classes and test folders."
+    },
+    "rubric": "r5",
+    "model": "claude-opus-5-5"
+   },
+   "verdict_repeat": {
+    "rules_violated": 0,
+    "files_out_of_scope": 0,
+    "parallel_mechanisms": 0,
+    "correctness": 5,
+    "convention_fit": 5,
+    "design_fit": 5,
+    "test_quality": 4,
+    "graph_use": 3,
+    "reasons": {
+     "correctness": "All four interface types match. The adapter matches ISO codes case-insensitively and returns 1 for PLN. toPln rounds to 2 decimals HALF_UP and throws BusinessRuleTranslatableException with key error.business.exchange_rate_unavailable and the ISO code. Hidden tests 5/5.",
+     "convention_fit": "ExchangeRatePort is in currency/port and FixedExchangeRateAdapter in currency/adapter. CurrencyConversionService depends only on the port. Constructors are explicit, no @Autowired. The new key is in both messages_en and messages_pl. The agent read VatRegistryPort and BialaListaVatAdapter before writing.",
+     "design_fit": "Small cohesive footprint: one port, one adapter, one properties class, one service. Rates live in application.yml under currency.fixed-rates. The service holds only the arithmetic, so swapping the provider needs a new adapter only. No duplicated lookup or parallel mechanism.",
+     "test_quality": "Two MockitoExtension unit tests, no Spring context. They cover the configured rate, case-insensitive match, PLN=1, unknown code, HALF_UP rounding, and the missing-rate exception key and args. Untested: null isoCode and PLN passed through the service.",
+     "graph_use": "One graph query for *Port/*Adapter files led to the VatRegistryPort/BialaListaVatAdapter example. All other navigation (currency package, properties pattern, yml, tests) used find, grep and cat."
+    },
+    "rubric": "r5",
+    "model": "claude-opus-5-5"
+   },
+   "score": 0.9125,
+   "components": {
+    "hidden_pass": 1.0,
+    "conventions_det": 1.0,
+    "tests_written": 1.0,
+    "process_det": 0.5,
+    "convention_fit": 1.0,
+    "design_fit": 1.0,
+    "correctness": 1.0,
+    "test_quality": 0.75,
+    "graph_use": 0.5
+   },
+   "score_repeat": 0.9125,
+   "run": "baseline-2026-09-23-r5\\0c3af0cdaacfe166\\exchange-rate-port.r2"
+  },
+  {
+   "task": "faq-reorder",
+   "split": "train",
+   "rep": 2,
+   "checks": {
+    "graph_first": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "1 graph queries before the first edit (1 in all)"
+    },
+    "exemplar_read": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "read before the first edit: BusinessRuleTranslatableException.java, FaqController.java"
+    },
+    "feature_first": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "1 of 1 new main files under the feature package"
+    },
+    "constructor_injection": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "0 added @Autowired lines; 0 new beans with final fields and no constructor"
+    },
+    "after_commit_listener": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "scheduler_lock": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "ports_adapters": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "translatable_errors": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "2 of 2 added throws are translatable; 2 of 2 message keys in both bundles"
+    },
+    "liquibase_changeset": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "version_field": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "controller_guards": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "reorderFaqs: PreAuthorize=True, RateLimit=True"
+    },
+    "dto_naming": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "reorderFaqs: body FaqReorderDtoIn, returns Void"
+    },
+    "tests_written": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "1 new unit test classes; Mockito without a Spring context=1/1; compiles=True; pass=True"
+    },
+    "build_green": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "test-compile green"
+    },
+    "scope": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "6 files changed; 0 outside src/main and src/test; 0 tests deleted"
+    },
+    "marker": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "marker=present, 0 tool calls after it"
+    },
+    "hidden_pass": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "hidden 6/6, pass-to-pass 65/65"
+    }
+   },
+   "verdict": {
+    "rules_violated": 0,
+    "files_out_of_scope": 0,
+    "parallel_mechanisms": 0,
+    "correctness": 5,
+    "convention_fit": 5,
+    "design_fit": 4,
+    "test_quality": 4,
+    "graph_use": 3,
+    "reasons": {
+     "correctness": "PUT /{categoryId}/order returns 204 and is ADMIN-only. reorderCategory rejects null, missing, duplicate and foreign ids with faq_reorder_mismatch, assigns orders i+1, saves each FAQ, and keeps ResourceNotFoundException for unknown categories. Acceptance tests 6/6.",
+     "convention_fit": "The endpoint has @PreAuthorize and inherits the class-level @RateLimit. The request body is a *DtoIn. BusinessRuleTranslatableException carries a key present in both messages_en and messages_pl. Constructor injection is kept. No controller catch-and-rewrap.",
+     "design_fit": "reorderCategory repeats the category findById plus findByCategoryAndActiveTrueOrderByDisplayOrderAsc lookup that getFaqsByCategory already does instead of calling it. The rest is placed correctly: the service owns the logic and the controller delegates.",
+     "test_quality": "FaqServiceReorderUnitTest runs under MockitoExtension without Spring and covers reorder, missing, duplicate, foreign and unknown-category cases. Only the missing-id case asserts the message key. Class-wide LENIENT strictness hides unused stubs.",
+     "graph_use": "A single graph query listed the support/faq files, then navigation relied on reads and greps. No graph query for dependents of FaqCategoryController or for existing examples of the pattern."
+    },
+    "rubric": "r5",
+    "model": "claude-opus-5-5"
+   },
+   "verdict_repeat": {
+    "rules_violated": 0,
+    "files_out_of_scope": 0,
+    "parallel_mechanisms": 0,
+    "correctness": 5,
+    "convention_fit": 5,
+    "design_fit": 4,
+    "test_quality": 4,
+    "graph_use": 4,
+    "reasons": {
+     "correctness": "reorderCategory rejects a null list, a wrong size, duplicates and foreign ids with error.business.faq_reorder_mismatch. It assigns i+1 and saves each FAQ. An unknown category still throws ResourceNotFoundException. PUT returns 204. Hidden tests pass 6/6.",
+     "convention_fit": "The endpoint has @PreAuthorize ADMIN and inherits the class-level @RateLimit. The body is a *DtoIn. The controller gets a constructor-injected FaqService. BusinessRuleTranslatableException carries a key present in both messages_en and messages_pl. A MockitoExtension unit test was added and run.",
+     "design_fit": "reorderCategory repeats getFaqsByCategory's category lookup and active-FAQ query instead of calling it. The size check before the set comparison is redundant. Otherwise the logic sits in the service, the controller only delegates, and the footprint is small.",
+     "test_quality": "FaqServiceReorderUnitTest covers the happy path, a missing id, a duplicate, a foreign id and an unknown category, with no Spring context. Only one test asserts the message key. Strictness is LENIENT. A null list is not tested.",
+     "graph_use": "One graph query listed the support/faq files. The agent then read the service, controllers and entity it went on to edit. It found existing exception and test examples by grep and find, not the graph."
+    },
+    "rubric": "r5",
+    "model": "claude-opus-5-5"
+   },
+   "score": 0.9375,
+   "components": {
+    "hidden_pass": 1.0,
+    "conventions_det": 1.0,
+    "tests_written": 1.0,
+    "process_det": 1.0,
+    "convention_fit": 1.0,
+    "design_fit": 0.75,
+    "correctness": 1.0,
+    "test_quality": 0.75,
+    "graph_use": 0.5
+   },
+   "score_repeat": 0.95,
+   "run": "baseline-2026-09-23-r5\\0c3af0cdaacfe166\\faq-reorder.r2"
+  },
+  {
+   "task": "currency-display-order",
+   "split": "train",
+   "rep": 2,
+   "checks": {
+    "graph_first": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "1 graph queries before the first edit (1 in all)"
+    },
+    "exemplar_read": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "read before the first edit: 02-09-2026-widen-ticket-reference-column.sql"
+    },
+    "feature_first": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "0 of 0 new main files under the feature package"
+    },
+    "constructor_injection": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "0 added @Autowired lines; 0 new beans with final fields and no constructor"
+    },
+    "after_commit_listener": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "scheduler_lock": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "ports_adapters": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "translatable_errors": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "liquibase_changeset": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "path=True, header=True, changeset id=True, rollback=True, include with month comment=True, no existing changeset edited=True, adds currency.display_order=True"
+    },
+    "version_field": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "controller_guards": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "dto_naming": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "tests_written": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "1 new unit test classes; Mockito without a Spring context=1/1; compiles=True; pass=True"
+    },
+    "build_green": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "test-compile green"
+    },
+    "scope": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "8 files changed; 0 outside src/main and src/test; 0 tests deleted"
+    },
+    "marker": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "marker=present, 0 tool calls after it"
+    },
+    "hidden_pass": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "hidden 4/4, pass-to-pass 102/102"
+    }
+   },
+   "verdict": {
+    "rules_violated": 0,
+    "files_out_of_scope": 0,
+    "parallel_mechanisms": 0,
+    "correctness": 4,
+    "convention_fit": 5,
+    "design_fit": 5,
+    "test_quality": 2,
+    "graph_use": 3,
+    "reasons": {
+     "correctness": "Column, entity field and DTO field are added. The paged mapper sets displayOrder; toDto gets it via ModelMapper name matching. Hidden tests pass 4/4. Weak spot: the seed sets PLN=0 but leaves other currencies at default 0, so they tie with PLN.",
+     "convention_fit": "The changeset is in 2026/09 with a DD-MM-YYYY kebab name, changeset header and rollback. It is included last in changelog.xml under a month comment. No existing changeset edited. A new MockitoExtension unit test is added.",
+     "design_fit": "Minimal footprint: one field each on Currency and CurrencyDtoOut, one setter line in the existing paged mapper, and reuse of ModelMapper for toDto. No new mechanisms, no layering changes.",
+     "test_quality": "CurrencyServiceDisplayOrderUnitTest only uses displayOrder 0, which is the int default, so it passes even without the mapping. The toDto test stubs modelMapper to return the expected DTO, so it is tautological. Strictness is LENIENT.",
+     "graph_use": "One graph query listed the currency files; the agent then read them directly. Changelog placement, test fixtures and constructor usage were found with grep, find and ls, not the graph."
+    },
+    "rubric": "r5",
+    "model": "claude-opus-5-5"
+   },
+   "verdict_repeat": {
+    "rules_violated": 0,
+    "files_out_of_scope": 0,
+    "parallel_mechanisms": 0,
+    "correctness": 4,
+    "convention_fit": 5,
+    "design_fit": 5,
+    "test_quality": 2,
+    "graph_use": 4,
+    "reasons": {
+     "correctness": "Column, entity field, DTO field and the explicit paged mapping are added, and toDto picks the field up through ModelMapper. All currencies other than PLN/EUR/USD default to 0, tying with PLN, so PLN is not strictly first.",
+     "convention_fit": "The changeset is 2026/09/23-09-2026-currency-display-order.sql with a changeset header and a rollback line. It is included last in changelog.xml under a month comment. Existing constructor callers in tests were updated.",
+     "design_fit": "Minimal footprint across Currency, CurrencyDtoOut and one added line in the existing paged mapping. It reuses the ModelMapper path for toDto. No new mechanism and no duplicated logic.",
+     "test_quality": "CurrencyServiceDisplayOrderUnitTest asserts displayOrder 0, which is the int default, so the paged test passes without the mapping line. The toDto test stubs modelMapper to return the expected DTO, which is tautological. No non-zero value is checked.",
+     "graph_use": "An initial graph query listed the currency feature files and guided the reads of Currency, CurrencyDtoOut and CurrencyService. The changelog layout and the example changeset were then found by grep, find and ls instead."
+    },
+    "rubric": "r5",
+    "model": "claude-opus-5-5"
+   },
+   "score": 0.925,
+   "components": {
+    "hidden_pass": 1.0,
+    "conventions_det": 1.0,
+    "tests_written": 1.0,
+    "process_det": 1.0,
+    "convention_fit": 1.0,
+    "design_fit": 1.0,
+    "correctness": 0.75,
+    "test_quality": 0.25,
+    "graph_use": 0.5
+   },
+   "score_repeat": 0.9375,
+   "run": "baseline-2026-09-23-r5\\0c3af0cdaacfe166\\currency-display-order.r2"
+  }
+ ],
+ "finished_at": "2026-09-24T12:26:52+0200",
+ "of": "baseline-2026-09-23",
+ "k": 3,
+ "tasks": [
+  "stale-ticket-close",
+  "support-ticket-version",
+  "ticket-created-after-commit",
+  "exchange-rate-port",
+  "faq-reorder",
+  "currency-display-order"
+ ],
+ "noise": {
+  "judge_mad_score": 0.009,
+  "judge_mad_criteria": {
+   "correctness": 0.056,
+   "convention_fit": 0.111,
+   "design_fit": 0.111,
+   "test_quality": 0.111,
+   "graph_use": 0.222
+  },
+  "agent_pooled_sd": 0.0466,
+  "agent_halfwidth": 0.0304,
+  "tasks": 6,
+  "k": 3,
+  "delta": 0.0304,
+  "rule": "max(judge MAD of S over the seed's runs judged twice, 1.96 * pooled SD of S over replicates * sqrt(2 / (T * k)))"
+ },
+ "previous": {
+  "rubric": "r4",
+  "score": 0.9109,
+  "delta": 0.0298
+ }
+}

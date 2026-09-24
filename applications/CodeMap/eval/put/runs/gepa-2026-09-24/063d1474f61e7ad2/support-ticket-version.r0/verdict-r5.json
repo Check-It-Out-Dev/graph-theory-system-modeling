@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 1,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 4,
+  "design_fit": 5,
+  "test_quality": 1,
+  "graph_use": 4,
+  "reasons": {
+   "correctness": "SupportTicket gets `@Version private Long version`. The changeset adds `version BIGINT DEFAULT 0 NOT NULL` to support_ticket, which matches the interface exactly. Hidden acceptance 2/2 and existing tests 229/229 pass.",
+   "convention_fit": "The changeset follows every convention: 2026/09 path, DD-MM-YYYY kebab name, liquibase header, `-- rollback` line, and the include appended with a `<!-- September 2026: ... -->` comment. The only miss is the required new *UnitTest class.",
+   "design_fit": "Minimal footprint: one annotated field, one changeset, one include. It reuses the existing @Version pattern (as on User and content) and the Liquibase changelog. It adds no new mechanism, no stray code, and no layering issues.",
+   "test_quality": "The agent's own tests are 0/0. No *UnitTest class was added for the versioning behaviour. The agent only reran existing SupportTicket unit tests.",
+   "graph_use": "The agent queried the graph for supportticket entities before editing, and later for dependents of SupportTicket.java to find constructor callers. It found the @Version examples and existing changesets mostly through grep."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 755,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 23419
+ },
+ "is_error": false
+}

@@ -1,0 +1,403 @@
+[
+ {
+  "i": 1,
+  "name": "mcp__graph__graph_query",
+  "input": {
+   "statement": "MATCH (e:Entity) WHERE e.file_path STARTS WITH 'backend/' AND lower(e.name) CONTAINS 'currency' RETURN e.file_path, e.layer, e.curated, e.line_count ORDER BY e.file_path LIMIT 50"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "{\"columns\": [\"e.file_path\", \"e.layer\", \"e.curated\", \"e.line_count\"], \"rows\": [[\"backend/src/main/java/com/sm/instagram/platform/currency/Currency.java\", \"Resource\", 4, 46], [\"backend/src/main/java/com"
+ },
+ {
+  "i": 2,
+  "name": "mcp__graph__graph_query",
+  "input": {
+   "statement": "MATCH (e:Entity) WHERE e.file_path STARTS WITH 'backend/src/main/' AND (e.name ENDS WITH 'Port.java' OR e.name ENDS WITH 'Adapter.java' OR e.name ENDS WITH 'Properties.java' OR e.name ENDS WITH 'TranslatableException.java') RETURN e.name, e.file_path ORDER BY e.name"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "{\"columns\": [\"e.name\", \"e.file_path\"], \"rows\": [[\"AppPaymentsProperties.java\", \"backend/src/main/java/com/sm/instagram/platform/subscription/config/AppPaymentsProperties.java\"], [\"AuthenticationTransl"
+ },
+ {
+  "i": 3,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\e16615aa284fb057-exchange-rate-port.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\registry\\port\\CompanyRegistryPort.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.registry.port;\n2\t\n3\t/**\n4\t * Port interface for company data lookup from a business registry.\n5\t * Primary implementation: {@link com.sm.instagram.platform.registry"
+ },
+ {
+  "i": 4,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\e16615aa284fb057-exchange-rate-port.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\registry\\adapter\\bialista\\BialaListaVatAdapter.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.registry.adapter.bialista;\n2\t\n3\timport com.sm.instagram.platform.registry.config.RegistryProperties;\n4\timport com.sm.instagram.platform.registry.port.VatRegistryPor"
+ },
+ {
+  "i": 5,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\e16615aa284fb057-exchange-rate-port.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\registry\\config\\RegistryProperties.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.registry.config;\n2\t\n3\timport lombok.Data;\n4\timport org.springframework.boot.context.properties.ConfigurationProperties;\n5\timport org.springframework.context.annotat"
+ },
+ {
+  "i": 6,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\e16615aa284fb057-exchange-rate-port.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\common\\exceptions\\BusinessRuleTranslatableException.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.common.exceptions;\n2\t\n3\timport java.io.Serializable;\n4\t\n5\t/**\n6\t * Exception for business logic and rule violations.\n7\t * <p>\n8\t * Use this exception when business "
+ },
+ {
+  "i": 7,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\e16615aa284fb057-exchange-rate-port.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\currency\\Currency.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.currency;\n2\t\n3\timport jakarta.persistence.*;\n4\timport jakarta.validation.constraints.NotBlank;\n5\timport jakarta.validation.constraints.Size;\n6\timport lombok.AllArgs"
+ },
+ {
+  "i": 8,
+  "name": "Grep",
+  "input": {
+   "pattern": "error.business.exchange_rate_unavailable|error\\.business\\.",
+   "path": "C:\\Users\\Norbert\\put-ws\\runs\\e16615aa284fb057-exchange-rate-port.r0\\src\\main\\resources\\messages_en.properties"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "Found 1 file\nsrc\\main\\resources\\messages_en.properties"
+ },
+ {
+  "i": 9,
+  "name": "Bash",
+  "input": {
+   "command": "grep -n \"prefix\" \"src/main/java/com/sm/instagram/platform/subscription/invoicing/FakturowniaProperties.java\"",
+   "description": "Check FakturowniaProperties prefix binding style"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "9:@ConfigurationProperties(prefix = \"fakturownia\")"
+ },
+ {
+  "i": 10,
+  "name": "Grep",
+  "input": {
+   "pattern": "error\\.business\\.exchange_rate",
+   "path": "C:\\Users\\Norbert\\put-ws\\runs\\e16615aa284fb057-exchange-rate-port.r0\\src\\main\\resources\\messages_en.properties",
+   "output_mode": "content"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "No matches found"
+ },
+ {
+  "i": 11,
+  "name": "Grep",
+  "input": {
+   "pattern": "error\\.business\\.",
+   "path": "C:\\Users\\Norbert\\put-ws\\runs\\e16615aa284fb057-exchange-rate-port.r0\\src\\main\\resources\\messages_en.properties",
+   "output_mode": "content",
+   "head_limit": 15
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "40:error.business.item_not_found={0} not found\n54:error.business.insufficient_permissions=You do not have permission to perform this action\n55:error.business.invalid_state=Invalid state for this opera"
+ },
+ {
+  "i": 12,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\e16615aa284fb057-exchange-rate-port.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\subscription\\invoicing\\FakturowniaProperties.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.subscription.invoicing;\n2\t\n3\timport lombok.Getter;\n4\timport lombok.Setter;\n5\timport org.springframework.boot.context.properties.ConfigurationProperties;\n6\t\n7\t@Gette"
+ },
+ {
+  "i": 13,
+  "name": "Grep",
+  "input": {
+   "pattern": "EnableConfigurationProperties",
+   "path": "C:\\Users\\Norbert\\put-ws\\runs\\e16615aa284fb057-exchange-rate-port.r0\\src\\main\\java",
+   "output_mode": "content"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "src\\main\\java\\com\\sm\\instagram\\platform\\config\\EmailConfig.java:4:import org.springframework.boot.context.properties.EnableConfigurationProperties;\nsrc\\main\\java\\com\\sm\\instagram\\platform\\config\\Email"
+ },
+ {
+  "i": 14,
+  "name": "Grep",
+  "input": {
+   "pattern": "CompanyRegistryPort|VatRegistryPort",
+   "path": "C:\\Users\\Norbert\\put-ws\\runs\\e16615aa284fb057-exchange-rate-port.r0\\src\\main\\java",
+   "output_mode": "files_with_matches"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "Found 8 files\nsrc\\main\\java\\com\\sm\\instagram\\platform\\registry\\test\\RegistryPortStubConfig.java\nsrc\\main\\java\\com\\sm\\instagram\\platform\\registry\\port\\VatRegistryPort.java\nsrc\\main\\java\\com\\sm\\instagra"
+ },
+ {
+  "i": 15,
+  "name": "Glob",
+  "input": {
+   "pattern": "**/registry/**/*UnitTest.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "src\\test\\java\\com\\sm\\instagram\\platform\\unit\\registry\\CompanyTypeClassifierUnitTest.java\nsrc\\test\\java\\com\\sm\\instagram\\platform\\unit\\registry\\GusBir1ResponseParserUnitTest.java\nsrc\\test\\java\\com\\sm\\i"
+ },
+ {
+  "i": 16,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\e16615aa284fb057-exchange-rate-port.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\common\\exceptions\\TranslatableException.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.common.exceptions;\n2\t\n3\timport lombok.Getter;\n4\t\n5\timport java.io.Serial;\n6\timport java.io.Serializable;\n7\t\n8\t/**\n9\t * Base exception for all translatable exception"
+ },
+ {
+  "i": 17,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\e16615aa284fb057-exchange-rate-port.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\registry\\RegistryLookupServiceUnitTest.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.unit.registry;\n2\t\n3\timport com.sm.instagram.platform.common.authorization.PermissionUtils;\n4\timport com.sm.instagram.platform.common.exceptions.BusinessRuleTranslat"
+ },
+ {
+  "i": 18,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\e16615aa284fb057-exchange-rate-port.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\registry\\RegistryLookupService.java",
+   "limit": 40
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.registry;\n2\t\n3\timport com.sm.instagram.platform.common.authorization.PermissionUtils;\n4\timport com.sm.instagram.platform.common.exceptions.BusinessRuleTranslatableE"
+ },
+ {
+  "i": 19,
+  "name": "Bash",
+  "input": {
+   "command": "grep -n \"error.business.item_not_found\\|error.business.rule_violation\" \"src/main/resources/messages_pl.properties\"",
+   "description": "Check Polish message bundle for matching keys"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "40:error.business.item_not_found={0} nie znaleziono\n60:error.business.rule_violation=Naruszono regułę biznesową"
+ },
+ {
+  "i": 20,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\e16615aa284fb057-exchange-rate-port.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\registry\\adapter\\BialaListaVatAdapterUnitTest.java",
+   "limit": 50
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.unit.registry.adapter;\n2\t\n3\timport com.sm.instagram.platform.registry.adapter.bialista.BialaListaResponse;\n4\timport com.sm.instagram.platform.registry.adapter.biali"
+ },
+ {
+  "i": 21,
+  "name": "Bash",
+  "input": {
+   "command": "head -5 \"src/test/java/com/sm/instagram/platform/unit/service/CurrencyServiceUnitTest.java\"",
+   "description": "Check package of existing currency test"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "package com.sm.instagram.platform.unit.service;\r\n\r\nimport com.sm.instagram.platform.currency.*;\r\nimport org.junit.jupiter.api.BeforeEach;\r\nimport org.junit.jupiter.api.DisplayName;"
+ },
+ {
+  "i": 22,
+  "name": "Grep",
+  "input": {
+   "pattern": "RoundingMode.HALF_UP",
+   "path": "C:\\Users\\Norbert\\put-ws\\runs\\e16615aa284fb057-exchange-rate-port.r0\\src\\main\\java",
+   "output_mode": "content",
+   "-n": true,
+   "head_limit": 10
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "No matches found"
+ },
+ {
+  "i": 23,
+  "name": "Write",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\e16615aa284fb057-exchange-rate-port.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\currency\\port\\ExchangeRatePort.java",
+   "content": "<771 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "File created successfully at: C:\\Users\\Norbert\\put-ws\\runs\\e16615aa284fb057-exchange-rate-port.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\currency\\port\\ExchangeRatePort.java (file state is current in "
+ },
+ {
+  "i": 24,
+  "name": "Write",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\e16615aa284fb057-exchange-rate-port.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\currency\\adapter\\FixedExchangeRateProperties.java",
+   "content": "<475 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "File created successfully at: C:\\Users\\Norbert\\put-ws\\runs\\e16615aa284fb057-exchange-rate-port.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\currency\\adapter\\FixedExchangeRateProperties.java (file state "
+ },
+ {
+  "i": 25,
+  "name": "Write",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\e16615aa284fb057-exchange-rate-port.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\currency\\adapter\\FixedExchangeRateAdapter.java",
+   "content": "<1291 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "File created successfully at: C:\\Users\\Norbert\\put-ws\\runs\\e16615aa284fb057-exchange-rate-port.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\currency\\adapter\\FixedExchangeRateAdapter.java (file state is "
+ },
+ {
+  "i": 26,
+  "name": "Write",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\e16615aa284fb057-exchange-rate-port.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\currency\\CurrencyConversionService.java",
+   "content": "<834 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "File created successfully at: C:\\Users\\Norbert\\put-ws\\runs\\e16615aa284fb057-exchange-rate-port.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\currency\\CurrencyConversionService.java (file state is current"
+ },
+ {
+  "i": 27,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\e16615aa284fb057-exchange-rate-port.r0\\src\\main\\resources\\messages_en.properties",
+   "offset": 38,
+   "limit": 4
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "38\t\n39\t# Business\n40\terror.business.item_not_found={0} not found\n41\t"
+ },
+ {
+  "i": 28,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\e16615aa284fb057-exchange-rate-port.r0\\src\\main\\resources\\messages_pl.properties",
+   "offset": 38,
+   "limit": 4
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "38\t\n39\t# Biznes\n40\terror.business.item_not_found={0} nie znaleziono\n41\t"
+ },
+ {
+  "i": 29,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\e16615aa284fb057-exchange-rate-port.r0\\src\\main\\resources\\messages_en.properties",
+   "old_string": "<54 chars>",
+   "new_string": "<139 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\e16615aa284fb057-exchange-rate-port.r0\\src\\main\\resources\\messages_en.properties has been updated successfully."
+ },
+ {
+  "i": 30,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\e16615aa284fb057-exchange-rate-port.r0\\src\\main\\resources\\messages_pl.properties",
+   "old_string": "<57 chars>",
+   "new_string": "<132 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\e16615aa284fb057-exchange-rate-port.r0\\src\\main\\resources\\messages_pl.properties has been updated successfully."
+ },
+ {
+  "i": 31,
+  "name": "Bash",
+  "input": {
+   "command": "ls \"src/test/java/com/sm/instagram/platform/unit/\" 2>/dev/null; echo \"---\"; ls \"src/test/java/com/sm/instagram/platform/unit/registry/\" 2>/dev/null",
+   "description": "List test unit directory structure"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "config/\ncontroller/\ncredentials/\ne2e/\nentity/\nexceptions/\ngrpc/\nlogging/\nopenapi/\nregistry/\nsecurity/\nservice/\nstorage/\nuser/\nutil/\nvalidation/\nvalidator/\n---\nCompanyTypeClassifierUnitTest.java\nGusBir"
+ },
+ {
+  "i": 32,
+  "name": "Write",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\e16615aa284fb057-exchange-rate-port.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\currency\\CurrencyConversionServiceUnitTest.java",
+   "content": "<2690 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "File created successfully at: C:\\Users\\Norbert\\put-ws\\runs\\e16615aa284fb057-exchange-rate-port.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\currency\\CurrencyConversionServiceUnitTest.java (file sta"
+ },
+ {
+  "i": 33,
+  "name": "Write",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\e16615aa284fb057-exchange-rate-port.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\currency\\adapter\\FixedExchangeRateAdapterUnitTest.java",
+   "content": "<2144 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "File created successfully at: C:\\Users\\Norbert\\put-ws\\runs\\e16615aa284fb057-exchange-rate-port.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\currency\\adapter\\FixedExchangeRateAdapterUnitTest.java (f"
+ },
+ {
+  "i": 34,
+  "name": "Bash",
+  "input": {
+   "command": "./mvnw -q test -Ptest -Dtest=CurrencyConversionServiceUnitTest,FixedExchangeRateAdapterUnitTest -Dsurefire.failIfNoSpecifiedTests=false 2>&1 | tail -100",
+   "description": "Run new unit tests",
+   "timeout": 300000
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's docu"
+ },
+ {
+  "i": 35,
+  "name": "Bash",
+  "input": {
+   "command": "./mvnw -q test-compile -Ptest 2>&1 | tail -100",
+   "description": "Verify full test-compile is green",
+   "timeout": 300000
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "(Bash completed with no output)"
+ },
+ {
+  "i": 36,
+  "name": "Bash",
+  "input": {
+   "command": "grep -n \"LENIENT\\|lenient(\" \"src/test/java/com/sm/instagram/platform/unit/currency/CurrencyConversionServiceUnitTest.java\" \"src/test/java/com/sm/instagram/platform/unit/currency/adapter/FixedExchangeRateAdapterUnitTest.java\"\necho \"---diff stat---\"\ngit status --porcelain",
+   "description": "Check for lenient/LENIENT usage and review changed files"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "---diff stat---\n M src/main/resources/messages_en.properties\n M src/main/resources/messages_pl.properties\n?? src/main/java/com/sm/instagram/platform/currency/CurrencyConversionService.java\n?? src/main"
+ }
+]

@@ -1,5 +1,7 @@
 {
  "calibration": {
+  "ac1_oracle": 0.9562,
+  "agreement_oracle": 0.9655,
   "agreement_rr": 0.7083,
   "anchors": {
    "drift": false,
@@ -8,6 +10,7 @@
    "matched": 20,
    "mean_abs_delta": 0.0
   },
+  "basis": "kappa",
   "calibrated": true,
   "gate": 0.6,
   "kappa_human": 1.0,
@@ -15,8 +18,10 @@
   "n_human": 3,
   "n_oracle": 29,
   "n_rr": 24,
+  "prevalence_oracle": 0.8793,
   "verdict": "calibrated"
  },
+ "oracle_definition": "WHERE only (gold entity among the first five pointers); answered kept beside it",
  "rows": [
   {
    "answer": "Now I have the picture: this is a graph-structural question, and the mechanism (how a new terms *version* triggers re-consent) is behavioral logic inside file content, not something the graph encodes directly. But the graph does show the wiring that implements it.\n\n**Where it lives:** subsystem [11] Subscriptions, payments & consent. `LegalDocumentService.java` owns legal documents (via `LegalDocumentRepository`, with `LegalDocumentType.java` as the doc-type/version enum). `LegalConsentService.java` records consent (`ConsentRecordRepository`, `ConsentRecordDtoIn`) and is the thing that must compare a user's stored consent against the current document version — it CALLS/INJECTS `LegalDocumentService.java` directly and also touches `User.java`/`UserRepository.java` and `ConsentCookieService.java`. `ConsentEnforcementFilter.java` is the gate that runs on every request: it CONSTRAINS on both `UserCacheService.java` (cached user identity, subsystem [6]) and `LegalDocumentService.java`, and imports `LegalDocumentType.java` — this is almost certainly the filter that compares the user's last-accepted version to the current published version and blocks/redirects (returns 403-with-valid-token, per subsystem [9]'s caveat) until they re-consent.\n\n**What to open first:** `LegalDocumentService.java` (publishing/versioning of documents), then `ConsentEnforcementFilter.java` (the per-request version check), then `LegalConsentService.java` and `ConsentRecordRepository.java` (where prior consent is stored/compared). The exact comparison logic (how \"new version\" invalidates old consent records) is file content — the graph only gives the touch set, not the algorithm.",
@@ -37,6 +42,8 @@
    "kind": "bank",
    "model": "claude-sonnet-5",
    "oracle": {
+    "answered": true,
+    "answered_and_located": false,
     "has": true,
     "success": false
    },
@@ -81,6 +88,8 @@
    "kind": "bank",
    "model": "claude-sonnet-5",
    "oracle": {
+    "answered": true,
+    "answered_and_located": true,
     "has": true,
     "success": true
    },
@@ -123,6 +132,8 @@
    "kind": "bank",
    "model": "claude-sonnet-5",
    "oracle": {
+    "answered": true,
+    "answered_and_located": true,
     "has": true,
     "success": true
    },
@@ -167,6 +178,8 @@
    "kind": "bank",
    "model": "claude-sonnet-5",
    "oracle": {
+    "answered": true,
+    "answered_and_located": true,
     "has": true,
     "success": true
    },
@@ -205,6 +218,8 @@
    "kind": "bank",
    "model": "claude-sonnet-5",
    "oracle": {
+    "answered": true,
+    "answered_and_located": true,
     "has": true,
     "success": true
    },
@@ -247,6 +262,8 @@
    "kind": "bank",
    "model": "claude-sonnet-5",
    "oracle": {
+    "answered": true,
+    "answered_and_located": false,
     "has": true,
     "success": false
    },
@@ -291,6 +308,8 @@
    "kind": "bank",
    "model": "claude-sonnet-5",
    "oracle": {
+    "answered": true,
+    "answered_and_located": true,
     "has": true,
     "success": true
    },
@@ -331,6 +350,8 @@
    "kind": "bank",
    "model": "claude-sonnet-5",
    "oracle": {
+    "answered": false,
+    "answered_and_located": false,
     "has": true,
     "success": false
    },
@@ -366,6 +387,8 @@
    "kind": "bank",
    "model": "claude-sonnet-5",
    "oracle": {
+    "answered": true,
+    "answered_and_located": true,
     "has": true,
     "success": true
    },
@@ -407,6 +430,8 @@
    "kind": "bank",
    "model": "claude-sonnet-5",
    "oracle": {
+    "answered": true,
+    "answered_and_located": true,
     "has": true,
     "success": true
    },
@@ -447,6 +472,8 @@
    "kind": "bank",
    "model": "claude-sonnet-5",
    "oracle": {
+    "answered": true,
+    "answered_and_located": true,
     "has": true,
     "success": true
    },
@@ -491,6 +518,8 @@
    "kind": "bank",
    "model": "claude-sonnet-5",
    "oracle": {
+    "answered": true,
+    "answered_and_located": true,
     "has": true,
     "success": true
    },
@@ -535,6 +564,8 @@
    "kind": "bank",
    "model": "claude-sonnet-5",
    "oracle": {
+    "answered": true,
+    "answered_and_located": true,
     "has": true,
     "success": true
    },
@@ -578,6 +609,8 @@
    "kind": "bank",
    "model": "claude-sonnet-5",
    "oracle": {
+    "answered": true,
+    "answered_and_located": true,
     "has": true,
     "success": true
    },
@@ -620,6 +653,8 @@
    "kind": "bank",
    "model": "claude-sonnet-5",
    "oracle": {
+    "answered": true,
+    "answered_and_located": true,
     "has": true,
     "success": true
    },
@@ -664,6 +699,8 @@
    "kind": "bank",
    "model": "claude-sonnet-5",
    "oracle": {
+    "answered": true,
+    "answered_and_located": true,
     "has": true,
     "success": true
    },
@@ -704,6 +741,8 @@
    "kind": "bank",
    "model": "claude-sonnet-5",
    "oracle": {
+    "answered": true,
+    "answered_and_located": null,
     "has": false,
     "success": null
    },
@@ -748,6 +787,8 @@
    "kind": "bank",
    "model": "claude-sonnet-5",
    "oracle": {
+    "answered": true,
+    "answered_and_located": true,
     "has": true,
     "success": true
    },
@@ -788,6 +829,8 @@
    "kind": "bank",
    "model": "claude-sonnet-5",
    "oracle": {
+    "answered": true,
+    "answered_and_located": true,
     "has": true,
     "success": true
    },
@@ -832,6 +875,8 @@
    "kind": "bank",
    "model": "claude-sonnet-5",
    "oracle": {
+    "answered": true,
+    "answered_and_located": true,
     "has": true,
     "success": true
    },
@@ -876,6 +921,8 @@
    "kind": "bank",
    "model": "claude-sonnet-5",
    "oracle": {
+    "answered": true,
+    "answered_and_located": true,
     "has": true,
     "success": true
    },
@@ -918,6 +965,8 @@
    "kind": "bank",
    "model": "claude-sonnet-5",
    "oracle": {
+    "answered": true,
+    "answered_and_located": false,
     "has": true,
     "success": false
    },
@@ -962,6 +1011,8 @@
    "kind": "bank",
    "model": "claude-sonnet-5",
    "oracle": {
+    "answered": true,
+    "answered_and_located": true,
     "has": true,
     "success": true
    },
@@ -1007,6 +1058,8 @@
    "kind": "bank",
    "model": "claude-sonnet-5",
    "oracle": {
+    "answered": true,
+    "answered_and_located": true,
     "has": true,
     "success": true
    },
@@ -1051,6 +1104,8 @@
    "kind": "probe",
    "model": "claude-sonnet-5",
    "oracle": {
+    "answered": false,
+    "answered_and_located": false,
     "has": true,
     "success": true
    },
@@ -1090,6 +1145,8 @@
    "kind": "probe",
    "model": "claude-sonnet-5",
    "oracle": {
+    "answered": false,
+    "answered_and_located": false,
     "has": true,
     "success": true
    },
@@ -1127,6 +1184,8 @@
    "kind": "probe",
    "model": "claude-sonnet-5",
    "oracle": {
+    "answered": false,
+    "answered_and_located": false,
     "has": true,
     "success": true
    },
@@ -1170,6 +1229,8 @@
    "kind": "probe",
    "model": "claude-sonnet-5",
    "oracle": {
+    "answered": false,
+    "answered_and_located": false,
     "has": true,
     "success": true
    },
@@ -1204,6 +1265,8 @@
    "kind": "probe",
    "model": "claude-sonnet-5",
    "oracle": {
+    "answered": false,
+    "answered_and_located": false,
     "has": true,
     "success": true
    },
@@ -1240,6 +1303,8 @@
    "kind": "probe",
    "model": "claude-sonnet-5",
    "oracle": {
+    "answered": false,
+    "answered_and_located": false,
     "has": true,
     "success": true
    },

@@ -1,0 +1,29 @@
+{
+ "rubric": "r4",
+ "verdict": {
+  "rules_violated": 2,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 2,
+  "convention_fit": 2,
+  "design_fit": 3,
+  "test_quality": 3,
+  "graph_use": 1,
+  "reasons": {
+   "correctness": "The listener uses plain `@EventListener`, so the e-mail still goes out synchronously inside the ticket transaction. The task's core requirement is not met. Hidden tests pass because they call `onTicketCreated` directly.",
+   "convention_fit": "Breaks the AFTER_COMMIT rule: no `@TransactionalEventListener(phase = AFTER_COMMIT)`. Breaks read-before-write: no existing listener was read before writing one, only `AccountActivatedEvent`. Catch-and-log and constructor injection are followed.",
+   "design_fit": "Event and listener sit correctly in `support/ticket/event` and the service publishes through `ApplicationEventPublisher`. The wrong listener annotation leaves the side effect coupled to the transaction, so the new mechanism does not do its job.",
+   "test_quality": "`SupportTicketCreatedEventListenerUnitTest` covers the send and the swallowed failure with Mockito, no Spring context. Nothing verifies that `createTicket` publishes the event instead of calling `EmailService`. After-commit timing is not pinned.",
+   "graph_use": "One trivial query, `MATCH (e:Entity) RETURN e.file_path LIMIT 1`, found neither the feature package, nor the dependents of `SupportTicketService`, nor an existing `@TransactionalEventListener` example to copy."
+  },
+  "rubric": "r4",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 1053,
+  "cache_read_input_tokens": 21905,
+  "cache_creation_input_tokens": 0
+ },
+ "is_error": false
+}

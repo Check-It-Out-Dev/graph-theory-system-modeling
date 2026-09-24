@@ -1,0 +1,139 @@
+diff --git a/src/main/java/com/sm/instagram/platform/userpreferences/UserPreferences.java b/src/main/java/com/sm/instagram/platform/userpreferences/UserPreferences.java
+index 9084061dcc8..2c6cf0c254b 100644
+--- a/src/main/java/com/sm/instagram/platform/userpreferences/UserPreferences.java
++++ b/src/main/java/com/sm/instagram/platform/userpreferences/UserPreferences.java
+@@ -68,6 +68,14 @@ public class UserPreferences {
+     @Column(name = "two_factor_authentication_enabled")
+     private Boolean twoFactorAuthenticationEnabled = false;
+ 
++    /**
++     * JPA version for optimistic locking.
++     * Prevents lost updates when the web app and the mobile app modify preferences concurrently.
++     */
++    @Version
++    @Column(name = "version")
++    private Long version;
++
+     @CreationTimestamp
+     @Column(updatable = false)
+     private LocalDateTime createdTime;
+diff --git a/src/main/resources/db/changelog/2026/09/24-09-2026-add-version-to-user-preferences.sql b/src/main/resources/db/changelog/2026/09/24-09-2026-add-version-to-user-preferences.sql
+new file mode 100644
+index 00000000000..c2354c8d90b
+--- /dev/null
++++ b/src/main/resources/db/changelog/2026/09/24-09-2026-add-version-to-user-preferences.sql
+@@ -0,0 +1,9 @@
++--liquibase formatted sql
++--changeset norbert:add-version-to-user-preferences
++
++-- Add JPA @Version column to user_preferences for optimistic locking protection
++-- Prevents the web app and the mobile app from silently overwriting each other's changes
++ALTER TABLE public.user_preferences
++ADD COLUMN version BIGINT DEFAULT 0 NOT NULL;
++
++-- rollback ALTER TABLE public.user_preferences DROP COLUMN version;
+diff --git a/src/main/resources/db/changelog/changelog.xml b/src/main/resources/db/changelog/changelog.xml
+index 77f52d5e094..4492f036cad 100644
+--- a/src/main/resources/db/changelog/changelog.xml
++++ b/src/main/resources/db/changelog/changelog.xml
+@@ -184,4 +184,7 @@
+     <!-- June 2026: Widen ticket_reference to VARCHAR(32) — pentest 3.3 SecureRandom format is 21 chars -->
+     <include file="2026/09/02-09-2026-widen-ticket-reference-column.sql" relativeToChangelogFile="true"/>
+ 
++    <!-- September 2026: Add JPA @Version column to user_preferences for optimistic locking protection -->
++    <include file="2026/09/24-09-2026-add-version-to-user-preferences.sql" relativeToChangelogFile="true"/>
++
+ </databaseChangeLog>
+diff --git a/src/test/java/com/sm/instagram/platform/userpreferences/UserPreferencesUnitTest.java b/src/test/java/com/sm/instagram/platform/userpreferences/UserPreferencesUnitTest.java
+new file mode 100644
+index 00000000000..2c494558dff
+--- /dev/null
++++ b/src/test/java/com/sm/instagram/platform/userpreferences/UserPreferencesUnitTest.java
+@@ -0,0 +1,87 @@
++package com.sm.instagram.platform.userpreferences;
++
++import com.sm.instagram.platform.common.util.mappers.EnumTranslationService;
++import com.sm.instagram.platform.common.util.mappers.UpdaterIdConverter;
++import jakarta.persistence.Version;
++import org.junit.jupiter.api.BeforeEach;
++import org.junit.jupiter.api.DisplayName;
++import org.junit.jupiter.api.Nested;
++import org.junit.jupiter.api.Test;
++import org.junit.jupiter.api.extension.ExtendWith;
++import org.mockito.Mock;
++import org.mockito.junit.jupiter.MockitoExtension;
++import org.modelmapper.ModelMapper;
++
++import java.lang.reflect.Field;
++
++import static org.assertj.core.api.Assertions.assertThat;
++
++@ExtendWith(MockitoExtension.class)
++@DisplayName("UserPreferences Version Field Unit Tests")
++class UserPreferencesUnitTest {
++
++    @Mock
++    private EnumTranslationService enumTranslationService;
++
++    private UserPreferencesMapping userPreferencesMapping;
++
++    @BeforeEach
++    void setUp() {
++        userPreferencesMapping = new UserPreferencesMapping(enumTranslationService, new UpdaterIdConverter());
++    }
++
++    @Nested
++    @DisplayName("Version field declaration")
++    class VersionFieldDeclarationTests {
++
++        @Test
++        @DisplayName("should carry @Version annotation on a Long field for optimistic locking")
++        void shouldCarryVersionAnnotationOnLongField() throws NoSuchFieldException {
++            Field versionField = UserPreferences.class.getDeclaredField("version");
++
++            assertThat(versionField.isAnnotationPresent(Version.class)).isTrue();
++            assertThat(versionField.getType()).isEqualTo(Long.class);
++        }
++    }
++
++    @Nested
++    @DisplayName("Version preservation through updates")
++    class VersionPreservationTests {
++
++        @Test
++        @DisplayName("should preserve the loaded version when mapping DtoIn onto an existing entity")
++        void shouldPreserveVersionWhenMappingDtoInOntoExistingEntity() {
++            ModelMapper modelMapper = new ModelMapper();
++            userPreferencesMapping.configureMapping(modelMapper);
++
++            UserPreferences existing = new UserPreferences();
++            existing.setId(42L);
++            existing.setVersion(7L);
++            existing.setLanguage("en");
++
++            UserPreferencesDtoIn dtoIn = new UserPreferencesDtoIn();
++            dtoIn.setLanguage("pl");
++            dtoIn.setTimezone("Europe/Warsaw");
++
++            modelMapper.map(dtoIn, existing);
++
++            assertThat(existing.getVersion()).isEqualTo(7L);
++            assertThat(existing.getLanguage()).isEqualTo("pl");
++            assertThat(existing.getTimezone()).isEqualTo("Europe/Warsaw");
++        }
++
++        @Test
++        @DisplayName("should leave version null for a brand-new entity created from DtoIn")
++        void shouldLeaveVersionNullForNewEntityFromDtoIn() {
++            ModelMapper modelMapper = new ModelMapper();
++            userPreferencesMapping.configureMapping(modelMapper);
++
++            UserPreferencesDtoIn dtoIn = new UserPreferencesDtoIn();
++            dtoIn.setLanguage("pl");
++
++            UserPreferences created = modelMapper.map(dtoIn, UserPreferences.class);
++
++            assertThat(created.getVersion()).isNull();
++        }
++    }
++}

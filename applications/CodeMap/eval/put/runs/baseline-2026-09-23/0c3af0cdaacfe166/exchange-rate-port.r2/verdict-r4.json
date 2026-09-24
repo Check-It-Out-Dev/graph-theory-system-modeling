@@ -1,0 +1,29 @@
+{
+ "rubric": "r4",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 5,
+  "test_quality": 5,
+  "graph_use": 3,
+  "reasons": {
+   "correctness": "Port, properties (prefix currency.fixed-rates), adapter (case-insensitive, PLN=1) and toPln (HALF_UP scale 2) all match the interface. The missing rate throws BusinessRuleTranslatableException with the key and ISO code as argument. Hidden tests 5/5.",
+   "convention_fit": "Port in currency/port and adapter in currency/adapter, inside the existing currency feature package. Explicit constructor injection. The new key is in both messages_en and messages_pl. Unit tests use MockitoExtension with no Spring context and were run with -Ptest.",
+   "design_fit": "CurrencyConversionService depends only on ExchangeRatePort. The properties class follows the existing RegistryProperties/SandboxProperties pattern. The yml block adds only the needed rates. The case-insensitive stream lookup is minimal. No parallel mechanism or stray layer.",
+   "test_quality": "The adapter test covers the configured rate, lowercase matching, PLN without config, and an unknown code. The service test pins HALF_UP rounding (3.955*10) and the exception's key and args. Neither test covers the null isoCode branch.",
+   "graph_use": "One graph query listed the *Port/*Adapter files and led to VatRegistryPort/BialaLista, which the new code followed. The feature package, properties pattern and test layout were found with find/grep/cat."
+  },
+  "rubric": "r4",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 959,
+  "cache_read_input_tokens": 1278,
+  "cache_creation_input_tokens": 23519
+ },
+ "is_error": false
+}

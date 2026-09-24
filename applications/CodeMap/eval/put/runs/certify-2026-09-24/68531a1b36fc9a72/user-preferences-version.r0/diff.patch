@@ -1,0 +1,98 @@
+diff --git a/src/main/java/com/sm/instagram/platform/userpreferences/UserPreferences.java b/src/main/java/com/sm/instagram/platform/userpreferences/UserPreferences.java
+index 9084061dcc8..3d263986ae8 100644
+--- a/src/main/java/com/sm/instagram/platform/userpreferences/UserPreferences.java
++++ b/src/main/java/com/sm/instagram/platform/userpreferences/UserPreferences.java
+@@ -113,4 +113,12 @@ public class UserPreferences {
+      */
+     @Column(name = "notification_email_support_enabled")
+     private Boolean notificationEmailSupportEnabled = true;
++
++    /**
++     * JPA version for optimistic locking.
++     * Prevents lost updates when the web app and mobile app edit the same preferences concurrently.
++     */
++    @Version
++    @Column(name = "version")
++    private Long version;
+ }
+\ No newline at end of file
+diff --git a/src/main/resources/db/changelog/2026/09/24-09-2026-add-version-to-user-preferences.sql b/src/main/resources/db/changelog/2026/09/24-09-2026-add-version-to-user-preferences.sql
+new file mode 100644
+index 00000000000..efa412409ca
+--- /dev/null
++++ b/src/main/resources/db/changelog/2026/09/24-09-2026-add-version-to-user-preferences.sql
+@@ -0,0 +1,9 @@
++--liquibase formatted sql
++--changeset norbert:add-version-to-user-preferences-table
++
++-- Add JPA @Version column to user_preferences table for optimistic locking protection
++-- Prevents lost updates when the web app and mobile app concurrently edit the same preferences
++ALTER TABLE user_preferences
++ADD COLUMN version BIGINT DEFAULT 0 NOT NULL;
++
++-- rollback ALTER TABLE user_preferences DROP COLUMN version;
+diff --git a/src/main/resources/db/changelog/changelog.xml b/src/main/resources/db/changelog/changelog.xml
+index 77f52d5e094..4492f036cad 100644
+--- a/src/main/resources/db/changelog/changelog.xml
++++ b/src/main/resources/db/changelog/changelog.xml
+@@ -184,4 +184,7 @@
+     <!-- June 2026: Widen ticket_reference to VARCHAR(32) — pentest 3.3 SecureRandom format is 21 chars -->
+     <include file="2026/09/02-09-2026-widen-ticket-reference-column.sql" relativeToChangelogFile="true"/>
+ 
++    <!-- September 2026: Add JPA @Version column to user_preferences for optimistic locking protection -->
++    <include file="2026/09/24-09-2026-add-version-to-user-preferences.sql" relativeToChangelogFile="true"/>
++
+ </databaseChangeLog>
+diff --git a/src/test/java/com/sm/instagram/platform/userpreferences/UserPreferencesUnitTest.java b/src/test/java/com/sm/instagram/platform/userpreferences/UserPreferencesUnitTest.java
+new file mode 100644
+index 00000000000..9ee2841a93f
+--- /dev/null
++++ b/src/test/java/com/sm/instagram/platform/userpreferences/UserPreferencesUnitTest.java
+@@ -0,0 +1,47 @@
++package com.sm.instagram.platform.userpreferences;
++
++import jakarta.persistence.Version;
++import org.junit.jupiter.api.DisplayName;
++import org.junit.jupiter.api.Test;
++import org.junit.jupiter.api.extension.ExtendWith;
++import org.mockito.junit.jupiter.MockitoExtension;
++import org.modelmapper.ModelMapper;
++
++import java.lang.reflect.Field;
++
++import static org.assertj.core.api.Assertions.assertThat;
++
++/**
++ * Unit tests for optimistic locking on UserPreferences.
++ * Prevents the web app and mobile app from silently overwriting each other's edits.
++ */
++@ExtendWith(MockitoExtension.class)
++@DisplayName("UserPreferences Unit Tests")
++class UserPreferencesUnitTest {
++
++    @Test
++    @DisplayName("version field carries @Version and is a Long")
++    void versionFieldIsAnnotatedForOptimisticLocking() throws NoSuchFieldException {
++        Field versionField = UserPreferences.class.getDeclaredField("version");
++
++        assertThat(versionField.isAnnotationPresent(Version.class)).isTrue();
++        assertThat(versionField.getType()).isEqualTo(Long.class);
++    }
++
++    @Test
++    @DisplayName("mapping a DtoIn onto an existing entity preserves its loaded version")
++    void mappingDtoInPreservesVersion() {
++        UserPreferences preferences = new UserPreferences();
++        preferences.setVersion(7L);
++        preferences.setLanguage("en");
++
++        UserPreferencesDtoIn dtoIn = new UserPreferencesDtoIn();
++        dtoIn.setLanguage("pl");
++        dtoIn.setTimezone("Europe/Warsaw");
++
++        new ModelMapper().map(dtoIn, preferences);
++
++        assertThat(preferences.getVersion()).isEqualTo(7L);
++        assertThat(preferences.getLanguage()).isEqualTo("pl");
++    }
++}

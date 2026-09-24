@@ -1,0 +1,40 @@
+diff --git a/src/main/java/com/sm/instagram/platform/userpreferences/UserPreferences.java b/src/main/java/com/sm/instagram/platform/userpreferences/UserPreferences.java
+index 9084061dcc8..32642719061 100644
+--- a/src/main/java/com/sm/instagram/platform/userpreferences/UserPreferences.java
++++ b/src/main/java/com/sm/instagram/platform/userpreferences/UserPreferences.java
+@@ -113,4 +113,8 @@ public class UserPreferences {
+      */
+     @Column(name = "notification_email_support_enabled")
+     private Boolean notificationEmailSupportEnabled = true;
++
++    @Version
++    @Column(name = "version")
++    private Long version;
+ }
+\ No newline at end of file
+diff --git a/src/main/resources/db/changelog/2026/09/24-09-2026-add-version-to-user-preferences.sql b/src/main/resources/db/changelog/2026/09/24-09-2026-add-version-to-user-preferences.sql
+new file mode 100644
+index 00000000000..08c60778c27
+--- /dev/null
++++ b/src/main/resources/db/changelog/2026/09/24-09-2026-add-version-to-user-preferences.sql
+@@ -0,0 +1,8 @@
++--liquibase formatted sql
++--changeset system:add-version-to-user-preferences
++
++-- Optimistic locking for user_preferences: web and mobile edited the same
++-- row concurrently and one save silently overwrote the other's changes.
++ALTER TABLE user_preferences ADD COLUMN IF NOT EXISTS version BIGINT NOT NULL DEFAULT 0;
++
++-- rollback ALTER TABLE user_preferences DROP COLUMN version;
+diff --git a/src/main/resources/db/changelog/changelog.xml b/src/main/resources/db/changelog/changelog.xml
+index 77f52d5e094..7e1f5d38cd1 100644
+--- a/src/main/resources/db/changelog/changelog.xml
++++ b/src/main/resources/db/changelog/changelog.xml
+@@ -184,4 +184,7 @@
+     <!-- June 2026: Widen ticket_reference to VARCHAR(32) — pentest 3.3 SecureRandom format is 21 chars -->
+     <include file="2026/09/02-09-2026-widen-ticket-reference-column.sql" relativeToChangelogFile="true"/>
+ 
++    <!-- September 2026: Optimistic locking for user_preferences — protect against lost updates between web and mobile -->
++    <include file="2026/09/24-09-2026-add-version-to-user-preferences.sql" relativeToChangelogFile="true"/>
++
+ </databaseChangeLog>

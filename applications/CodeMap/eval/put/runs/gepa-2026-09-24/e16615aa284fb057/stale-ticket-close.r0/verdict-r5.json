@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 5,
+  "test_quality": 5,
+  "graph_use": 5,
+  "reasons": {
+   "correctness": "Implements the repository finder, closeStaleResolvedTickets with a now-minus-days cutoff, and StaleTicketCloseCronJob with the disabled guard and catch-and-log. Property names and defaults match the interface. Build green, 4/4 hidden and 53/53 existing tests pass.",
+   "convention_fit": "The @Scheduled method carries @SchedulerLock named support:ticketStaleClose. Cron and enabled flag come from @Value properties, and the class is named *CronJob. Injection uses a private final field with @RequiredArgsConstructor. No field @Autowired, and the change stays in the support/ticket feature package.",
+   "design_fit": "The service owns the closing logic, the repository holds a derived query, and the cron job only delegates. It reuses the existing ShedLock and property-driven job pattern. No duplicated lookup, and the footprint is small, with defaults mirrored in application.yml.",
+   "test_quality": "Two MockitoExtension unit test classes with no Spring context. They cover closing and the returned count, the cutoff window via ArgumentCaptor, the empty case with never-save, the disabled skip with verifyNoInteractions, and exception swallowing.",
+   "graph_use": "Before editing, graph queries located the support/ticket files, the existing *CronJob exemplars and the TESTED_BY tests. The agent then read InvoiceRetryCronJob and AnonymousConsentCleanupCronJob and followed their structure."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 1047,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 42074
+ },
+ "is_error": false
+}

@@ -1,0 +1,744 @@
+# =============================================================================
+# MAIN APPLICATION CONFIGURATION - BASE + LOCAL DEV SETTINGS
+# =============================================================================
+# This file contains CRITICAL settings that are inherited by ALL profiles
+# and local development settings (active when no profile specified)
+
+spring:
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: norbert_marchewka@checkitout.app
+    password: ${MAIL_PASSWORD:}
+    from: norbert_marchewka@checkitout.app
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+  application:
+    name: checkitout-backend
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+  
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}  # Default to dev if not specified
+    group:
+      # dev-lite = dev + credential-less simulator extras
+      # (see application-dev-lite.yml for what it adds and why)
+      dev-lite: dev
+  
+  # =============================================================================
+  # JPA/HIBERNATE - UNIFIED CONFIGURATION (CRITICAL FOR CONSISTENCY!)
+  # =============================================================================
+  jpa:
+    open-in-view: false  # ALWAYS false for performance and to catch lazy loading issues
+    database-platform: org.hibernate.dialect.PostgreSQLDialect  # Same dialect for all
+    hibernate:
+      ddl-auto: validate  # ALWAYS validate only - Liquibase handles schema changes
+    properties:
+      '[hypersistence.utils.enable_types_contributor]': false
+      hibernate:
+        # CRITICAL: Sequence generation MUST be identical across environments
+        id:
+          new_generator_mappings: true  # REQUIRED for proper sequence handling
+          optimizer:
+            pooled:
+              preferred: pooled-lo  # Consistent optimizer across all environments
+        
+        # PostgreSQL-specific settings (same for all environments)
+        jdbc:
+          batch_size: 50  # Same batch size everywhere
+          batch_versioned_data: true
+          # CRITICAL for PostgreSQL LOB/bytea handling
+          use_streams_for_binary: false
+          lob:
+            non_contextual_creation: true  # Prevents connection issues
+        
+        # Performance settings (consistent across environments)
+        order_inserts: true
+        order_updates: true
+        enable_lazy_load_no_trans: false  # NEVER enable in any environment
+        
+        # PostgreSQL specific
+        temp:
+          use_jdbc_metadata_defaults: false
+        
+        # Query optimizations (same everywhere)
+        query:
+          in_clause_parameter_padding: true
+          fail_on_pagination_over_collection_fetch: true  # Catch N+1 issues early
+        
+        # Dialect-specific
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        
+        # Development-specific visual settings (overridden in prod)
+        format_sql: true  # Format for readability in dev
+        use_sql_comments: true  # Show comments in dev
+        generate_statistics: false  # Disable statistics (noisy logs)
+    
+    # Never let Hibernate generate DDL
+    generate-ddl: false
+    
+    # Development-specific visual setting (overridden in prod)
+    show-sql: false  # Show SQL in dev
+
+  # =============================================================================
+  # DATASOURCE - BASE HIKARI CONFIGURATION + LOCAL DEV
+  # =============================================================================
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    host: localhost
+    port: 5432
+    database: checkitout_local_db
+    url: jdbc:postgresql://${spring.datasource.host}:${spring.datasource.port}/${spring.datasource.database}
+    # Application uses the restricted user (created by LocalDatabaseInitializer)
+    username: checkitout_app_local
+    password: local_dev_password
+    
+    hikari:
+      # Connection validation (same for all)
+      connection-test-query: SELECT 1
+      validation-timeout: 5000
+      leak-detection-threshold: 60000
+      
+      # Timeouts (consistent across environments)
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000  # 30 minutes
+      
+      # Development pool (smaller)
+      pool-name: CheckItOut-Dev-Pool
+      maximum-pool-size: 5
+      minimum-idle: 2
+      
+      # PostgreSQL-specific properties (CRITICAL for all environments)
+      data-source-properties:
+        prepareThreshold: 0  # Prevents prepared statement issues
+        reWriteBatchedInserts: true  # Better batch performance
+        stringtype: unspecified  # Prevents type conversion issues
+        # SSL disabled for local
+        ssl: false
+        sslmode: disable
+  
+  # =============================================================================
+  # LIQUIBASE - UNIFIED CONFIGURATION + LOCAL DEV
+  # =============================================================================
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/changelog.xml
+    default-schema: public
+    liquibase-schema: public
+    # CRITICAL safety settings (same for all environments)
+    drop-first: false  # NEVER drop database in any environment
+    test-rollback-on-update: false
+    # Lock configuration (prevents migration issues)
+    database-change-log-lock-table: databasechangeloglock
+    database-change-log-table: databasechangelog
+    
+    # Development-specific
+    contexts: dev,local
+    # IMPORTANT: Liquibase runs as application user (after LocalDatabaseInitializer creates it)
+    # This matches production/test pattern where app user owns schema
+    user: ${spring.datasource.username:checkitout_app_local}
+    password: ${spring.datasource.password:local_dev_password}
+    # URL for Liquibase (uses application database)
+    url: ${spring.datasource.url:jdbc:postgresql://localhost:5432/checkitout_local_db}
+  
+  # =============================================================================
+  # JACKSON - UNIFIED JSON HANDLING
+  # =============================================================================
+  jackson:
+    time-zone: UTC
+    date-format: yyyy-MM-dd'T'HH:mm:ss.SSS'Z'
+    serialization:
+      write-dates-as-timestamps: false
+      write-durations-as-timestamps: false
+      fail-on-empty-beans: false
+    default-property-inclusion: NON_NULL
+  
+  # =============================================================================
+  # INTERNATIONALIZATION
+  # =============================================================================
+  messages:
+    basename: messages
+    default-locale: pl
+    encoding: UTF-8
+
+  # =============================================================================
+  # LOCAL REDIS CONFIGURATION
+  # =============================================================================
+  data:
+    redis:
+      mode: standalone
+      host: localhost
+      port: 6379
+      password:
+      database: 0
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 2
+  
+  cache:
+    type: redis
+    redis:
+      time-to-live: 10m  # Shorter TTL for dev
+      key-prefix: "checkitout:dev:"
+
+# ========================================================================
+# NOTIFICATION SETTINGS
+# ========================================================================
+notification:
+  email:
+    # Enable/disable email notifications
+    enabled: ${NOTIFICATION_EMAIL_ENABLED:true}
+    # Cron schedule for email queue processing (default: every 15 minutes)
+    cron: "0 0/15 * * * *"
+    # Maximum emails to process per cron run
+    batch-size: 100
+
+# =============================================================================
+# POSTGRES SUPERUSER - FOR LOCAL INITIAL SETUP ONLY
+# =============================================================================
+# Used by LocalDatabaseInitializer to create database and user
+# Only used in dev/no-redis profiles
+postgres:
+  superuser:
+    username: postgres
+    password: admin
+
+# =============================================================================
+# LOCAL DATABASE INITIALIZATION
+# =============================================================================
+local:
+  db:
+    init:
+      enabled: true  # Auto-create database and user on startup
+      force: false   # Set to true to recreate database (WARNING: data loss!)
+
+# =============================================================================
+# SECURITY - BASE CONFIGURATION
+# =============================================================================
+security:
+  enabled: true
+  oauth2:
+    resourceserver:
+      jwt:
+        jwk-set-uri: https://www.googleapis.com/service_accounts/v1/jwk/securetoken%40system.gserviceaccount.com
+
+# =============================================================================
+# UNIFIED STORAGE MODE - DEFAULT CONFIGURATION
+# =============================================================================
+storage:
+  mode: redis  # Default to Redis (override with 'in-memory' for standalone profiles)
+  # This single property controls ALL storage/caching in the application:
+  # - User authentication cache
+  # - Rate limiting storage
+  # - Session management
+  # - Application cache
+  # - Upload tracking
+  monitoring:
+    enabled: true  # Fixed health indicator to handle missing dependencies gracefully
+    metrics:
+      enabled: true
+    alerts:
+      enabled: true
+
+# =============================================================================
+# RATE LIMITING - BASE CONFIGURATION
+# =============================================================================
+rate-limit:
+  enabled: true
+  algorithm: sliding-window
+  max-entries: 100000
+  cleanup:
+    enabled: true
+    interval: 300000
+  redis:
+    key-prefix: "rate_limit:"
+    enable-fallback: true
+    connection-timeout: 2000
+    sliding-window:
+      enabled: true
+      precision: 10
+    circuit-breaker:
+      enabled: true
+      failure-threshold: 5
+      success-threshold: 3
+      timeout: 30s
+      fallback-to-memory: true
+  metrics:
+    enabled: true
+    optimized: true
+  excluded-paths: /health,/actuator/**,/swagger-ui/**,/v3/api-docs/**
+  # Default limits
+  defaults:
+    requests: 1000  # Very high for dev
+    duration: 3600
+    auth-requests: 20
+    auth-duration: 300
+    upload-requests: 10
+    upload-duration: 3600
+  
+  # Upload-specific rate limits
+  upload:
+    per-hour: 10        # Max uploads per hour per user
+    per-day: 50         # Max uploads per day per user
+    global-per-minute: 100  # Max uploads globally per minute
+    max-user-storage: 1073741824  # 1GB per user
+    max-file-size: 104857600      # 100MB per file
+
+  # =============================================================================
+  # PROFILE CONFIGURATIONS - Override enum defaults for flexibility
+  # =============================================================================
+  # These values match RateLimitProfile enum defaults.
+  # Can be overridden per environment or for testing.
+  profiles:
+    standard:
+      requests: 60
+      window-seconds: 60
+      block-duration-seconds: 300
+    strict:
+      requests: 10
+      window-seconds: 60
+      block-duration-seconds: 300
+    relaxed:
+      requests: 120
+      window-seconds: 60
+      block-duration-seconds: 300
+    high:
+      requests: 300
+      window-seconds: 60
+      block-duration-seconds: 300
+    auth:
+      requests: 50
+      window-seconds: 60
+      block-duration-seconds: 300
+    admin-auth:
+      requests: 3
+      window-seconds: 900
+      block-duration-seconds: 300
+    company-auth:
+      requests: 5
+      window-seconds: 300
+      block-duration-seconds: 180
+    influencer-auth:
+      requests: 10
+      window-seconds: 300
+      block-duration-seconds: 120
+    unknown-auth:
+      requests: 5
+      window-seconds: 300
+      block-duration-seconds: 300
+
+# =============================================================================
+# ACTUATOR & MONITORING - UNIFIED CONFIGURATION
+# =============================================================================
+management:
+  endpoints:
+    web:
+      base-path: /actuator
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: when-authorized
+      roles: SCOPE_ADMIN
+      validate-group-membership: false
+      group:
+        readiness:
+          include: db,diskSpace,liquibase
+        liveness:
+          include: ping
+  health:
+    liquibase:
+      enabled: true
+    diskSpace:
+      enabled: true
+    db:
+      enabled: true
+    ping:
+      enabled: true
+    mail:
+      enabled: false  # Disable mail health check to prevent DOWN status
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: ${spring.application.name}
+      environment: ${app.environment:default}
+
+alerts:
+  rate-limit:
+    threshold: 100
+  failure-rate:
+    threshold: 0.1
+  storage-usage:
+    threshold: 0.8
+  webhook:
+    url: ${ALERT_WEBHOOK_URL:}
+
+webhooks:
+  firebase:
+    secret: ${FIREBASE_WEBHOOK_SECRET:}
+
+# =============================================================================
+# DEVELOPMENT ENVIRONMENT SETTINGS
+# =============================================================================
+app:
+  environment: DEVELOPMENT
+  base-url: ${APP_BASE_URL:https://checkitout.com}
+
+  # =============================================================================
+  # PAYMENTS FEATURE TOGGLE
+  # =============================================================================
+  # When false, all Stripe/subscription/upgrade/billing paths are hidden.
+  # Only the FREE plan is offered (5-campaign limit). Flipping this flag must
+  # not require a code change. See plan: generic-stargazing-cat.md.
+  payments:
+    enabled: ${APP_PAYMENTS_ENABLED:false}
+
+  # =============================================================================
+  # APPLICATION EMAIL CONFIGURATION
+  # =============================================================================
+  email:
+    # Default keeps a credential-less clone bootable (dev-lite); every managed
+    # deployment overrides via env. Must stay @Email-valid — the binder validates.
+    admin-email: ${ADMIN_EMAIL:admin@synthetic.test}
+    from-email: norbert_marchewka@checkitout.app
+    enabled: true
+    validation:
+      enabled: true
+      fail-fast: false  # false = Degraded mode (allow startup with warning)
+      send-test-email: false  # Set to true only for testing SMTP configuration
+      timeout-ms: 5000
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+  error:
+    include-stacktrace: always  # Full stack traces in dev
+    include-message: always
+    include-binding-errors: always
+
+# =============================================================================
+# DEVELOPMENT SECRETS (LOCAL ONLY)
+# =============================================================================
+secrets:
+  development:
+    mode: true  # Use local secrets
+
+# JWT/Security Configuration
+jwt:
+  secret: ${JWT_SECRET:ThisIsAVeryLongSecretKeyForJWTSigningAtLeast256BitsLongForHS256Algorithm}
+  cookie:
+    domain: localhost  # Used by @Value("${jwt.cookie.domain:localhost}")
+    secure: true  # Used by @Value("${jwt.cookie.secure:true}")
+
+# Cookie HMAC Configuration
+cookie:
+  hmac:
+    secret: ${COOKIE_HMAC_SECRET:DifferentSecretKeyForCookieHMACSignatureValidationAlsoAtLeast256BitsLong}  # Used by @Value("${cookie.hmac.secret}")
+
+# Note: SameSite policy is hardcoded in Java:
+# - Session cookies (FirebaseIdToken, partialSession, session): SameSite=Strict
+# - OAuth cookies (Meta/Instagram): SameSite=Lax
+# - Consent cookies: SameSite=Lax (must survive OAuth redirects)
+
+# Consent Module HMAC Configuration (separate from session cookie HMAC)
+consent:
+  hmac-secret: ${CONSENT_HMAC_SECRET:ConsentSpecificHMACSecretKeyForConsentCookieSignatureValidationAtLeast256BitsLong}
+  enforcement:
+    cron: "0 0 2 * * *"       # Daily at 2 AM
+    grace-period-days: 38     # Days after document update before blocking
+  cleanup:
+    cron: "0 0 3 * * SUN"     # Weekly on Sunday at 3 AM
+    retention-days: 365        # Delete anonymous records older than this
+
+# =============================================================================
+# REGISTRY MODULE — POLISH PUBLIC REGISTRY APIs
+# =============================================================================
+registry:
+  gus:
+    api-key: ${GUS_BIR1_API_KEY:abcde12345abcde12345}  # Test key as default
+    environment: production                              # Using production for consistent data across all registries
+  ceidg:
+    api-key: ${CEIDG_APP_KEY:}                           # Bearer token from biznes.gov.pl
+    environment: production                              # CEIDG has no test environment distinction
+  vat:
+    base-url: https://wl-api.mf.gov.pl                  # Public, no auth needed
+  cache:
+    ttl-minutes: 15
+
+# =============================================================================
+# CURRENCY MODULE — FIXED EXCHANGE RATES (TO BE REPLACED BY AN EXTERNAL PROVIDER)
+# =============================================================================
+currency:
+  fixed-rates:
+    rates:
+      USD: 4.00
+      EUR: 4.30
+      GBP: 5.00
+
+firebase:
+  config:
+    path: src/main/resources/service-account.json
+  project:
+    id: check-it-out-47c50  # Expected TEST Firebase instance (actual depends on service-account.json)
+  # Note: Firebase API key removed - now using service account OAuth Bearer token authentication
+
+# Google Cloud Platform Configuration
+gcp:
+  project-id: check-it-out-47c50
+  kms:
+    enabled: true
+    location: europe-central2  # Warsaw, Poland
+    key-ring: instagram-tokens
+    key-name: token-encryption-key
+    totp-key-name: totp-secrets-key  # For 2FA secrets
+  bucket-name: ${GCP_BUCKET_NAME:check-it-out-47c50.firebasestorage.app}
+  storage:
+    enabled: true
+
+# Meta App Configuration (Facebook App for Instagram Business Login)
+meta:
+  app-id: ${META_APP_ID:770277702827785}          # TEST Meta App ID
+  app-secret: ${META_APP_SECRET:}  # TEST Meta Secret
+  deletion:
+    cron: ${META_DELETION_CRON:0 0 3 * * *}  # Daily at 3 AM
+    enabled: ${META_DELETION_ENABLED:true}
+
+# Admin Configuration
+admin:
+  firebase:
+    uid: ${ADMIN_FIREBASE_UID}
+  email: ${ADMIN_EMAIL}
+
+instagram:
+  test-token: ${INSTAGRAM_TEST_TOKEN:}
+  client-id: ${INSTAGRAM_CLIENT_ID:2113860459101101}      # Instagram App ID (TEST)
+  client:
+    secret: ${INSTAGRAM_CLIENT_SECRET:}  # Instagram Secret (TEST)
+  redirect-uri: https://localhost:8080/api/auth/social/callback/instagram  # Backend handles OAuth callback (HTTPS required)
+  validation:
+    enabled: true  # Validate configuration at startup
+    test-mode: false  # In production/test, try actual API calls when users authenticate
+
+# =============================================================================
+# FILE UPLOAD CONFIGURATION
+# =============================================================================
+file-upload:
+  max-file-size: 10485760
+  allowed-extensions: jpg,jpeg,png,gif,webp
+  signed-url-expiration-minutes: 5
+  storage-path-pattern: content/{userId}/{timestamp}_{filename}
+  tracking:
+    enabled: true
+    cleanup-orphaned-uploads: true
+    orphaned-upload-timeout-hours: 1
+
+# =============================================================================
+# RECAPTCHA ENTERPRISE CONFIGURATION
+# =============================================================================
+recaptcha:
+  project-id: check-it-out-47c50
+  # Using Firebase service account for authentication (no API key needed)
+  site-key: 6LfEy6orAAAAACHdzHZXmj9FC5rKcT0nQpe8qzcD  # Public site key
+  score-threshold: 0.5  # Default threshold
+  enabled: true
+  cache-duration: 60  # Cache assessments for 60 seconds
+  # Action-specific thresholds (optional)
+  login-threshold: 0.5
+  signup-threshold: 0.3  # Lower threshold for signup to reduce friction
+  forgot-password-threshold: 0.3
+
+# =============================================================================
+# TOTP (2FA) CONFIGURATION
+# =============================================================================
+totp:
+  enabled: true
+  # Environment-specific issuer for Google Authenticator
+  # This will show as "CheckItOut-Dev" in the authenticator app for local/test
+  issuer: ${TOTP_ISSUER:CheckItOut-Dev}
+  
+  # GoogleAuthenticator Configuration (centralized)
+  window-size: 1  # Allow 1 window before/after current (±30 seconds tolerance)
+  code-digits: 6  # Standard TOTP code length
+  time-step-seconds: 30  # Standard TOTP time step
+  key-representation: BASE32  # Key encoding format
+  
+  # Legacy property (kept for backward compatibility)
+  window: 1  # Deprecated - use window-size instead
+  
+  # Rate limiting for TOTP attempts
+  max-attempts: 5
+  window-minutes: 1
+  
+  # Backup codes configuration
+  backup-codes:
+    count: 10
+    length: 8
+    max-attempts: 3
+    window-hours: 1
+
+# =============================================================================
+# SESSION CONFIGURATION
+# =============================================================================
+# Configurable session durations for JWT tokens
+# Override in profile-specific yamls (e.g., application-e2e.yml for testing)
+session:
+  full-duration-seconds: 604800      # 7 days (7 * 24 * 60 * 60) for COMPANY/INFLUENCER
+  admin-full-duration-seconds: 7200  # 2 hours for ADMIN/PENDING_ADMIN (security hardening)
+  partial-duration-seconds: 600      # 10 minutes for partial sessions (2FA pending)
+
+# =============================================================================
+# QR CODE CONFIGURATION FOR 2FA
+# =============================================================================
+qrcode:
+  logo:
+    path: static/favicon.png  # Path to logo file in resources
+  color:
+    foreground: "#000000"  # Black QR code
+    background: "#FFFFFF"  # White background
+
+# =============================================================================
+# MAXMIND GEOIP CONFIGURATION
+# =============================================================================
+maxmind:
+  license:
+    # Empty default: without the key the GeoIP service boots in degraded
+    # mode (downloads + scheduled updates skip themselves) instead of
+    # killing the whole context — a fresh clone without .env must compile
+    # and pass tests.
+    key: ${MAXMIND_LICENSE_KEY:}
+    account-id: ${MAXMIND_ACCOUNT_ID:1215955}
+  database:
+    path: ./geoip/GeoLite2-City.mmdb
+  update:
+    enabled: true
+    cron: "0 0 2 ? * WED"  # Weekly update on Wednesday at 2 AM
+
+
+# =============================================================================
+# STRIPE PAYMENT GATEWAY
+# =============================================================================
+stripe:
+  # Empty defaults keep StripeProperties bindable on a credential-less clone —
+  # StripePropertiesConfig registers it unconditionally (by design, so the
+  # payments-off path stays wireable). StripeConfig itself only loads when
+  # app.payments.enabled=true, and real deployments inject both keys via env.
+  secret-key: ${STRIPE_PRIVATE_KEY:}
+  public-key: ${STRIPE_PUBLIC_KEY:}
+  # No fallback: the old literal leaked via the public release (rotation owed
+  # by the owner) — deployments must inject the real secret via env.
+  webhook-secret: ${STRIPE_WEBHOOK_SECRET:}
+  prices:
+    business: price_1TDprAEF0n7JDo59KpKh8vnt
+    enterprise: price_1TDprIEF0n7JDo591xcehTLl
+
+# =============================================================================
+# FAKTUROWNIA INVOICING
+# =============================================================================
+fakturownia:
+  enabled: true
+  # Empty default: a machine without the env var must still BOOT (invoicing
+  # is an optional integration — payments work without it; unsent invoices
+  # queue as PENDING/FAILED for the retry cron). A blank key makes the
+  # adapter treat itself as unconfigured instead of failing startup.
+  api-key: ${FAKTUROWNIA_API_KEY:}
+  domain: checkitout
+  department-id: 1878648
+  connect-timeout-ms: 5000
+  read-timeout-ms: 15000
+
+# =============================================================================
+# SUBSCRIPTION CRONS
+# =============================================================================
+subscription:
+  trial-expiry-notifier:
+    enabled: true
+    cron: "0 0 5 * * *"
+  period-processor:
+    enabled: true
+    cron: "0 0 4 * * *"
+  grace-processor:
+    enabled: true
+    cron: "0 0 3 * * *"
+  invoice-retry:
+    enabled: true
+    cron: "0 */15 * * * *"
+
+# =============================================================================
+# DEVELOPMENT LOGGING
+# =============================================================================
+logging:
+  level:
+    root: INFO
+    com.sm.instagram.platform: INFO
+    com.sm.instagram.platform.common.authorization: INFO  # Ensure Firebase logging is visible
+    com.sm.instagram.platform.common.ratelimit: INFO  # Rate limiting logs
+    com.sm.instagram.platform.common.logging: INFO
+    com.sm.instagram.platform.secrets: INFO
+    com.sm.instagram.platform.secrets.ProductionSecretService: INFO
+    com.sm.instagram.platform.secrets.HcpSecretManager: INFO
+    org.hibernate.SQL: INFO  # Hide SQL
+    org.hibernate.type.descriptor.sql.BasicBinder: INFO  # Hide parameters
+    org.hibernate.id: INFO  # Hide sequence operations
+    org.hibernate.engine.internal.StatisticalLoggingSessionEventListener: WARN  # Suppress session metrics
+    org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver: INFO
+    liquibase: INFO  # Show migrations
+    com.zaxxer.hikari: INFO  # Only warnings for pool
+    com.google.firebase: INFO
+  pattern:
+    dateformat: yyyy-MM-dd'T'HH:mm:ss.SSS'Z',UTC
+  file:
+    name: logs/checkitout-dev.log
+    path: target/var/log
+
+# =============================================================================
+# SWAGGER ENABLED FOR DEVELOPMENT
+# =============================================================================
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    try-it-out-enabled: true
+
+# =============================================================================
+# CORS FOR LOCAL DEVELOPMENT
+# =============================================================================
+cors:
+  allowed-origins:
+    - http://localhost:3000
+    - http://localhost:4200
+    - https://localhost:4200
+    - http://localhost:8080
+    - https://localhost:8080
+    - http://localhost:80
+    - https://localhost:80
+    - http://bs-local.com:4200
+    - https://bs-local.com:4200
+  allowed-methods:
+    - GET
+    - POST
+    - PUT
+    - PATCH
+    - DELETE
+    - OPTIONS
+    - HEAD
+  allow-credentials: true
+  max-age: 86400

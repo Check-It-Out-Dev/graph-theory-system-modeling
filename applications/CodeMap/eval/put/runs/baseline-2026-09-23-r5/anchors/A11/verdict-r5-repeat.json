@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 1,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 4,
+  "design_fit": 4,
+  "test_quality": 4,
+  "graph_use": 2,
+  "reasons": {
+   "correctness": "The port, properties, adapter and service match the interface. The adapter handles PLN=1 and matches case-insensitively. toPln rounds to 2 decimals HALF_UP and throws BusinessRuleTranslatableException with the key and ISO code. Hidden tests pass 4/4.",
+   "convention_fit": "CurrencyConversionService imports com.sm.instagram.platform.currency.adapter.FixedExchangeRateAdapter, which breaks the rule that services depend on the port and never on an adapter class. Constructor injection, the port/adapter packages and the en+pl i18n keys are compliant.",
+   "design_fit": "The port/adapter split is clean and the properties class is cohesive. The unused adapter import in the service couples the conversion code to the fixed vendor, which undercuts the swap-without-touching goal. Otherwise the footprint is minimal.",
+   "test_quality": "The MockitoExtension test covers HALF_UP rounding, the missing-rate key, and adapter case-insensitivity, PLN and the unknown code. It does not assert the ISO-code argument on the exception. The run command used placeholder -Dtest=X, and the harness counted only 2 tests.",
+   "graph_use": "There was one trivial graph query (MATCH (e:Entity) RETURN e.file_path LIMIT 1) that located nothing relevant. The agent then read CompanyRegistryPort but no existing adapter or TranslatableException usage before writing."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 946,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 22067
+ },
+ "is_error": false
+}

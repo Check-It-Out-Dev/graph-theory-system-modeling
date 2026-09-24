@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 5,
+  "test_quality": 4,
+  "graph_use": 4,
+  "reasons": {
+   "correctness": "UserPreferences gains `@Version private Long version`. The changeset adds `version BIGINT DEFAULT 0 NOT NULL` to user_preferences. Build green, hidden acceptance 2/2, existing tests 46/46.",
+   "convention_fit": "Changeset 2026/09/24-09-2026-add-version-to-user-preferences.sql has the formatted-sql header, changeset id and rollback. It is included last in changelog.xml under a `<!-- September 2026: ... -->` comment. MockitoExtension unit test was added and run.",
+   "design_fit": "Minimal footprint: one entity field, one changeset, one include. It reuses JPA @Version exactly as PartnershipOpportunity does. No new mechanism, no service or DTO churn.",
+   "test_quality": "UserPreferencesUnitTest asserts @Version is present on a Long field. It checks that ModelMapper keeps the loaded version on update and that a new entity starts with null version. No stale-version conflict path is exercised; it is mostly a structural check.",
+   "graph_use": "Graph queries located the userpreferences files, their dependents and TESTED_BY tests before editing. The changeset exemplar and @Version examples were then found by grep/glob, not by the graph."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 763,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 25761
+ },
+ "is_error": false
+}

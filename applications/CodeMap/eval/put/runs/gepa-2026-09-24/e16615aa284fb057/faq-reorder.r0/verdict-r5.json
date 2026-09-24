@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 5,
+  "test_quality": 5,
+  "graph_use": 4,
+  "reasons": {
+   "correctness": "PUT /categories/{categoryId}/order returns 204 under @PreAuthorize ADMIN. reorderCategory rejects missing, duplicate and foreign ids with error.business.faq_reorder_mismatch, sets order i+1 and saves each FAQ. Unknown category throws ResourceNotFoundException. Hidden acceptance tests 6/6.",
+   "convention_fit": "Throws BusinessRuleTranslatableException with keys added to both messages_en and messages_pl. Uses a *DtoIn body and @PreAuthorize; class-level @RateLimit covers the endpoint. Placed in the faq feature package. No field injection.",
+   "design_fit": "Reuses getFaqsByCategory, so the category lookup and not-found behaviour are not duplicated. The logic sits in the service and the controller only delegates. The null-list guard is redundant with @NotEmpty but harmless.",
+   "test_quality": "FaqServiceUnitTest uses MockitoExtension with no Spring context. It covers unknown category, missing, duplicate and foreign ids, a reorder by positions and a single FAQ, with ArgumentCaptor checks on save order and never-save on failures.",
+   "graph_use": "Graph queries located the faq files, their TESTED_BY tests and their dependents before editing. Later navigation of the exception classes and test examples relied on grep and glob."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 916,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 34458
+ },
+ "is_error": false
+}

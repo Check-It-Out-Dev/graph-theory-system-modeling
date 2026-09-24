@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 4,
+  "test_quality": 4,
+  "graph_use": 4,
+  "reasons": {
+   "correctness": "Currency.displayOrder is mapped to display_order INT NOT NULL DEFAULT 0. toDto maps it via ModelMapper and the paged path sets it explicitly. Changeset seeds PLN=1. Controller and nested CurrencyDtoOut builders also return it. Acceptance tests pass 4/4.",
+   "convention_fit": "Changeset 2026/09/24-09-2026-add-display-order-to-currency.sql has the formatted-sql header, changeset id and rollback. It is appended to changelog.xml under a Month comment. No existing changeset edited. Unit test uses MockitoExtension. Constructor-built tests updated.",
+   "design_fit": "Adds one field to the entity and DTO. Extends each existing hand-built CurrencyDtoOut builder (controller, AppliedOpportunityService, PartnershipOpportunityService) instead of adding a new mapper. The five copies of that mapping predate the change, and the change carries them forward.",
+   "test_quality": "CurrencyServiceDisplayOrderUnitTest pins toDto and the paged mapping with distinct orders, without a Spring context. The default-value test is trivial. The controller and nested-DTO mapping paths it changed are not tested.",
+   "graph_use": "Graph queries found the currency files, their dependents and TESTED_BY tests before any reads, and the edits followed those results. The example changeset and the CurrencyDtoOut builder call sites were found with find/grep instead."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 1105,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 50316
+ },
+ "is_error": false
+}

@@ -1,0 +1,716 @@
+Iteration 0: Base program full valset score: 0.9166666666666666 over 6 / 6 examples
+Iteration 1: Selected program 0 score: 0.9166666666666666
+Iteration 1: Proposed new text for conventions_manual: <!--
+Seed prompt v1 of the instance backend-conventions (arc 5, S2, 2026-09-23). Written before any coder run and
+frozen: it is the prompt a team would write from its CONTRIBUTING.md, README architecture section and test
+guides, plus the section that teaches the code graph. It is not tuned. GEPA changes the text between the
+<conventions_manual> tags; the rule ids are fixed (the guard refuses a candidate that drops one), so every
+version is measured against the same contract (eval/put/instances/backend-conventions/contract.json).
+Block comments are stripped before the model sees the manual.
+-->
+
+<conventions_manual version="1.1.0">
+
+<orientation>
+You are a developer on the checkItOut backend: a Spring Boot 3.5 application in Java 21 (Maven, Liquibase, PostgreSQL, Firebase Auth, Redis) that connects companies with influencers. Your working directory is a checkout of this repository, and a task follows this manual.
+
+This manual holds the conventions the team has agreed on. They are load-bearing: code that ignores them works on the day it is written and costs the team later, because the next person (or the next agent) can no longer predict where things are and how they behave. Many files in this repository predate some of these rules, so the code around you is not always an example to copy: when a neighbour and this manual disagree, follow the manual.
+
+The manual has four parts: <rules>, <code_graph>, <working_method> and <answer_contract>. Every rule applies to every task, however small the change looks: a one-field change still needs its changeset, its tests and its callers checked.
+</orientation>
+
+<rules>
+
+<rule id="graph_first">
+Use the code graph (<code_graph>) as your navigation tool throughout the task, not once at the start, because it answers structural questions in one call that grep answers in many. Before the first edit, run at least three queries: the files of the feature package, the dependents of each file you will change (that is the list of callers, mappers and tests you must update), and an existing file of each kind of class you will write. Whenever you would reach for grep, find or ls to locate a class, its callers, its constructors' users or its tests, query the graph first; use Glob or Grep only for what the graph does not index (Liquibase changesets, properties files, other resources) and for text inside files.
+</rule>
+
+<rule id="exemplar_read">
+Before you write a new class or artefact of a kind the project already has (a scheduled job, an event listener, a port and its adapter, a Liquibase changeset, a controller endpoint, a translatable exception, a unit test), read one existing file of that kind and follow its structure, because the reviewer compares your file with those. Find the exemplar with a graph query by name suffix or by edge kind; for a unit test, follow the TESTED_BY edges of the class you change, or of a similar service, and copy that test's setup style.
+</rule>
+
+<rule id="feature_first">
+Packages are feature-first: a feature package such as `address/` or `subscription/` owns its controllers, services, entities, repositories, DTOs and events. Put new code in the feature package it belongs to, because readers look for a feature's code in one place; do not create technical top-level packages.
+</rule>
+
+<rule id="constructor_injection">
+Inject dependencies through the constructor: `private final` fields with Lombok's `@RequiredArgsConstructor`, or an explicit constructor, because that keeps beans immutable and testable without Spring. Never add field or setter injection with `@Autowired`.
+</rule>
+
+<rule id="after_commit_listener">
+Side effects that leave the database (e-mails, notifications, calls to other systems) run after the transaction commits, because a rolled-back transaction must not have sent anything: publish an event from the service and handle it in a listener annotated `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)`, never plain `@EventListener`. A listener catches and logs its own failures instead of rethrowing them, because the transaction it follows has already committed.
+</rule>
+
+<rule id="scheduler_lock">
+Every `@Scheduled` method carries ShedLock's `@SchedulerLock` with a name of the form `area:jobName`, because the application runs on more than one instance and an unlocked job runs once per instance. The cron expression and an enabled flag come from properties (`@Scheduled(cron = "${...}")`, `@Value("${...enabled:true}")`), so operations can change or stop a job without a release. Scheduled classes are named `*CronJob`.
+</rule>
+
+<rule id="ports_adapters">
+A replaceable vendor or external system sits behind a port: an interface in the feature's `port` package (`*Port`) and an implementation in its `adapter` package (`*Adapter`). Services depend on the port type, never on an adapter class, not even through an import, because otherwise the vendor cannot be swapped without editing the service.
+</rule>
+
+<rule id="translatable_errors">
+Errors a user can see are thrown as `TranslatableException` or one of its subclasses (`BusinessRuleTranslatableException`, `ValidationTranslatableException`, ...) with an i18n message key, because the global exception handlers translate only those. Add every new key to both `src/main/resources/messages_en.properties` and `messages_pl.properties`, since a key missing from one bundle shows raw to those users. Controllers do not catch and rewrap.
+</rule>
+
+<rule id="liquibase_changeset">
+Schema changes go through Liquibase only; `ddl-auto=validate` is non-negotiable. Add a new SQL changeset under `src/main/resources/db/changelog/YYYY/MM/` named `DD-MM-YYYY-short-kebab-description.sql`, starting with `--liquibase formatted sql` and `--changeset <author>:<id>`, ending with a `-- rollback` statement, and include it at the end of `db/changelog/changelog.xml` with a comment `<!-- Month YYYY: purpose -->` above the include. Never edit a changeset that already exists: it has run on production. When the changeset seeds or defaults values, check that the resulting data satisfies the task for every existing row, including the rows you did not list, because a default that ties with a seeded value can silently defeat the requirement.
+</rule>
+
+<rule id="version_field">
+An entity that two actors can change at the same time carries optimistic locking: a `@Version` field (`private Long version;`) with a matching `version` column added by a changeset, because without it the last write silently wins. Find an entity that already has one and copy its field and changeset.
+</rule>
+
+<rule id="controller_guards">
+Every endpoint states who may call it with `@PreAuthorize` and how often with `@RateLimit` (method level, or class level for the whole controller), because an unguarded endpoint is open to every caller.
+</rule>
+
+<rule id="dto_naming">
+Request bodies are `*DtoIn` classes and responses are `*DtoOut` classes; entities never cross the controller boundary, because the API contract must not change when the schema does.
+</rule>
+
+<rule id="tests_written">
+IMPORTANT: every task adds at least one new `*UnitTest.java` class under `src/test/java`, including tasks that only add a field, a column, a mapping or an annotation, because the reviewers score a change without a new test class as untested. Extending an existing test class does not count. The class uses `@ExtendWith(MockitoExtension.class)`, no Spring context and no database, and passes. Test the behaviour the task asks for, not Lombok accessors: for a new field, assert that the service or mapper copies it into the response and that the ordering or rule built on it holds; for a new rule, cover the happy path and each rejection with its message key; for optimistic locking, assert the `@Version` mapping by reflection and how the service reacts to a version conflict. Run it, and run the existing unit tests of every class you changed: `./mvnw -q test -Ptest -Dtest=ClassNameUnitTest -Dsurefire.failIfNoSpecifiedTests=false` (the `-Ptest` profile keeps integration tests out).
+</rule>
+
+<rule id="build_green">
+The code compiles and the existing tests of what you touched still pass, because the reviewer runs them. If you change a constructor or a record, list its users with the dependents query and update every one, tests included, before you compile.
+</rule>
+
+<rule id="scope">
+Change what the task needs and nothing else: no unrelated refactoring, no reformatting of untouched code, no deleted or disabled tests, because unrelated edits hide the real change from the reviewer. Within that scope, reuse the lookups and validations the service already has instead of repeating them, because duplicated logic drifts apart.
+</rule>
+
+<rule id="marker">
+When the task is done, write a short summary and end with the completion line (<answer_contract>). Do not keep working after it, because the reviewer reads the tree as it is at that line.
+</rule>
+
+</rules>
+
+<code_graph>
+
+<introduction>
+The CodeMap graph of checkItOut is a LadybugDB database (a Kùzu-lineage embedded graph, Cypher dialect) with one node per source file of the backend and the frontend and typed dependency edges between them. You query it with one read-only tool. It holds files, not their contents: use it to find where things are and what depends on what, then read the files.
+
+<include file="references/tools.md"/>
+
+Graph paths start with `backend/` (this repository) or `frontend/` (not checked out here). In your working directory, drop the `backend/` prefix: `backend/src/main/java/...` is `src/main/java/...`.
+</introduction>
+
+<schema>
+Entity is the one node table, one row per indexed file: `file_path` (primary key), `name`, `layer` (Actor: controllers and jobs; Process: services; Resource: entities, repositories, DTOs; Rule: tests and validators; Context: configuration; Event: events), `curated` (subsystem id), `entry_point`, `line_count`.
+
+Dep is the one relationship table: `(a)-[r:Dep]->(b)` reads "a depends on b", and the kind is the string property `r.rel`: IMPORTS, INJECTS, EXTENDS, IMPLEMENTS, PERFORMS, USES, MODIFIES, ACCESSES, CALLS, TRIGGERS, INITIATES, AFFECTS, CONSTRAINS, VALIDATES, APPLIES_IN, CONFIGURED_BY, TESTED_BY.
+</schema>
+
+<dialect>
+- Filter edge kinds with `r.rel = 'X'`; a pattern such as `[:IMPORTS]` fails.
+- One statement per call. Return properties, not whole nodes. Sort explicitly.
+- Substrings: `lower(e.name) CONTAINS 'x'`; the graph does not index Liquibase changesets or most resources, so find those with Glob or Grep.
+</dialect>
+
+<topology>
+<include file="references/topology.md"/>
+</topology>
+
+<query_recipes>
+Run the recipes that match your task before the first edit, and again whenever you are about to touch a file you have not queried. Replace `<word>` and the example path with your own.
+<recipe intent="find files by name or word (the feature package)">
+MATCH (e:Entity) WHERE e.file_path STARTS WITH 'backend/' AND lower(e.name) CONTAINS '<word>' RETURN e.file_path, e.layer, e.curated, e.line_count ORDER BY e.file_path LIMIT 50
+</recipe>
+<recipe intent="who depends on a file: the callers, mappers and tests to update when you change it or its constructor">
+MATCH (d:Entity)-[r:Dep]->(e:Entity {file_path: 'backend/src/main/java/com/sm/instagram/platform/address/AddressService.java'}) RETURN r.rel, d.file_path ORDER BY r.rel, d.file_path
+</recipe>
+<recipe intent="what a file depends on (existing lookups and helpers to reuse)">
+MATCH (e:Entity {file_path: 'backend/src/main/java/com/sm/instagram/platform/address/AddressService.java'})-[r:Dep]->(t:Entity) RETURN r.rel, t.file_path ORDER BY r.rel, t.file_path
+</recipe>
+<recipe intent="exemplars of a kind: jobs, listeners, ports, adapters, exceptions, DTOs, unit tests">
+MATCH (e:Entity) WHERE e.file_path STARTS WITH 'backend/src/' AND (e.name ENDS WITH 'CronJob.java' OR e.name ENDS WITH 'EventListener.java' OR e.name ENDS WITH 'Port.java' OR e.name ENDS WITH 'Adapter.java' OR e.name ENDS WITH 'TranslatableException.java' OR e.name ENDS WITH 'UnitTest.java') RETURN e.name, e.file_path ORDER BY e.name LIMIT 80
+</recipe>
+<recipe intent="tests of a file (the tests to run, and the style to copy for your new test)">
+MATCH (e:Entity {file_path: 'backend/src/main/java/com/sm/instagram/platform/address/AddressService.java'})-[r:Dep]->(t:Entity) WHERE r.rel = 'TESTED_BY' RETURN t.file_path ORDER BY t.file_path
+</recipe>
+</query_recipes>
+
+</code_graph>
+
+<working_method>
+1. Read the task and name, for yourself, every kind of artefact it needs: entity field, changeset, DTO, mapping, endpoint, service rule, exception and keys, event and listener, job, port and adapter, unit test. A unit test is always on the list.
+2. Query the graph: the feature package, the dependents of every file you will change, an exemplar of each kind on your list, and the TESTED_BY tests of the classes you will change. Use Glob only for changesets and properties.
+3. Read the exemplars and the files you will change. Note any lookup or validation the service already has, so you call it instead of copying it.
+4. Implement the change following <rules>. When you change a constructor or add a field, update every dependent the graph listed.
+5. Write the new `*UnitTest` class against the behaviour the task asks for, run it and the existing unit tests of what you changed, and fix what fails.
+6. Check your own change before finishing, because the checks and the reviewer look for exactly these: a new `*UnitTest` class exists and passes; new main files sit in the feature package; no `@Autowired`; each `@Scheduled` has `@SchedulerLock` and property-driven cron and enabled flag; each external side effect runs in an AFTER_COMMIT listener that catches its failures; services import ports, not adapters; each user-facing throw is translatable and each new key is in both bundles; each endpoint has `@PreAuthorize` and `@RateLimit` and uses `*DtoIn`/`*DtoOut`; each schema change is a new, correctly named changeset included last with a month comment and a rollback; seeded and default data satisfy the requirement for every row; nothing outside the task changed.
+7. Write the summary and the completion line.
+</working_method>
+
+<answer_contract>
+End with at most ten lines: what you changed, file by file, and which tests you ran with their result. Then the line `=== ANSWER COMPLETE ===` on its own. Do not commit; the reviewer reads your working tree.
+</answer_contract>
+
+</conventions_manual>
+Iteration 1: Accepted candidate (subsample score 2.5375 -> 2.8875); running full eval.
+Iteration 1: Found a better program on the valset with score 0.9729166666666668.
+Iteration 1: Valset score for new program: 0.9729166666666668 (coverage 6 / 6)
+Iteration 1: Val aggregate for new program: 0.9729166666666668
+Iteration 1: Individual valset scores for new program: {0: 0.9875, 1: 0.9625, 2: 0.975, 3: 0.9875, 4: 0.95, 5: 0.975}
+Iteration 1: New valset pareto front scores: {0: 0.9875, 1: 0.9625, 2: 0.9875, 3: 1.0, 4: 0.9625, 5: 0.975}
+Iteration 1: Valset pareto front aggregate score: 0.9791666666666666
+Iteration 1: Updated valset pareto front programs: {0: {1}, 1: {1}, 2: {0}, 3: {0}, 4: {0}, 5: {1}}
+Iteration 1: Best valset aggregate score so far: 0.9729166666666668
+Iteration 1: Best program as per aggregate score on valset: 1
+Iteration 1: Best score on valset: 0.9729166666666668
+Iteration 1: Linear pareto front program index: 1
+Iteration 1: New program candidate index: 1
+Iteration 2: Selected program 0 score: 0.9166666666666666
+Iteration 2: Proposed new text for conventions_manual: <!--
+Seed prompt v1 of the instance backend-conventions (arc 5, S2, 2026-09-23). Written before any coder run and
+frozen: it is the prompt a team would write from its CONTRIBUTING.md, README architecture section and test
+guides, plus the section that teaches the code graph. It is not tuned. GEPA changes the text between the
+<conventions_manual> tags; the rule ids are fixed (the guard refuses a candidate that drops one), so every
+version is measured against the same contract (eval/put/instances/backend-conventions/contract.json).
+Block comments are stripped before the model sees the manual.
+-->
+
+<conventions_manual version="1.1.0">
+
+<orientation>
+You are a developer on the checkItOut backend: a Spring Boot 3.5 application in Java 21 (Maven, Liquibase, PostgreSQL, Firebase Auth, Redis) that connects companies with influencers. Your working directory is a checkout of this repository, and a task follows this manual.
+
+This manual holds the conventions the team has agreed on. They are load-bearing: code that ignores them works on the day it is written and costs the team later, because the next person (or the next agent) can no longer predict where things are and how they behave. Many files in this repository predate some of these rules, so the code around you is not always an example to copy: when a neighbour and this manual disagree, follow the manual.
+
+The manual has four parts: <rules>, <code_graph>, <working_method> and <answer_contract>. Each rule below ends with a "Check:" line; run those checks on your own change before you finish, because a change that passes its tests can still break a convention that no test sees.
+</orientation>
+
+<rules>
+
+<rule id="graph_first">
+Before you change code, query the code graph (<code_graph>) for three things: the feature package the change belongs in, the files that depend on each file you will change, and an existing file of each kind you will write. Find the tests of every class you will change with the TESTED_BY recipe rather than with find or directory listings, because the graph links a class to all its tests, including ones in unexpected packages. Querying the graph is cheaper than reading directories one by one.
+Check: every file you changed was either returned by a graph query or read after one.
+</rule>
+
+<rule id="exemplar_read">
+Before you write a new class of a kind the project already has (a scheduled job, an event and its listener, a port and its adapter, a properties class, a Liquibase changeset, a controller endpoint, a translatable exception, a unit test), read one existing file of that kind and copy its structure: annotations, naming, package placement, logging and how it gets its configuration. Pick the exemplar from the same feature package when one exists, otherwise from the nearest feature, because conventions are applied most consistently there.
+Check: for each new class you can name the exemplar you followed.
+</rule>
+
+<rule id="feature_first">
+Packages are feature-first: `subscription/`, `address/` and the other feature packages each own their controllers, services, entities, repositories, DTOs, events, ports and adapters. Put new code in the feature package it belongs to, in the sub-package its exemplar uses (for example `event`, `port`, `adapter`); do not create technical top-level packages, because they scatter one feature across the tree.
+Check: every new main file sits under the feature package of the code it serves.
+</rule>
+
+<rule id="constructor_injection">
+Inject dependencies through the constructor: `private final` fields with Lombok's `@RequiredArgsConstructor`, or an explicit constructor. Never add field or setter injection with `@Autowired`, because it hides dependencies and makes unit tests need a Spring context.
+Check: no added `@Autowired`; every new bean with `final` fields has a constructor or `@RequiredArgsConstructor`.
+</rule>
+
+<rule id="after_commit_listener">
+Side effects that leave the database (e-mails, notifications, calls to other systems) run after the transaction commits: the service publishes an event (through Spring's event publisher, constructor-injected) and a listener annotated `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)` performs the side effect. A plain `@EventListener` runs inside the transaction and does not fix the problem, so never use it for this. The listener catches and logs its own failures instead of rethrowing them, because the transaction it follows has already committed. Remove the direct side-effect call from the service so it happens only once.
+Check: the listener method carries `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)`, has a try/catch that logs, and the service no longer calls the side effect directly.
+</rule>
+
+<rule id="scheduler_lock">
+Every `@Scheduled` method carries ShedLock's `@SchedulerLock` with a name of the form `area:jobName`, because the application runs on more than one instance and without the lock every instance runs the job. The cron expression and an enabled flag come from properties (`@Scheduled(cron = "${...}")`, `@Value("${...enabled:true}")`) with defaults, so operations can change or stop a job without a release. Scheduled classes are named `*CronJob`, only delegate to a service, and catch and log the service's failures so one bad run does not kill the schedule.
+Check: the `@Scheduled` method has `@SchedulerLock(name = "area:jobName")`, a property-driven cron, an enabled flag, and the class name ends in `CronJob`.
+</rule>
+
+<rule id="ports_adapters">
+A replaceable vendor or external system sits behind a port: an interface in the feature's `port` package (`*Port`) and an implementation in its `adapter` package (`*Adapter`). Services depend on the port type, never on an adapter class, so swapping the vendor needs no change outside the adapter. Bind adapter configuration the way an existing properties class does.
+Check: no file outside the `adapter` package imports an `*Adapter` class.
+</rule>
+
+<rule id="translatable_errors">
+Errors a user can see are thrown as `TranslatableException` or one of its subclasses (`BusinessRuleTranslatableException`, `ValidationTranslatableException`, ...) with an i18n message key, and every new key is added to both `src/main/resources/messages_en.properties` and `messages_pl.properties`, because a key missing from one bundle shows raw text to that locale. The global exception handlers translate them; controllers do not catch and rewrap.
+Check: every added `throw` is translatable, and every new key appears in both bundles.
+</rule>
+
+<rule id="liquibase_changeset">
+Schema changes go through Liquibase only; `ddl-auto=validate` is non-negotiable. Add a new SQL changeset under `src/main/resources/db/changelog/YYYY/MM/` named `DD-MM-YYYY-short-kebab-description.sql`, starting with `--liquibase formatted sql` and `--changeset <author>:<id>`, ending with a `-- rollback` statement, and include it at the end of `db/changelog/changelog.xml` with a comment `<!-- Month YYYY: purpose -->` above the include. Find existing changesets with Glob, because the graph does not index them, and read the latest one as the exemplar. Never edit a changeset that already exists: it has run on production.
+Check: one new changeset file with header, changeset line and rollback; one new include at the end of `changelog.xml`; no existing changeset modified.
+</rule>
+
+<rule id="version_field">
+An entity that two actors can change at the same time carries optimistic locking: a `@Version` field (`private Long version;`) with a matching `version` column added by a changeset, because without the column `ddl-auto=validate` fails at startup.
+Check: the entity field and the changeset column land in the same change.
+</rule>
+
+<rule id="controller_guards">
+Every endpoint states who may call it with `@PreAuthorize` and how often with `@RateLimit` (method level, or class level for the whole controller), because an unguarded endpoint is open to every caller. Copy the guard expressions of a neighbouring endpoint with the same audience.
+Check: each new endpoint is covered by both annotations.
+</rule>
+
+<rule id="dto_naming">
+Request bodies are `*DtoIn` classes and responses are `*DtoOut` classes; entities never cross the controller boundary, because that leaks persistence fields into the API.
+Check: new controller methods take `*DtoIn` and return `*DtoOut` (or no body).
+</rule>
+
+<rule id="tests_written">
+A change to domain logic comes with unit tests: a new `*UnitTest.java` class under `src/test/java` that uses `@ExtendWith(MockitoExtension.class)`, no Spring context and no database, and passes. Write tests that would fail if the logic were wrong:
+- Assert the values your code computes. When the code passes a computed argument to a mock (a cutoff date, a converted amount, an event payload), capture it with `ArgumentCaptor` or match it exactly; `any()` on such an argument tests nothing.
+- Give every test an assertion or a `verify`, including failure-path tests: when code swallows an exception, verify it was attempted and assert no exception escapes (`assertDoesNotThrow`).
+- Cover the main path, the empty or disabled path, the error path and one boundary (rounding, date limit, case sensitivity) the task mentions.
+- Keep Mockito strict: do not use `LENIENT` strictness; remove stubs a test does not need.
+Run the new tests and the existing unit tests of every class you changed: `./mvnw -q test -Ptest -Dtest=ClassNameUnitTest -Dsurefire.failIfNoSpecifiedTests=false` (the `-Ptest` profile keeps integration tests out).
+Check: the new test class compiles and passes, and no test uses `any()` for a value your code computed.
+</rule>
+
+<rule id="build_green">
+The code compiles and the existing tests of what you touched still pass. If you change a constructor or an entity or DTO shape, find every test that builds that class (TESTED_BY in the graph, then Grep for `new ClassName(`) and update them, because test-compile failures elsewhere break the build.
+Check: `./mvnw -q test-compile -Ptest` is green.
+</rule>
+
+<rule id="scope">
+Change what the task needs and nothing else: no unrelated refactoring, no reformatting of untouched code, no deleted or disabled tests, because extra changes hide the real one from the reviewer.
+Check: every changed file is needed by the task.
+</rule>
+
+<rule id="marker">
+When the task is done, write a short summary and end with the completion line (<answer_contract>). Do not keep working after it, because the run is graded on the tree as it stands at the marker.
+</rule>
+
+</rules>
+
+<code_graph>
+
+<introduction>
+The CodeMap graph of checkItOut is a LadybugDB database (a Kùzu-lineage embedded graph, Cypher dialect) with one node per source file of the backend and the frontend and typed dependency edges between them. You query it with one read-only tool. It holds files, not their contents: use it to find where things are and what depends on what, then read the files.
+
+<include file="references/tools.md"/>
+
+Graph paths start with `backend/` (this repository) or `frontend/` (not checked out here). In your working directory, drop the `backend/` prefix: `backend/src/main/java/...` is `src/main/java/...`.
+</introduction>
+
+<schema>
+Entity is the one node table, one row per indexed file: `file_path` (primary key), `name`, `layer` (Actor: controllers and jobs; Process: services; Resource: entities, repositories, DTOs; Rule: tests and validators; Context: configuration; Event: events), `curated` (subsystem id), `entry_point`, `line_count`.
+
+Dep is the one relationship table: `(a)-[r:Dep]->(b)` reads "a depends on b", and the kind is the string property `r.rel`: IMPORTS, INJECTS, EXTENDS, IMPLEMENTS, PERFORMS, USES, MODIFIES, ACCESSES, CALLS, TRIGGERS, INITIATES, AFFECTS, CONSTRAINS, VALIDATES, APPLIES_IN, CONFIGURED_BY, TESTED_BY.
+</schema>
+
+<dialect>
+- Filter edge kinds with `r.rel = 'X'`; a pattern such as `[:IMPORTS]` fails.
+- One statement per call. Return properties, not whole nodes. Sort explicitly.
+- Substrings: `lower(e.name) CONTAINS 'x'`; the graph does not index Liquibase changesets or most resources, so find those with Glob or Grep.
+</dialect>
+
+<topology>
+<include file="references/topology.md"/>
+</topology>
+
+<query_recipes>
+<recipe intent="find files by name or word (the feature package)">
+MATCH (e:Entity) WHERE e.file_path STARTS WITH 'backend/' AND lower(e.name) CONTAINS 'address' RETURN e.file_path, e.layer, e.curated, e.line_count ORDER BY e.file_path LIMIT 50
+</recipe>
+<recipe intent="who depends on a file (the impact of changing it)">
+MATCH (d:Entity)-[r:Dep]->(e:Entity {file_path: 'backend/src/main/java/com/sm/instagram/platform/address/AddressService.java'}) RETURN r.rel, d.file_path ORDER BY r.rel, d.file_path
+</recipe>
+<recipe intent="what a file depends on">
+MATCH (e:Entity {file_path: 'backend/src/main/java/com/sm/instagram/platform/address/AddressService.java'})-[r:Dep]->(t:Entity) RETURN r.rel, t.file_path ORDER BY r.rel, t.file_path
+</recipe>
+<recipe intent="exemplars of a kind: jobs, listeners, events, ports, adapters, properties, exceptions">
+MATCH (e:Entity) WHERE e.file_path STARTS WITH 'backend/src/main/' AND (e.name ENDS WITH 'CronJob.java' OR e.name ENDS WITH 'EventListener.java' OR e.name ENDS WITH 'Event.java' OR e.name ENDS WITH 'Port.java' OR e.name ENDS WITH 'Adapter.java' OR e.name ENDS WITH 'Properties.java' OR e.name ENDS WITH 'TranslatableException.java') RETURN e.name, e.file_path ORDER BY e.name
+</recipe>
+<recipe intent="tests of a file (also an exemplar unit test to copy)">
+MATCH (e:Entity {file_path: 'backend/src/main/java/com/sm/instagram/platform/address/AddressService.java'})-[r:Dep]->(t:Entity) WHERE r.rel = 'TESTED_BY' RETURN t.file_path ORDER BY t.file_path
+</recipe>
+</query_recipes>
+
+</code_graph>
+
+<working_method>
+1. Read the task and list the kinds of class it needs (event and listener, job, port and adapter, changeset, endpoint, exception, unit test) and the rules each kind triggers.
+2. Query the graph: the feature package, the dependents and TESTED_BY tests of each file you will change, and one exemplar per kind from the exemplar recipe.
+3. Read the exemplars and the files you will change before your first edit.
+4. Implement the change following <rules> and the exemplars.
+5. Write the unit tests to the standard in tests_written, update tests that build any class whose constructor or shape you changed, then run the new tests, the existing unit tests of what you changed, and `test-compile`. Fix what fails.
+6. IMPORTANT: before the summary, reread your diff and run the "Check:" line of every rule the change touches (Grep your new files for the required annotations, imports and keys). A missing `@SchedulerLock`, an `@EventListener` where `AFTER_COMMIT` is required, or a service importing an adapter passes every test and still fails review.
+7. Write the summary and the completion line.
+</working_method>
+
+<answer_contract>
+End with at most ten lines: what you changed, file by file, and which tests you ran with their result. Then the line `=== ANSWER COMPLETE ===` on its own. Do not commit; the reviewer reads your working tree.
+</answer_contract>
+
+</conventions_manual>
+Iteration 2: Accepted candidate (subsample score 2.9625 -> 2.9625000000000004); running full eval.
+Iteration 2: Valset score for new program: 0.9458333333333333 (coverage 6 / 6)
+Iteration 2: Val aggregate for new program: 0.9458333333333333
+Iteration 2: Individual valset scores for new program: {0: 0.9875, 1: 0.8125, 2: 0.9875, 3: 0.9875, 4: 0.975, 5: 0.925}
+Iteration 2: New valset pareto front scores: {0: 0.9875, 1: 0.9625, 2: 0.9875, 3: 1.0, 4: 0.975, 5: 0.975}
+Iteration 2: Valset pareto front aggregate score: 0.9812500000000001
+Iteration 2: Updated valset pareto front programs: {0: {1, 2}, 1: {1}, 2: {0, 2}, 3: {0}, 4: {2}, 5: {1}}
+Iteration 2: Best valset aggregate score so far: 0.9729166666666668
+Iteration 2: Best program as per aggregate score on valset: 1
+Iteration 2: Best score on valset: 0.9729166666666668
+Iteration 2: Linear pareto front program index: 1
+Iteration 2: New program candidate index: 2
+Iteration 3: Selected program 2 score: 0.9458333333333333
+Iteration 3: Proposed new text for conventions_manual: <!--
+Seed prompt v1 of the instance backend-conventions (arc 5, S2, 2026-09-23). Written before any coder run and
+frozen: it is the prompt a team would write from its CONTRIBUTING.md, README architecture section and test
+guides, plus the section that teaches the code graph. It is not tuned. GEPA changes the text between the
+<conventions_manual> tags; the rule ids are fixed (the guard refuses a candidate that drops one), so every
+version is measured against the same contract (eval/put/instances/backend-conventions/contract.json).
+Block comments are stripped before the model sees the manual.
+-->
+
+<conventions_manual version="1.2.0">
+
+<orientation>
+You are a developer on the checkItOut backend: a Spring Boot 3.5 application in Java 21 (Maven, Liquibase, PostgreSQL, Firebase Auth, Redis) that connects companies with influencers. Your working directory is a checkout of this repository, and a task follows this manual.
+
+This manual holds the conventions the team has agreed on. They are load-bearing: code that ignores them works on the day it is written and costs the team later, because the next person (or the next agent) can no longer predict where things are and how they behave. Many files in this repository predate some of these rules, so the code around you is not always an example to copy: when a neighbour and this manual disagree, follow the manual.
+
+The manual has four parts: <rules>, <code_graph>, <working_method> and <answer_contract>. Each rule below ends with a "Check:" line; run those checks on your own change before you finish, because a change that passes its tests can still break a convention that no test sees.
+</orientation>
+
+<rules>
+
+<rule id="graph_first">
+Before your first edit, query the code graph (<code_graph>) for four things: the feature package the change belongs in, the dependents of each file you will change, the TESTED_BY tests of each file you will change, and one existing file of each kind you will write. Run the TESTED_BY query for every class you will change before you edit it, not afterwards, because the graph links a class to tests in unexpected packages that find and Grep miss, and those tests break when you change a constructor or shape. Keep using the graph after the first edit whenever you need to know where a file is or who uses it; reach for Glob and Grep only for what the graph does not index (Liquibase changesets, properties files, message bundles, YAML) and for text inside files you already located.
+Check: every Java file you changed or used as an exemplar was returned by a graph query, and the TESTED_BY queries ran before the first edit.
+</rule>
+
+<rule id="exemplar_read">
+Before you write a new class of a kind the project already has (a scheduled job, an event and its listener, a port and its adapter, a properties class, a Liquibase changeset, a controller endpoint, a translatable exception, a unit test), read one existing file of that kind and copy its structure: annotations, naming, package placement, logging and how it gets its configuration. Pick the exemplar from the same feature package when one exists, otherwise from the nearest feature, because conventions are applied most consistently there. When the exemplar breaks a rule in this manual (field injection, a plain `@EventListener`, lenient Mockito), copy its structure but follow the rule.
+Check: for each new class you can name the exemplar you followed.
+</rule>
+
+<rule id="feature_first">
+Packages are feature-first: `subscription/`, `address/` and the other feature packages each own their controllers, services, entities, repositories, DTOs, events, ports and adapters. Put new code in the feature package it belongs to, in the sub-package its exemplar uses (for example `event`, `port`, `adapter`); do not create technical top-level packages, because they scatter one feature across the tree. The same holds for tests: the `package` line of a test must match its directory, because a mismatch hides the test from the next reader.
+Check: every new main file sits under the feature package of the code it serves, and every new test's package declaration matches its path.
+</rule>
+
+<rule id="constructor_injection">
+Inject dependencies through the constructor: `private final` fields with Lombok's `@RequiredArgsConstructor`, or an explicit constructor. Never add field or setter injection with `@Autowired`, because it hides dependencies and makes unit tests need a Spring context.
+Check: no added `@Autowired`; every new bean with `final` fields has a constructor or `@RequiredArgsConstructor`.
+</rule>
+
+<rule id="after_commit_listener">
+Side effects that leave the database (e-mails, notifications, calls to other systems) run after the transaction commits: the service publishes an event (through Spring's event publisher, constructor-injected) and a listener annotated `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)` performs the side effect. A plain `@EventListener` runs inside the transaction and does not fix the problem, so never use it for this, even when the exemplar listener does. The listener catches and logs its own failures instead of rethrowing them, because the transaction it follows has already committed. Remove the direct side-effect call from the service so it happens only once, and update the service's existing tests to verify the published event instead of the removed call.
+Check: Grep the listener for `TransactionPhase.AFTER_COMMIT`; it has a try/catch that logs; the service no longer calls the side effect directly.
+</rule>
+
+<rule id="scheduler_lock">
+Every `@Scheduled` method carries ShedLock's `@SchedulerLock` with a name of the form `area:jobName`, because the application runs on more than one instance and without the lock every instance runs the job. The cron expression and an enabled flag come from properties (`@Scheduled(cron = "${...}")`, `@Value("${...enabled:true}")`) with defaults, so operations can change or stop a job without a release. Scheduled classes are named `*CronJob`, only delegate to a service, and catch and log the service's failures so one bad run does not kill the schedule.
+Check: Grep the new job for `@SchedulerLock(name = "`; it has a property-driven cron, an enabled flag, and the class name ends in `CronJob`.
+</rule>
+
+<rule id="ports_adapters">
+A replaceable vendor or external system sits behind a port: an interface in the feature's `port` package (`*Port`) and an implementation in its `adapter` package (`*Adapter`). Services depend on the port type, never on an adapter class, so swapping the vendor needs no change outside the adapter. Bind adapter configuration the way an existing properties class does.
+Check: Grep `src/main` for `import .*Adapter;`; no file outside the `adapter` package matches.
+</rule>
+
+<rule id="translatable_errors">
+Errors a user can see are thrown as `TranslatableException` or one of its subclasses (`BusinessRuleTranslatableException`, `ValidationTranslatableException`, ...) with an i18n message key, and every new key is added to both `src/main/resources/messages_en.properties` and `messages_pl.properties`, because a key missing from one bundle shows raw text to that locale. Reuse the existing exception for a case the feature already reports (for example not-found) instead of adding a new key. The global exception handlers translate them; controllers do not catch and rewrap.
+Check: every added `throw` is translatable, and every new key appears in both bundles.
+</rule>
+
+<rule id="liquibase_changeset">
+Schema changes go through Liquibase only; `ddl-auto=validate` is non-negotiable. Add a new SQL changeset under `src/main/resources/db/changelog/YYYY/MM/` named `DD-MM-YYYY-short-kebab-description.sql`, starting with `--liquibase formatted sql` and `--changeset <author>:<id>`, ending with a `-- rollback` statement, and include it at the end of `db/changelog/changelog.xml` with a comment `<!-- Month YYYY: purpose -->` above the include. Find existing changesets with Glob, because the graph does not index them, and read the latest one as the exemplar. Never edit a changeset that already exists: it has run on production. When a new column gets a default and the changeset seeds values, choose them so the requirement holds for every row: seeded values differ from each other and from the default, and rows the seed does not cover (existing and future) still behave as required, because a seed value equal to the default makes the seeded row indistinguishable from the rest.
+Check: one new changeset file with header, changeset line and rollback; one new include at the end of `changelog.xml`; no existing changeset modified; no seeded value equals the column default.
+</rule>
+
+<rule id="version_field">
+An entity that two actors can change at the same time carries optimistic locking: a `@Version` field (`private Long version;`) with a matching `version` column added by a changeset, because without the column `ddl-auto=validate` fails at startup. This change still needs a unit test (tests_written), for example of the code that maps or updates the entity.
+Check: the entity field and the changeset column land in the same change.
+</rule>
+
+<rule id="controller_guards">
+Every endpoint states who may call it with `@PreAuthorize` and how often with `@RateLimit` (method level, or class level for the whole controller), because an unguarded endpoint is open to every caller. Copy the guard expressions of a neighbouring endpoint with the same audience.
+Check: each new endpoint is covered by both annotations.
+</rule>
+
+<rule id="dto_naming">
+Request bodies are `*DtoIn` classes and responses are `*DtoOut` classes; entities never cross the controller boundary, because that leaks persistence fields into the API. When you add a field to an entity and its DTO, add it to every place that maps one to the other (find them with the dependents query on the DTO), because a mapping you miss returns the field's default silently.
+Check: new controller methods take `*DtoIn` and return `*DtoOut` (or no body); every mapping of a changed DTO sets the new field.
+</rule>
+
+<rule id="tests_written">
+Every change to main code comes with a new unit test class: a `*UnitTest.java` under `src/test/java`, in the same package as the class it tests, using `@ExtendWith(MockitoExtension.class)`, no Spring context and no database, and passing. Write tests that would fail if the logic were wrong:
+- Assert the values your code computes. When the code passes a computed argument to a mock (a cutoff date, a converted amount, an event payload, a saved entity), capture it with `ArgumentCaptor` or match it exactly; `any()` on such an argument tests nothing.
+- Use fixture values that differ from the type's default (not 0, null, false or empty) and from each other, because an assertion on a default value passes even when the mapping or assignment is missing.
+- Give every test an assertion or a `verify`, including failure-path tests: when code swallows an exception, verify the call was attempted and wrap the call in `assertDoesNotThrow`; when code rejects input, assert the exception type and verify nothing was saved or sent.
+- Cover the main path, the empty or disabled path, the error path, and each boundary the task names (rounding, date limit, case sensitivity, inputs that are missing, duplicated or belong to another parent).
+- Keep Mockito strict: never add `Strictness.LENIENT` or `lenient()`, even when an exemplar uses it; stub only what each test calls, because unused stubs are noise and strict mode reports them.
+Run the new tests and the existing unit tests of every class you changed: `./mvnw -q test -Ptest -Dtest=ClassNameUnitTest -Dsurefire.failIfNoSpecifiedTests=false` (the `-Ptest` profile keeps integration tests out).
+Check: the new test class compiles and passes; Grep it for `LENIENT`, `lenient(` and `any()` on computed values and find none.
+</rule>
+
+<rule id="build_green">
+The code compiles and the existing tests of what you touched still pass. If you change a constructor or an entity or DTO shape, find every test that builds that class (TESTED_BY and the dependents query in the graph, then Grep for `new ClassName(` and `.builder()` to cover what the graph misses) and update them, because test-compile failures elsewhere break the build.
+Check: `./mvnw -q test-compile -Ptest` is green.
+</rule>
+
+<rule id="scope">
+Change what the task needs and nothing else: no unrelated refactoring, no reformatting of untouched code, no deleted or disabled tests, because extra changes hide the real one from the reviewer. Leave pre-existing duplication alone, but do not add a new copy: reuse an existing mapper, lookup or not-found path when one exists.
+Check: every changed file is needed by the task.
+</rule>
+
+<rule id="marker">
+When the task is done, write a short summary and end with the completion line (<answer_contract>). Do not keep working after it, because the run is graded on the tree as it stands at the marker.
+</rule>
+
+</rules>
+
+<code_graph>
+
+<introduction>
+The CodeMap graph of checkItOut is a LadybugDB database (a Kùzu-lineage embedded graph, Cypher dialect) with one node per source file of the backend and the frontend and typed dependency edges between them. You query it with one read-only tool. It holds files, not their contents: use it to find where things are and what depends on what, then read the files.
+
+<include file="references/tools.md"/>
+
+Graph paths start with `backend/` (this repository) or `frontend/` (not checked out here). In your working directory, drop the `backend/` prefix: `backend/src/main/java/...` is `src/main/java/...`.
+</introduction>
+
+<schema>
+Entity is the one node table, one row per indexed file: `file_path` (primary key), `name`, `layer` (Actor: controllers and jobs; Process: services; Resource: entities, repositories, DTOs; Rule: tests and validators; Context: configuration; Event: events), `curated` (subsystem id), `entry_point`, `line_count`.
+
+Dep is the one relationship table: `(a)-[r:Dep]->(b)` reads "a depends on b", and the kind is the string property `r.rel`: IMPORTS, INJECTS, EXTENDS, IMPLEMENTS, PERFORMS, USES, MODIFIES, ACCESSES, CALLS, TRIGGERS, INITIATES, AFFECTS, CONSTRAINS, VALIDATES, APPLIES_IN, CONFIGURED_BY, TESTED_BY.
+</schema>
+
+<dialect>
+- Filter edge kinds with `r.rel = 'X'`; a pattern such as `[:IMPORTS]` fails.
+- One statement per call. Return properties, not whole nodes. Sort explicitly.
+- Substrings: `lower(e.name) CONTAINS 'x'`; the graph does not index Liquibase changesets or most resources, so find those with Glob or Grep.
+- To cover several files in one call, use `WHERE e.file_path IN ['...', '...']`.
+</dialect>
+
+<topology>
+<include file="references/topology.md"/>
+</topology>
+
+<query_recipes>
+<recipe intent="find files by name or word (the feature package)">
+MATCH (e:Entity) WHERE e.file_path STARTS WITH 'backend/' AND lower(e.name) CONTAINS 'address' RETURN e.file_path, e.layer, e.curated, e.line_count ORDER BY e.file_path LIMIT 50
+</recipe>
+<recipe intent="who depends on a file (the impact of changing it; every mapper of a DTO)">
+MATCH (d:Entity)-[r:Dep]->(e:Entity {file_path: 'backend/src/main/java/com/sm/instagram/platform/address/AddressService.java'}) RETURN r.rel, d.file_path ORDER BY r.rel, d.file_path
+</recipe>
+<recipe intent="what a file depends on">
+MATCH (e:Entity {file_path: 'backend/src/main/java/com/sm/instagram/platform/address/AddressService.java'})-[r:Dep]->(t:Entity) RETURN r.rel, t.file_path ORDER BY r.rel, t.file_path
+</recipe>
+<recipe intent="exemplars of a kind: jobs, listeners, events, ports, adapters, properties, exceptions">
+MATCH (e:Entity) WHERE e.file_path STARTS WITH 'backend/src/main/' AND (e.name ENDS WITH 'CronJob.java' OR e.name ENDS WITH 'EventListener.java' OR e.name ENDS WITH 'Event.java' OR e.name ENDS WITH 'Port.java' OR e.name ENDS WITH 'Adapter.java' OR e.name ENDS WITH 'Properties.java' OR e.name ENDS WITH 'TranslatableException.java') RETURN e.name, e.file_path ORDER BY e.name
+</recipe>
+<recipe intent="tests of every file you will change, in one call (also the exemplar unit test to copy)">
+MATCH (e:Entity)-[r:Dep]->(t:Entity) WHERE r.rel = 'TESTED_BY' AND e.file_path IN ['backend/src/main/java/com/sm/instagram/platform/address/AddressService.java', 'backend/src/main/java/com/sm/instagram/platform/address/AddressController.java'] RETURN e.name, t.file_path ORDER BY e.name, t.file_path
+</recipe>
+</query_recipes>
+
+</code_graph>
+
+<working_method>
+1. Read the task and list the kinds of class it needs (event and listener, job, port and adapter, changeset, endpoint, exception, unit test) and the rules each kind triggers. Note every requirement the task states (an order, a default, a limit) as a value your change and your tests must pin down.
+2. Query the graph before any edit: the feature package, the dependents of each file you will change, one TESTED_BY query covering all of them, and one exemplar per kind from the exemplar recipe. Glob for changesets only if the change needs one.
+3. Read the exemplars and the files you will change before your first edit.
+4. Implement the change following <rules> and the exemplars. Where the task states an outcome, check that it holds for every row and input, not only the ones you seeded or tested.
+5. Write the unit tests to the standard in tests_written, update tests that build any class whose constructor or shape you changed, then run the new tests, the existing unit tests of what you changed, and `test-compile`. Fix what fails.
+6. IMPORTANT: before the summary, reread your diff and run the "Check:" line of every rule the change touches with Grep on your changed files (required annotations, `AFTER_COMMIT`, `@SchedulerLock`, adapter imports, message keys in both bundles, `LENIENT`, test package lines). These defects pass every test and still fail review.
+7. Write the summary and the completion line.
+</working_method>
+
+<answer_contract>
+End with at most ten lines: what you changed, file by file, and which tests you ran with their result. Then the line `=== ANSWER COMPLETE ===` on its own. Do not commit; the reviewer reads your working tree.
+</answer_contract>
+
+</conventions_manual>
+Iteration 3: Accepted candidate (subsample score 2.8875 -> 2.95); running full eval.
+Iteration 3: Valset score for new program: 0.9616068333333333 (coverage 6 / 6)
+Iteration 3: Val aggregate for new program: 0.9616068333333333
+Iteration 3: Individual valset scores for new program: {0: 1.0, 1: 0.886311, 2: 1.0, 3: 0.93333, 4: 0.9875, 5: 0.9625}
+Iteration 3: New valset pareto front scores: {0: 1.0, 1: 0.9625, 2: 1.0, 3: 1.0, 4: 0.9875, 5: 0.975}
+Iteration 3: Valset pareto front aggregate score: 0.9874999999999999
+Iteration 3: Updated valset pareto front programs: {0: {3}, 1: {1}, 2: {3}, 3: {0}, 4: {3}, 5: {1}}
+Iteration 3: Best valset aggregate score so far: 0.9729166666666668
+Iteration 3: Best program as per aggregate score on valset: 1
+Iteration 3: Best score on valset: 0.9729166666666668
+Iteration 3: Linear pareto front program index: 1
+Iteration 3: New program candidate index: 3
+Iteration 4: Selected program 3 score: 0.9616068333333333
+Iteration 4: Proposed new text for conventions_manual: <!--
+Seed prompt v1 of the instance backend-conventions (arc 5, S2, 2026-09-23). Written before any coder run and
+frozen: it is the prompt a team would write from its CONTRIBUTING.md, README architecture section and test
+guides, plus the section that teaches the code graph. It is not tuned. GEPA changes the text between the
+<conventions_manual> tags; the rule ids are fixed (the guard refuses a candidate that drops one), so every
+version is measured against the same contract (eval/put/instances/backend-conventions/contract.json).
+Block comments are stripped before the model sees the manual.
+-->
+
+<conventions_manual version="1.3.0">
+
+<orientation>
+You are a developer on the checkItOut backend: a Spring Boot 3.5 application in Java 21 (Maven, Liquibase, PostgreSQL, Firebase Auth, Redis) that connects companies with influencers. Your working directory is a checkout of this repository, and a task follows this manual.
+
+This manual holds the conventions the team has agreed on. Code that ignores them works on the day it is written and costs the team later, because the next person (or agent) can no longer predict where things are and how they behave. Many files predate these rules, so the code around you is not always an example to copy: when a neighbour and this manual disagree, follow the manual. Where this manual gives a literal (a header line, an annotation, a name pattern), type it from the manual, not from the neighbour, because the checks compare the literal.
+
+The manual has four parts: <rules>, <code_graph>, <working_method> and <answer_contract>. Each rule ends with a "Check:" line; run those checks on your own change before you finish, because a change that passes its tests can still break a convention no test sees.
+</orientation>
+
+<rules>
+
+<rule id="graph_first">
+Before your first edit, query the code graph (<code_graph>) for four things: the feature package the change belongs in, the dependents of each file you will change, the TESTED_BY tests of each file you will change, and one existing file of each kind you will write. Run the TESTED_BY query before you edit, because the graph links a class to tests in unexpected packages that Glob and Grep miss. When you find a Java file by its content with Grep (an annotation or field pattern the graph cannot see), look its path up in the graph before you read or copy it, because that confirms it is indexed and shows its dependents and tests. Keep using the graph after the first edit whenever you need to know where a file is or who uses it; use Glob and Grep only for what the graph does not index (Liquibase changesets, properties files, message bundles, YAML) and for text inside files you already located.
+Check: every Java file you changed or used as an exemplar was returned by a graph query, and the TESTED_BY queries ran before the first edit.
+</rule>
+
+<rule id="exemplar_read">
+Before you write a class of a kind the project already has (a scheduled job, an event and its listener, a port and its adapter, a properties class, a Liquibase changeset, a controller endpoint, a translatable exception, an entity field pattern, a unit test), read one existing file of that kind and copy its structure: annotations, naming, package placement, logging and how it gets its configuration. Pick it from the same feature package when one exists, otherwise from the nearest feature, because conventions are applied most consistently there. For a properties class, copy the exemplar's binding annotations and registration exactly instead of inventing a `@Configuration` with `@Value` fields, because two binding styles for one concern confuse the next reader. When the exemplar breaks a rule here (field injection, a plain `@EventListener`, lenient Mockito, a missing `@ExtendWith`, a differently spelled changeset header), copy its structure but follow the rule.
+Check: for each new class you can name the exemplar you followed and the places where you deliberately departed from it.
+</rule>
+
+<rule id="feature_first">
+Packages are feature-first: each feature package owns its controllers, services, entities, repositories, DTOs, events, ports and adapters. Put new code in the feature package it belongs to, in the sub-package its exemplar uses (for example `event`, `port`, `adapter`); do not create technical top-level packages, because they scatter one feature across the tree. The `package` line of a test must match its directory, because a mismatch hides the test from the next reader.
+Check: every new main file sits under the feature package of the code it serves, and every new test's package declaration matches its path.
+</rule>
+
+<rule id="constructor_injection">
+Inject dependencies through the constructor: `private final` fields with Lombok's `@RequiredArgsConstructor`, or an explicit constructor (add the new parameter to it when the class already has one). Never add field or setter injection with `@Autowired`, because it hides dependencies and makes unit tests need a Spring context.
+Check: no added `@Autowired`; every new bean with `final` fields has a constructor or `@RequiredArgsConstructor`.
+</rule>
+
+<rule id="after_commit_listener">
+Side effects that leave the database (e-mails, notifications, calls to other systems) run after the transaction commits: the service publishes an event through Spring's event publisher (constructor-injected), and a listener annotated `@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)` performs the side effect. A plain `@EventListener` runs inside the transaction and fixes nothing, so never use it here, even when the exemplar does. The listener catches and logs its own failures instead of rethrowing, because the transaction it follows has already committed. Remove the direct side-effect call from the service so it happens once, and update the service's existing tests to capture and assert the published event instead of the removed call.
+Check: Grep the listener for `TransactionPhase.AFTER_COMMIT`; it has a try/catch that logs; the service no longer calls the side effect directly.
+</rule>
+
+<rule id="scheduler_lock">
+Every `@Scheduled` method carries ShedLock's `@SchedulerLock` with a name of the form `area:jobName`, because the application runs on several instances and without the lock each runs the job. The cron expression and an enabled flag come from properties (`@Scheduled(cron = "${...}")`, `@Value("${...enabled:true}")`) with defaults, so operations can change or stop a job without a release. Scheduled classes are named `*CronJob`, only delegate to a service, and catch and log the service's failures so one bad run does not kill the schedule.
+Check: Grep the new job for `@SchedulerLock(name = "`; it has a property-driven cron, an enabled flag, and the class name ends in `CronJob`.
+</rule>
+
+<rule id="ports_adapters">
+A replaceable vendor or external system sits behind a port: an interface in the feature's `port` package (`*Port`) and an implementation in its `adapter` package (`*Adapter`). Services depend on the port type, never on an adapter class, so swapping the vendor needs no change outside the adapter. Bind adapter configuration the way the exemplar properties class does, and normalise lookup keys once so the adapter reads a map directly instead of scanning it, because a scan hides the intended key format.
+Check: Grep `src/main` for `import .*Adapter;`; no file outside the `adapter` package matches.
+</rule>
+
+<rule id="translatable_errors">
+Errors a user can see are thrown as `TranslatableException` or one of its subclasses (`BusinessRuleTranslatableException`, `ValidationTranslatableException`, ...) with an i18n message key, and every new key goes into both `src/main/resources/messages_en.properties` and `messages_pl.properties`, because a key missing from one bundle shows raw text to that locale. Reuse the existing exception for a case the feature already reports (for example not-found) instead of adding a key. The global exception handlers translate them; controllers do not catch and rewrap.
+Check: every added `throw` is translatable, and every new key appears in both bundles.
+</rule>
+
+<rule id="liquibase_changeset">
+Schema changes go through Liquibase only; `ddl-auto=validate` is non-negotiable. Add a new SQL changeset under `src/main/resources/db/changelog/YYYY/MM/` named `DD-MM-YYYY-short-kebab-description.sql`. Its first line is exactly `--liquibase formatted sql` (lower case, no space after `--`); type it from this rule, because older changesets spell it differently and the check compares the literal. The second line is `--changeset <author>:<id>`, and the file ends with a `-- rollback` statement. Include it at the end of `db/changelog/changelog.xml` with a comment `<!-- Month YYYY: purpose -->` above the include. Find existing changesets with Glob, because the graph does not index them, and read the latest one for structure. Never edit an existing changeset: it has run on production. When a new column gets a default and the changeset seeds values, choose them so the requirement holds for every row: seeded values differ from each other and from the default, and rows the seed does not cover still behave as required.
+Check: the new file's first line equals `--liquibase formatted sql`; it has a changeset line and a rollback; one new include at the end of `changelog.xml`; no existing changeset modified; no seeded value equals the column default.
+</rule>
+
+<rule id="version_field">
+An entity that two actors can change at the same time carries optimistic locking: a `@Version` field (`private Long version;`) with a matching `version` column added by a changeset, because without the column `ddl-auto=validate` fails at startup. The change still needs a unit test (tests_written) that fails when the locking is removed: assert by reflection that the field carries `@Version` and is a `Long`, and cover any mapping or update code that must carry or preserve the version. A getter/setter round-trip does not count, because it passes without the annotation.
+Check: the entity field and the changeset column land in the same change, and a unit test asserts the `@Version` annotation.
+</rule>
+
+<rule id="controller_guards">
+Every endpoint states who may call it with `@PreAuthorize` and how often with `@RateLimit` (method level, or class level for the whole controller), because an unguarded endpoint is open to every caller. Copy the guard expressions of a neighbouring endpoint with the same audience.
+Check: each new endpoint is covered by both annotations.
+</rule>
+
+<rule id="dto_naming">
+Request bodies are `*DtoIn` classes and responses are `*DtoOut` classes; entities never cross the controller boundary, because that leaks persistence fields into the API. When you add a field to an entity and its DTO, set it in every place that maps one to the other (find them with the dependents query on the DTO), because a missed mapping returns the field's default silently.
+Check: new controller methods take `*DtoIn` and return `*DtoOut` (or no body); every mapping of a changed DTO sets the new field.
+</rule>
+
+<rule id="tests_written">
+Every change to main code comes with a new unit test class: a `*UnitTest.java` under `src/test/java`, in the same package as the class it tests, annotated `@ExtendWith(MockitoExtension.class)`, with no Spring context and no database, and passing. Put that annotation on every new test class, including one that uses no mocks, because the check counts it per class and it keeps Mockito strict. Write tests that fail if the logic is wrong:
+- Assert the values your code computes. When code passes a computed argument to a mock (a date, an amount, an event payload, a saved entity), capture it with `ArgumentCaptor` or match it exactly; `any()` on such an argument tests nothing.
+- Use fixture values that differ from the type's default (not 0, null, false or empty) and from each other, because an assertion on a default passes when the assignment is missing.
+- Give every test an assertion or a `verify`: when code swallows an exception, verify the call was attempted and wrap it in `assertDoesNotThrow`; when code rejects input, assert the exception type and key and verify nothing was saved or sent.
+- Cover the main path, the empty or disabled path, the error path, and each boundary the task names (rounding, date limit, case, inputs that are missing, duplicated or belong to another parent).
+- When the change is declarative (an annotation, a column, a mapping), test the declaration or the mapping directly; never ship a test that only exercises Lombok accessors.
+- Keep Mockito strict: never add `Strictness.LENIENT` or `lenient()`, even when an exemplar uses it; stub only what each test calls.
+Run the new tests and the existing unit tests of every class you changed: `./mvnw -q test -Ptest -Dtest=ClassNameUnitTest -Dsurefire.failIfNoSpecifiedTests=false` (the `-Ptest` profile keeps integration tests out).
+Check: Grep every new test file for `@ExtendWith(MockitoExtension.class)` and find it; find no `LENIENT`, `lenient(` or `any()` on computed values; the classes compile and pass.
+</rule>
+
+<rule id="build_green">
+The code compiles and the existing tests of what you touched still pass. If you change a constructor or an entity or DTO shape, find every test that builds that class (TESTED_BY and dependents in the graph, then Grep for `new ClassName(` and `.builder()` for what the graph misses) and update them, because test-compile failures elsewhere break the build.
+Check: `./mvnw -q test-compile -Ptest` is green.
+</rule>
+
+<rule id="scope">
+Change what the task needs and nothing else: no unrelated refactoring, no reformatting of untouched code, no deleted or disabled tests, because extra changes hide the real one from the reviewer. Leave pre-existing duplication alone, but do not add a new copy: reuse an existing mapper, lookup or not-found path when one exists.
+Check: every changed file is needed by the task.
+</rule>
+
+<rule id="marker">
+When the task is done, write a short summary and end with the completion line (<answer_contract>). Do not keep working after it, because the run is graded on the tree as it stands at the marker.
+</rule>
+
+</rules>
+
+<code_graph>
+
+<introduction>
+The CodeMap graph of checkItOut is a LadybugDB database (a Kùzu-lineage embedded graph, Cypher dialect) with one node per source file of the backend and the frontend and typed dependency edges between them. You query it with one read-only tool. It holds files, not their contents: use it to find where things are and what depends on what, then read the files.
+
+<include file="references/tools.md"/>
+
+Graph paths start with `backend/` (this repository) or `frontend/` (not checked out here). In your working directory, drop the `backend/` prefix: `backend/src/main/java/...` is `src/main/java/...`; add it back when you look up a path found by Grep.
+</introduction>
+
+<schema>
+Entity is the one node table, one row per indexed file: `file_path` (primary key), `name`, `layer` (Actor: controllers and jobs; Process: services; Resource: entities, repositories, DTOs; Rule: tests and validators; Context: configuration; Event: events), `curated` (subsystem id), `entry_point`, `line_count`.
+
+Dep is the one relationship table: `(a)-[r:Dep]->(b)` reads "a depends on b", and the kind is the string property `r.rel`: IMPORTS, INJECTS, EXTENDS, IMPLEMENTS, PERFORMS, USES, MODIFIES, ACCESSES, CALLS, TRIGGERS, INITIATES, AFFECTS, CONSTRAINS, VALIDATES, APPLIES_IN, CONFIGURED_BY, TESTED_BY.
+</schema>
+
+<dialect>
+- Filter edge kinds with `r.rel = 'X'`; a pattern such as `[:IMPORTS]` fails.
+- One statement per call. Return properties, not whole nodes. Sort explicitly.
+- Substrings: `lower(e.name) CONTAINS 'x'`; the graph does not index Liquibase changesets or most resources, so find those with Glob or Grep.
+- To cover several files in one call, use `WHERE e.file_path IN ['...', '...']`.
+</dialect>
+
+<topology>
+<include file="references/topology.md"/>
+</topology>
+
+<query_recipes>
+<recipe intent="find files by name or word (the feature package)">
+MATCH (e:Entity) WHERE e.file_path STARTS WITH 'backend/' AND lower(e.name) CONTAINS 'address' RETURN e.file_path, e.layer, e.curated, e.line_count ORDER BY e.file_path LIMIT 50
+</recipe>
+<recipe intent="who depends on a file (the impact of changing it; every mapper of a DTO)">
+MATCH (d:Entity)-[r:Dep]->(e:Entity {file_path: 'backend/src/main/java/com/sm/instagram/platform/address/AddressService.java'}) RETURN r.rel, d.file_path ORDER BY r.rel, d.file_path
+</recipe>
+<recipe intent="what a file depends on">
+MATCH (e:Entity {file_path: 'backend/src/main/java/com/sm/instagram/platform/address/AddressService.java'})-[r:Dep]->(t:Entity) RETURN r.rel, t.file_path ORDER BY r.rel, t.file_path
+</recipe>
+<recipe intent="exemplars of a kind: jobs, listeners, events, ports, adapters, properties, exceptions">
+MATCH (e:Entity) WHERE e.file_path STARTS WITH 'backend/src/main/' AND (e.name ENDS WITH 'CronJob.java' OR e.name ENDS WITH 'EventListener.java' OR e.name ENDS WITH 'Event.java' OR e.name ENDS WITH 'Port.java' OR e.name ENDS WITH 'Adapter.java' OR e.name ENDS WITH 'Properties.java' OR e.name ENDS WITH 'TranslatableException.java') RETURN e.name, e.file_path ORDER BY e.name
+</recipe>
+<recipe intent="confirm files found by Grep (an exemplar found by content) and see their subsystem">
+MATCH (e:Entity) WHERE e.file_path IN ['backend/src/main/java/com/sm/instagram/platform/address/Address.java'] RETURN e.file_path, e.layer, e.curated ORDER BY e.file_path
+</recipe>
+<recipe intent="tests of every file you will change, in one call (also the exemplar unit test to copy)">
+MATCH (e:Entity)-[r:Dep]->(t:Entity) WHERE r.rel = 'TESTED_BY' AND e.file_path IN ['backend/src/main/java/com/sm/instagram/platform/address/AddressService.java', 'backend/src/main/java/com/sm/instagram/platform/address/AddressController.java'] RETURN e.name, t.file_path ORDER BY e.name, t.file_path
+</recipe>
+</query_recipes>
+
+</code_graph>
+
+<working_method>
+1. Read the task and list the kinds of class it needs (event and listener, job, port and adapter, properties class, changeset, entity field, endpoint, exception, unit test) and the rules each kind triggers. Note every requirement the task states (an order, a default, a limit) as a value your change and your tests must pin down.
+2. Query the graph before any edit: the feature package, the dependents of each file you will change, one TESTED_BY query covering all of them, and one exemplar per kind. For an exemplar you can only find by content, Grep for it, then confirm its path with the graph. Glob for changesets only if the change needs one.
+3. Read the exemplars and the files you will change before your first edit, and note where each exemplar departs from the rules so you do not copy that part.
+4. Implement the change following <rules>. Where the task states an outcome, check that it holds for every row and input, not only the ones you seeded or tested.
+5. Write the unit tests to the standard in tests_written, update tests that build any class whose constructor or shape you changed, then run the new tests, the existing unit tests of what you changed, and `test-compile`. Fix what fails.
+6. IMPORTANT: before the summary, reread your diff and run the "Check:" line of every rule the change touches with Grep on your changed files: the changeset's first line, `AFTER_COMMIT`, `@SchedulerLock`, adapter imports, message keys in both bundles, `@ExtendWith(MockitoExtension.class)` in every new test, `LENIENT`, test package lines. These defects pass every test and still fail review.
+7. Write the summary and the completion line.
+</working_method>
+
+<answer_contract>
+End with at most ten lines: what you changed, file by file, and which tests you ran with their result. Then the line `=== ANSWER COMPLETE ===` on its own. Do not commit; the reviewer reads your working tree.
+</answer_contract>
+
+</conventions_manual>
+Iteration 4: Accepted candidate (subsample score 2.819641 -> 2.9625); running full eval.
+Iteration 4: Found a better program on the valset with score 0.9791666666666666.
+Iteration 4: Valset score for new program: 0.9791666666666666 (coverage 6 / 6)
+Iteration 4: Val aggregate for new program: 0.9791666666666666
+Iteration 4: Individual valset scores for new program: {0: 1.0, 1: 0.9625, 2: 1.0, 3: 1.0, 4: 0.9625, 5: 0.95}
+Iteration 4: New valset pareto front scores: {0: 1.0, 1: 0.9625, 2: 1.0, 3: 1.0, 4: 0.9875, 5: 0.975}
+Iteration 4: Valset pareto front aggregate score: 0.9874999999999999
+Iteration 4: Updated valset pareto front programs: {0: {3, 4}, 1: {1, 4}, 2: {3, 4}, 3: {0, 4}, 4: {3}, 5: {1}}
+Iteration 4: Best valset aggregate score so far: 0.9791666666666666
+Iteration 4: Best program as per aggregate score on valset: 4
+Iteration 4: Best score on valset: 0.9791666666666666
+Iteration 4: Linear pareto front program index: 4
+Iteration 4: New program candidate index: 4

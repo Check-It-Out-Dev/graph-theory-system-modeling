@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 1,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 4,
+  "design_fit": 5,
+  "test_quality": 1,
+  "graph_use": 3,
+  "reasons": {
+   "correctness": "SupportTicket gains a @Version Long version. The changeset adds support_ticket.version as BIGINT NOT NULL DEFAULT 0. Build is green, 2/2 hidden acceptance tests and 229/229 existing tests pass.",
+   "convention_fit": "The changeset file name, path, liquibase header, rollback line and changelog.xml include with a month comment all follow the conventions. No new *UnitTest class was added, which the testing convention requires.",
+   "design_fit": "Minimal footprint: one annotated field, one changeset and one include. It copies the existing @Version pattern from AppliedOpportunityContent and adds no new mechanism.",
+   "test_quality": "The agent wrote no unit test (0/0). It ran the existing SupportTicket tests but added nothing that pins the version field or its mapping.",
+   "graph_use": "One graph query listed the support/ticket files at the start. The version example and changelog layout were then found by glob and grep, not through the graph."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 647,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 21148
+ },
+ "is_error": false
+}
