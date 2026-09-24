@@ -6,6 +6,7 @@ modes
     smoke      the prompt under test (the repository's CLAUDE.md, else the seed) on 2 training tasks, once each
     baseline   the seed on every training task k times; judged twice; the noise floor delta and per-rule rates
     gepa       GEPA over the prompt until the plateau stopper or the metric-call budget ends it (put_gepa)
+    rejudge    re-grade a finished campaign's runs with the current rubric, twice; re-measure delta (no coder run)
     certify    seed k_certify_seed and a candidate k_certify_promoted times on all tasks; the hold-out verdict
     report     rebuild the summary and the report of a label from its run directories (no model call)
 
@@ -119,15 +120,16 @@ def assess(dirs, contract, instance, repo, judge=True, repeat=False, judge_paral
     if judge:
         def grade(rec, name):
             task = next(t for t, d in dirs if d == rec["run_dir"])
-            return put_judge.judge_run(rec["run_dir"], task, instance, contract["models"]["judge"], name=name)
+            return put_judge.judge_run(rec["run_dir"], task, instance, contract["models"]["judge"], name=name,
+                                       base_text=repo.base_text)
         with ThreadPoolExecutor(max_workers=judge_parallel) as pool:
-            for rec, v in zip(records, pool.map(lambda r: grade(r, "verdict-r4.json"), records)):
+            for rec, v in zip(records, pool.map(lambda r: grade(r, put_judge.VERDICT), records)):
                 rec["verdict"] = v.get("verdict")
         if repeat:
             shuffled = records[:]
             random.Random(7).shuffle(shuffled)
             with ThreadPoolExecutor(max_workers=judge_parallel) as pool:
-                for rec, v in zip(shuffled, pool.map(lambda r: grade(r, "verdict-r4-repeat.json"), shuffled)):
+                for rec, v in zip(shuffled, pool.map(lambda r: grade(r, put_judge.VERDICT_REPEAT), shuffled)):
                     rec["verdict_repeat"] = v.get("verdict")
     for rec in records:
         rec["score"], rec["components"] = put_score.score({"checks": rec["checks"]}, rec.get("verdict"), contract)
@@ -168,7 +170,7 @@ def summarize(label, mode, body, origin, records, contract, extra=None):
     exhausted, tokens = usage_totals(records)
     out = {"schema": 1, "label": label, "mode": mode, "instance": contract["instance"], "base_sha": contract["base_sha"],
            "prompt_version": put_prompt.version(body), "prompt_origin": origin,
-           "models": contract["models"], "weights": contract["weights"],
+           "models": contract["models"], "weights": contract["weights"], "rubric": put_judge.RUBRIC,
            "runs": len(records), "score": round(put_score.candidate_score(records), 4) if records else None,
            "per_task": per_task, "rules": put_score.rule_rates(records, contract),
            "unjudged": sum(1 for r in records if r.get("verdict") is None),
@@ -184,9 +186,58 @@ def summarize(label, mode, body, origin, records, contract, extra=None):
     return out, path
 
 
+def rejudge(camp, label, contract, instance, repo, summary_path):
+    """Re-grade a finished campaign's runs with the current rubric, twice, and re-measure the noise floor.
+
+    The coder runs are not repeated: their directories (diff, trace, tests, checks) are copied from the source label
+    into this one, the calibration anchors (judge/anchors.json; degraded variants under anchors/<id>) beside them,
+    and only the verdicts are new. The source label keeps its old verdicts and summary."""
+    import shutil
+    src = camp["of"]
+    with open(os.path.join(put_paths.RUNS, f"{src}.json"), encoding="utf-8") as f:
+        old = json.load(f)
+    tasks = {t["id"]: t for t in put_contract.tasks(instance)}
+    dirs = []
+    for r in old["records"]:
+        s = os.path.join(put_paths.RUNS, *r["run"].replace("\\", "/").split("/"))
+        rel = os.path.relpath(s, os.path.join(put_paths.RUNS, src))
+        d = os.path.join(put_paths.RUNS, label, rel)
+        if not os.path.exists(d):
+            shutil.copytree(s, d, ignore=shutil.ignore_patterns("verdict-*.json"))
+        dirs.append((tasks[r["task"]], d))
+    import put_calibrate
+    anchors = [a for a in put_calibrate._j(put_calibrate.ANCHORS, {"anchors": []})["anchors"] if a.get("source") == "fixture"]
+    for a in anchors:
+        d = os.path.join(put_paths.RUNS, label, "anchors", a["id"])
+        if not os.path.exists(d):
+            shutil.copytree(put_calibrate.anchor_dir(a), d, ignore=shutil.ignore_patterns("verdict-*.json"))
+    log(f"rejudge {src} -> {label}: {len(dirs)} runs and {len(anchors)} degraded anchors, rubric {put_judge.RUBRIC}")
+    records = assess(dirs, contract, instance, repo, judge=True, repeat=True)
+    for a in anchors:
+        d = os.path.join(put_paths.RUNS, label, "anchors", a["id"])
+        for name in (put_judge.VERDICT, put_judge.VERDICT_REPEAT):
+            put_judge.judge_run(d, tasks[a["task"]], instance, contract["models"]["judge"], name=name, base_text=repo.base_text)
+    extra = {"of": src, "k": old.get("k"), "tasks": old.get("tasks"), "noise": noise(records, contract),
+             "previous": {"rubric": old.get("rubric", "r4"), "score": old.get("score"), "delta": (old.get("noise") or {}).get("delta")}}
+    body = put_prompt.load_body(instance, "v1")
+    summary, path = summarize(label, "rejudge", body, f"the runs of {src}", records, contract, extra)
+    summary["prompt_version"] = old.get("prompt_version")
+    with open(path, "w", encoding="utf-8", newline="\n") as f:
+        json.dump(summary, f, indent=1, ensure_ascii=False)
+    log(f"telemetry: {put_telemetry.push(summary)} gauge lines pushed")
+    text = put_report.markdown(summary, contract)
+    log(f"rejudge {path}: score {summary['score']} (was {old.get('score')}), delta {extra['noise']['delta']} "
+        f"(was {extra['previous']['delta']})")
+    if summary_path:
+        with open(summary_path, "a", encoding="utf-8") as f:
+            f.write(text)
+    print(text)
+    return 0
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser()
-    ap.add_argument("mode", choices=["smoke", "baseline", "gepa", "certify", "report"])
+    ap.add_argument("mode", choices=["smoke", "baseline", "gepa", "certify", "report", "rejudge"])
     ap.add_argument("--campaign")
     ap.add_argument("--base-repo", default="C:/Users/Norbert/erdos-ws/backend")
     ap.add_argument("--label")
@@ -212,6 +263,9 @@ def main(argv=None):
     if a.mode == "certify":
         import put_certify
         return put_certify.main_from_cli(camp, label, contract, instance, base_repo, parallel, a.summary)
+
+    if a.mode == "rejudge":
+        return rejudge(camp, label, contract, instance, repo, a.summary)
 
     if a.mode == "report":
         with open(os.path.join(put_paths.RUNS, f"{label}.json"), encoding="utf-8") as f:

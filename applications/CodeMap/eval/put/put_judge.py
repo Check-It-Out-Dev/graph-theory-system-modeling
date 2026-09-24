@@ -1,4 +1,4 @@
-"""The judge of the prompt-under-test pipeline, rubric r4: Claude Opus grades one coding run against its task and the
+"""The judge of the prompt-under-test pipeline, rubric r5: Claude Opus grades one coding run against its task and the
 team's WRITTEN conventions, blind to the prompt that produced it.
 
     ask(run_dir, task, contract, instance, model="opus")  -> (verdict or None, usage, is_error)
@@ -8,7 +8,9 @@ Blindness (law 3): the judge never sees the candidate prompt, its hash or its it
 against are the canonical rule texts of the seed prompt v1 (what the team wrote), fixed for the whole arc, so a
 candidate cannot win by rewording the rules the judge reads. The work summary is built from calls.json (what the
 agent queried, read, edited and ran), the test numbers from tests.json; the diff is capped at 40,000 characters,
-each file truncated in turn when it is longer.
+each file truncated in turn when it is longer. BASE CODE holds the unchanged text of the production Java files the
+diff modifies (r5): a judge that sees only the diff cannot tell a new method that repeats an existing one from real
+reuse, which calibration found on two anchors (judge/reference-scores.json).
 
 A verdict carries the rubric id; a change of rubric re-measures the judge's noise and its anchors (law 12).
 """
@@ -25,11 +27,15 @@ import put_contract
 import put_tasks
 import erdos_judge                 # eval/erdos: parse_json_text
 
-RUBRIC = "r4"
-RUBRIC_FILE = os.path.join(put_paths.HERE, "judge", "rubric-r4.md")
+RUBRIC = "r5"
+RUBRIC_FILE = os.path.join(put_paths.HERE, "judge", f"rubric-{RUBRIC}.md")
+VERDICT = f"verdict-{RUBRIC}.json"
+VERDICT_REPEAT = f"verdict-{RUBRIC}-repeat.json"
 CRITERIA = ("correctness", "convention_fit", "design_fit", "test_quality", "graph_use")
 COUNTS = ("rules_violated", "files_out_of_scope", "parallel_mechanisms")
 DIFF_CAP = 40000
+BASE_CAP_FILE = 36000
+BASE_CAP = 60000
 RULE = re.compile(r'<rule id="([a-z_]+)">\s*(.*?)\s*</rule>', re.S)
 
 
@@ -50,6 +56,38 @@ def capped_diff(diff, cap=DIFF_CAP):
     for p in parts:
         out.append(p if len(p) <= share else p[:share] + f"\n[... {len(p) - share} characters of this file omitted ...]\n")
     return "".join(out)[:cap]
+
+
+def modified_sources(diff):
+    """-> paths of production Java files the diff modifies (not new files, not tests, not resources)."""
+    out = []
+    for part in re.split(r"(?=^diff --git )", diff, flags=re.M):
+        m = re.match(r"diff --git a/(\S+) b/(\S+)", part)
+        if not m or "\nnew file mode" in part[:300]:
+            continue
+        path = m.group(2)
+        if path.startswith("src/main/java/") and path.endswith(".java"):
+            out.append(path)
+    return out
+
+
+def base_code(diff, base_text):
+    """-> the unchanged text of the modified production files, capped per file and in total; "" without a reader."""
+    if base_text is None:
+        return ""
+    blocks, used = [], 0
+    for path in modified_sources(diff):
+        text = base_text(path)
+        if not text:
+            continue
+        if len(text) > BASE_CAP_FILE:
+            text = text[:BASE_CAP_FILE] + f"\n[... {len(text) - BASE_CAP_FILE} characters omitted ...]\n"
+        if used + len(text) > BASE_CAP:
+            blocks.append(f"--- {path}: omitted (base code budget reached)")
+            continue
+        blocks.append(f"--- {path} (before the change)\n{text}")
+        used += len(text)
+    return "\n\n".join(blocks)
 
 
 def work_summary(calls, limit=60):
@@ -84,11 +122,13 @@ def test_summary(tests):
             f"hidden acceptance tests: {pair('hidden')}; existing tests of the touched classes: {pair('pass_to_pass')}")
 
 
-def prompt(task, instance, diff, calls, tests):
+def prompt(task, instance, diff, calls, tests, base_text=None):
     rules = "\n".join(f"- {text}" for _, text in canonical_rules(instance))
+    base = base_code(diff, base_text)
     return (f"{put_tasks.card(task)}\n\nTHE TEAM'S WRITTEN CONVENTIONS\n{rules}\n\n"
             f"HOW THE AGENT WORKED\n{work_summary(calls)}\n\nTEST RESULTS (measured by the harness)\n{test_summary(tests)}\n\n"
-            f"DIFF\n{capped_diff(diff)}\n\nGrade this change with the rubric. Return only the JSON object.")
+            f"DIFF\n{capped_diff(diff)}\n\n" + (f"BASE CODE\n{base}\n\n" if base else "") +
+            "Grade this change with the rubric. Return only the JSON object.")
 
 
 def valid(verdict):
@@ -113,17 +153,17 @@ def read_run(run_dir):
     return diff, j("calls.json", []), j("tests.json", {})
 
 
-def ask(run_dir, task, instance, model="opus", runner=None, timeout=900):
-    """-> (verdict or None, usage, is_error): one run graded with rubric r4."""
+def ask(run_dir, task, instance, model="opus", runner=None, timeout=900, base_text=None):
+    """-> (verdict or None, usage, is_error): one run graded with the current rubric."""
     import claude_cli
     diff, calls, tests = read_run(run_dir)
     with open(RUBRIC_FILE, encoding="utf-8") as f:
         system = f.read()
-    fd, sys_path = tempfile.mkstemp(prefix="put-judge-r4-", suffix=".md")
+    fd, sys_path = tempfile.mkstemp(prefix=f"put-judge-{RUBRIC}-", suffix=".md")
     with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as f:
         f.write(system)
     try:
-        out = claude_cli.run(prompt(task, instance, diff, calls, tests), model=model, role="judge", system_file=sys_path,
+        out = claude_cli.run(prompt(task, instance, diff, calls, tests, base_text), model=model, role="judge", system_file=sys_path,
                              max_turns=1, timeout=timeout, runner=runner, tools=[])
     finally:
         try:
@@ -138,15 +178,15 @@ def ask(run_dir, task, instance, model="opus", runner=None, timeout=900):
     return (verdict if ok else None), out.get("usage"), bool(out.get("is_error")) or not ok
 
 
-def judge_run(run_dir, task, instance, model="opus", name="verdict-r4.json", force=False):
+def judge_run(run_dir, task, instance, model="opus", name=None, force=False, base_text=None):
     """Grade a run once and store the verdict beside it (cached: a stored valid verdict is reused)."""
-    path = os.path.join(run_dir, name)
+    path = os.path.join(run_dir, name or VERDICT)
     if os.path.exists(path) and not force:
         with open(path, encoding="utf-8") as f:
             v = json.load(f)
         if v.get("verdict") is not None:
             return v
-    verdict, usage, err = ask(run_dir, task, instance, model)
+    verdict, usage, err = ask(run_dir, task, instance, model, base_text=base_text)
     rec = {"rubric": RUBRIC, "verdict": verdict, "usage": usage, "is_error": err}
     with open(path, "w", encoding="utf-8", newline="\n") as f:
         json.dump(rec, f, indent=1)
@@ -161,13 +201,18 @@ def main(argv=None):
     ap.add_argument("--model", default="opus")
     ap.add_argument("--force", action="store_true")
     ap.add_argument("--print-prompt", action="store_true")
+    ap.add_argument("--base-repo", help="a clone of the repository under test: adds BASE CODE (r5)")
     a = ap.parse_args(argv)
     task = next(t for t in put_contract.tasks(a.instance) if t["id"] == a.task)
+    base_text = None
+    if a.base_repo:
+        import put_diff
+        base_text = put_diff.git_base_reader(a.base_repo, put_contract.load(a.instance)["base_sha"])
     if a.print_prompt:
         diff, calls, tests = read_run(a.run)
-        print(prompt(task, a.instance, diff, calls, tests))
+        print(prompt(task, a.instance, diff, calls, tests, base_text))
         return 0
-    rec = judge_run(a.run, task, a.instance, a.model, force=a.force)
+    rec = judge_run(a.run, task, a.instance, a.model, force=a.force, base_text=base_text)
     print(json.dumps(rec, indent=1))
     return 0 if rec.get("verdict") else 1
 

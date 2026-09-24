@@ -1,0 +1,224 @@
+{
+ "schema": 1,
+ "label": "baseline-2026-09-23",
+ "rubric": "r4",
+ "process": [
+  "1. Anchors: 8 baseline runs spread over the judge's range (put_calibrate select), plus 4 degraded variants of training tasks that each break one rule (put_calibrate extend): a seed that writes good code gives the judge no bad change to be measured on.",
+  "2. Blind grading: a reviewer grades convention_fit, design_fit and test_quality from the task, the diff, the test results, the harness checks and the unchanged code base, without seeing the judge's verdicts (judge/bench/ renders the same evidence for a person).",
+  "3. Owner decisions override: a score the owner gave after seeing the evidence is the reference for that cell.",
+  "4. Comparison: put_calibrate score -> judge/calibration.json (agreement, kappa, AC1, Spearman, and whether the judge's second pass closes each gap).",
+  "5. Adjudication: every disagreement is argued on the code and classified; a rubric or check change is made only for a systematic error whose cost exceeds the noise floor, and then the baseline is re-judged and delta re-measured."
+ ],
+ "graders": {
+  "owner": "the owner, after reading the evidence",
+  "reviewer": "an independent reviewer model (Opus 5.5 subagent, fresh context, blind to the judge's verdicts), delegated by the owner on 2026-09-23"
+ },
+ "anchors": {
+  "A1": {
+   "convention_fit": 4,
+   "design_fit": 4,
+   "test_quality": 2,
+   "grader": "reviewer",
+   "owner_preliminary": {
+    "convention_fit": 5,
+    "design_fit": 5,
+    "test_quality": 5,
+    "note": "given in chat before the evidence page existed; the owner then said the anchors cannot be judged without seeing the diffs, so the evidence-based grade is the reference"
+   }
+  },
+  "A2": {
+   "convention_fit": 4,
+   "design_fit": 5,
+   "test_quality": 1,
+   "grader": {
+    "convention_fit": "owner",
+    "design_fit": "reviewer",
+    "test_quality": "reviewer"
+   },
+   "note": "convention_fit (owner): everything written follows the conventions exactly; the one lapse is the missing unit test, which test_quality already penalises; taking two points here as well counts the same miss twice."
+  },
+  "A3": {
+   "convention_fit": 4,
+   "design_fit": 5,
+   "test_quality": 1,
+   "grader": "reviewer"
+  },
+  "A4": {
+   "convention_fit": 5,
+   "design_fit": 4,
+   "test_quality": 5,
+   "grader": "reviewer"
+  },
+  "A5": {
+   "convention_fit": 5,
+   "design_fit": 5,
+   "test_quality": 4,
+   "grader": "reviewer"
+  },
+  "A6": {
+   "convention_fit": 5,
+   "design_fit": 4,
+   "test_quality": 4,
+   "grader": "reviewer"
+  },
+  "A7": {
+   "convention_fit": 5,
+   "design_fit": 5,
+   "test_quality": 4,
+   "grader": "reviewer"
+  },
+  "A8": {
+   "convention_fit": 5,
+   "design_fit": 5,
+   "test_quality": 5,
+   "grader": "reviewer"
+  },
+  "A9": {
+   "convention_fit": 3,
+   "design_fit": 4,
+   "test_quality": 3,
+   "grader": "reviewer",
+   "breaks": "constructor_injection"
+  },
+  "A10": {
+   "convention_fit": 3,
+   "design_fit": 3,
+   "test_quality": 3,
+   "grader": "reviewer",
+   "breaks": "scheduler_lock"
+  },
+  "A11": {
+   "convention_fit": 3,
+   "design_fit": 4,
+   "test_quality": 4,
+   "grader": "reviewer",
+   "breaks": "ports_adapters"
+  },
+  "A12": {
+   "convention_fit": 2,
+   "design_fit": 2,
+   "test_quality": 3,
+   "grader": "reviewer",
+   "breaks": "after_commit_listener"
+  }
+ },
+ "adjudication": [
+  {
+   "anchor": "A2",
+   "criterion": "convention_fit",
+   "judge": 3,
+   "judge_repeat": 5,
+   "reference": 4,
+   "class": "rubric_overlap",
+   "finding": "The rubric lets a missing unit test cost points under convention_fit and again under test_quality (and the deterministic tests_written check). On the identical task the judge gave 3 (A2) and 4 (A3), and its own second pass gave A2 a 5: the ambiguity shows up as judge noise, and convention_fit has the largest judge MAD of the three (0.222).",
+   "action": "not changed in this arc: one point on one anchor, below delta; candidate for rubric r5 ('convention_fit excludes the testing convention, which test_quality grades')."
+  },
+  {
+   "anchor": "A4",
+   "criterion": "design_fit",
+   "judge": 5,
+   "judge_repeat": 5,
+   "reference": 4,
+   "class": "judge_blind_spot",
+   "finding": "FaqService.reorderCategory repeats the category lookup and the active-FAQ query of getFaqsByCategory (FaqService.java:66-68) instead of calling it. The judge praised the 'reuse of the repository finder': it sees the diff, never the unchanged code the diff duplicates. Both passes miss it.",
+   "action": "not changed in this arc (the contract and the rubric are fixed before the first run). Candidate: a deterministic clone check (added lines matching unchanged lines of the same file) or unchanged-callers context in the judge's input. Cost here: one point of design_fit = 0.025 of S on 2 of 8 anchors, below delta 0.030."
+  },
+  {
+   "anchor": "A6",
+   "criterion": "design_fit",
+   "judge": 5,
+   "judge_repeat": 5,
+   "reference": 4,
+   "class": "judge_blind_spot",
+   "finding": "Same duplication of getFaqsByCategory as A4, plus a redundant size check; the judge again sees only the diff.",
+   "action": "as A4."
+  },
+  {
+   "anchor": "A5",
+   "criterion": "design_fit",
+   "judge": 4,
+   "judge_repeat": 5,
+   "reference": 5,
+   "class": "judge_error",
+   "finding": "The judge docked the cron job for sitting in services/ rather than a cron subpackage, but the task's interface names com.sm.instagram.platform.support.ticket.services.StaleTicketCloseCronJob, and no written convention asks for a cron package. The second pass gave 5.",
+   "action": "none: within the judge's own repeatability."
+  },
+  {
+   "anchor": "A4",
+   "criterion": "test_quality",
+   "judge": 4,
+   "judge_repeat": 5,
+   "reference": 5,
+   "class": "defensible",
+   "finding": "Five Mockito tests cover the stated behaviour and every failure path with message keys. The judge's points (lenient strictness, SecurityContextHolder not cleared) are real test-hygiene nits outside the rubric's anchors. The second pass gave 5.",
+   "action": "none."
+  },
+  {
+   "anchor": "A8",
+   "criterion": "test_quality",
+   "judge": 4,
+   "judge_repeat": 4,
+   "reference": 5,
+   "class": "defensible",
+   "finding": "The listener tests and the service test (event payload, verifyNoInteractions(emailService)) pin the added behaviour; the judge wanted the language field asserted. A one-point difference of taste on the same side of the >= 4 line.",
+   "action": "none."
+  },
+  {
+   "anchor": "A9",
+   "criterion": "convention_fit",
+   "judge": 2,
+   "judge_repeat": 2,
+   "reference": 3,
+   "class": "rubric_overlap",
+   "finding": "One convention broken (field injection) = 3 by the anchor; the judge also charged the untested service logic and the fixture's synthetic test command (-Dtest=X), a fixture artifact that real runs do not have.",
+   "action": "r5: the testing convention costs at most one point under convention_fit."
+  },
+  {
+   "anchor": "A10",
+   "criterion": "convention_fit",
+   "judge": 2,
+   "judge_repeat": 2,
+   "reference": 3,
+   "class": "rubric_overlap",
+   "finding": "As A9: a missing lock is one broken convention; the extra point went to tests and the fixture trace.",
+   "action": "as A9."
+  },
+  {
+   "anchor": "A10",
+   "criterion": "design_fit",
+   "judge": 4,
+   "judge_repeat": 4,
+   "reference": 3,
+   "class": "judge_lenient_structural",
+   "finding": "Without @SchedulerLock the job runs on every instance and both close the same tickets: a structural defect of how the project runs jobs, not only a missed rule. The judge kept design at 4 and instead docked the task-mandated services/ placement (the same mistake as A5), in both passes.",
+   "action": "r5: a convention break that is a structural defect lowers design_fit too; a placement named by the task's interface is not graded."
+  },
+  {
+   "anchor": "A12",
+   "criterion": "design_fit",
+   "judge": 3,
+   "judge_repeat": 3,
+   "reference": 2,
+   "class": "judge_lenient_structural",
+   "finding": "A plain @EventListener runs inside createTicket's transaction: the mail still leaves before commit and on rollback, so the new indirection fixes neither defect the task names. The judge saw the missing annotation but graded design as a mild smell.",
+   "action": "r5 (as A10)."
+  }
+ ],
+ "caveats": [
+  "The reviewer and the judge are the same model family (Opus 5.5); shared blind spots inflate agreement. The reviewer read the unchanged code base, the judge cannot, which is why the design-fit gaps surfaced.",
+  "On the 8 baseline anchors every reference score for convention_fit and design_fit is >= 4 (prevalence 1.0): kappa collapses (0 for convention_fit) whatever the judge does, which is why the degraded anchors were added and why AC1 and Spearman are read beside it.",
+  "Eight anchors bound what calibration can show: a systematic error on a rare case (a change that breaks layering, a parallel mechanism) would not appear in this sample."
+ ],
+ "decision": {
+  "rubric": "r5",
+  "why": "Three systematic patterns, each repeated across anchors and both judge passes: (1) design_fit is lenient where the defect is structural or a duplication of unchanged code (A4, A6, A10, A12: judge above the reference every time, never below except A5); (2) the testing convention is charged under convention_fit as well as test_quality (A2, A9, A10); (3) a placement the task mandates is graded as a smell (A5, A10). Pattern 1 sits on the criterion the showcase is about (the anti-spaghetti score) and is the reviewer-to-judge gap GEPA would inherit: a judge that cannot see duplication cannot reward a prompt that teaches reuse. The one-point gaps of taste (A4, A8 test_quality) are left alone.",
+  "changes": [
+   "BASE CODE: the unchanged text of the production Java files the diff modifies is part of the judge's input",
+   "design_fit: duplication against BASE CODE, and convention breaks that are structural defects, lower the score",
+   "convention_fit: the testing convention costs at most one point",
+   "a placement named by the task's interface is not graded"
+  ],
+  "cost": "the 18 baseline runs and the 4 degraded anchors re-judged twice under r5 (Actions, mode rejudge); delta re-measured from the new verdicts; no coder run repeated",
+  "not_changed": "the weights, the deterministic checks, the thresholds and the split (law 1); a deterministic clone check stays a recommendation"
+ }
+}

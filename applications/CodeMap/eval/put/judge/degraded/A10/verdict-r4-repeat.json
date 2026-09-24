@@ -1,0 +1,29 @@
+{
+ "rubric": "r4",
+ "verdict": {
+  "rules_violated": 2,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 2,
+  "design_fit": 4,
+  "test_quality": 3,
+  "graph_use": 2,
+  "reasons": {
+   "correctness": "Repository finder, closeStaleResolvedTickets(int) and StaleTicketCloseCronJob match the interface. They cover the property defaults, the disabled short-circuit and the swallowed failure. Build green, hidden tests 4/4, existing tests 10/10.",
+   "convention_fit": "closeStaleTickets() has @Scheduled but no @SchedulerLock(name = \"support:...\") on a multi-instance app. The service's new domain logic has no unit test. The run command was -Dtest=X, not the new test class.",
+   "design_fit": "Logic sits in SupportTicketService, the query in the repository, and the job only delegates. Explicit save() inside @Transactional on managed entities is redundant. With no ShedLock, the job would run once per instance.",
+   "test_quality": "StaleTicketCloseCronJobUnitTest has Mockito-only tests for enabled, disabled and failure. closeStaleResolvedTickets has no test for the cutoff, the status change, save calls or the returned count.",
+   "graph_use": "One generic query (MATCH (e:Entity) RETURN e.file_path LIMIT 1) found nothing relevant. The DeferredDeletionCronJob example and the support/ticket files were found without the graph."
+  },
+  "rubric": "r4",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 1057,
+  "cache_read_input_tokens": 1278,
+  "cache_creation_input_tokens": 20058
+ },
+ "is_error": false
+}

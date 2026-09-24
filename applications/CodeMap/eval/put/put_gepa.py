@@ -151,7 +151,8 @@ class PutAdapter:
         if not put_runner.finished(rd):
             self.execute(task, body, rd, self.base_repo, self.contract, self.instance, label=self.label)
         checks = put_checks.check_run(rd, task, self.contract, self.repo)
-        verdict = self.judge(rd, task, self.instance, self.contract["models"]["judge"]).get("verdict")
+        verdict = self.judge(rd, task, self.instance, self.contract["models"]["judge"],
+                             base_text=getattr(self.repo, "base_text", None)).get("verdict")
         s, comp = put_score.score(checks, verdict, self.contract)
         with open(os.path.join(rd, "meta.json"), encoding="utf-8") as f:
             meta = json.load(f)

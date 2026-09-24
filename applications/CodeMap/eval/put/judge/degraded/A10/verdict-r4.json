@@ -1,0 +1,29 @@
+{
+ "rubric": "r4",
+ "verdict": {
+  "rules_violated": 2,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 2,
+  "design_fit": 4,
+  "test_quality": 3,
+  "graph_use": 2,
+  "reasons": {
+   "correctness": "Repository finder, closeStaleResolvedTickets(int) with @Transactional, and the cron job's enabled, olderThanDays and cron properties and defaults all match the interface. Failures are logged, not thrown. Hidden acceptance tests pass 4/4; build is green.",
+   "convention_fit": "The @Scheduled closeStaleTickets() has no @SchedulerLock; SchedulerLock is imported but unused, so the job runs on every instance. The new domain logic in SupportTicketService has no unit test, and the run command used -Dtest=X instead of the class name.",
+   "design_fit": "Selection logic sits in the service and the query in the repository; the job only delegates, and the change is small. Minor smell: the CronJob is placed in the services package, while the example read uses a cron package.",
+   "test_quality": "StaleTicketCloseCronJobUnitTest covers the enabled, disabled and exception-swallowed paths with MockitoExtension. The service's cutoff, status transition and save count are untested. The file holds 3 tests, but the reported result is 2/2.",
+   "graph_use": "One trivial query (MATCH (e:Entity) RETURN e.file_path LIMIT 1) found nothing specific. No query located the support/ticket package, its dependents or an existing scheduled job. The DeferredDeletionCronJob example was read directly."
+  },
+  "rubric": "r4",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 1174,
+  "cache_read_input_tokens": 0,
+  "cache_creation_input_tokens": 21208
+ },
+ "is_error": false
+}

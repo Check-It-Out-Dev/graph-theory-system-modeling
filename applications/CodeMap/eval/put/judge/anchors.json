@@ -40,6 +40,38 @@
    "id": "A8",
    "run": "baseline-2026-09-23\\0c3af0cdaacfe166\\ticket-created-after-commit.r2",
    "task": "ticket-created-after-commit"
+  },
+  {
+   "id": "A9",
+   "source": "fixture",
+   "fixture": "stale-ticket-close--field-injection",
+   "task": "stale-ticket-close",
+   "run": "judge/degraded/A9",
+   "breaks": "constructor_injection"
+  },
+  {
+   "id": "A10",
+   "source": "fixture",
+   "fixture": "stale-ticket-close--no-lock",
+   "task": "stale-ticket-close",
+   "run": "judge/degraded/A10",
+   "breaks": "scheduler_lock"
+  },
+  {
+   "id": "A11",
+   "source": "fixture",
+   "fixture": "exchange-rate-port--service-imports-adapter",
+   "task": "exchange-rate-port",
+   "run": "judge/degraded/A11",
+   "breaks": "ports_adapters"
+  },
+  {
+   "id": "A12",
+   "source": "fixture",
+   "fixture": "ticket-created-after-commit--plain-listener",
+   "task": "ticket-created-after-commit",
+   "run": "judge/degraded/A12",
+   "breaks": "after_commit_listener"
   }
  ]
 }

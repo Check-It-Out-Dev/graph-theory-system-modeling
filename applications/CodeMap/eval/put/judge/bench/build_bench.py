@@ -4,7 +4,7 @@
 
 Bundles, per anchor in judge/anchors.json: the task card, the diff, the test numbers, the applicable checks, the
 work summary and both judge verdicts. The page stores the owner's scores (one document per anchor); they become
-judge/owner-scores.json, which put_calibrate.py score reads.
+judge/reference-scores.json (with the graders and the adjudication), which put_calibrate.py score reads.
 """
 
 import json
@@ -17,6 +17,7 @@ sys.path.insert(0, PUT)
 import put_paths    # noqa: E402
 import put_contract  # noqa: E402
 import put_judge    # noqa: E402
+import put_calibrate  # noqa: E402
 
 INSTANCE = "backend-conventions"
 CRITERIA = ("correctness", "convention_fit", "design_fit", "test_quality", "graph_use")
@@ -34,7 +35,7 @@ def bundle():
     anchors = _j(os.path.join(PUT, "judge", "anchors.json"))["anchors"]
     out = []
     for a in anchors:
-        rd = os.path.join(put_paths.RUNS, *a["run"].replace("\\", "/").split("/"))
+        rd = put_calibrate.anchor_dir(a)
         t = tasks[a["task"]]
         v = (_j(os.path.join(rd, "verdict-r4.json")) or {}).get("verdict") or {}
         vr = (_j(os.path.join(rd, "verdict-r4-repeat.json")) or {}).get("verdict") or {}
@@ -43,7 +44,7 @@ def bundle():
         with open(os.path.join(rd, "diff.patch"), encoding="utf-8") as f:
             diff = f.read()
         out.append({
-            "id": a["id"], "run": a["run"].replace("\\", "/"), "task": a["task"], "rep": a["run"].rsplit(".r", 1)[-1],
+            "id": a["id"], "run": a["run"].replace("\\", "/"), "task": a["task"], "rep": a["run"].rsplit(".r", 1)[-1] if a.get("source") != "fixture" else a["fixture"].split("--")[-1],
             "title": t["title"], "text": t["text"], "interface": t.get("interface", []), "tags": t.get("tags", []),
             "diff": diff,
             "tests": {"build": tests.get("build_green"), "own": tests.get("own"), "own_classes": tests.get("own_classes"),
