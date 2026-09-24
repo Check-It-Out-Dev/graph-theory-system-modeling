@@ -79,6 +79,25 @@ logic, a parallel mechanism beside an existing one); and the owner graded the ce
 the reviewer is the engineer who owns the conventions, the sample is refreshed from each campaign's runs, and the
 same five steps run whenever the rubric or the judge model changes.
 
+## Results (2026-09-24)
+
+| campaign | Actions run | what it says |
+|---|---|---|
+| `baseline-2026-09-23` | 35885709905 | the seed on the 6 training tasks × 3: 0.911 (r4), every hidden test passed, `tests_written` 12/18 the gap, delta 0.030 |
+| calibration | — | 12 anchors; r4 soft on design; r5 written; the record in `eval/put/judge/reference-scores.json` |
+| `baseline-2026-09-23-r5` | 35986676711 | the same runs re-judged under r5: 0.907, delta 0.030, judge noise halved |
+| `gepa-2026-09-24` | 35987646721 | 0.917 → 0.979 in-sample, four candidates, plateau after iteration 3, 54 metric calls |
+| `certify-2026-09-24` | 35995327027 | hold-out 0.902 → 0.965, gain 0.063, 95 % CI −0.007 to 0.135: not certified |
+| `promote-2026-09-24.json` | — | the gate closed on the interval; the seed stays |
+
+What was learned, beyond the verdict: a seed transcribed carefully from the team's own CONTRIBUTING already reaches
+the ceiling on correctness and on most rules, so the room an optimiser has is narrow and sits where the written rules
+are vague (here: tests). GEPA filled that gap — `tests_written` 18/30 → 37/40 at certification — and on the tasks the
+seed already did well it bought nothing and cost a longer manual and one scope creep. Four held-out tasks cannot
+separate a gain of that shape from noise; the next certification needs more of them, declared before it runs. The
+rules the prompt could not teach to the 0.90 bound (an example read first, a new unit test with every change, scope)
+are the ones to move into a session hook or a CI gate: that recommendation is the practical output for a team.
+
 ## S0 — provisioning and probes (2026-09-23)
 
 Every item below was run, not assumed. Raw transcripts: `eval/put/probes/s0/`.

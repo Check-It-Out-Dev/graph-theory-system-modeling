@@ -15,7 +15,8 @@ promotion gate. The long form is `../../docs/09-prompt-under-test.md`; the stati
 | `instances/<name>/tasks/<id>/hidden/`, `reference.patch` | what the coder never sees; `validation.json` proves each hidden test fails on the base and passes on the reference |
 | `put_runner.py` | one coding run: fresh worktree, restricted Sonnet session with the prompt as CLAUDE.md, budget, diff, tests |
 | `put_checks.py`, `put_diff.py` | the deterministic checks, diff-scoped, from committed artifacts only |
-| `put_judge.py`, `judge/rubric-r4.md` | the blind Opus judge |
+| `put_judge.py`, `judge/rubric-r5.md` | the blind Opus judge (r5: sees the unchanged text of the files a diff modifies) |
+| `put_calibrate.py`, `judge/` | the judge against reference grades: anchors (`select`, degraded variants via `extend`), `score --rubric rN [--label L]`, `reference-scores.json` (who graded what, every gap argued), `bench/` (the page to grade on) |
 | `put_score.py`, `put_stats.py` | the score and the statistics (Wilson, delta, bootstrap, sign test, kappa, AC1, Spearman) |
 | `put_gepa.py`, `put_stop.py` | GEPA over the prompt, its memorisation guard and the plateau stopper |
 | `put_certify.py`, `put_promote.py` | the held-out verdict, the ceiling test, the promotion gate and the CLAUDE.md branch |
@@ -36,10 +37,15 @@ the job summary and uploads the run directories. Locally, the same command:
 | `baseline` | the seed on every training task k = 3 times, judged twice: delta and the per-rule rates |
 | `gepa` | GEPA until the plateau (K = 3 without a gain above delta) or 60 metric calls |
 | `certify` | the seed k = 3 and a candidate k = 4 on all tasks: the hold-out verdict and the ceiling |
+| `rejudge` | re-grade a finished campaign's runs (`"of": <label>`) and the degraded anchors twice with the current rubric; re-measures delta; no coder run |
 | `report` | rebuild a report from the run directories |
 
 Then `put_promote.py decide --certify <label> --gepa <label>`; `apply --target-repo <backend> --push` commits the
-certified prompt as `CLAUDE.md` on a branch of the backend. The owner merges.
+certified prompt as `CLAUDE.md` on a branch of the backend. The owner merges. A closed gate is a result: the decision is
+kept as `runs/promote-<date>.json` and the seed stays the team's prompt.
+
+The arc of 2026-09-23/24, in order: `baseline-2026-09-23` (r4) → calibration → `baseline-2026-09-23-r5` (rejudge) →
+`gepa-2026-09-24` → `certify-2026-09-24` → `promote-2026-09-24.json` (closed: the hold-out CI includes 0).
 
 ## A second instance
 

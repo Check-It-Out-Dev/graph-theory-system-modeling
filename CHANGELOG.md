@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] — 1.2.0, CodeMap Remote
 
 ### Added
+- Two-part root README (Part 1 the graph; Part 2 how to make sure AI won't turn your codebase into spaghetti); the `put` claims section gating its 22 campaign figures (181 checks); EVAL_CARD prompt-under-test section (D-R29n)
 - Prompt under test, S10–S11: certification on all ten tasks (Actions run 35995327027): hold-out gain 0.063 (delta 0.030) with a 95 % CI of −0.007 to 0.135, so the pre-declared verdict is no and the promotion gate stays closed; `tests_written` 18/30 → 37/40 (D-R29m)
 - Prompt under test, S9: GEPA to the plateau (Actions run 35987646721): 0.917 → 0.979 in-sample in four candidates, 54 metric calls (D-R29l)
 - Prompt under test, S6 closed: the judge calibrated on 12 anchors (8 baseline runs + 4 degraded variants) against blind reference grades; every gap argued in `judge/reference-scores.json`; rubric r5 (base code in the judge's input, design anchors for duplication and structural breaks) re-measured on the box (Actions run 35986676711): design-fit agreement 0.58 → 0.92 exact, Spearman 0.65 → 0.97, judge noise halved; `put_calibrate extend|score`, `run.py rejudge`, the anchor bench page (D-R29k)

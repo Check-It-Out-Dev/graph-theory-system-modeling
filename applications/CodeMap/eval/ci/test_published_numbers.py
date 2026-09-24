@@ -116,3 +116,30 @@ def test_the_night_artifact_still_supports_it(claim):
     decimals = len(str(claimed).split(".")[1]) if isinstance(claimed, float) else 0
     assert round(actual, decimals) == claimed, (
         f"{claim['doc']} claims {claim['metric']} = {claimed} for night {claim['night']}; the artifact says {actual}")
+
+
+# ----------------------------------------------------------------------------- prompt-under-test claims
+
+def _path_lookup(doc, metric):
+    """A dotted path through dicts and lists (`verdict.gain_holdout.ci.0`)."""
+    v = doc
+    for part in metric.split("."):
+        v = v[int(part)] if isinstance(v, list) else v[part]
+    return v
+
+
+@pytest.mark.parametrize("claim", CLAIMS.get("put", []), ids=_label)
+def test_the_document_still_says_the_campaign_figure(claim):
+    assert claim["text"] in _doc(claim["doc"]), (
+        f"{claim['doc']} no longer contains {claim['text']!r} --- the manifest is stale, or a "
+        "published figure was edited without re-gating it")
+
+
+@pytest.mark.parametrize("claim", CLAIMS.get("put", []), ids=_label)
+def test_the_campaign_artifact_still_supports_it(claim):
+    # a prompt-under-test figure lives in a committed campaign summary or calibration under eval/put/
+    with open(harness.os.path.join(harness.CODEMAP, *claim["artifact"].split("/")), encoding="utf-8") as fh:
+        doc = json.load(fh)
+    actual = _path_lookup(doc, claim["metric"])
+    assert round(actual, claim["decimals"]) == round(claim["value"], claim["decimals"]), (
+        f"{claim['doc']} claims {claim['metric']} = {claim['value']} from {claim['artifact']}; the artifact says {actual}")

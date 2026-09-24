@@ -1,7 +1,7 @@
 # Evaluation card — how CodeMap Remote is measured
 
 Every rate on a dashboard or in a README traces to a committed artifact and a script that
-recomputes it in CI without a model. Last revised 2026-09-16.
+recomputes it in CI without a model. Last revised 2026-09-24.
 
 ## Corpus
 
@@ -49,3 +49,23 @@ A night's judge κ is reported per night beside the calibration pass on exact qu
 descriptive, not a claim of trend; the Qwen signal is reported, not gating; the optimiser's
 validation scores are on ≤ 8 examples per run and decide a promotion, not a README row. README
 rows flip from 🟡 to ✅ only with an artifact and a check that re-reads it (`eval/ci/`).
+
+## Prompt under test — a conventions prompt for a coding agent (2026-09-24)
+
+The same discipline applied to a prompt that writes code rather than one that answers questions
+(`eval/put/`, method in `docs/09-prompt-under-test.md`, normative statistics in `eval/put/METRICS.md`).
+
+| | |
+|---|---|
+| Corpus | 10 tasks at `ff43730b` of checkitout-backend, 6 train / 4 hold-out, split fixed before the first run (`eval/put/instances/backend-conventions/tasks/tasks.jsonl`); hidden acceptance tests per task, validated fail-on-base / pass-on-reference twice (40/40 arms) |
+| Oracles | hidden tests (correctness); 17 deterministic checks scoped to the agent's diff and trace, each proven on a fixture that breaks it; pass-to-pass classes |
+| Judge | Claude Opus, rubric r5, blind to the prompt; sees the unchanged text of the modified files. Calibrated on 12 anchors (8 baseline runs, 4 degraded variants) against blind reference grades: pooled exact 0.83, AC1 0.85, Spearman 0.92; design fit exact 0.92 (r4: 0.58). Test-retest MAD of score 0.009 |
+| Noise floor | δ = 0.030 (agent replicate variance dominates) |
+| Verdict rule | hold-out gain > δ, paired-bootstrap 95 % CI excluding 0, no obligatory rule lost — declared before the first run |
+| Result | GEPA 0.917 → 0.979 in-sample; certification hold-out 0.902 → 0.965, gain 0.063, CI −0.007 to 0.135: **not certified**, promotion gate closed |
+| Evidence | Actions runs on the self-hosted runner, artifacts committed under `eval/put/runs/`, listed in `eval/put/RUNS.md`; README figures in the `put` section of `eval/ci/claims.json` |
+
+Not gated: the code-base census that motivates the diff scope (7 of 40 `@Version`, 9 of 23 locks,
+69 `@Autowired`) is a property of the repository under test, not of an evaluation artifact. The
+calibration reviewer is the same model family as the judge; the owner graded the first contested
+cell and delegated the rest, and `eval/put/judge/reference-scores.json` records who graded each.
