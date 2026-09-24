@@ -10,3 +10,9 @@ Every prompt-under-test campaign that produced a committed number: its Actions r
 | 2026-09-24 | baseline-2026-09-23-r5 | rejudge | [35986676711](https://github.com/Check-It-Out-Dev/checkitout-backend/actions/runs/35986676711) | 10802815732, `11712ad7ba58b1fa` | `put@0c3af0cdaacfe166` | 18 | 0.9074 | |
 | 2026-09-24 | gepa-2026-09-24 | gepa | [35987646721](https://github.com/Check-It-Out-Dev/checkitout-backend/actions/runs/35987646721) | 10805832219, `26967d2c278b8f42` | `put@68531a1b36fc9a72` | 0 | 0.9792 | |
 | 2026-09-24 | certify-2026-09-24 | certify | [35995327027](https://github.com/Check-It-Out-Dev/checkitout-backend/actions/runs/35995327027) | 10811422522, `b102093d235b6085` | `put@68531a1b36fc9a72` | 40 | 0.9679 | |
+
+Notes. `runs` counts the scored coder runs a summary rests on: a `gepa` summary records 0 there because its 54
+cells are GEPA metric calls (one replicate per candidate and task, in `gepa.log.jsonl` and the candidate directories),
+and its verdict is the certification's, not its own. `runs/s4-smoke/` is the first local run of S4, made before the
+contract was frozen in S5 and outside the evidence plane; it is kept as the harness's first trace and carries no
+published number, so it has no row here.

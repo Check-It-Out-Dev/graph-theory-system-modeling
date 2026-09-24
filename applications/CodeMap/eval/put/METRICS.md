@@ -86,7 +86,10 @@ tasks is reported beside it; with four tasks its smallest p is 0.0625, so it is 
 
 **The prompt works** when the candidate's hold-out mean exceeds the seed's by more than δ, the bootstrap CI excludes
 0, and no rule obligatory for the seed stops being obligatory. Any part failing falsifies the claim, and the report
-says which part failed.
+says which part failed. At the declared replication the third part cannot fail: the seed runs k = 3 on ten tasks, so a
+universal rule has n = 30 and a lower Wilson bound of at most 30/(30 + z²) = 0.887, below the 0.90 bar — the seed can
+hold no obligatory rule. It is kept because it bites when the seed is certified with k ≥ 4 (n ≥ 40); until then the
+per-rule table beside the verdict (both arms' rates and intervals) is where a lost rule would show.
 
 ## 7. The judge (`put_judge.py`, `judge/rubric-r5.md`)
 

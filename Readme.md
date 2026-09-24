@@ -205,7 +205,7 @@ the pipeline stays. For this one:
 | The conventions are followed | the deterministic checks that apply to the task, on the agent's diff | 0.15 |
 | The change comes with tests | a new `*UnitTest`, no Spring context, at most three mocks, compiles and passes | 0.10 |
 | The agent works the team's way | the graph queried before the first edit; an existing example read before writing a new kind of class | 0.10 |
-| Convention fit, design fit, correctness, test quality, graph use | the calibrated judge, 1–5 each | 0.35 |
+| Convention fit, design fit, correctness, test quality, graph use | the judge, 1–5 each; the first three it shares with a person were calibrated against reference grades, correctness and graph use sit beside deterministic signals (hidden tests, graph first) | 0.35 |
 
 With this repository's earlier graph-navigation evaluation (the Erdős architecture manual) only the criteria and the
 examples change: answers graded against the execution oracle instead of diffs graded against conventions.
@@ -229,7 +229,12 @@ Here the review found the judge **systematically soft on design**: it praised a 
 existing one (it saw only the diff, never the code the diff repeats), and it rated an unlocked job running on every
 instance as a mild smell. Rubric r5 gives the judge the unchanged text of the files a change modifies and names those
 patterns. Re-measured on the same twelve anchors, design-fit agreement went from 0.58 to 0.92 exact
-(Spearman 0.65 → 0.97) and the judge's own test-retest noise halved. The record, gap by gap, is in
+(Spearman 0.65 → 0.97) and the judge's own test-retest noise fell (MAD of score 0.017 → 0.009). Not everything
+improved: pooled agreement at the ≥ 4 line slipped (AC1 0.90 → 0.85), because three cells now sit on the other side
+of the line — two of them flip back on the judge's own second pass, and on the third (a service importing its
+adapter) the judge counts the broken rule and still gives 4, which the deterministic ports check fails regardless.
+r5 was frozen there: a third revision fitted to the same twelve anchors would make them the rubric's training data.
+The record, gap by gap, is in
 [`eval/put/judge/reference-scores.json`](./applications/CodeMap/eval/put/judge/reference-scores.json).
 
 ## Two prompts
@@ -270,7 +275,7 @@ that just misses would be optional stopping, so a second certification needs new
 packages, constructor injection, the build, one pass. Below the bound — *rules the prompt could not teach to that
 standard*, recommended to enforcement instead: an example read before a new class (a session hook), a new unit test
 with every main change (a CI gate), and scope (a diff path gate). The task-specific rules (locks, listeners, ports,
-changesets, guards) held in every run that touched them, but 6 to 12 runs per rule cannot reach the 0.90 bound, so
+changesets, guards) held in every run that touched them, but 8 to 12 runs per rule cannot reach the 0.90 bound, so
 they are reported with their intervals, not claimed. Every figure and run is in
 [`eval/put/RUNS.md`](./applications/CodeMap/eval/put/RUNS.md).
 
@@ -300,7 +305,7 @@ Dated 2026-09. ✅ built · 🟡 under way · ⬜ designed.
 | ✅ | **Execution-fingerprint oracles** | The eval ladder compares answers with execution, not with a judge's opinion of the text; gold answers are byte-identical across two graph engines |
 | ✅ | **Abstention as a tested property** | The navigator abstains at 1.0 on out-of-graph questions — an oracle that knows the boundary of its knowledge is one you can write assertions against |
 | ✅ | **SFT/DPO training with its own evaluation** | Four rounds, 0 → 0.98 execution accuracy, the harness and the data generators in `training/` |
-| ✅ | **Prompt and model evaluation as a CI gate** | 181 checks on every push, no GPU and no model: the master prompt's verb table must equal the parser's in both directions, nine frozen model runs must re-score to their own published summaries, 4,936 recorded DSL steps must draw the same verdicts from today's grammar, and every evaluation figure in the prose — this README's Part 2 included — is tied to the artifact behind it — [`eval/ci/README.md`](./applications/CodeMap/eval/ci/README.md) says why that is the half that rots |
+| ✅ | **Prompt and model evaluation as a CI gate** | 198 checks on every push, no GPU and no model: the master prompt's verb table must equal the parser's in both directions, nine frozen model runs must re-score to their own published summaries, 4,936 recorded DSL steps must draw the same verdicts from today's grammar, and every evaluation figure in the prose — this README's Part 2 included — is tied to the artifact behind it — [`eval/ci/README.md`](./applications/CodeMap/eval/ci/README.md) says why that is the half that rots |
 | ✅ | **A conventions prompt under test** | Part 2: the pipeline built and run end to end on the self-hosted runner, the judge calibrated and revised, GEPA to its plateau; the first candidate was not certified, and the report says why |
 | ⬜ | **The model itself back in the loop** | Re-running the navigator on a schedule needs the 2.5 GB checkpoint and the graph pack published; a publishing decision, not a CI one |
 | 🟡 | **Measuring the quality of an AI system in production** | Live since 2026-09-16 on the served MCP: grounded, correct and abstention rates from a judge calibrated against the execution oracle (κ 0.84), ratings from synthetic users who verify pointers — one artifact per night in `applications/CodeMap/eval/quality/runs/`, the [quality page](https://check-it-out-dev.github.io/graph-theory-system-modeling/quality/) and public dashboards; ✅ once a full night's judge is calibrated on that night's own rows (κ ≥ 0.6) and the gain carries at least thirty baseline pairs — the first full night (2026-09-17) met neither, and says so |
