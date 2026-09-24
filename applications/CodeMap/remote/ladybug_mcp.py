@@ -65,25 +65,54 @@ def to_workspace(value, pairs):
     return value
 
 
-LITERAL = re.compile(r"('(?:[^'\\]|\\.)*'|\"(?:[^\"\\]|\\.)*\")")
+def literal_spans(s):
+    """-> [(start, end)] of the quoted string literals in a statement, left to right, in one pass.
+
+    The same literals the pattern `'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"` finds, without its cost on hostile input: a
+    regex retried at every unterminated quote rescans to the end each time (quadratic in the caller's statement).
+    Once a quote of one kind has no closing partner, no later quote of that kind can have one either (the escape
+    parse after it is the same from either start), so it is read as a plain character from then on."""
+    spans, dead, i, n = [], set(), 0, len(s)
+    while i < n:
+        c = s[i]
+        if c in "'\"" and c not in dead:
+            j = i + 1
+            while j < n and s[j] != c:
+                j += 2 if s[j] == "\\" else 1
+            if j < n:
+                spans.append((i, j + 1))
+                i = j + 1
+                continue
+            dead.add(c)
+        i += 1
+    return spans
+
+
+def _map_literals(s, fn):
+    out, last = [], 0
+    for a, b in literal_spans(s):
+        out.append(s[last:a])
+        out.append(fn(s[a:b]))
+        last = b
+    out.append(s[last:])
+    return "".join(out)
 
 
 def to_stored(statement, pairs):
     """Translate string literals that start with a workspace prefix back to the stored prefix."""
-    def fix(m):
-        lit = m.group(0)
+    def fix(lit):
         quote, body = lit[0], lit[1:-1]
         for stored, short in pairs:
             if body.startswith(short):
                 return quote + stored + body[len(short):] + quote
         return lit
-    return LITERAL.sub(fix, statement)
+    return _map_literals(statement, fix)
 
 
 def one_statement(statement):
     """-> the statement without a trailing ';', or None when it holds more than one."""
     s = statement.strip().rstrip(";").strip()
-    outside = LITERAL.sub("''", s)
+    outside = _map_literals(s, lambda lit: "''")
     return None if ";" in outside else s
 
 

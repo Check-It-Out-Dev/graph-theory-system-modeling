@@ -39,6 +39,25 @@ class PureTests(unittest.TestCase):
 
 
 @unittest.skipUnless(os.path.exists(os.path.join(PACK, "codemap.lbdb")), "no pack")
+class LiteralScannerTests(unittest.TestCase):
+    """The one-pass literal scanner that replaced a regex CodeQL flagged as polynomial on caller input."""
+    OLD = __import__("re").compile(r"('(?:[^'\\]|\\.)*'|\"(?:[^\"\\]|\\.)*\")")
+
+    def test_it_finds_exactly_the_literals_the_old_pattern_found(self):
+        import random
+        rnd = random.Random(20260924)
+        for _ in range(20000):
+            s = "".join(rnd.choice("'\"\\;a ") for _ in range(rnd.randint(0, 24)))
+            self.assertEqual(L.literal_spans(s), [m.span() for m in self.OLD.finditer(s)], repr(s))
+
+    def test_hostile_input_stays_linear(self):
+        import time
+        for s in ("'" + "\\'" * 200000, "'a" * 200000, "\"'" * 200000):
+            t0 = time.perf_counter()
+            L.one_statement(s)
+            self.assertLess(time.perf_counter() - t0, 2.0)
+
+
 class PackTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

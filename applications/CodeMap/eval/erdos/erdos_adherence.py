@@ -37,7 +37,9 @@ SECTIONS = ("Problem", "Where it lives today", "Proposed change", "Plan", "Risks
 BEHAVIOUR_RELS = ("PERFORMS", "MODIFIES", "ACCESSES", "CALLS", "TRIGGERS", "INITIATES", "AFFECTS", "CONSTRAINS", "VALIDATES")
 FILE_RX = re.compile(r"[A-Za-z0-9_.\-]+\.(?:java|ts|html|scss|css|yml|yaml|xml|properties|feature|sql|js|mjs|json|md)\b")
 LABEL_RX = re.compile(r"\b(FACT|INFERENCE|HYPOTHESIS)\b")
-IDENT_RX = re.compile(r"\b[A-Z][a-z0-9]+(?:[A-Z][A-Za-z0-9]*)+\b")          # a class name such as UserService
+IDENT_RX = re.compile(r"\b[A-Z][a-z0-9]+[A-Z][A-Za-z0-9]*\b")              # a class name such as UserService
+# (the same words as `[A-Z][a-z0-9]+(?:[A-Z][A-Za-z0-9]*)+`: the tail's class absorbs every later capital, so one
+#  group suffices, and the nested quantifier that could backtrack exponentially is gone)
 CODE_IDENT_RX = re.compile(r"`([A-Z][A-Za-z0-9_]*)(?:[.#(][^`]*)?`")          # `Guard`, `UserService.delete`
 TELL_RX = re.compile(r"(?<![\w`\]])\[\d{1,3}\]|\bsubsystems?\s+\[?\d{1,3}\b|\bgraph_query\b|\bthe graph\b", re.I)
 EDGE_RX = re.compile(r"\((\w*)(?::Entity)?\s*(\{[^}]*\})?\)\s*<?-\s*\[[^\]]*\]\s*->?\s*\((\w*)(?::Entity)?\s*(\{[^}]*\})?\)")
