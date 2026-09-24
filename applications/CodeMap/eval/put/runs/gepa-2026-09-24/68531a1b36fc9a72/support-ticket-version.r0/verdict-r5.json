@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 5,
+  "test_quality": 3,
+  "graph_use": 4,
+  "reasons": {
+   "correctness": "SupportTicket gains a @Version Long version field. The changeset adds version BIGINT DEFAULT 0 NOT NULL to support_ticket, which matches the interface exactly. Build is green, hidden tests pass 2/2 and existing tests pass 229/229.",
+   "convention_fit": "The changeset sits in 2026/09/ as 24-09-2026-add-version-to-support-ticket.sql. It starts with the liquibase header and changeset line and ends with a rollback. It is included at the end of changelog.xml with a 'September 2026' comment. No existing changeset was edited.",
+   "design_fit": "The footprint is minimal: one field, one changeset, one include. It reuses JPA @Version, the mechanism PartnershipOpportunity and User already use. No new layer and no duplicated logic.",
+   "test_quality": "SupportTicketVersionUnitTest only checks by reflection that the @Version annotation is present and the type is Long. It does not show the version behaviour, such as starting null or being carried through the service update path. The class is fast, uses MockitoExtension and has no Spring context.",
+   "graph_use": "Graph queries found the support files, existing Version entities, the TESTED_BY tests and SupportTicket's dependents before any edit. The edits followed the PartnershipOpportunity example found that way. Later navigation relied heavily on grep and reading changeset files."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 955,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 23618
+ },
+ "is_error": false
+}

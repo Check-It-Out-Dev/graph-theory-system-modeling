@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 5,
+  "test_quality": 3,
+  "graph_use": 4,
+  "reasons": {
+   "correctness": "SupportTicket gains @Version Long version. The changeset adds version BIGINT DEFAULT 0 NOT NULL to support_ticket. The build is green, hidden tests pass 2/2 and existing tests pass 229/229.",
+   "convention_fit": "The new changeset sits in 2026/09/ with the DD-MM-YYYY kebab name, a changeset header and a rollback. It is appended to changelog.xml with a month comment. No existing changeset was edited. SupportTicketVersionUnitTest uses MockitoExtension.",
+   "design_fit": "The change is minimal: one entity field and one changeset. It mirrors the existing AppliedOpportunity @Version pattern. There is no new mechanism and no service rewiring.",
+   "test_quality": "One test only checks the annotation by reflection. Two tests mock save() to throw ObjectOptimisticLockingFailureException and assert only that it propagates, so they do not pin real conflict behaviour. The class uses Strictness.LENIENT.",
+   "graph_use": "Graph queries found the support/ticket files, the dependents of SupportTicket and the tests of SupportTicketService before any edit. The AppliedOpportunity exemplar and its changeset were then found through grep and reads."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 825,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 25680
+ },
+ "is_error": false
+}

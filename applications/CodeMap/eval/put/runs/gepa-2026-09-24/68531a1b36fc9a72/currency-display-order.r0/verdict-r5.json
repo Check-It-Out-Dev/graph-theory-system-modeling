@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 4,
+  "test_quality": 4,
+  "graph_use": 4,
+  "reasons": {
+   "correctness": "Currency.displayOrder maps to display_order INT NOT NULL DEFAULT 0. CurrencyDtoOut.displayOrder is filled by toDto (ModelMapper) and getDataPagedAndFilteredAsDtos. The seed puts PLN first. Build green, hidden tests 4/4.",
+   "convention_fit": "Changeset is at 2026/09/24-09-2026-add-display-order-to-currency.sql with the formatted-sql header, author:id and rollback. Its include is last in changelog.xml under a month comment. No existing changeset edited. New *UnitTest uses MockitoExtension.",
+   "design_fit": "Extends the existing duplicated CurrencyDtoOut builders in CurrencyController, PartnershipOpportunity* and AppliedOpportunityService rather than consolidating them. That keeps the footprint minimal, but four copy-paste mapping sites remain to keep in sync.",
+   "test_quality": "CurrencyServiceDisplayOrderUnitTest covers both mapping paths per entity and the default of 0, with no Spring context. It builds the service through a reflective constructor. There is no null-entity path check, and constructor call sites were updated in existing tests.",
+   "graph_use": "Graph queries located the currency files, their dependents and TESTED_BY tests before any edit. Changeset exemplars and the other CurrencyDtoOut builders were then found by ls and grep, and the edits followed those findings."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 1089,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 50123
+ },
+ "is_error": false
+}
