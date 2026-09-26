@@ -21,6 +21,53 @@ This repository presents a mathematical approach to creating living documentatio
 
 **Why It Works**: As explained in [Appendix A](./GraphTheoryInSystemModeling/Appendix_A_Mathematical_Bridge.md), transformers are differential geometry machines that need algebraic structure to operate optimally. By providing this structure through graphs, we achieve a 73% reduction in AI hallucinations—the same principle that makes XML-structured prompts more effective than unstructured text. This isn't luck; it's mathematics.
 
+## Proven on a production system, not a toy
+
+The method was not designed in the abstract and then illustrated. It was built while
+building **[checkItOut](https://checkitout.app)** — a live influencer-marketing
+marketplace with Stripe billing and Polish e-invoicing — and it is the reason one person
+could keep a system that size navigable.
+
+Both halves of that platform are public, MIT, and are the case study for everything below:
+
+| Repository | What it is, and what it shows about the method |
+| :-- | :-- |
+| **[checkitout-backend](https://github.com/Check-It-Out-Dev/checkitout-backend)** | Spring Boot on Java 21: 40 entities, 50 controllers, a 34-file Cucumber corpus, and an OpenAPI contract generated from a server that actually boots. Modelled here with the 3-level NavigationMaster topology and the six-entity lens. |
+| **[checkitout-frontend](https://github.com/Check-It-Out-Dev/checkitout-frontend)** | Angular 22, a greenfield rewrite of the legacy client, with 1,816 tests across nine tiers and a client generated from the backend's contract. |
+| **[checkitout.app](https://checkitout.app)** | The running product, and a five-chapter technical survey of how it was built — including the chapter on graph-assisted development. |
+
+The screenshots in
+[`Real_Example_Documentation_On_Demands_Screenshots_And_Generated_Documentation/`](./Real_Example_Documentation_On_Demands_Screenshots_And_Generated_Documentation/)
+and
+[`Real_Example_New_Feature_Seat_Model_Screenshots/`](./Real_Example_New_Feature_Seat_Model_Screenshots/)
+are from that work: an agent inside a 200k context window reconstructing the architecture
+from the graph — which files exist, which events they raise, what depends on what — and
+then using it to place a new feature. The economics are the point. Retrieving k hops from a
+graph costs O(k); pushing a codebase through a context window costs O(n) attention with
+documented degradation in the middle, and it costs it again on every question.
+
+## The tooling, and why an SDET should care
+
+This repository is not only theory. It contains the day-to-day machinery that made the
+above workable, and most of it is directly relevant to anyone whose job is now to **test AI
+systems** rather than only systems written by people:
+
+- **[`Promts/`](./Promts/)** — 15 documents: system prompts as XML contracts
+  (`ClaudeCode_ErdosOrchestrator_SystemPrompt.xml`, `Opus4.1_DeepModeling.xml`,
+  `GPT5_ClineDebugger.xml`) and full prompt-engineering guides for the Claude and GPT-5
+  families. A prompt written as a structured contract is a prompt you can evaluate against,
+  which is the whole problem with testing an LLM-backed feature.
+- **[`McpServerForEmbeddings/`](./McpServerForEmbeddings/)** and
+  **[`McpServerForReranking/`](./McpServerForReranking/)** — two MCP servers, in Python,
+  with **29 tests between them** and their own pytest configuration. Retrieval and
+  reranking as services an agent can call, and as code that can fail a build.
+- **[`embeddings-service/`](./embeddings-service/)** — the graph-embedding pipeline:
+  delta extraction, hyperedge emission, an embedding server. This is what makes a graph
+  answer a question in the shape a model can use.
+- **[`applications/CodeMap/`](./applications/CodeMap/)** — a 4B model, running locally on
+  CPU, that navigates the graph through a 13-verb DSL and **abstains** when the answer is
+  not in it. An oracle that knows the boundary of its own knowledge is a testable oracle.
+
 ## Applications: CodeMap — the theory, shipped
 
 **[`applications/CodeMap/`](./applications/CodeMap/)** is the working embodiment of this
