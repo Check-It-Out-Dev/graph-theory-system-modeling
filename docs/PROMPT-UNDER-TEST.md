@@ -30,11 +30,9 @@ otherwise be graded as compliant.
 
 ```mermaid
 flowchart TB
-    SEED["Seed prompt<br/>the team's conventions as a manual"] --> RUN["Sonnet coder in a fresh worktree<br/>prompt as CLAUDE.md · code-graph MCP"]
-    RUN --> CHECKS["Build · own tests · hidden acceptance tests<br/>17 checks on the diff and the tool trace"]
-    CHECKS --> JUDGE["Opus judge, blind to the prompt<br/>five criteria, 1 to 5"]
-    JUDGE --> SCORE["Score S<br/>weighted sum of the measures"]
-    SCORE --> GEPA["GEPA<br/>reflect on failures · rewrite the prompt · keep the Pareto-best"]
+    SEED["Seed prompt<br/>the team's conventions as a manual"] --> RUN["A coder implements one task<br/>fresh worktree · prompt as CLAUDE.md · code-graph MCP"]
+    RUN --> SCORE["The change is scored<br/>build · hidden acceptance tests · 17 checks on the diff · a judge blind to the prompt"]
+    SCORE --> GEPA["GEPA<br/>reflect on the failures · rewrite the prompt · keep the Pareto-best"]
     GEPA -->|"a gain above the noise floor"| RUN
     GEPA -->|"plateau: three iterations without one"| CERT["Certification<br/>seed and candidate replicated on all ten tasks"]
     CERT --> V{"Gain on the held-out tasks:<br/>does the interval exclude zero?"}
