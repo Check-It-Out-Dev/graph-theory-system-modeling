@@ -1,0 +1,37 @@
+diff --git a/src/main/java/com/sm/instagram/platform/support/ticket/models/SupportTicket.java b/src/main/java/com/sm/instagram/platform/support/ticket/models/SupportTicket.java
+index df875dd5d8e..eeb1c0efcab 100644
+--- a/src/main/java/com/sm/instagram/platform/support/ticket/models/SupportTicket.java
++++ b/src/main/java/com/sm/instagram/platform/support/ticket/models/SupportTicket.java
+@@ -149,6 +149,10 @@ public class SupportTicket implements UpdaterTracking {
+     @Size(max = 255, message = "Updater ID cannot exceed 255 characters")
+     private String updaterId;
+ 
++    @Version
++    @Column(name = "version")
++    private Long version;
++
+     /**
+      * Helper method to add a response to this ticket.
+      */
+diff --git a/src/main/resources/db/changelog/2026/09/23-09-2026-add-version-to-support-ticket.sql b/src/main/resources/db/changelog/2026/09/23-09-2026-add-version-to-support-ticket.sql
+new file mode 100644
+index 00000000000..4907c3989b9
+--- /dev/null
++++ b/src/main/resources/db/changelog/2026/09/23-09-2026-add-version-to-support-ticket.sql
+@@ -0,0 +1,4 @@
++--liquibase formatted sql
++--changeset norbert_marchewka:add-version-to-support-ticket
++ALTER TABLE support_ticket ADD COLUMN version BIGINT NOT NULL DEFAULT 0;
++-- rollback ALTER TABLE support_ticket DROP COLUMN version;
+diff --git a/src/main/resources/db/changelog/changelog.xml b/src/main/resources/db/changelog/changelog.xml
+index 77f52d5e094..9b07c237486 100644
+--- a/src/main/resources/db/changelog/changelog.xml
++++ b/src/main/resources/db/changelog/changelog.xml
+@@ -184,4 +184,7 @@
+     <!-- June 2026: Widen ticket_reference to VARCHAR(32) — pentest 3.3 SecureRandom format is 21 chars -->
+     <include file="2026/09/02-09-2026-widen-ticket-reference-column.sql" relativeToChangelogFile="true"/>
+ 
++    <!-- September 2026: Add optimistic locking version column to support_ticket to prevent lost updates -->
++    <include file="2026/09/23-09-2026-add-version-to-support-ticket.sql" relativeToChangelogFile="true"/>
++
+ </databaseChangeLog>

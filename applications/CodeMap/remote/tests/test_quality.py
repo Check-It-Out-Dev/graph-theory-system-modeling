@@ -74,6 +74,15 @@ class QualityTests(unittest.TestCase):
     def test_gains_need_pairs(self):
         g = quality.gains([{"persona": "p", "seed_id": "a", "mode": "codemap", "usage": {"input_tokens": 10}, "num_turns": 3}])
         self.assertEqual((g["n_pairs"], g["tokens_ratio_mean"]), (0, None))
+        # a baseline whose partner was skipped (budget) is no pair, and neither is a skipped baseline
+        rows = [{"persona": "p", "seed_id": "a", "mode": "baseline", "usage": {"input_tokens": 10}, "num_turns": 3},
+                {"persona": "p", "seed_id": "a", "mode": "codemap", "skipped": "budget_exhausted"},
+                {"persona": "p", "seed_id": "b", "mode": "baseline", "skipped": "no_budget_for_partner"},
+                {"persona": "p", "seed_id": "b", "mode": "codemap", "skipped": "baseline_skipped"},
+                {"persona": "p", "seed_id": "c", "mode": "baseline", "usage": {"input_tokens": 20}, "num_turns": 4},
+                {"persona": "p", "seed_id": "c", "mode": "codemap", "usage": {"input_tokens": 10}, "num_turns": 2}]
+        g = quality.gains(rows)
+        self.assertEqual((g["n_pairs"], g["baselines"], g["tokens_ratio_mean"], g["turns_delta_mean"]), (1, 2, 2.0, 2.0))
 
 
 if __name__ == "__main__":

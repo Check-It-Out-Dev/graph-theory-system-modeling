@@ -1,0 +1,29 @@
+{
+ "rubric": "r4",
+ "verdict": {
+  "rules_violated": 1,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 4,
+  "design_fit": 5,
+  "test_quality": 1,
+  "graph_use": 4,
+  "reasons": {
+   "correctness": "Adds `@Version private Long version` to SupportTicket and a BIGINT NOT NULL DEFAULT 0 `version` column on support_ticket. Matches the interface exactly. Build green, hidden tests 2/2, existing tests 229/229.",
+   "convention_fit": "The changeset follows the rules: 2026/09/23-09-2026 naming, formatted-sql header, rollback, and an appended include with a month comment. It mirrors a read example. No new *UnitTest accompanies the entity locking change.",
+   "design_fit": "Minimal footprint: one field, one changeset, one include. It reuses the existing @Version pattern from AppliedOpportunityContent. No new mechanism and no unrelated edits.",
+   "test_quality": "The agent wrote no tests (0/0). Nothing pins the @Version annotation or the version field. The agent only reran existing SupportTicket tests.",
+   "graph_use": "The graph query listed support/ticket files before editing and led to SupportTicket.java. The changeset example and the @Version precedent were found through glob and grep, not the graph."
+  },
+  "rubric": "r4",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 805,
+  "cache_read_input_tokens": 1278,
+  "cache_creation_input_tokens": 18186
+ },
+ "is_error": false
+}

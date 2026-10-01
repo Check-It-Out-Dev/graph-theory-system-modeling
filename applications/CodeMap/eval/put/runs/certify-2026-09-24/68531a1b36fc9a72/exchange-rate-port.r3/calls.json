@@ -1,0 +1,415 @@
+[
+ {
+  "i": 1,
+  "name": "mcp__graph__graph_query",
+  "input": {
+   "statement": "MATCH (e:Entity) WHERE e.file_path STARTS WITH 'backend/src/main/' AND (e.name ENDS WITH 'Port.java' OR e.name ENDS WITH 'Adapter.java' OR e.name ENDS WITH 'Properties.java' OR e.name ENDS WITH 'TranslatableException.java') RETURN e.name, e.file_path ORDER BY e.name"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "{\"columns\": [\"e.name\", \"e.file_path\"], \"rows\": [[\"AppPaymentsProperties.java\", \"backend/src/main/java/com/sm/instagram/platform/subscription/config/AppPaymentsProperties.java\"], [\"AuthenticationTransl"
+ },
+ {
+  "i": 2,
+  "name": "mcp__graph__graph_query",
+  "input": {
+   "statement": "MATCH (e:Entity) WHERE e.file_path STARTS WITH 'backend/' AND lower(e.name) CONTAINS 'currency' RETURN e.file_path, e.layer, e.curated, e.line_count ORDER BY e.file_path LIMIT 50"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "{\"columns\": [\"e.file_path\", \"e.layer\", \"e.curated\", \"e.line_count\"], \"rows\": [[\"backend/src/main/java/com/sm/instagram/platform/currency/Currency.java\", \"Resource\", 4, 46], [\"backend/src/main/java/com"
+ },
+ {
+  "i": 3,
+  "name": "mcp__graph__graph_query",
+  "input": {
+   "statement": "MATCH (e:Entity)-[r:Dep]->(t:Entity) WHERE r.rel = 'TESTED_BY' AND e.file_path IN ['backend/src/main/java/com/sm/instagram/platform/currency/CurrencyService.java', 'backend/src/main/java/com/sm/instagram/platform/currency/CurrencyConverter.java', 'backend/src/main/java/com/sm/instagram/platform/registry/config/RegistryProperties.java', 'backend/src/main/java/com/sm/instagram/platform/registry/port/CompanyRegistryPort.java', 'backend/src/main/java/com/sm/instagram/platform/registry/adapter/gus/GusBir1RegistryAdapter.java'] RETURN e.name, t.file_path ORDER BY e.name, t.file_path"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "{\"columns\": [\"e.name\", \"t.file_path\"], \"rows\": [[\"CurrencyService.java\", \"backend/src/test/java/com/sm/instagram/platform/unit/service/CurrencyServiceUnitTest.java\"], [\"GusBir1RegistryAdapter.java\", \""
+ },
+ {
+  "i": 4,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-exchange-rate-port.r3\\src\\main\\java\\com\\sm\\instagram\\platform\\registry\\config\\RegistryProperties.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.registry.config;\n2\t\n3\timport lombok.Data;\n4\timport org.springframework.boot.context.properties.ConfigurationProperties;\n5\timport org.springframework.context.annotat"
+ },
+ {
+  "i": 5,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-exchange-rate-port.r3\\src\\main\\java\\com\\sm\\instagram\\platform\\registry\\port\\CompanyRegistryPort.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.registry.port;\n2\t\n3\t/**\n4\t * Port interface for company data lookup from a business registry.\n5\t * Primary implementation: {@link com.sm.instagram.platform.registry"
+ },
+ {
+  "i": 6,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-exchange-rate-port.r3\\src\\main\\java\\com\\sm\\instagram\\platform\\registry\\adapter\\gus\\GusBir1RegistryAdapter.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.registry.adapter.gus;\n2\t\n3\timport com.sm.instagram.platform.common.exceptions.ExternalServiceException;\n4\timport com.sm.instagram.platform.registry.config.RegistryP"
+ },
+ {
+  "i": 7,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-exchange-rate-port.r3\\src\\main\\java\\com\\sm\\instagram\\platform\\subscription\\invoicing\\FakturowniaProperties.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.subscription.invoicing;\n2\t\n3\timport lombok.Getter;\n4\timport lombok.Setter;\n5\timport org.springframework.boot.context.properties.ConfigurationProperties;\n6\t\n7\t@Gette"
+ },
+ {
+  "i": 8,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-exchange-rate-port.r3\\src\\main\\java\\com\\sm\\instagram\\platform\\subscription\\invoicing\\InvoicingPort.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.subscription.invoicing;\n2\t\n3\timport java.math.BigDecimal;\n4\t\n5\t/**\n6\t * Port interface for invoice generation.\n7\t * Primary implementation: Fakturownia API.\n8\t * Ab"
+ },
+ {
+  "i": 9,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-exchange-rate-port.r3\\src\\main\\java\\com\\sm\\instagram\\platform\\common\\exceptions\\BusinessRuleTranslatableException.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.common.exceptions;\n2\t\n3\timport java.io.Serializable;\n4\t\n5\t/**\n6\t * Exception for business logic and rule violations.\n7\t * <p>\n8\t * Use this exception when business "
+ },
+ {
+  "i": 10,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-exchange-rate-port.r3\\src\\main\\java\\com\\sm\\instagram\\platform\\currency\\CurrencyService.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.currency;\n2\t\n3\timport com.sm.instagram.platform.common.base.BaseService;\n4\timport com.sm.instagram.platform.common.util.RepositoryResolver;\n5\timport com.sm.instagra"
+ },
+ {
+  "i": 11,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-exchange-rate-port.r3\\src\\main\\java\\com\\sm\\instagram\\platform\\currency\\CurrencyConverter.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.currency;\n2\t\n3\timport org.modelmapper.Converter;\n4\timport org.springframework.stereotype.Component;\n5\t\n6\t@Component\n7\tpublic class CurrencyConverter {\n8\t\n9\t        "
+ },
+ {
+  "i": 12,
+  "name": "Bash",
+  "input": {
+   "command": "grep -rn \"FakturowniaProperties\" --include=*.java -l . | head -20"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "./src/main/java/com/sm/instagram/platform/subscription/invoicing/FakturowniaAdapter.java\n./src/main/java/com/sm/instagram/platform/subscription/invoicing/FakturowniaConfig.java\n./src/main/java/com/sm/"
+ },
+ {
+  "i": 13,
+  "name": "Bash",
+  "input": {
+   "command": "grep -n \"error.business\" src/main/resources/messages_en.properties | head -5; echo ---; grep -n \"error.business\" src/main/resources/messages_pl.properties | head -5"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "40:error.business.item_not_found={0} not found\n54:error.business.insufficient_permissions=You do not have permission to perform this action\n55:error.business.invalid_state=Invalid state for this opera"
+ },
+ {
+  "i": 14,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-exchange-rate-port.r3\\src\\main\\java\\com\\sm\\instagram\\platform\\subscription\\invoicing\\FakturowniaConfig.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.subscription.invoicing;\n2\t\n3\timport org.springframework.boot.context.properties.EnableConfigurationProperties;\n4\timport org.springframework.boot.web.client.RestTemp"
+ },
+ {
+  "i": 15,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-exchange-rate-port.r3\\src\\main\\java\\com\\sm\\instagram\\platform\\subscription\\invoicing\\FakturowniaAdapter.java",
+   "limit": 60
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.subscription.invoicing;\n2\t\n3\timport com.sm.instagram.platform.subscription.invoicing.dto.FakturowniaCreateRequest;\n4\timport com.sm.instagram.platform.subscription.i"
+ },
+ {
+  "i": 16,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-exchange-rate-port.r3\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\subscription\\FakturowniaAdapterUnitTest.java",
+   "limit": 80
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.unit.service.subscription;\n2\t\n3\timport com.sm.instagram.platform.subscription.invoicing.FakturowniaAdapter;\n4\timport com.sm.instagram.platform.subscription.invoicin"
+ },
+ {
+  "i": 17,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-exchange-rate-port.r3\\src\\main\\java\\com\\sm\\instagram\\platform\\common\\exceptions\\TranslatableException.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.common.exceptions;\n2\t\n3\timport lombok.Getter;\n4\t\n5\timport java.io.Serial;\n6\timport java.io.Serializable;\n7\t\n8\t/**\n9\t * Base exception for all translatable exception"
+ },
+ {
+  "i": 18,
+  "name": "Bash",
+  "input": {
+   "command": "grep -n \"^package\" src/test/java/com/sm/instagram/platform/unit/service/CurrencyServiceUnitTest.java; echo ---; ls src/test/java/com/sm/instagram/platform/unit/ | head -30; echo ---adapter---; find src/test/java/com/sm/instagram/platform/unit -iname \"*Adapter*\" "
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1:package com.sm.instagram.platform.unit.service;\n---\nconfig/\ncontroller/\ncredentials/\ne2e/\nentity/\nexceptions/\ngrpc/\nlogging/\nopenapi/\nregistry/\nsecurity/\nservice/\nstorage/\nuser/\nutil/\nvalidation/\nva"
+ },
+ {
+  "i": 19,
+  "name": "Bash",
+  "input": {
+   "command": "find src/main/resources -maxdepth 1 -iname \"application*\"; echo ---; grep -n \"fakturownia\\|registry:\" -A5 src/main/resources/application.yml 2>/dev/null | head -60"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "src/main/resources/application-actuator.yml\nsrc/main/resources/application-dev-lite.yml\nsrc/main/resources/application-dev.yml\nsrc/main/resources/application-e2e.yml\nsrc/main/resources/application-int"
+ },
+ {
+  "i": 20,
+  "name": "Bash",
+  "input": {
+   "command": "sed -n '640,665p' src/main/resources/application.yml"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "    enterprise: price_1TDprIEF0n7JDo591xcehTLl\n\n# =============================================================================\n# FAKTUROWNIA INVOICING\n# =============================================="
+ },
+ {
+  "i": 21,
+  "name": "Bash",
+  "input": {
+   "command": "grep -n \"^currency:\" -A5 src/main/resources/application.yml"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "(Bash completed with no output)"
+ },
+ {
+  "i": 22,
+  "name": "mcp__graph__graph_query",
+  "input": {
+   "statement": "MATCH (d:Entity)-[r:Dep]->(e:Entity) WHERE e.file_path IN ['backend/src/main/java/com/sm/instagram/platform/currency/CurrencyService.java', 'backend/src/main/java/com/sm/instagram/platform/currency/CurrencyConverter.java'] RETURN r.rel, d.file_path, e.file_path ORDER BY d.file_path"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "{\"columns\": [\"r.rel\", \"d.file_path\", \"e.file_path\"], \"rows\": [[\"INJECTS\", \"backend/src/main/java/com/sm/instagram/platform/currency/CurrencyController.java\", \"backend/src/main/java/com/sm/instagram/pl"
+ },
+ {
+  "i": 23,
+  "name": "Write",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-exchange-rate-port.r3\\src\\main\\java\\com\\sm\\instagram\\platform\\currency\\port\\ExchangeRatePort.java",
+   "content": "<733 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "File created successfully at: C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-exchange-rate-port.r3\\src\\main\\java\\com\\sm\\instagram\\platform\\currency\\port\\ExchangeRatePort.java (file state is current in "
+ },
+ {
+  "i": 24,
+  "name": "Write",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-exchange-rate-port.r3\\src\\main\\java\\com\\sm\\instagram\\platform\\currency\\adapter\\FixedExchangeRateProperties.java",
+   "content": "<747 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "File created successfully at: C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-exchange-rate-port.r3\\src\\main\\java\\com\\sm\\instagram\\platform\\currency\\adapter\\FixedExchangeRateProperties.java (file state "
+ },
+ {
+  "i": 25,
+  "name": "Write",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-exchange-rate-port.r3\\src\\main\\java\\com\\sm\\instagram\\platform\\currency\\adapter\\FixedExchangeRateConfig.java",
+   "content": "<319 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "File created successfully at: C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-exchange-rate-port.r3\\src\\main\\java\\com\\sm\\instagram\\platform\\currency\\adapter\\FixedExchangeRateConfig.java (file state is c"
+ },
+ {
+  "i": 26,
+  "name": "Write",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-exchange-rate-port.r3\\src\\main\\java\\com\\sm\\instagram\\platform\\currency\\adapter\\FixedExchangeRateAdapter.java",
+   "content": "<1263 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "File created successfully at: C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-exchange-rate-port.r3\\src\\main\\java\\com\\sm\\instagram\\platform\\currency\\adapter\\FixedExchangeRateAdapter.java (file state is "
+ },
+ {
+  "i": 27,
+  "name": "Write",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-exchange-rate-port.r3\\src\\main\\java\\com\\sm\\instagram\\platform\\currency\\CurrencyConversionService.java",
+   "content": "<901 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "File created successfully at: C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-exchange-rate-port.r3\\src\\main\\java\\com\\sm\\instagram\\platform\\currency\\CurrencyConversionService.java (file state is current"
+ },
+ {
+  "i": 28,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-exchange-rate-port.r3\\src\\main\\resources\\messages_en.properties",
+   "offset": 50,
+   "limit": 10
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "50\terror.database.deadlock=A temporary database conflict occurred. Please try again\n51\t\n52\t# Cache Errors\n53\terror.cache.cleanup_failed=Cache cleanup failed. This is a non-critical operation\n54\terror."
+ },
+ {
+  "i": 29,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-exchange-rate-port.r3\\src\\main\\resources\\messages_pl.properties",
+   "offset": 50,
+   "limit": 10
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "50\terror.database.deadlock=Wystąpił tymczasowy konflikt w bazie danych. Spróbuj ponownie\n51\t\n52\t# Błędy cache\n53\terror.cache.cleanup_failed=Czyszczenie cache nie powiodło się. To operacja niekrytyczna"
+ },
+ {
+  "i": 30,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-exchange-rate-port.r3\\src\\main\\resources\\messages_en.properties",
+   "old_string": "<57 chars>",
+   "new_string": "<145 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-exchange-rate-port.r3\\src\\main\\resources\\messages_en.properties has been updated successfully."
+ },
+ {
+  "i": 31,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-exchange-rate-port.r3\\src\\main\\resources\\messages_pl.properties",
+   "old_string": "<61 chars>",
+   "new_string": "<136 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-exchange-rate-port.r3\\src\\main\\resources\\messages_pl.properties has been updated successfully."
+ },
+ {
+  "i": 32,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-exchange-rate-port.r3\\src\\main\\resources\\application.yml",
+   "old_string": "<180 chars>",
+   "new_string": "<447 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-exchange-rate-port.r3\\src\\main\\resources\\application.yml has been updated successfully."
+ },
+ {
+  "i": 33,
+  "name": "Write",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-exchange-rate-port.r3\\src\\test\\java\\com\\sm\\instagram\\platform\\currency\\CurrencyConversionServiceUnitTest.java",
+   "content": "<2862 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "File created successfully at: C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-exchange-rate-port.r3\\src\\test\\java\\com\\sm\\instagram\\platform\\currency\\CurrencyConversionServiceUnitTest.java (file state is"
+ },
+ {
+  "i": 34,
+  "name": "Write",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-exchange-rate-port.r3\\src\\test\\java\\com\\sm\\instagram\\platform\\currency\\adapter\\FixedExchangeRateAdapterUnitTest.java",
+   "content": "<1836 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "File created successfully at: C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-exchange-rate-port.r3\\src\\test\\java\\com\\sm\\instagram\\platform\\currency\\adapter\\FixedExchangeRateAdapterUnitTest.java (file s"
+ },
+ {
+  "i": 35,
+  "name": "Write",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-exchange-rate-port.r3\\src\\test\\java\\com\\sm\\instagram\\platform\\currency\\adapter\\FixedExchangeRatePropertiesUnitTest.java",
+   "content": "<1207 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "File created successfully at: C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-exchange-rate-port.r3\\src\\test\\java\\com\\sm\\instagram\\platform\\currency\\adapter\\FixedExchangeRatePropertiesUnitTest.java (fil"
+ },
+ {
+  "i": 36,
+  "name": "Bash",
+  "input": {
+   "command": "cd \"C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-exchange-rate-port.r3\" && ./mvnw -q test -Ptest -Dtest=CurrencyConversionServiceUnitTest,FixedExchangeRateAdapterUnitTest,FixedExchangeRatePropertiesUnitTest -Dsurefire.failIfNoSpecifiedTests=false 2>&1 | tail -100"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's docu"
+ },
+ {
+  "i": 37,
+  "name": "Bash",
+  "input": {
+   "command": "cd \"C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-exchange-rate-port.r3\" && ./mvnw -q test-compile -Ptest 2>&1 | tail -100"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "(Bash completed with no output)"
+ },
+ {
+  "i": 38,
+  "name": "Bash",
+  "input": {
+   "command": "cd \"C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-exchange-rate-port.r3\" && echo \"--ExtendWith--\" && grep -l \"ExtendWith(MockitoExtension.class)\" src/test/java/com/sm/instagram/platform/currency/CurrencyConversionServiceUnitTest.java src/test/java/com/sm/instagram/platform/currency/adapter/*.java && echo \"--LENIENT/any(--\" && grep -rn \"LENIENT\\|lenient(\" src/test/java/com/sm/instagram/platform/currency || echo none && echo \"--adapter import outside adapter pkg--\" && grep -rn \"import .*currency\\.adapter\\.\" src/main | grep -v \"/currency/adapter/\" || echo none && echo \"--package decls--\" && grep -n \"^package\" src/test/java/com/sm/instagram/platform/currency/CurrencyConversionServiceUnitTest.java src/test/java/com/sm/instagram/platform/currency/adapter/*.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "--ExtendWith--\nsrc/test/java/com/sm/instagram/platform/currency/CurrencyConversionServiceUnitTest.java\nsrc/test/java/com/sm/instagram/platform/currency/adapter/FixedExchangeRateAdapterUnitTest.java\nsr"
+ },
+ {
+  "i": 39,
+  "name": "Bash",
+  "input": {
+   "command": "cd \"C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-exchange-rate-port.r3\" && git status --porcelain"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": " M src/main/resources/application.yml\n M src/main/resources/messages_en.properties\n M src/main/resources/messages_pl.properties\n?? src/main/java/com/sm/instagram/platform/currency/CurrencyConversionSe"
+ }
+]

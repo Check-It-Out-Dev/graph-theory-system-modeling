@@ -1,0 +1,94 @@
+diff --git a/src/main/java/com/sm/instagram/platform/userpreferences/UserPreferences.java b/src/main/java/com/sm/instagram/platform/userpreferences/UserPreferences.java
+index 9084061dcc8..32642719061 100644
+--- a/src/main/java/com/sm/instagram/platform/userpreferences/UserPreferences.java
++++ b/src/main/java/com/sm/instagram/platform/userpreferences/UserPreferences.java
+@@ -113,4 +113,8 @@ public class UserPreferences {
+      */
+     @Column(name = "notification_email_support_enabled")
+     private Boolean notificationEmailSupportEnabled = true;
++
++    @Version
++    @Column(name = "version")
++    private Long version;
+ }
+\ No newline at end of file
+diff --git a/src/main/resources/db/changelog/2026/09/24-09-2026-add-version-to-user-preferences.sql b/src/main/resources/db/changelog/2026/09/24-09-2026-add-version-to-user-preferences.sql
+new file mode 100644
+index 00000000000..ae298ad88c9
+--- /dev/null
++++ b/src/main/resources/db/changelog/2026/09/24-09-2026-add-version-to-user-preferences.sql
+@@ -0,0 +1,10 @@
++-- liquibase formatted sql
++-- changeset norbert:add-version-to-user-preferences-table
++
++-- Add JPA @Version column to user_preferences table for optimistic locking protection
++-- Prevents the web app and the mobile app from silently overwriting each other's
++-- concurrent preference updates
++ALTER TABLE user_preferences
++ADD COLUMN version BIGINT DEFAULT 0 NOT NULL;
++
++-- rollback ALTER TABLE user_preferences DROP COLUMN version;
+diff --git a/src/main/resources/db/changelog/changelog.xml b/src/main/resources/db/changelog/changelog.xml
+index 77f52d5e094..4492f036cad 100644
+--- a/src/main/resources/db/changelog/changelog.xml
++++ b/src/main/resources/db/changelog/changelog.xml
+@@ -184,4 +184,7 @@
+     <!-- June 2026: Widen ticket_reference to VARCHAR(32) — pentest 3.3 SecureRandom format is 21 chars -->
+     <include file="2026/09/02-09-2026-widen-ticket-reference-column.sql" relativeToChangelogFile="true"/>
+ 
++    <!-- September 2026: Add JPA @Version column to user_preferences for optimistic locking protection -->
++    <include file="2026/09/24-09-2026-add-version-to-user-preferences.sql" relativeToChangelogFile="true"/>
++
+ </databaseChangeLog>
+diff --git a/src/test/java/com/sm/instagram/platform/unit/service/UserPreferencesServiceUnitTest.java b/src/test/java/com/sm/instagram/platform/unit/service/UserPreferencesServiceUnitTest.java
+index 7e5175d6055..afc22aaf218 100644
+--- a/src/test/java/com/sm/instagram/platform/unit/service/UserPreferencesServiceUnitTest.java
++++ b/src/test/java/com/sm/instagram/platform/unit/service/UserPreferencesServiceUnitTest.java
+@@ -17,6 +17,7 @@ import org.junit.jupiter.params.provider.EnumSource;
+ import org.junit.jupiter.params.provider.ValueSource;
+ import org.mockito.Mock;
+ import org.mockito.junit.jupiter.MockitoExtension;
++import org.springframework.orm.ObjectOptimisticLockingFailureException;
+ 
+ import java.util.HashMap;
+ import java.util.Map;
+@@ -165,6 +166,19 @@ class UserPreferencesServiceUnitTest {
+             // Then
+             assertThat(preferences.getSharePhoneForPayments()).isFalse();
+         }
++
++        @Test
++        @DisplayName("should expose the optimistic locking version field")
++        void shouldExposeVersionField() {
++            // Given
++            UserPreferences preferences = new UserPreferences();
++
++            // When
++            preferences.setVersion(5L);
++
++            // Then
++            assertThat(preferences.getVersion()).isEqualTo(5L);
++        }
+     }
+ 
+     @Nested
+@@ -557,6 +571,19 @@ class UserPreferencesServiceUnitTest {
+             assertThat(saved.getId()).isEqualTo(1L);
+             verify(preferencesRepository).save(testPreferences);
+         }
++
++        @Test
++        @DisplayName("should surface a conflict when a concurrent update wins the race")
++        void shouldRejectStaleSaveOnConcurrentUpdate() {
++            // Given
++            testPreferences.setVersion(0L);
++            when(preferencesRepository.save(testPreferences))
++                    .thenThrow(new ObjectOptimisticLockingFailureException(UserPreferences.class, testPreferences.getId()));
++
++            // When / Then
++            assertThatThrownBy(() -> preferencesRepository.save(testPreferences))
++                    .isInstanceOf(ObjectOptimisticLockingFailureException.class);
++        }
+     }
+ 
+     @Nested

@@ -1,0 +1,539 @@
+[
+ {
+  "i": 1,
+  "name": "mcp__graph__graph_query",
+  "input": {
+   "statement": "MATCH (e:Entity) WHERE e.file_path STARTS WITH 'backend/src/main/java/com/sm/instagram/platform/support/faq/' RETURN e.file_path, e.layer, e.name ORDER BY e.file_path"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "{\"columns\": [\"e.file_path\", \"e.layer\", \"e.name\"], \"rows\": [[\"backend/src/main/java/com/sm/instagram/platform/support/faq/FaqCategoryController.java\", \"Actor\", \"FaqCategoryController.java\"], [\"backend/"
+ },
+ {
+  "i": 2,
+  "name": "mcp__graph__graph_query",
+  "input": {
+   "statement": "MATCH (e:Entity) WHERE e.file_path STARTS WITH 'backend/src/main/' AND e.name ENDS WITH 'CronJob.java' RETURN e.name, e.file_path ORDER BY e.name"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "{\"columns\": [\"e.name\", \"e.file_path\"], \"rows\": [[\"AnonymousConsentCleanupCronJob.java\", \"backend/src/main/java/com/sm/instagram/platform/legal/AnonymousConsentCleanupCronJob.java\"], [\"ConsentEnforceme"
+ },
+ {
+  "i": 3,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r2\\backend\\src\\main\\java\\com\\sm\\instagram\\platform\\legal\\AnonymousConsentCleanupCronJob.java"
+  },
+  "after_marker": false,
+  "is_error": true,
+  "result_head": "File does not exist. Note: your current working directory is C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r2."
+ },
+ {
+  "i": 4,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r2\\backend\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\faq\\services\\FaqService.java"
+  },
+  "after_marker": false,
+  "is_error": true,
+  "result_head": "File does not exist. Note: your current working directory is C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r2."
+ },
+ {
+  "i": 5,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r2\\backend\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\faq\\repositories\\FaqRepository.java"
+  },
+  "after_marker": false,
+  "is_error": true,
+  "result_head": "File does not exist. Note: your current working directory is C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r2."
+ },
+ {
+  "i": 6,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r2\\backend\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\faq\\models\\Faq.java"
+  },
+  "after_marker": false,
+  "is_error": true,
+  "result_head": "File does not exist. Note: your current working directory is C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r2."
+ },
+ {
+  "i": 7,
+  "name": "Bash",
+  "input": {
+   "command": "find \"$PWD\" -maxdepth 2; echo \"---\"; find . -iname \"AnonymousConsentCleanupCronJob.java\"",
+   "description": "Locate repo root and cron job file"
+  },
+  "after_marker": false,
+  "is_error": true,
+  "result_head": "Permission to use Bash has been denied because Claude Code is running in don't ask mode. IMPORTANT: You *may* attempt to accomplish this action using other tools that might naturally be used to accomp"
+ },
+ {
+  "i": 8,
+  "name": "Glob",
+  "input": {
+   "pattern": "**/AnonymousConsentCleanupCronJob.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "src\\main\\java\\com\\sm\\instagram\\platform\\legal\\AnonymousConsentCleanupCronJob.java"
+ },
+ {
+  "i": 9,
+  "name": "Glob",
+  "input": {
+   "pattern": "**/faq/**"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "src\\main\\java\\com\\sm\\instagram\\platform\\support\\faq\\FaqCategoryController.java\nsrc\\main\\java\\com\\sm\\instagram\\platform\\support\\faq\\dtos\\FaqCategoryDtoIn.java\nsrc\\main\\java\\com\\sm\\instagram\\platform\\su"
+ },
+ {
+  "i": 10,
+  "name": "Read",
+  "input": {
+   "file_path": "src\\main\\java\\com\\sm\\instagram\\platform\\legal\\AnonymousConsentCleanupCronJob.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.legal;\n2\t\n3\timport lombok.RequiredArgsConstructor;\n4\timport lombok.extern.slf4j.Slf4j;\n5\timport net.javacrumbs.shedlock.spring.annotation.SchedulerLock;\n6\timport or"
+ },
+ {
+  "i": 11,
+  "name": "Read",
+  "input": {
+   "file_path": "src\\main\\java\\com\\sm\\instagram\\platform\\support\\faq\\services\\FaqService.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.support.faq.services;\n2\t\n3\timport com.sm.instagram.platform.common.base.BaseService;\n4\timport com.sm.instagram.platform.common.exceptions.ResourceNotFoundException;"
+ },
+ {
+  "i": 12,
+  "name": "Read",
+  "input": {
+   "file_path": "src\\main\\java\\com\\sm\\instagram\\platform\\support\\faq\\repositories\\FaqRepository.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.support.faq.repositories;\n2\t\n3\timport com.sm.instagram.platform.common.base.BaseRepository;\n4\timport com.sm.instagram.platform.support.faq.models.Faq;\n5\timport com."
+ },
+ {
+  "i": 13,
+  "name": "Read",
+  "input": {
+   "file_path": "src\\main\\java\\com\\sm\\instagram\\platform\\support\\faq\\models\\Faq.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.support.faq.models;\n2\t\n3\timport com.sm.instagram.platform.common.base.UpdaterTracking;\n4\timport jakarta.persistence.*;\n5\timport jakarta.validation.constraints.NotBl"
+ },
+ {
+  "i": 14,
+  "name": "Grep",
+  "input": {
+   "pattern": "cleanupAnonymousRecords",
+   "path": "src\\main\\java\\com\\sm\\instagram\\platform\\legal",
+   "output_mode": "content",
+   "-n": true
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "src\\main\\java\\com\\sm\\instagram\\platform\\legal\\AnonymousConsentCleanupCronJob.java:41:            int deleted = legalConsentService.cleanupAnonymousRecords();\nsrc\\main\\java\\com\\sm\\instagram\\platform\\le"
+ },
+ {
+  "i": 15,
+  "name": "Glob",
+  "input": {
+   "pattern": "**/*CronJob*UnitTest.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\AnonymousConsentCleanupCronJobUnitTest.java\nsrc\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\ConsentEnforcementCronJobUnitTest.java\nsrc\\test\\ja"
+ },
+ {
+  "i": 16,
+  "name": "Glob",
+  "input": {
+   "pattern": "**/faq/services/*UnitTest.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "No files found"
+ },
+ {
+  "i": 17,
+  "name": "Read",
+  "input": {
+   "file_path": "src\\main\\java\\com\\sm\\instagram\\platform\\legal\\LegalConsentService.java",
+   "offset": 555,
+   "limit": 30
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "555\t        }\n556\t\n557\t        if (archivedCount > 0) {\n558\t            log.info(\"GDPR: No-consent account cleanup: archived {} accounts with zero consent records \" +\n559\t                    \"(created"
+ },
+ {
+  "i": 18,
+  "name": "Read",
+  "input": {
+   "file_path": "src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\AnonymousConsentCleanupCronJobUnitTest.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.unit.service;\n2\t\n3\timport com.sm.instagram.platform.legal.AnonymousConsentCleanupCronJob;\n4\timport com.sm.instagram.platform.legal.LegalConsentService;\n5\timport org"
+ },
+ {
+  "i": 19,
+  "name": "Bash",
+  "input": {
+   "command": "powershell -Command \"Get-Content 'src\\main\\java\\com\\sm\\instagram\\platform\\common\\base\\BaseRepository.java'\" | Select-Object -First 40",
+   "description": "View BaseRepository interface"
+  },
+  "after_marker": false,
+  "is_error": true,
+  "result_head": "Permission to use Bash has been denied because Claude Code is running in don't ask mode. IMPORTANT: You *may* attempt to accomplish this action using other tools that might naturally be used to accomp"
+ },
+ {
+  "i": 20,
+  "name": "Read",
+  "input": {
+   "file_path": "src\\main\\java\\com\\sm\\instagram\\platform\\common\\base\\BaseRepository.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.common.base;\n2\t\n3\timport org.springframework.data.jpa.repository.JpaRepository;\n4\timport org.springframework.data.jpa.repository.JpaSpecificationExecutor;\n5\timport "
+ },
+ {
+  "i": 21,
+  "name": "Grep",
+  "input": {
+   "pattern": "consent.cleanup",
+   "path": "src\\main\\resources",
+   "output_mode": "files_with_matches"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "Found 1 file\nsrc\\main\\resources\\db\\changelog\\2026\\03\\09-03-2026-consent-module-tables.sql"
+ },
+ {
+  "i": 22,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "src\\main\\java\\com\\sm\\instagram\\platform\\support\\faq\\repositories\\FaqRepository.java",
+   "old_string": "<129 chars>",
+   "new_string": "<161 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file src\\main\\java\\com\\sm\\instagram\\platform\\support\\faq\\repositories\\FaqRepository.java has been updated successfully. (file state is current in your context — no need to Read it back)"
+ },
+ {
+  "i": 23,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "src\\main\\java\\com\\sm\\instagram\\platform\\support\\faq\\repositories\\FaqRepository.java",
+   "old_string": "<166 chars>",
+   "new_string": "<431 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file src\\main\\java\\com\\sm\\instagram\\platform\\support\\faq\\repositories\\FaqRepository.java has been updated successfully. (file state is current in your context — no need to Read it back)"
+ },
+ {
+  "i": 24,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "src\\main\\java\\com\\sm\\instagram\\platform\\support\\faq\\services\\FaqService.java",
+   "old_string": "<108 chars>",
+   "new_string": "<140 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file src\\main\\java\\com\\sm\\instagram\\platform\\support\\faq\\services\\FaqService.java has been updated successfully. (file state is current in your context — no need to Read it back)"
+ },
+ {
+  "i": 25,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "src\\main\\java\\com\\sm\\instagram\\platform\\support\\faq\\services\\FaqService.java",
+   "old_string": "<254 chars>",
+   "new_string": "<934 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file src\\main\\java\\com\\sm\\instagram\\platform\\support\\faq\\services\\FaqService.java has been updated successfully. (file state is current in your context — no need to Read it back)"
+ },
+ {
+  "i": 26,
+  "name": "Write",
+  "input": {
+   "file_path": "src\\main\\java\\com\\sm\\instagram\\platform\\support\\faq\\services\\InactiveFaqPurgeCronJob.java",
+   "content": "<1690 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "File created successfully at: src\\main\\java\\com\\sm\\instagram\\platform\\support\\faq\\services\\InactiveFaqPurgeCronJob.java (file state is current in your context — no need to Read it back)"
+ },
+ {
+  "i": 27,
+  "name": "Bash",
+  "input": {
+   "command": "echo",
+   "description": "noop"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "(Bash completed with no output)"
+ },
+ {
+  "i": 28,
+  "name": "Glob",
+  "input": {
+   "pattern": "src\\test\\java\\com\\sm\\instagram\\platform\\unit\\**"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "No files found"
+ },
+ {
+  "i": 29,
+  "name": "Glob",
+  "input": {
+   "pattern": "src/test/java/com/sm/instagram/platform/unit/**"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "src\\test\\java\\com\\sm\\instagram\\platform\\unit\\config\\ActuatorExposureUnitTest.java\nsrc\\test\\java\\com\\sm\\instagram\\platform\\unit\\config\\AuthFailureResponsesCustomizerUnitTest.java\nsrc\\test\\java\\com\\sm\\i"
+ },
+ {
+  "i": 30,
+  "name": "Glob",
+  "input": {
+   "pattern": "src/test/java/com/sm/instagram/platform/unit/service/Faq*"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\FaqUnitTest.java"
+ },
+ {
+  "i": 31,
+  "name": "Read",
+  "input": {
+   "file_path": "src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\FaqUnitTest.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.unit.service;\n2\t\n3\timport com.sm.instagram.platform.support.faq.dtos.FaqCategoryDtoIn;\n4\timport com.sm.instagram.platform.support.faq.dtos.FaqCategoryDtoOut;\n5\timpo"
+ },
+ {
+  "i": 32,
+  "name": "Read",
+  "input": {
+   "file_path": "src\\main\\java\\com\\sm\\instagram\\platform\\common\\base\\BaseService.java",
+   "limit": 80
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.common.base;\n2\t\n3\timport com.sm.instagram.platform.city.City;\n4\timport com.sm.instagram.platform.city.CityRepository;\n5\timport com.sm.instagram.platform.common.exce"
+ },
+ {
+  "i": 33,
+  "name": "Write",
+  "input": {
+   "file_path": "src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\FaqPurgeUnitTest.java",
+   "content": "<3757 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "File created successfully at: src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\FaqPurgeUnitTest.java (file state is current in your context — no need to Read it back)"
+ },
+ {
+  "i": 34,
+  "name": "Write",
+  "input": {
+   "file_path": "src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\InactiveFaqPurgeCronJobUnitTest.java",
+   "content": "<2335 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "File created successfully at: src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\InactiveFaqPurgeCronJobUnitTest.java (file state is current in your context — no need to Read it back)"
+ },
+ {
+  "i": 35,
+  "name": "Bash",
+  "input": {
+   "command": "./mvnw -q test -Ptest -Dtest=FaqPurgeUnitTest,InactiveFaqPurgeCronJobUnitTest -Dsurefire.failIfNoSpecifiedTests=false 2>&1 | tail -150",
+   "description": "Run new unit tests",
+   "timeout": 300000
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's docu"
+ },
+ {
+  "i": 36,
+  "name": "Bash",
+  "input": {
+   "command": "./mvnw -q test -Ptest -Dtest=FaqPurgeUnitTest,InactiveFaqPurgeCronJobUnitTest -Dsurefire.failIfNoSpecifiedTests=false 2>&1 | grep -E \"Tests run|BUILD|ERROR.*Fail|FAIL\"",
+   "description": "Show test summary lines",
+   "timeout": 300000
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "(Bash completed with no output)"
+ },
+ {
+  "i": 37,
+  "name": "Glob",
+  "input": {
+   "pattern": "target/surefire-reports/*FaqPurgeUnitTest.txt"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "target\\surefire-reports\\com.sm.instagram.platform.unit.service.FaqPurgeUnitTest.txt"
+ },
+ {
+  "i": 38,
+  "name": "Glob",
+  "input": {
+   "pattern": "target/surefire-reports/*InactiveFaqPurgeCronJobUnitTest.txt"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "target\\surefire-reports\\com.sm.instagram.platform.unit.service.InactiveFaqPurgeCronJobUnitTest.txt"
+ },
+ {
+  "i": 39,
+  "name": "Read",
+  "input": {
+   "file_path": "target\\surefire-reports\\com.sm.instagram.platform.unit.service.FaqPurgeUnitTest.txt"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\t-------------------------------------------------------------------------------\n2\tTest set: com.sm.instagram.platform.unit.service.FaqPurgeUnitTest\n3\t------------------------------------------------"
+ },
+ {
+  "i": 40,
+  "name": "Read",
+  "input": {
+   "file_path": "target\\surefire-reports\\com.sm.instagram.platform.unit.service.InactiveFaqPurgeCronJobUnitTest.txt"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\t-------------------------------------------------------------------------------\n2\tTest set: com.sm.instagram.platform.unit.service.InactiveFaqPurgeCronJobUnitTest\n3\t---------------------------------"
+ },
+ {
+  "i": 41,
+  "name": "Bash",
+  "input": {
+   "command": "./mvnw -q test -Ptest -Dtest=InactiveFaqPurgeCronJobUnitTest -Dsurefire.failIfNoSpecifiedTests=false 2>&1 | tail -30",
+   "description": "Rerun cron job unit test alone",
+   "timeout": 180000
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "\tat org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35)\r\n\tat org.junit.platform.engine.support.hierarchic"
+ },
+ {
+  "i": 42,
+  "name": "Read",
+  "input": {
+   "file_path": "target\\surefire-reports\\com.sm.instagram.platform.unit.service.InactiveFaqPurgeCronJobUnitTest.txt"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\t-------------------------------------------------------------------------------\n2\tTest set: com.sm.instagram.platform.unit.service.InactiveFaqPurgeCronJobUnitTest\n3\t---------------------------------"
+ },
+ {
+  "i": 43,
+  "name": "Bash",
+  "input": {
+   "command": "find target/surefire-reports -iname \"*AnonymousConsentCleanupCronJobUnitTest*\"",
+   "description": "Check if report exists for consent cron test"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "(Bash completed with no output)"
+ },
+ {
+  "i": 44,
+  "name": "Bash",
+  "input": {
+   "command": "./mvnw -q test -Ptest -Dtest=AnonymousConsentCleanupCronJobUnitTest -Dsurefire.failIfNoSpecifiedTests=false 2>&1 | tail -20",
+   "description": "Run existing consent cron job unit test for comparison",
+   "timeout": 180000
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "\tat org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:109)\r\n\tat org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:91)\r\n\tat org.junit.platform.la"
+ },
+ {
+  "i": 45,
+  "name": "Glob",
+  "input": {
+   "pattern": "target/surefire-reports/*AnonymousConsentCleanupCronJobUnitTest.txt"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "target\\surefire-reports\\com.sm.instagram.platform.unit.service.AnonymousConsentCleanupCronJobUnitTest.txt"
+ },
+ {
+  "i": 46,
+  "name": "Read",
+  "input": {
+   "file_path": "target\\surefire-reports\\com.sm.instagram.platform.unit.service.AnonymousConsentCleanupCronJobUnitTest.txt"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\t-------------------------------------------------------------------------------\n2\tTest set: com.sm.instagram.platform.unit.service.AnonymousConsentCleanupCronJobUnitTest\n3\t--------------------------"
+ },
+ {
+  "i": 47,
+  "name": "Glob",
+  "input": {
+   "pattern": "target/surefire-reports/*InactiveFaqPurgeCronJobUnitTest*PurgeInactiveFaqs*"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "target\\surefire-reports\\com.sm.instagram.platform.unit.service.InactiveFaqPurgeCronJobUnitTest$PurgeInactiveFaqs.txt\ntarget\\surefire-reports\\TEST-com.sm.instagram.platform.unit.service.InactiveFaqPurg"
+ },
+ {
+  "i": 48,
+  "name": "Read",
+  "input": {
+   "file_path": "target\\surefire-reports\\com.sm.instagram.platform.unit.service.InactiveFaqPurgeCronJobUnitTest$PurgeInactiveFaqs.txt"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\t-------------------------------------------------------------------------------\n2\tTest set: com.sm.instagram.platform.unit.service.InactiveFaqPurgeCronJobUnitTest$PurgeInactiveFaqs\n3\t---------------"
+ },
+ {
+  "i": 49,
+  "name": "Bash",
+  "input": {
+   "command": "./mvnw -q test -Ptest -Dtest=FaqUnitTest -Dsurefire.failIfNoSpecifiedTests=false 2>&1 | tail -30",
+   "description": "Run existing FAQ entity unit tests",
+   "timeout": 180000
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "(Bash completed with no output)"
+ },
+ {
+  "i": 50,
+  "name": "Glob",
+  "input": {
+   "pattern": "target/surefire-reports/*FaqUnitTest*.txt"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "target\\surefire-reports\\com.sm.instagram.platform.unit.service.FaqUnitTest$EdgeCaseTests.txt\ntarget\\surefire-reports\\com.sm.instagram.platform.unit.service.FaqUnitTest$FaqCategoryDtoOutTests.txt\ntarge"
+ }
+]

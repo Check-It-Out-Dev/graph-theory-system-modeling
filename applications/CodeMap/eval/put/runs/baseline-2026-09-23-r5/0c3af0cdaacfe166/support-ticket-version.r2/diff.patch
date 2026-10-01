@@ -1,0 +1,77 @@
+diff --git a/src/main/java/com/sm/instagram/platform/support/ticket/models/SupportTicket.java b/src/main/java/com/sm/instagram/platform/support/ticket/models/SupportTicket.java
+index df875dd5d8e..93da68232a7 100644
+--- a/src/main/java/com/sm/instagram/platform/support/ticket/models/SupportTicket.java
++++ b/src/main/java/com/sm/instagram/platform/support/ticket/models/SupportTicket.java
+@@ -149,6 +149,14 @@ public class SupportTicket implements UpdaterTracking {
+     @Size(max = 255, message = "Updater ID cannot exceed 255 characters")
+     private String updaterId;
+ 
++    /**
++     * Optimistic locking version, protects against lost updates when an
++     * admin and the customer change the same ticket concurrently.
++     */
++    @Version
++    @Column(name = "version")
++    private Long version;
++
+     /**
+      * Helper method to add a response to this ticket.
+      */
+diff --git a/src/main/resources/db/changelog/2026/09/23-09-2026-add-version-to-support-ticket.sql b/src/main/resources/db/changelog/2026/09/23-09-2026-add-version-to-support-ticket.sql
+new file mode 100644
+index 00000000000..d7e2964e818
+--- /dev/null
++++ b/src/main/resources/db/changelog/2026/09/23-09-2026-add-version-to-support-ticket.sql
+@@ -0,0 +1,10 @@
++-- liquibase formatted sql
++-- changeset norbert:add-version-to-support-ticket-table
++
++-- Add JPA @Version column to support_ticket table for optimistic locking
++-- Prevents lost updates when an admin and the customer concurrently update
++-- the same ticket (e.g. a status change and a customer reply).
++ALTER TABLE support_ticket
++ADD COLUMN version BIGINT DEFAULT 0 NOT NULL;
++
++-- rollback ALTER TABLE support_ticket DROP COLUMN version;
+diff --git a/src/main/resources/db/changelog/changelog.xml b/src/main/resources/db/changelog/changelog.xml
+index 77f52d5e094..7e6a7a9e424 100644
+--- a/src/main/resources/db/changelog/changelog.xml
++++ b/src/main/resources/db/changelog/changelog.xml
+@@ -184,4 +184,7 @@
+     <!-- June 2026: Widen ticket_reference to VARCHAR(32) — pentest 3.3 SecureRandom format is 21 chars -->
+     <include file="2026/09/02-09-2026-widen-ticket-reference-column.sql" relativeToChangelogFile="true"/>
+ 
++    <!-- September 2026: Optimistic locking for support_ticket — protects against lost updates when admin and customer edit concurrently -->
++    <include file="2026/09/23-09-2026-add-version-to-support-ticket.sql" relativeToChangelogFile="true"/>
++
+ </databaseChangeLog>
+diff --git a/src/test/java/com/sm/instagram/platform/unit/service/SupportTicketEntityUnitTest.java b/src/test/java/com/sm/instagram/platform/unit/service/SupportTicketEntityUnitTest.java
+index 5c5a4a2f61d..b149e2c50e0 100644
+--- a/src/test/java/com/sm/instagram/platform/unit/service/SupportTicketEntityUnitTest.java
++++ b/src/test/java/com/sm/instagram/platform/unit/service/SupportTicketEntityUnitTest.java
+@@ -575,4 +575,25 @@ class SupportTicketEntityUnitTest {
+             assertThat(violations).hasSizeGreaterThanOrEqualTo(5);
+         }
+     }
++
++    // ==================== version (optimistic locking) Tests ====================
++
++    @Nested
++    @DisplayName("version")
++    class VersionTests {
++
++        @Test
++        @DisplayName("should be null before persistence")
++        void shouldBeNullBeforePersistence() {
++            assertThat(ticket.getVersion()).isNull();
++        }
++
++        @Test
++        @DisplayName("should get and set version")
++        void shouldGetAndSetVersion() {
++            ticket.setVersion(5L);
++
++            assertThat(ticket.getVersion()).isEqualTo(5L);
++        }
++    }
+ }

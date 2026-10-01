@@ -1,0 +1,673 @@
+[
+ {
+  "i": 1,
+  "name": "mcp__graph__graph_query",
+  "input": {
+   "statement": "MATCH (e:Entity) WHERE e.file_path STARTS WITH 'backend/' AND lower(e.file_path) CONTAINS 'currency' RETURN e.file_path, e.layer, e.line_count ORDER BY e.file_path"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "{\"columns\": [\"e.file_path\", \"e.layer\", \"e.line_count\"], \"rows\": [[\"backend/src/main/java/com/sm/instagram/platform/currency/Currency.java\", \"Resource\", 46], [\"backend/src/main/java/com/sm/instagram/pl"
+ },
+ {
+  "i": 2,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\currency\\Currency.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.currency;\n2\t\n3\timport jakarta.persistence.*;\n4\timport jakarta.validation.constraints.NotBlank;\n5\timport jakarta.validation.constraints.Size;\n6\timport lombok.AllArgs"
+ },
+ {
+  "i": 3,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\currency\\CurrencyDtoOut.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.currency;\n2\t\n3\timport lombok.AllArgsConstructor;\n4\timport lombok.Builder;\n5\timport lombok.Data;\n6\timport lombok.NoArgsConstructor;\n7\t\n8\t/**\n9\t * Output DTO for Curr"
+ },
+ {
+  "i": 4,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\currency\\CurrencyService.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.currency;\n2\t\n3\timport com.sm.instagram.platform.common.base.BaseService;\n4\timport com.sm.instagram.platform.common.util.RepositoryResolver;\n5\timport com.sm.instagra"
+ },
+ {
+  "i": 5,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\currency\\CurrencyDto.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.currency;\n2\t\n3\timport lombok.Getter;\n4\timport lombok.Setter;\n5\t\n6\t@Getter\n7\t@Setter\n8\tpublic class CurrencyDto {\n9\t    private Long id;\n10\t    private String name;\n"
+ },
+ {
+  "i": 6,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\currency\\CurrencyRepository.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.currency;\n2\t\n3\timport com.sm.instagram.platform.common.base.BaseRepository;\n4\timport org.springframework.stereotype.Repository;\n5\t\n6\timport java.util.Optional;\n7\t\n8"
+ },
+ {
+  "i": 7,
+  "name": "Bash",
+  "input": {
+   "command": "ls \"C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\main\\resources\\db\\changelog\\2026\" 2>/dev/null | tail -30"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "01/\n02/\n03/\n04/\n09/"
+ },
+ {
+  "i": 8,
+  "name": "Bash",
+  "input": {
+   "command": "grep -rl \"currency\" \"C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\main\\resources\\db\\changelog\" -i --include=*.sql"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\main\\resources\\db\\changelog/common/001-schema/001-sequences.sql\nC:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-displ"
+ },
+ {
+  "i": 9,
+  "name": "Bash",
+  "input": {
+   "command": "grep -n -i \"currency\" \"C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\main\\resources\\db\\changelog\\common\\002-data\\001-reference-data.sql\" | head -30"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "72:INSERT INTO currency (name, iso_code, sign, country_code) VALUES\n271:-- rollback DELETE FROM currency;"
+ },
+ {
+  "i": 10,
+  "name": "Bash",
+  "input": {
+   "command": "grep -n -i \"currency\" \"C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\main\\resources\\db\\changelog\\common\\001-schema\\002-tables.sql\""
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "96:-- Currency table\n97:CREATE TABLE IF NOT EXISTS currency (\n98:    id BIGINT PRIMARY KEY DEFAULT nextval('currency_seq'),\n168:    currency_id BIGINT REFERENCES currency(id),\n520:-- rollback DROP TAB"
+ },
+ {
+  "i": 11,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\main\\resources\\db\\changelog\\common\\002-data\\001-reference-data.sql",
+   "offset": 60,
+   "limit": 30
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "60\t    ('Ełk', 'Warmińsko-mazurskie', 'Polska'),\n61\t    ('Słupsk', 'Pomorskie', 'Polska'),\n62\t    ('Ostrowiec Świętokrzyski', 'Świętokrzyskie', 'Polska'),\n63\t    ('Kędzierzyn-Koźle', 'Opolskie', 'Pols"
+ },
+ {
+  "i": 12,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\main\\resources\\db\\changelog\\common\\001-schema\\002-tables.sql",
+   "offset": 90,
+   "limit": 20
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "90\t-- Content type table\n91\tCREATE TABLE IF NOT EXISTS content_type (\n92\t    id BIGINT PRIMARY KEY DEFAULT nextval('content_type_seq'),\n93\t    name VARCHAR(255) NOT NULL\n94\t);\n95\t\n96\t-- Currency table"
+ },
+ {
+  "i": 13,
+  "name": "Bash",
+  "input": {
+   "command": "ls \"C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\main\\resources\\db\\changelog\\2026\\09\""
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "02-09-2026-widen-ticket-reference-column.sql"
+ },
+ {
+  "i": 14,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\main\\resources\\db\\changelog\\2026\\09\\02-09-2026-widen-ticket-reference-column.sql"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\t-- liquibase formatted sql\n2\t-- changeset system:widen-ticket-reference-column\n3\t\n4\t-- Widen ticket_reference from VARCHAR(20) to VARCHAR(32).\n5\t-- The pentest 3.3 fix (SecureRandom, Crockford base3"
+ },
+ {
+  "i": 15,
+  "name": "Bash",
+  "input": {
+   "command": "grep -n \"2026\" \"C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\main\\resources\\db\\changelog\\changelog.xml\" -A3 -B3"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "75-    <include file=\"2025/12/28-12-2025-add-share-phone-for-payments.sql\" relativeToChangelogFile=\"true\"/>\n76-\n77-    <!-- ===================================================================== -->\n78"
+ },
+ {
+  "i": 16,
+  "name": "Bash",
+  "input": {
+   "command": "find \"C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\main\\resources\\db\\changelog\\2026\\03\" -iname \"*display-order*\""
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\main\\resources\\db\\changelog\\2026\\03/21-03-2026-add-display-order-to-consent-definition.sql"
+ },
+ {
+  "i": 17,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\main\\resources\\db\\changelog\\2026\\03\\21-03-2026-add-display-order-to-consent-definition.sql"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\t--liquibase formatted sql\n2\t--changeset system:add-display-order-to-consent-definition\n3\t\n4\tALTER TABLE consent_definition ADD COLUMN IF NOT EXISTS display_order INT NOT NULL DEFAULT 0;\n5\t\n6\tUPDATE "
+ },
+ {
+  "i": 18,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\currency\\CurrencyController.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.currency;\n2\t\n3\timport com.sm.instagram.platform.common.base.BaseController;\n4\timport com.sm.instagram.platform.common.base.BaseService;\n5\timport com.sm.instagram.pl"
+ },
+ {
+  "i": 19,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\CurrencyServiceUnitTest.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.unit.service;\n2\t\n3\timport com.sm.instagram.platform.currency.*;\n4\timport org.junit.jupiter.api.BeforeEach;\n5\timport org.junit.jupiter.api.DisplayName;\n6\timport org."
+ },
+ {
+  "i": 20,
+  "name": "Grep",
+  "input": {
+   "pattern": "new Currency\\(",
+   "path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src",
+   "output_mode": "content",
+   "-n": true
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "src\\test\\java\\com\\sm\\instagram\\platform\\unit\\controller\\PartnershipOpportunityControllerUnitTest.java:275:            Currency pln = new Currency();\nsrc\\test\\java\\com\\sm\\instagram\\platform\\unit\\servic"
+ },
+ {
+  "i": 21,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\currency\\CurrencyConverter.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.currency;\n2\t\n3\timport org.modelmapper.Converter;\n4\timport org.springframework.stereotype.Component;\n5\t\n6\t@Component\n7\tpublic class CurrencyConverter {\n8\t\n9\t        "
+ },
+ {
+  "i": 22,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\currency\\Currency.java",
+   "old_string": "<135 chars>",
+   "new_string": "<220 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\currency\\Currency.java has been updated successfully. (file state is current in"
+ },
+ {
+  "i": 23,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\currency\\CurrencyDtoOut.java",
+   "old_string": "<86 chars>",
+   "new_string": "<116 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\currency\\CurrencyDtoOut.java has been updated successfully. (file state is curr"
+ },
+ {
+  "i": 24,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\currency\\CurrencyService.java",
+   "old_string": "<124 chars>",
+   "new_string": "<183 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\currency\\CurrencyService.java has been updated successfully. (file state is cur"
+ },
+ {
+  "i": 25,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\currency\\CurrencyController.java",
+   "old_string": "<165 chars>",
+   "new_string": "<221 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\currency\\CurrencyController.java has been updated successfully. (file state is "
+ },
+ {
+  "i": 26,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\currency\\CurrencyController.java",
+   "old_string": "<196 chars>",
+   "new_string": "<260 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\currency\\CurrencyController.java has been updated successfully. (file state is "
+ },
+ {
+  "i": 27,
+  "name": "Write",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\main\\resources\\db\\changelog\\2026\\09\\23-09-2026-add-display-order-to-currency.sql",
+   "content": "<408 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "File created successfully at: C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\main\\resources\\db\\changelog\\2026\\09\\23-09-2026-add-display-order-to-currency.sql (file state i"
+ },
+ {
+  "i": 28,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\main\\resources\\db\\changelog\\changelog.xml",
+   "old_string": "<235 chars>",
+   "new_string": "<446 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\main\\resources\\db\\changelog\\changelog.xml has been updated successfully. (file state is current in your context — n"
+ },
+ {
+  "i": 29,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\controller\\PartnershipOpportunityControllerUnitTest.java",
+   "offset": 265,
+   "limit": 20
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "265\t            // controller loop must patch it like it patches compensationType.\n266\t            Page<PartnershipOpportunityDtoOut> page = new PageImpl<>(\n267\t                    List.of(testOpportu"
+ },
+ {
+  "i": 30,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\AddressAndCurrencyUnitTest.java",
+   "offset": 1,
+   "limit": 60
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.unit.service;\n2\t\n3\timport com.sm.instagram.platform.activecooperations.CoopDto;\n4\timport com.sm.instagram.platform.activecooperations.CoopFilter;\n5\timport com.sm.in"
+ },
+ {
+  "i": 31,
+  "name": "Bash",
+  "input": {
+   "command": "cd \"C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\" && python3 - <<'EOF'\nimport re\npath = \"src/test/java/com/sm/instagram/platform/unit/service/CurrencyServiceUnitTest.java\"\nwith open(path, encoding=\"utf-8\") as f:\n    content = f.read()\n\npattern = re.compile(r\"new Currency\\(([^()]*?)\\)\")\ndef repl(m):\n    return f\"new Currency({m.group(1)}, 0)\"\n\nnew_content = pattern.sub(repl, content)\nwith open(path, \"w\", encoding=\"utf-8\") as f:\n    f.write(new_content)\nEOF\n"
+  },
+  "after_marker": false,
+  "is_error": true,
+  "result_head": "Permission to use Bash has been denied because Claude Code is running in don't ask mode. IMPORTANT: You *may* attempt to accomplish this action using other tools that might naturally be used to accomp"
+ },
+ {
+  "i": 32,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\CurrencyServiceUnitTest.java",
+   "old_string": "<75 chars>",
+   "new_string": "<78 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\CurrencyServiceUnitTest.java has been updated successfully. (file "
+ },
+ {
+  "i": 33,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\CurrencyServiceUnitTest.java",
+   "old_string": "<596 chars>",
+   "new_string": "<602 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\CurrencyServiceUnitTest.java has been updated successfully. (file "
+ },
+ {
+  "i": 34,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\CurrencyServiceUnitTest.java",
+   "old_string": "<84 chars>",
+   "new_string": "<87 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\CurrencyServiceUnitTest.java has been updated successfully. (file "
+ },
+ {
+  "i": 35,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\CurrencyServiceUnitTest.java",
+   "old_string": "<83 chars>",
+   "new_string": "<86 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\CurrencyServiceUnitTest.java has been updated successfully. (file "
+ },
+ {
+  "i": 36,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\CurrencyServiceUnitTest.java",
+   "old_string": "<80 chars>",
+   "new_string": "<83 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\CurrencyServiceUnitTest.java has been updated successfully. (file "
+ },
+ {
+  "i": 37,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\CurrencyServiceUnitTest.java",
+   "old_string": "<82 chars>",
+   "new_string": "<85 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\CurrencyServiceUnitTest.java has been updated successfully. (file "
+ },
+ {
+  "i": 38,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\CurrencyServiceUnitTest.java",
+   "old_string": "<81 chars>",
+   "new_string": "<84 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\CurrencyServiceUnitTest.java has been updated successfully. (file "
+ },
+ {
+  "i": 39,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\CurrencyServiceUnitTest.java",
+   "old_string": "<79 chars>",
+   "new_string": "<82 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\CurrencyServiceUnitTest.java has been updated successfully. (file "
+ },
+ {
+  "i": 40,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\CurrencyServiceUnitTest.java",
+   "old_string": "<78 chars>",
+   "new_string": "<81 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\CurrencyServiceUnitTest.java has been updated successfully. (file "
+ },
+ {
+  "i": 41,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\CurrencyServiceUnitTest.java",
+   "old_string": "<74 chars>",
+   "new_string": "<77 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\CurrencyServiceUnitTest.java has been updated successfully. (file "
+ },
+ {
+  "i": 42,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\CurrencyServiceUnitTest.java",
+   "old_string": "<79 chars>",
+   "new_string": "<82 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\CurrencyServiceUnitTest.java has been updated successfully. (file "
+ },
+ {
+  "i": 43,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\CurrencyServiceUnitTest.java",
+   "old_string": "<79 chars>",
+   "new_string": "<82 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\CurrencyServiceUnitTest.java has been updated successfully. (file "
+ },
+ {
+  "i": 44,
+  "name": "Grep",
+  "input": {
+   "pattern": "new Currency\\(",
+   "path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\CurrencyServiceUnitTest.java",
+   "output_mode": "content"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "47:            Currency currency = new Currency();\n66:            Currency currency = new Currency(1L, \"Euro\", \"EUR\", \"€\", \"EU\", 1);\n80:            Currency currency = new Currency();\n98:            C"
+ },
+ {
+  "i": 45,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\CurrencyServiceUnitTest.java",
+   "old_string": "<417 chars>",
+   "new_string": "<765 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\CurrencyServiceUnitTest.java has been updated successfully. (file "
+ },
+ {
+  "i": 46,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\CurrencyServiceUnitTest.java",
+   "old_string": "<582 chars>",
+   "new_string": "<678 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\CurrencyServiceUnitTest.java has been updated successfully. (file "
+ },
+ {
+  "i": 47,
+  "name": "Bash",
+  "input": {
+   "command": "cd \"C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\" && ./mvnw -q test -Ptest -Dtest=CurrencyServiceUnitTest,AddressAndCurrencyUnitTest,PartnershipOpportunityControllerUnitTest,PartnershipOpportunityConverterUnitTest,PartnershipOpportunityMoreUnitTest -Dsurefire.failIfNoSpecifiedTests=false 2>&1 | tail -100"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "[ERROR] COMPILATION ERROR : \r\n[ERROR] C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\AddressAndCurrencyUnitTest.java:[269,"
+ },
+ {
+  "i": 48,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\AddressAndCurrencyUnitTest.java",
+   "offset": 255,
+   "limit": 30
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "255\t            assertThat(dto.getSign()).isEqualTo(\"zl\");\n256\t            assertThat(dto.getCountryCode()).isEqualTo(\"PL\");\n257\t        }\n258\t\n259\t        @Test\n260\t        @DisplayName(\"no-args cons"
+ },
+ {
+  "i": 49,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\AddressAndCurrencyUnitTest.java",
+   "old_string": "<90 chars>",
+   "new_string": "<93 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\AddressAndCurrencyUnitTest.java has been updated successfully. (fi"
+ },
+ {
+  "i": 50,
+  "name": "Grep",
+  "input": {
+   "pattern": "new CurrencyDtoOut\\(",
+   "path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\\src",
+   "output_mode": "content"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "src\\main\\java\\com\\sm\\instagram\\platform\\currency\\CurrencyService.java:131:            CurrencyDtoOut dto = new CurrencyDtoOut();\nsrc\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\AddressAndCurrency"
+ },
+ {
+  "i": 51,
+  "name": "Bash",
+  "input": {
+   "command": "cd \"C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\" && ./mvnw -q test -Ptest -Dtest=CurrencyServiceUnitTest,AddressAndCurrencyUnitTest,PartnershipOpportunityControllerUnitTest,PartnershipOpportunityConverterUnitTest,PartnershipOpportunityMoreUnitTest -Dsurefire.failIfNoSpecifiedTests=false 2>&1 | tail -100"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "  .   ____          _            __ _ _\n /\\\\ / ___'_ __ _ _(_)_ __  __ _ \\ \\ \\ \\\n( ( )\\___ | '_ | '_| | '_ \\/ _` | \\ \\ \\ \\\n \\\\/  ___)| |_)| | | | | || (_| |  ) ) ) )\n  '  |____| .__|_| |_|_| |_\\__, | "
+ },
+ {
+  "i": 52,
+  "name": "Bash",
+  "input": {
+   "command": "cd \"C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\" && ./mvnw -q test -Ptest -Dtest=CurrencyServiceUnitTest,AddressAndCurrencyUnitTest,PartnershipOpportunityControllerUnitTest,PartnershipOpportunityConverterUnitTest,PartnershipOpportunityMoreUnitTest -Dsurefire.failIfNoSpecifiedTests=false 2>&1 | tee /tmp/test_out.log | grep -E \"Tests run|ERROR|FAIL|BUILD\""
+  },
+  "after_marker": false,
+  "is_error": true,
+  "result_head": "Permission to use Bash has been denied because Claude Code is running in don't ask mode. IMPORTANT: You *may* attempt to accomplish this action using other tools that might naturally be used to accomp"
+ },
+ {
+  "i": 53,
+  "name": "Bash",
+  "input": {
+   "command": "cd \"C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\" && ./mvnw -q test -Ptest -Dtest=CurrencyServiceUnitTest,AddressAndCurrencyUnitTest,PartnershipOpportunityControllerUnitTest,PartnershipOpportunityConverterUnitTest,PartnershipOpportunityMoreUnitTest -Dsurefire.failIfNoSpecifiedTests=false > mvn_out.log 2>&1; echo \"EXIT:$?\"; grep -E \"Tests run|ERROR|BUILD\" mvn_out.log"
+  },
+  "after_marker": false,
+  "is_error": true,
+  "result_head": "Permission to use Bash has been denied because Claude Code is running in don't ask mode. IMPORTANT: You *may* attempt to accomplish this action using other tools that might naturally be used to accomp"
+ },
+ {
+  "i": 54,
+  "name": "Bash",
+  "input": {
+   "command": "cd \"C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\" && ./mvnw -q test -Ptest -Dtest=CurrencyServiceUnitTest,AddressAndCurrencyUnitTest,PartnershipOpportunityControllerUnitTest,PartnershipOpportunityConverterUnitTest,PartnershipOpportunityMoreUnitTest -Dsurefire.failIfNoSpecifiedTests=false 2>&1 | tail -40"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended\r\n16:11:59.191 [main] INFO  o.s.b.t.m.w.SpringBootMockServletContext - "
+ },
+ {
+  "i": 55,
+  "name": "Bash",
+  "input": {
+   "command": "cd \"C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\" && ./mvnw -q test -Ptest -Dtest=CurrencyServiceUnitTest,AddressAndCurrencyUnitTest,PartnershipOpportunityControllerUnitTest,PartnershipOpportunityConverterUnitTest,PartnershipOpportunityMoreUnitTest -Dsurefire.failIfNoSpecifiedTests=false > out.log 2>&1; echo \"EXITCODE:$?\""
+  },
+  "after_marker": false,
+  "is_error": true,
+  "result_head": "Permission to use Bash has been denied because Claude Code is running in don't ask mode. IMPORTANT: You *may* attempt to accomplish this action using other tools that might naturally be used to accomp"
+ },
+ {
+  "i": 56,
+  "name": "Bash",
+  "input": {
+   "command": "cd \"C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\" && ./mvnw -q test -Ptest -Dtest=CurrencyServiceUnitTest,AddressAndCurrencyUnitTest,PartnershipOpportunityControllerUnitTest,PartnershipOpportunityConverterUnitTest,PartnershipOpportunityMoreUnitTest -Dsurefire.failIfNoSpecifiedTests=false; echo \"EXITCODE:$?\""
+  },
+  "after_marker": false,
+  "is_error": true,
+  "result_head": "Permission to use Bash has been denied because Claude Code is running in don't ask mode. IMPORTANT: You *may* attempt to accomplish this action using other tools that might naturally be used to accomp"
+ },
+ {
+  "i": 57,
+  "name": "Bash",
+  "input": {
+   "command": "cd \"C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\" && ./mvnw -q test -Ptest -Dtest=CurrencyServiceUnitTest,AddressAndCurrencyUnitTest,PartnershipOpportunityControllerUnitTest,PartnershipOpportunityConverterUnitTest,PartnershipOpportunityMoreUnitTest -Dsurefire.failIfNoSpecifiedTests=false 2>&1 | tail -5"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "16:13:00.574 [main] INFO  c.s.i.p.p.PartnershipOpportunityController - GDPR: Operation=getPartnershipOpportunity, FirebaseUID=org.springframework.security.core.userdetails.User [Username=user, Passwor"
+ },
+ {
+  "i": 58,
+  "name": "Bash",
+  "input": {
+   "command": "cd \"C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\" && ./mvnw test -Ptest -Dtest=CurrencyServiceUnitTest -Dsurefire.failIfNoSpecifiedTests=false 2>&1 | tail -30"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.075 s -- in com.sm.instagram.platform.unit.service.CurrencyServiceUnitTest$CommonCurrencyValuesTests\r\n[INFO] Running com.sm.ins"
+ },
+ {
+  "i": 59,
+  "name": "Bash",
+  "input": {
+   "command": "cd \"C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-currency-display-order.r0\" && ./mvnw test -Ptest -Dtest=AddressAndCurrencyUnitTest,PartnershipOpportunityControllerUnitTest,PartnershipOpportunityConverterUnitTest,PartnershipOpportunityMoreUnitTest -Dsurefire.failIfNoSpecifiedTests=false 2>&1 | tail -15"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "[INFO] \r\n[INFO] --- surefire-report:3.2.5:report-only (generate-test-report) @ InstagramPlatform ---\r\n[WARNING]  Parameter 'outputDirectory' is read-only, must not be used in configuration\r\n[INFO] Ren"
+ }
+]

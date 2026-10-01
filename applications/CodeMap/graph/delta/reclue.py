@@ -114,8 +114,11 @@ def _j(v):
     return v
 
 
-def gates(prose, doss):
-    """-> list of problems (empty = pass). Mechanical: lengths, copied numbers, resolvable file names."""
+def gates(prose, doss, known=None):
+    """-> list of problems (empty = pass). Mechanical: lengths, copied numbers, resolvable file names.
+    A file mention resolves when it is a dossier file, a suffix pattern of one (`*UnitTest.java`, `.spec.ts`),
+    or any entity the pack knows (`known`); an invented name fails. Decimals and integers above 20 must be
+    copied from the dossier; small counts a reader verifies by eye pass."""
     problems = []
     summary = (prose.get("ai_summary") or "").strip()
     resp = prose.get("responsibilities") or []
@@ -136,13 +139,20 @@ def gates(prose, doss):
     text = " ".join([summary] + [str(x) for x in resp] + [str(x) for x in (cav or [])])
     allowed_files = {m["name"] for m in doss["members"]} | set(FILE_RX.findall(json.dumps(doss.get("entry_points") or "")))
     allowed_files |= set(FILE_RX.findall(json.dumps(doss.get("spines") or ""))) | set(FILE_RX.findall(" ".join(doss.get("curation_notes") or [])))
+    known = set(known or ())
     for f in sorted(set(FILE_RX.findall(text))):
-        if f not in allowed_files:
-            problems.append(f"file not in the dossier: {f}")
+        if f in allowed_files or f in known:
+            continue
+        if any(a.endswith(f) for a in allowed_files | known):  # a suffix pattern (*UnitTest.java, .spec.ts)
+            continue
+        problems.append(f"file not in the dossier: {f}")
     doss_numbers = set(NUM_RX.findall(json.dumps({k: v for k, v in doss.items() if k != "current_prose"}, ensure_ascii=False)))
     for n in sorted(set(NUM_RX.findall(text))):
-        if n not in doss_numbers:
-            problems.append(f"number not in the dossier: {n}")
+        if n in doss_numbers:
+            continue
+        if "." not in n and int(n) <= 20:  # a small count ("three seams", "2 tests") a reader verifies by eye
+            continue
+        problems.append(f"number not in the dossier: {n}")
     if "TODO" in text or "lorem" in text.lower():
         problems.append("placeholder text")
     return problems
@@ -204,7 +214,7 @@ def reclue(pack, subsystems, version, ledger_dir, backend="claude", model="claud
                                f"subtype: {(out.get('raw') or {}).get('subtype')}"]
             report["results"].append(res)
             continue
-        probs = gates(prose, doss)
+        probs = gates(prose, doss, known={e["name"] for e in ents})
         res["problems"] = probs
         if probs:
             res["status"] = "gated"

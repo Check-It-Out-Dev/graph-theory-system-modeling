@@ -204,6 +204,26 @@ def build_all():
     d.panel("stat", "Paired conversations", [{"expr": q("codemap_quality_gain", "n_pairs"), "legendFormat": "pairs"}], w=6, h=6)
     d.panel("timeseries", "Self-reported minutes saved (mean per night)", [{"expr": q("codemap_quality_gain", "minutes_saved_estimate_mean"), "legendFormat": "minutes"}], w=24, h=7, unit="m")
     dashes.append(d)
+
+    d = Dash("codemap-prompt-under-test", "Prompt under test · conventions manual",
+             "A coding agent's conventions prompt, measured per rule, iterated by GEPA, certified on held-out tasks "
+             "(applications/CodeMap/eval/put). One point per campaign; the committed artifacts are the record. Public.",
+             ["codemap", "prompt-under-test", "public"])
+    d.row("Campaigns: score and noise")
+    d.panel("bargauge", "Score by campaign", [{"expr": "max by (campaign) (put_score)", "legendFormat": "{{campaign}}"}], w=12, h=8,
+            description="Mean over tasks of the mean over replicates (eval/put/METRICS.md section 3).")
+    d.panel("stat", "Noise floor δ (baseline)", [{"expr": "max(put_delta)", "legendFormat": "delta"}], w=6, h=8,
+            description="max(judge test-retest MAD, agent replicate half-width): every gain is read against it.")
+    d.panel("stat", "Hold-out gain (certification)", [{"expr": "max by (campaign) (put_holdout_gain)", "legendFormat": "{{campaign}}"}], w=6, h=8)
+    d.row("Per rule: how often the agent follows each written rule")
+    d.panel("bargauge", "Pass rate by rule (latest campaign point)", [{"expr": "max by (rule) (put_rule_rate)", "legendFormat": "{{rule}}"}], w=12, h=10,
+            unit="percentunit", description="A run passes a rule only at value 1; rates over the runs the rule applies to.")
+    d.panel("bargauge", "Lower Wilson bound by rule", [{"expr": "max by (rule) (put_rule_wilson_lo)", "legendFormat": "{{rule}}"}], w=12, h=10,
+            unit="percentunit", description="A rule is obligatory at a lower bound of 0.90; with no failure that needs 35 runs.")
+    d.row("Tokens: the campaign's own sessions (subscription), by role")
+    d.panel("timeseries", "Tokens per role (coder, judge, reflector)", [{"expr": "sum by (role) (claude_code_token_usage_tokens_total{campaign!=\"\"})", "legendFormat": "{{role}}"}], w=12, h=8)
+    d.panel("stat", "Sessions ended by the output-token budget", [{"expr": "max by (campaign) (put_budget_exhausted)", "legendFormat": "{{campaign}}"}], w=12, h=8)
+    dashes.append(d)
     return dashes
 
 

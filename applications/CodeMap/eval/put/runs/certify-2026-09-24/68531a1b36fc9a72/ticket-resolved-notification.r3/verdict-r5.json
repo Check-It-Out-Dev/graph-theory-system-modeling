@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 4,
+  "convention_fit": 5,
+  "design_fit": 4,
+  "test_quality": 5,
+  "graph_use": 5,
+  "reasons": {
+   "correctness": "updateTicketStatus publishes SupportTicketResolvedEvent only for RESOLVED, matching the interface. All tests pass. addAdminResponse can also set RESOLVED through newStatus but publishes no event, so that path leaves the customer uninformed.",
+   "convention_fit": "Port and adapter sit in support/ticket/port and adapter. The listener uses @TransactionalEventListener(AFTER_COMMIT) with catch-and-log. Injection is constructor-only (@RequiredArgsConstructor, extended explicit constructor). Tests use MockitoExtension, and the existing service test was updated.",
+   "design_fit": "Clean port/adapter split; the listener depends only on TicketNotificationPort. EmailTicketNotificationAdapter hardcodes English HTML and ignores the language-aware pattern of the other EmailService methods. The resolve trigger in addAdminResponse is left out.",
+   "test_quality": "Adapter test captures recipient, subject and text. Listener tests cover the happy path and a port failure with assertDoesNotThrow. Service tests verify the event payload for RESOLVED and verifyNoInteractions for IN_PROGRESS/CLOSED. No Spring context.",
+   "graph_use": "Graph queries located the support package files and existing Event/Listener/Port examples, and TESTED_BY found SupportTicketServiceUnitTest before any edit. The agent read the InvoiceCreated listener and FakturowniaAdapter exemplars and followed their structure."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 1136,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 41973
+ },
+ "is_error": false
+}

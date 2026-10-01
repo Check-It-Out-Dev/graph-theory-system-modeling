@@ -255,7 +255,7 @@ def coverage_of(name, repo_dir, ents):
             "ratio": round(known / len(eligible_paths), 4) if eligible_paths else None}
 
 
-def run(name, repo_dir, changes, pack_dir, out_dir, backlog_rows=None, date=None, churn_full=None):
+def run(name, repo_dir, changes, pack_dir, out_dir, backlog_rows=None, date=None, churn_full=None, force=False):
     repo = REPOS["repos"][name]
     churn_full = REPOS.get("churn_full_reindex", 0.1) if churn_full is None else churn_full
     date = date or time.strftime("%Y-%m-%d", time.gmtime())
@@ -363,6 +363,7 @@ def run(name, repo_dir, changes, pack_dir, out_dir, backlog_rows=None, date=None
     os.makedirs(out_dir, exist_ok=True)
     coverage = coverage_of(name, repo_dir, ents_next)
     delta = {"schema": 1, "repo": name, "date": date, "mode": mode, "churn": round(churn, 4), "churn_full_reindex": churn_full,
+             "forced_full": bool(mode == "full" and force),
              "coverage": coverage,
              "counts": {"before": n_before, "after": len(ents_next), "added": len(added), "modified": len(modified),
                         "deleted": len(deleted), "unchanged": len(unchanged), "skipped": len(skipped),
@@ -375,7 +376,7 @@ def run(name, repo_dir, changes, pack_dir, out_dir, backlog_rows=None, date=None
              "unassigned": [cp for cp, *_ in added]}
     with open(os.path.join(out_dir, "delta.json"), "w", encoding="utf-8", newline="\n") as f:
         json.dump(delta, f, indent=1, sort_keys=True)
-    if mode == "full":
+    if mode == "full" and not force:  # a full reindex is a decision taken on the box (--full), never by CI
         return delta
     # 5. pack.next
     nxt = os.path.join(out_dir, "pack.next")
@@ -457,6 +458,7 @@ def main(argv=None):
     ap.add_argument("--out", default=None)
     ap.add_argument("--backlog", default=os.path.join(HERE, "backlog.jsonl"))
     ap.add_argument("--date", default=None)
+    ap.add_argument("--full", action="store_true", help="build pack.next even above the churn threshold (the full reindex on the box)")
     a = ap.parse_args(argv)
     if a.changed_list:
         changes = parse_changes(open(a.changed_list, encoding="utf-8").read())
@@ -466,7 +468,7 @@ def main(argv=None):
         raise SystemExit("give --base/--head or --changed-list")
     backlog = [json.loads(l) for l in open(a.backlog, encoding="utf-8") if l.strip()] if os.path.exists(a.backlog) else []
     out = a.out or os.path.join(R, "delta", time.strftime("%Y%m%dT%H%M%SZ", time.gmtime()))
-    delta = run(a.name, a.repo_dir, changes, a.pack, out, backlog, a.date)
+    delta = run(a.name, a.repo_dir, changes, a.pack, out, backlog, a.date, force=a.full)
     print(json.dumps({k: delta[k] for k in ("repo", "mode", "churn", "counts")}, indent=1))
     print(f"out: {out}")
     return 0

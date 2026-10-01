@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 5,
+  "test_quality": 5,
+  "graph_use": 5,
+  "reasons": {
+   "correctness": "Implements the repository derived query, FaqService#purgeInactiveOlderThan (cutoff now minus days, deleteAll, returns count) and InactiveFaqPurgeCronJob with the stated properties and defaults. Disabled flag and catch/log work. Hidden tests 4/4.",
+   "convention_fit": "The cron job uses @SchedulerLock(name=\"faq:inactivePurge\"), cron and enabled flag from properties, the *CronJob name, and @RequiredArgsConstructor with a private final FaqService. Code stays in the support/faq feature package. No schema or i18n change was needed.",
+   "design_fit": "Query logic sits in FaqRepository, deletion logic in FaqService, scheduling in a thin cron job that delegates, following the AnonymousConsentCleanupCronJob structure. It adds no duplicate lookup and no new mechanism, and touches only the files the task needs.",
+   "test_quality": "FaqService_PurgeUnitTest captures the cutoff and checks it falls within the expected window, and verifies deleteAll and the count, plus an empty case. InactiveFaqPurgeCronJobUnitTest covers enabled, disabled and exception-swallowed paths. Both use Mockito only, no Spring context.",
+   "graph_use": "Before editing, graph queries located the faq files and existing *CronJob classes, then followed TESTED_BY to AnonymousConsentCleanupCronJobUnitTest. The agent read those as exemplars and the edits mirror them. A later graph query found an AddressService test pattern."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 926,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 32733
+ },
+ "is_error": false
+}

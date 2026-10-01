@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 5,
+  "test_quality": 5,
+  "graph_use": 4,
+  "reasons": {
+   "correctness": "FaqRepository#findByActiveFalseAndLastUpdateTimeBefore, FaqService#purgeInactiveOlderThan(int) and InactiveFaqPurgeCronJob match the interface: enabled/days/cron properties with the stated defaults, skip when disabled, catch-and-log on failure. Hidden tests 4/4.",
+   "convention_fit": "@Scheduled cron from property, @SchedulerLock named support:faqPurge, @Value enabled flag, *CronJob name, @RequiredArgsConstructor with a private final FaqService, config added to application.yml. No schema or endpoint change, so no other convention applies.",
+   "design_fit": "Derived query sits in the repository, deletion logic in FaqService, and the cron job only delegates. It reuses ShedLock and the pattern of AnonymousConsentCleanupCronJob. Small footprint, no duplicated lookup.",
+   "test_quality": "FaqServiceUnitTest checks the returned count, the deleteAll call, the empty result and the cutoff window through a captor. InactiveFaqPurgeCronJobUnitTest covers enabled, disabled (verifyNoInteractions) and a swallowed exception. Mockito only, no Spring context.",
+   "graph_use": "Graph queries found the faq package files and the existing *CronJob classes. The agent then read AnonymousConsentCleanupCronJob as the exemplar before editing. Test and config discovery afterwards relied on grep and find."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 900,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 32050
+ },
+ "is_error": false
+}

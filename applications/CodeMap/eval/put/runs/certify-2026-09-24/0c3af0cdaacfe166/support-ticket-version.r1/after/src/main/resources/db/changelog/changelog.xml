@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <!-- ===================================================================== -->
+    <!-- COMMON MIGRATIONS: Run in ALL environments (dev, test, prod)         -->
+    <!-- ===================================================================== -->
+
+    <!-- SCHEMA: Core database structure (runs everywhere) -->
+    <include file="common/001-schema/001-sequences.sql" relativeToChangelogFile="true"/>
+    <include file="common/001-schema/002-tables.sql" relativeToChangelogFile="true"/>
+    <include file="common/001-schema/003-constraints.sql" relativeToChangelogFile="true"/>
+    <include file="common/001-schema/004-triggers.sql" relativeToChangelogFile="true"/>
+    <include file="common/001-schema/005-file-uploads-table.sql" relativeToChangelogFile="true"/>
+    <include file="common/001-schema/006-consent-management-tables.sql" relativeToChangelogFile="true"/>
+    <include file="common/001-schema/007-password-reset-timestamp.sql" relativeToChangelogFile="true"/>
+
+    <!-- REFERENCE DATA: Required for application functionality (runs everywhere) -->
+    <include file="common/002-data/001-reference-data.sql" relativeToChangelogFile="true"/>
+
+    <!-- TRANSLATIONS: Essential enum and entity translations (runs everywhere) -->
+    <include file="common/002-data/002-comprehensive-translations.sql" relativeToChangelogFile="true"/>
+
+    <!-- ADMIN USERS: Environment-specific admin accounts -->
+    <include file="dev-test/002-data/003-admin-users-test.sql" relativeToChangelogFile="true" context="dev,test,local"/>
+    <include file="prod/002-data/003-admin-users-prod.sql" relativeToChangelogFile="true" context="prod"/>
+
+    <!-- CONSENT INITIAL DATA: Required for consent management functionality (runs everywhere) -->
+    <include file="common/002-data/004-consent-initial-data.sql" relativeToChangelogFile="true"/>
+
+    <!-- ===================================================================== -->
+    <!-- DEV/TEST MIGRATIONS: Run only in development and test environments   -->
+    <!-- ===================================================================== -->
+
+    <!-- TEST DATA: Sample data for development and testing -->
+    <include file="dev-test/002-data/002-test-data.sql" relativeToChangelogFile="true" context="dev,test,local"/>
+
+    <!-- DEMO DATA: Sample influencer and company data for development/testing -->
+    <include file="dev-test/002-data/004-demo-company-data.sql" relativeToChangelogFile="true" context="dev,test,local"/>
+    <include file="dev-test/002-data/005-demo-influencer-data.sql" relativeToChangelogFile="true" context="dev,test,local"/>
+    <include file="dev-test/002-data/006-demo-extended-data.sql" relativeToChangelogFile="true" context="dev,test,local"/>
+
+    <!-- DEV-LITE ONLY: repoint demo images at the local placeholder endpoint (no egress) -->
+    <include file="dev-test/002-data/007-dev-lite-offline-images.sql" relativeToChangelogFile="true" context="dev-lite"/>
+
+    <!-- ===================================================================== -->
+    <!-- PRODUCTION MIGRATIONS: Run only in production environment           -->
+    <!-- ===================================================================== -->
+
+    <!-- TEST ACCOUNTS: Production test accounts for functionality testing -->
+    <include file="prod/002-data/004-test-company-account.sql" relativeToChangelogFile="true" context="prod"/>
+    <include file="prod/002-data/005-test-influencer-account.sql" relativeToChangelogFile="true" context="prod"/>
+
+    <!-- Future production-specific migrations will be added here with context="prod" -->
+
+    <!-- ===================================================================== -->
+    <!-- 2025 MIGRATIONS: Chronological schema and data changes               -->
+    <!-- ===================================================================== -->
+
+    <!-- December 2025: Token version for immediate session invalidation -->
+    <include file="2025/12/19-12-2025-add-token-version-column.sql" relativeToChangelogFile="true"/>
+
+    <!-- December 2025: Add BANNED status to account_status constraint -->
+    <include file="2025/12/19-12-2025-add-banned-status-to-constraint.sql" relativeToChangelogFile="true"/>
+
+    <!-- December 2025: Add JPA @Version columns for optimistic locking protection -->
+    <include file="2025/12/20-12-2025-add-version-to-user.sql" relativeToChangelogFile="true"/>
+    <include file="2025/12/20-12-2025-add-version-to-applied-opportunity.sql" relativeToChangelogFile="true"/>
+    <include file="2025/12/20-12-2025-add-version-to-partnership-opportunity.sql" relativeToChangelogFile="true"/>
+
+    <!-- December 2025: CIO-373 - Add GDPR consent for phone sharing at payment stage -->
+    <include file="2025/12/28-12-2025-add-share-phone-for-payments.sql" relativeToChangelogFile="true"/>
+
+    <!-- ===================================================================== -->
+    <!-- 2026 MIGRATIONS: Chronological schema and data changes               -->
+    <!-- ===================================================================== -->
+
+    <!-- January 2026: Notification -->
+    <include file="2026/01/2026-01-create-notifications-table.sql" relativeToChangelogFile="true"/>
+    <include file="2026/01/2026-01-notification-translations.sql" relativeToChangelogFile="true"/>
+    <include file="2026/01/2026-01-notifications-indexes.sql" relativeToChangelogFile="true"/>
+    <include file="2026/01/2026-01-userpreferences-notification-fields.sql" relativeToChangelogFile="true"/>
+    <include file="2026/01/2026-01-create-shedLock.sql" relativeToChangelogFile="true"/>
+
+    <!-- January 2025: CIO-395 - Fix Instagram content type naming conventions -->
+    <include file="2025/01/15-01-2025-cio-395-content-type-translations.sql" relativeToChangelogFile="true"/>
+
+    <!-- ===================================================================== -->
+    <!-- 2026 MIGRATIONS: Chronological schema and data changes               -->
+    <!-- ===================================================================== -->
+
+    <!-- January 2026: Admin cascade delete task tracking table -->
+    <include file="2026/01/24-01-2026-cascade-delete-task-table.sql" relativeToChangelogFile="true"/>
+
+    <!-- January 2026: Email verification tracking columns -->
+    <include file="2026/01/26-01-2026-add-email-verification-tracking.sql" relativeToChangelogFile="true"/>
+
+    <!-- January 2026: Case-insensitive unique index for email column -->
+    <include file="2026/01/31-01-2026-email-case-insensitive-unique.sql" relativeToChangelogFile="true"/>
+
+    <!-- February 2026: Migrate communication_frequency to EmailFrequency enum values -->
+    <include file="2026/02/20-02-2026-migrate-communication-frequency-to-email-frequency.sql" relativeToChangelogFile="true"/>
+
+    <!-- February 2026: Fix consent_type to UPPERCASE to match ConsentController validation -->
+    <include file="2026/02/20-02-2026-fix-consent-type-uppercase.sql" relativeToChangelogFile="true"/>
+
+    <!-- February 2026: Fix notification category defaults from TRUE to FALSE -->
+    <include file="2026/02/22-02-2026-fix-notification-defaults-to-false.sql" relativeToChangelogFile="true"/>
+
+    <!-- March 2026: OWASP P2-14 - Prevent duplicate applications -->
+    <include file="2026/03/01-03-2026-unique-influencer-opportunity.sql" relativeToChangelogFile="true"/>
+
+    <!-- March 2026: OWASP P2-13 - Add optimistic locking to applied_opportunity_content -->
+    <include file="2026/03/01-03-2026-add-version-to-content.sql" relativeToChangelogFile="true"/>
+
+    <!-- March 2026: Legal Consent Module - mandatory legal document acceptance -->
+    <include file="2026/03/09-03-2026-consent-module-tables.sql" relativeToChangelogFile="true"/>
+    <include file="2026/03/09-03-2026-add-newest-consents-accepted.sql" relativeToChangelogFile="true"/>
+    <include file="2026/03/09-03-2026-add-blocked-terms-status.sql" relativeToChangelogFile="true"/>
+    <include file="2026/03/09-03-2026-widen-account-status-column.sql" relativeToChangelogFile="true"/>
+    <include file="2026/03/09-03-2026-seed-legal-documents.sql" relativeToChangelogFile="true"/>
+
+    <!-- March 2026: Update v1 document hashes + seed v2 legal documents -->
+    <include file="2026/03/10-03-2026-update-v1-document-hashes.sql" relativeToChangelogFile="true"/>
+    <include file="2026/03/10-03-2026-seed-legal-documents-v2.sql" relativeToChangelogFile="true"/>
+    <include file="2026/03/10-03-2026-reset-consent-for-v2.sql" relativeToChangelogFile="true"/>
+
+    <!-- March 2026: Company Data Form Expansion Module -->
+    <include file="2026/03/11-03-2026-create-company-data-table.sql" relativeToChangelogFile="true"/>
+    <include file="2026/03/11-03-2026-add-consent-source-company-data-form.sql" relativeToChangelogFile="true"/>
+    <include file="2026/03/11-03-2026-seed-professional-character-declaration.sql" relativeToChangelogFile="true"/>
+    <include file="2026/03/11-03-2026-deactivate-all-company-users.sql" relativeToChangelogFile="true"/>
+    <include file="2026/03/11-03-2026-replace-pcd-with-subscription-consent.sql" relativeToChangelogFile="true"/>
+
+    <!-- March 2026: Instagram OAuth Callbacks - Meta deauthorization and data deletion -->
+    <include file="2026/03/11-03-2026-create-pending-data-deletion-request.sql" relativeToChangelogFile="true"/>
+
+    <!-- March 2026: Reset all influencers to IN_VALIDATION for email verification + password setup -->
+    <include file="2026/03/12-03-2026-deactivate-influencers-for-password-setup.sql" relativeToChangelogFile="true"/>
+
+    <!-- March 2026: Enable all notifications by default, hide phone numbers (user opt-in) -->
+    <include file="2026/03/13-03-2026-enable-notifications-hide-phone.sql" relativeToChangelogFile="true"/>
+
+    <!-- March 2026: Add initial_account_setup_completed flag — PG source of truth for account setup -->
+    <include file="2026/03/16-03-2026-add-initial-account-setup-completed.sql" relativeToChangelogFile="true"/>
+
+    <!-- March 2026: Add last_verified_email — step-up codes always sent to proven email -->
+    <include file="2026/03/17-03-2026-add-last-verified-email.sql" relativeToChangelogFile="true"/>
+
+    <!-- March 2026: Add display_order to consent_definition for cookie banner ordering -->
+    <include file="2026/03/21-03-2026-add-display-order-to-consent-definition.sql" relativeToChangelogFile="true"/>
+
+    <!-- March 2026: Admin in-app notification translations (NTF-002 supplement) -->
+    <include file="2026/03/22-03-2026-admin-notification-translations.sql" relativeToChangelogFile="true"/>
+
+    <!-- March 2026: Subscription module — plans, billing periods, invoice tracking, terms versioning -->
+    <include file="2026/03/22-03-2026-subscription-tables.sql" relativeToChangelogFile="true"/>
+
+    <!-- March 2026: Update notification type CHECK constraint for ADMIN_* and SUBSCRIPTION_* types -->
+    <include file="2026/03/22-03-2026-update-notification-type-constraint.sql" relativeToChangelogFile="true"/>
+
+    <!-- March 2026: Subscription notification translations (10 types x 3 keys x 2 languages) -->
+    <include file="2026/03/23-03-2026-subscription-notification-translations.sql" relativeToChangelogFile="true"/>
+
+    <!-- March 2026: Backfill FREE subscriptions for all existing COMPANY users -->
+    <include file="2026/03/23-03-2026-backfill-free-subscriptions.sql" relativeToChangelogFile="true"/>
+
+    <!-- April 2026: Free-only rollout — raise FREE plan campaign limit from 2 to 5 -->
+    <include file="2026/04/09-04-2026-update-free-plan-campaign-limit.sql" relativeToChangelogFile="true"/>
+
+    <!-- April 2026: Free-only rollout — downgrade ALL non-FREE subscriptions to FREE_ACTIVE -->
+    <!-- Must run before PaymentsDisabledBootGuard @PostConstruct fires (Liquibase runs first) -->
+    <include file="2026/04/09-04-2026-downgrade-all-to-free-for-rollout.sql" relativeToChangelogFile="true"/>
+
+    <!-- April 2026: Repoint legal_document URLs to FE-bundled /assets/docs paths and seed DATA_RETENTION_POLICY -->
+    <include file="2026/04/25-04-2026-fix-legal-document-urls.sql" relativeToChangelogFile="true"/>
+
+    <!-- April 2026: Bump content_hash for all legal documents after rebuilding PDFs with "Version 2.0" / "Wersja 2.0" label -->
+    <include file="2026/04/25-04-2026-bump-legal-document-content-hashes.sql" relativeToChangelogFile="true"/>
+
+    <!-- June 2026: Widen ticket_reference to VARCHAR(32) — pentest 3.3 SecureRandom format is 21 chars -->
+    <include file="2026/09/02-09-2026-widen-ticket-reference-column.sql" relativeToChangelogFile="true"/>
+
+    <!-- September 2026: Add optimistic locking version column to support_ticket to prevent lost updates -->
+    <include file="2026/09/23-09-2026-add-version-to-support-ticket.sql" relativeToChangelogFile="true"/>
+
+</databaseChangeLog>

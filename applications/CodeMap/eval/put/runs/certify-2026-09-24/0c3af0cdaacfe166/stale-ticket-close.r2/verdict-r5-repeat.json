@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 5,
+  "test_quality": 4,
+  "graph_use": 5,
+  "reasons": {
+   "correctness": "Implements the repository derived query, the RESOLVED-to-CLOSED loop with lastUpdateTime and count, and the cron job with enabled guard, catch-and-log, and property defaults. Matches the interface; hidden tests 4/4 green.",
+   "convention_fit": "The @Scheduled cron comes from a property, @SchedulerLock is named support:staleTicketClose, and the enabled flag uses @Value with a default. Injection is constructor-based via @RequiredArgsConstructor, the class is named *CronJob, and new unit tests use MockitoExtension.",
+   "design_fit": "Adds a small derived query in the repository, keeps the logic in SupportTicketService and a thin CronJob delegating to it, and reuses ShedLock. No duplicated lookup, no new mechanism, minimal footprint.",
+   "test_quality": "Covers the cron job's enabled, disabled and failure paths, and the service's close-and-count and empty cases. The service test matches any(LocalDateTime), so it never checks the cutoff (now minus days). The failure test only verifies the call.",
+   "graph_use": "Graph queries listed the support/ticket package files and the existing *CronJob classes before any edit. The agent then read AnonymousConsentCleanupCronJob as the example and followed its structure. Test files were located with find."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 926,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 37058
+ },
+ "is_error": false
+}

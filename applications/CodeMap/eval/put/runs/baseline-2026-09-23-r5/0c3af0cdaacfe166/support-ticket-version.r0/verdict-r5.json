@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 1,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 4,
+  "design_fit": 5,
+  "test_quality": 1,
+  "graph_use": 3,
+  "reasons": {
+   "correctness": "SupportTicket gains @Version Long version. The changeset adds version BIGINT DEFAULT 0 NOT NULL to support_ticket, matching the interface exactly. Build is green, hidden tests pass 2/2 and existing tests pass 229/229.",
+   "convention_fit": "The changeset has the right path, name, header, changeset line and rollback, and is included last in changelog.xml under a month comment. No existing changeset was edited. No new *UnitTest class was added for the locking change.",
+   "design_fit": "Minimal footprint: one annotated field and one changeset. It follows the existing AppliedOpportunity @Version pattern and its version changeset. No new mechanisms and no unrelated edits.",
+   "test_quality": "No unit tests were added (0/0). Nothing pins the @Version mapping or how a concurrent update conflict is handled. The agent only re-ran existing SupportTicket tests.",
+   "graph_use": "One graph query listed the support/ticket files up front. The @Version example, the applied_opportunity changeset and changelog.xml were all found by grep, glob and reading directories."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 819,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 20800
+ },
+ "is_error": false
+}

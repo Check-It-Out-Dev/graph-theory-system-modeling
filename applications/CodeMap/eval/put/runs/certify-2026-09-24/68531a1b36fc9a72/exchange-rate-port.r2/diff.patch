@@ -1,0 +1,355 @@
+diff --git a/src/main/java/com/sm/instagram/platform/currency/CurrencyConversionService.java b/src/main/java/com/sm/instagram/platform/currency/CurrencyConversionService.java
+new file mode 100644
+index 00000000000..231b5e9df67
+--- /dev/null
++++ b/src/main/java/com/sm/instagram/platform/currency/CurrencyConversionService.java
+@@ -0,0 +1,29 @@
++package com.sm.instagram.platform.currency;
++
++import com.sm.instagram.platform.common.exceptions.BusinessRuleTranslatableException;
++import com.sm.instagram.platform.currency.port.ExchangeRatePort;
++import org.springframework.stereotype.Service;
++
++import java.math.BigDecimal;
++import java.math.RoundingMode;
++import java.util.Optional;
++
++@Service
++public class CurrencyConversionService {
++
++    private final ExchangeRatePort exchangeRatePort;
++
++    public CurrencyConversionService(ExchangeRatePort exchangeRatePort) {
++        this.exchangeRatePort = exchangeRatePort;
++    }
++
++    public BigDecimal toPln(BigDecimal amount, String isoCode) {
++        Optional<BigDecimal> rate = exchangeRatePort.rateToPln(isoCode);
++
++        if (rate.isEmpty()) {
++            throw new BusinessRuleTranslatableException("error.business.exchange_rate_unavailable", isoCode);
++        }
++
++        return amount.multiply(rate.get()).setScale(2, RoundingMode.HALF_UP);
++    }
++}
+diff --git a/src/main/java/com/sm/instagram/platform/currency/adapter/FixedExchangeRateAdapter.java b/src/main/java/com/sm/instagram/platform/currency/adapter/FixedExchangeRateAdapter.java
+new file mode 100644
+index 00000000000..e7638f9e838
+--- /dev/null
++++ b/src/main/java/com/sm/instagram/platform/currency/adapter/FixedExchangeRateAdapter.java
+@@ -0,0 +1,44 @@
++package com.sm.instagram.platform.currency.adapter;
++
++import com.sm.instagram.platform.currency.port.ExchangeRatePort;
++import org.springframework.stereotype.Component;
++
++import java.math.BigDecimal;
++import java.util.Locale;
++import java.util.Map;
++import java.util.Optional;
++import java.util.stream.Collectors;
++
++/**
++ * Fixed-rate exchange rate adapter. Rates are configured statically and can be
++ * replaced by a live provider adapter behind {@link ExchangeRatePort} without
++ * touching the code that converts amounts.
++ */
++@Component
++public class FixedExchangeRateAdapter implements ExchangeRatePort {
++
++    private static final String PLN = "PLN";
++
++    private final Map<String, BigDecimal> ratesByIsoCode;
++
++    public FixedExchangeRateAdapter(FixedExchangeRateProperties properties) {
++        this.ratesByIsoCode = properties.getRates().entrySet().stream()
++                .collect(Collectors.toMap(
++                        entry -> entry.getKey().toUpperCase(Locale.ROOT),
++                        Map.Entry::getValue));
++    }
++
++    @Override
++    public Optional<BigDecimal> rateToPln(String isoCode) {
++        if (isoCode == null) {
++            return Optional.empty();
++        }
++
++        String normalizedIsoCode = isoCode.toUpperCase(Locale.ROOT);
++        if (PLN.equals(normalizedIsoCode)) {
++            return Optional.of(BigDecimal.ONE);
++        }
++
++        return Optional.ofNullable(ratesByIsoCode.get(normalizedIsoCode));
++    }
++}
+diff --git a/src/main/java/com/sm/instagram/platform/currency/adapter/FixedExchangeRateProperties.java b/src/main/java/com/sm/instagram/platform/currency/adapter/FixedExchangeRateProperties.java
+new file mode 100644
+index 00000000000..a0052aa51a6
+--- /dev/null
++++ b/src/main/java/com/sm/instagram/platform/currency/adapter/FixedExchangeRateProperties.java
+@@ -0,0 +1,17 @@
++package com.sm.instagram.platform.currency.adapter;
++
++import lombok.Data;
++import org.springframework.boot.context.properties.ConfigurationProperties;
++import org.springframework.context.annotation.Configuration;
++
++import java.math.BigDecimal;
++import java.util.HashMap;
++import java.util.Map;
++
++@Data
++@Configuration
++@ConfigurationProperties(prefix = "currency.fixed-rates")
++public class FixedExchangeRateProperties {
++
++    private Map<String, BigDecimal> rates = new HashMap<>();
++}
+diff --git a/src/main/java/com/sm/instagram/platform/currency/port/ExchangeRatePort.java b/src/main/java/com/sm/instagram/platform/currency/port/ExchangeRatePort.java
+new file mode 100644
+index 00000000000..44d934558a3
+--- /dev/null
++++ b/src/main/java/com/sm/instagram/platform/currency/port/ExchangeRatePort.java
+@@ -0,0 +1,19 @@
++package com.sm.instagram.platform.currency.port;
++
++import java.math.BigDecimal;
++import java.util.Optional;
++
++/**
++ * Port for looking up the exchange rate to convert an amount in a given currency to PLN.
++ * Primary implementation: fixed rates from configuration, replaceable by a live provider.
++ */
++public interface ExchangeRatePort {
++
++    /**
++     * Looks up the rate to multiply an amount in the given currency by to get PLN.
++     *
++     * @param isoCode ISO 4217 currency code, matched case-insensitively
++     * @return the rate to PLN, or empty when the currency is not known
++     */
++    Optional<BigDecimal> rateToPln(String isoCode);
++}
+diff --git a/src/main/resources/application.yml b/src/main/resources/application.yml
+index ad9fbdab428..b2e5cabebcf 100644
+--- a/src/main/resources/application.yml
++++ b/src/main/resources/application.yml
+@@ -483,6 +483,16 @@ registry:
+   cache:
+     ttl-minutes: 15
+ 
++# =============================================================================
++# CURRENCY MODULE — CONVERSION TO PLN
++# =============================================================================
++currency:
++  fixed-rates:
++    rates:
++      USD: 4.05
++      EUR: 4.35
++      GBP: 5.10
++
+ firebase:
+   config:
+     path: src/main/resources/service-account.json
+diff --git a/src/main/resources/messages_en.properties b/src/main/resources/messages_en.properties
+index 8d90d4d66d9..0c0b5b39967 100644
+--- a/src/main/resources/messages_en.properties
++++ b/src/main/resources/messages_en.properties
+@@ -62,6 +62,7 @@ error.business.data_integrity=A data integrity error occurred
+ error.business.foreign_key=Cannot complete operation due to related data constraints
+ error.business.not_null=A required field cannot be empty
+ error.business.database_constraint=Database constraint violation occurred
++error.business.exchange_rate_unavailable=No exchange rate available for currency {0}
+ 
+ # Authentication
+ error.auth.insufficient_permissions=You do not have permission to access this resource
+diff --git a/src/main/resources/messages_pl.properties b/src/main/resources/messages_pl.properties
+index b33f77fa5ad..2bfb50da168 100644
+--- a/src/main/resources/messages_pl.properties
++++ b/src/main/resources/messages_pl.properties
+@@ -62,6 +62,7 @@ error.business.data_integrity=Wystąpił błąd integralności danych
+ error.business.foreign_key=Nie można wykonać operacji z powodu powiązanych danych
+ error.business.not_null=Wymagane pole nie może być puste
+ error.business.database_constraint=Wystąpiło naruszenie ograniczenia bazy danych
++error.business.exchange_rate_unavailable=Brak kursu wymiany dla waluty {0}
+ 
+ # Uwierzytelnianie
+ error.auth.insufficient_permissions=Nie masz uprawnień do dostępu do tego zasobu
+diff --git a/src/test/java/com/sm/instagram/platform/unit/currency/CurrencyConversionServiceUnitTest.java b/src/test/java/com/sm/instagram/platform/unit/currency/CurrencyConversionServiceUnitTest.java
+new file mode 100644
+index 00000000000..af41ac2ce49
+--- /dev/null
++++ b/src/test/java/com/sm/instagram/platform/unit/currency/CurrencyConversionServiceUnitTest.java
+@@ -0,0 +1,79 @@
++package com.sm.instagram.platform.unit.currency;
++
++import com.sm.instagram.platform.common.exceptions.BusinessRuleTranslatableException;
++import com.sm.instagram.platform.currency.CurrencyConversionService;
++import com.sm.instagram.platform.currency.port.ExchangeRatePort;
++import org.junit.jupiter.api.DisplayName;
++import org.junit.jupiter.api.Nested;
++import org.junit.jupiter.api.Test;
++import org.junit.jupiter.api.extension.ExtendWith;
++import org.mockito.Mock;
++import org.mockito.junit.jupiter.MockitoExtension;
++
++import java.math.BigDecimal;
++import java.util.Optional;
++
++import static org.assertj.core.api.Assertions.assertThat;
++import static org.mockito.Mockito.verify;
++import static org.mockito.Mockito.when;
++
++/**
++ * Unit tests for CurrencyConversionService.
++ * Tests rounding and the error thrown when no rate is available.
++ */
++@ExtendWith(MockitoExtension.class)
++@DisplayName("CurrencyConversionService")
++class CurrencyConversionServiceUnitTest {
++
++    @Mock
++    private ExchangeRatePort exchangeRatePort;
++
++    private CurrencyConversionService service;
++
++    @Nested
++    @DisplayName("Known rate")
++    class KnownRate {
++
++        @Test
++        @DisplayName("should multiply the amount by the rate and round half up to 2 decimals")
++        void shouldConvertAndRoundHalfUp() {
++            service = new CurrencyConversionService(exchangeRatePort);
++            when(exchangeRatePort.rateToPln("USD")).thenReturn(Optional.of(new BigDecimal("4.055")));
++
++            BigDecimal result = service.toPln(new BigDecimal("10.00"), "USD");
++
++            assertThat(result).isEqualByComparingTo(new BigDecimal("40.55"));
++        }
++
++        @Test
++        @DisplayName("should round 0.005 up on the boundary")
++        void shouldRoundHalfUpOnBoundary() {
++            service = new CurrencyConversionService(exchangeRatePort);
++            when(exchangeRatePort.rateToPln("EUR")).thenReturn(Optional.of(new BigDecimal("1.005")));
++
++            BigDecimal result = service.toPln(BigDecimal.ONE, "EUR");
++
++            assertThat(result).isEqualByComparingTo(new BigDecimal("1.01"));
++        }
++    }
++
++    @Nested
++    @DisplayName("Unknown rate")
++    class UnknownRate {
++
++        @Test
++        @DisplayName("should throw a translatable business exception carrying the ISO code")
++        void shouldThrowWhenRateUnavailable() {
++            service = new CurrencyConversionService(exchangeRatePort);
++            when(exchangeRatePort.rateToPln("JPY")).thenReturn(Optional.empty());
++
++            BusinessRuleTranslatableException exception = org.junit.jupiter.api.Assertions.assertThrows(
++                    BusinessRuleTranslatableException.class,
++                    () -> service.toPln(new BigDecimal("10.00"), "JPY"));
++
++            assertThat(exception.getMessageKey()).isEqualTo("error.business.exchange_rate_unavailable");
++            assertThat(exception.getArgs()).containsExactly("JPY");
++            verify(exchangeRatePort).rateToPln("JPY");
++        }
++    }
++}
+diff --git a/src/test/java/com/sm/instagram/platform/unit/currency/adapter/FixedExchangeRateAdapterUnitTest.java b/src/test/java/com/sm/instagram/platform/unit/currency/adapter/FixedExchangeRateAdapterUnitTest.java
+new file mode 100644
+index 00000000000..dce671d5bef
+--- /dev/null
++++ b/src/test/java/com/sm/instagram/platform/unit/currency/adapter/FixedExchangeRateAdapterUnitTest.java
+@@ -0,0 +1,86 @@
++package com.sm.instagram.platform.unit.currency.adapter;
++
++import com.sm.instagram.platform.currency.adapter.FixedExchangeRateAdapter;
++import com.sm.instagram.platform.currency.adapter.FixedExchangeRateProperties;
++import org.junit.jupiter.api.DisplayName;
++import org.junit.jupiter.api.Nested;
++import org.junit.jupiter.api.Test;
++import org.junit.jupiter.api.extension.ExtendWith;
++import org.mockito.junit.jupiter.MockitoExtension;
++
++import java.math.BigDecimal;
++import java.util.LinkedHashMap;
++import java.util.Map;
++import java.util.Optional;
++
++import static org.assertj.core.api.Assertions.assertThat;
++
++/**
++ * Unit tests for FixedExchangeRateAdapter.
++ * Tests case-insensitive lookup, the fixed PLN rate and unknown currencies.
++ */
++@ExtendWith(MockitoExtension.class)
++@DisplayName("FixedExchangeRateAdapter")
++class FixedExchangeRateAdapterUnitTest {
++
++    @Nested
++    @DisplayName("Known currency")
++    class KnownCurrency {
++
++        @Test
++        @DisplayName("should return the configured rate for an exact ISO code")
++        void shouldReturnConfiguredRateForExactIsoCode() {
++            FixedExchangeRateAdapter adapter = adapterWithRates(Map.of("USD", new BigDecimal("4.05")));
++
++            Optional<BigDecimal> result = adapter.rateToPln("USD");
++
++            assertThat(result).contains(new BigDecimal("4.05"));
++        }
++
++        @Test
++        @DisplayName("should match the ISO code case-insensitively")
++        void shouldMatchIsoCodeCaseInsensitively() {
++            FixedExchangeRateAdapter adapter = adapterWithRates(Map.of("eur", new BigDecimal("4.35")));
++
++            Optional<BigDecimal> result = adapter.rateToPln("Eur");
++
++            assertThat(result).contains(new BigDecimal("4.35"));
++        }
++    }
++
++    @Nested
++    @DisplayName("PLN")
++    class Pln {
++
++        @Test
++        @DisplayName("should always be rate 1, even when not configured")
++        void shouldAlwaysBeRateOne() {
++            FixedExchangeRateAdapter adapter = adapterWithRates(Map.of("USD", new BigDecimal("4.05")));
++
++            Optional<BigDecimal> result = adapter.rateToPln("pln");
++
++            assertThat(result).contains(BigDecimal.ONE);
++        }
++    }
++
++    @Nested
++    @DisplayName("Unknown currency")
++    class UnknownCurrency {
++
++        @Test
++        @DisplayName("should return empty when no rate is configured")
++        void shouldReturnEmptyWhenNoRateConfigured() {
++            FixedExchangeRateAdapter adapter = adapterWithRates(Map.of("USD", new BigDecimal("4.05")));
++
++            Optional<BigDecimal> result = adapter.rateToPln("JPY");
++
++            assertThat(result).isEmpty();
++        }
++    }
++
++    private FixedExchangeRateAdapter adapterWithRates(Map<String, BigDecimal> rates) {
++        FixedExchangeRateProperties properties = new FixedExchangeRateProperties();
++        properties.setRates(new LinkedHashMap<>(rates));
++        return new FixedExchangeRateAdapter(properties);
++    }
++}

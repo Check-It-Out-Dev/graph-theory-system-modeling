@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 5,
+  "test_quality": 4,
+  "graph_use": 4,
+  "reasons": {
+   "correctness": "Currency.displayOrder is mapped to display_order INT NOT NULL DEFAULT 0. CurrencyDtoOut carries it. toDto gets it through ModelMapper; getDataPagedAndFilteredAsDtos and both controller builders set it explicitly. Seed data sets PLN=1, EUR=2, USD=3. 4/4 hidden tests pass.",
+   "convention_fit": "Changeset 2026/09/24-09-2026-add-display-order-to-currency.sql has the formatted-sql header, a changeset id and a rollback. It is included last in changelog.xml under a 'September 2026:' comment. No existing changeset was edited. Test constructors were updated for the new all-args shapes.",
+   "design_fit": "The field is added to the existing entity, DTO and mapping paths only. There is no new mechanism. The controller edits are needed because it builds CurrencyDtoOut by hand. The footprint is minimal.",
+   "test_quality": "CurrencyDisplayOrderUnitTest uses MockitoExtension with no Spring context and pins both mapping paths. The protected constructor is reached through reflection, and strictness is LENIENT. The third test sorts inside the test itself, so it asserts no production behaviour.",
+   "graph_use": "Graph queries found the currency package and the dependents of Currency and CurrencyDtoOut before editing, and the edits touched exactly those files. The changelog example was found by glob, and constructor callers were found by grep."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 1286,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 34124
+ },
+ "is_error": false
+}

@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 4,
+  "test_quality": 4,
+  "graph_use": 4,
+  "reasons": {
+   "correctness": "PUT /{categoryId}/order returns 204. reorderCategory rejects missing, foreign and duplicate ids with error.business.faq_reorder_mismatch, sets displayOrder i+1, saves each FAQ and keeps ResourceNotFoundException for an unknown category. Acceptance tests pass 6/6.",
+   "convention_fit": "Endpoint has @PreAuthorize and inherits the class-level @RateLimit. Body is a *DtoIn. Uses BusinessRuleTranslatableException. Both new keys are in messages_en and messages_pl. The dependency is constructor-injected. The unit test uses MockitoExtension.",
+   "design_fit": "reorderCategory repeats the category findById plus findByCategoryAndActiveTrueOrderByDisplayOrderAsc lookup that getFaqsByCategory already does, instead of calling it. Otherwise the logic is in the service and the endpoint sits correctly in FaqCategoryController.",
+   "test_quality": "FaqServiceReorderUnitTest covers reordering, missing id, foreign id, duplicate id and unknown category, and asserts the message key and display orders. It uses blanket LENIENT strictness and has no null-list case.",
+   "graph_use": "One graph query listed the faq files before any reads, and the edits went to the controller, service and DTO it found. The existing example tests and the exception class were found by grep."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 955,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 33907
+ },
+ "is_error": false
+}

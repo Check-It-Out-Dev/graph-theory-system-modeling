@@ -31,7 +31,8 @@ def _fake_runner(prose):
 class GateTests(unittest.TestCase):
     doss = {"sub_id": "6", "name": "Two-factor auth", "size": 51, "layer_profile": {"Resource": 27},
             "entry_points": ["UserCacheService.java (51 ext in-edges)"], "spines": [], "contracts": [], "seams": [],
-            "members": [{"name": "UserCacheService.java", "type": "Process", "ext_in": 51, "ext_out": 0}], "curation_notes": [],
+            "members": [{"name": "UserCacheService.java", "type": "Process", "ext_in": 51, "ext_out": 0},
+                        {"name": "UserServiceUnitTest.java", "type": "Rule", "ext_in": 0, "ext_out": 3}], "curation_notes": [],
             "current_prose": {}}
 
     def test_pass(self):
@@ -46,6 +47,14 @@ class GateTests(unittest.TestCase):
         self.assertTrue(any("file not in the dossier: GhostService.java" in p for p in probs))
         self.assertTrue(any("responsibilities 2" in p for p in probs))
         self.assertTrue(any("caveats" in p for p in probs))
+        suffix = {"ai_summary": "Every *UnitTest.java here mocks UserCacheService.java; 3 seams, ratio 0.27.", "responsibilities": ["a", "b", "c"], "caveats": []}
+        probs = reclue.gates(suffix, self.doss)
+        self.assertFalse(any("UnitTest.java" in p for p in probs), probs)  # a suffix pattern of a dossier file
+        self.assertFalse(any("dossier: 3" in p for p in probs), probs)  # a small count
+        self.assertTrue(any("dossier: 0.27" in p for p in probs), probs)  # a derived ratio is not copied
+        neighbour = {"ai_summary": "Calls TotpEncryptionService.java next door.", "responsibilities": ["a", "b", "c"], "caveats": []}
+        self.assertTrue(any("TotpEncryptionService.java" in p for p in reclue.gates(neighbour, self.doss)))
+        self.assertEqual([p for p in reclue.gates(neighbour, self.doss, known={"TotpEncryptionService.java"}) if "file" in p], [])
         long = {"ai_summary": " ".join(["word"] * 81), "responsibilities": ["a", "b", "c"], "caveats": []}
         self.assertTrue(any("> 80" in p for p in reclue.gates(long, self.doss)))
 
@@ -70,7 +79,9 @@ class ReclueTests(unittest.TestCase):
 
     def test_reclue_writes_only_the_touched_line(self):
         before = open(os.path.join(self.pack, "l2_navigators.jsonl"), encoding="utf-8").read().split("\n")
-        prose = {"ai_summary": "TOTP second factor and the Firestore-backed user cache; UserCacheService.java is the entry with 51 external in-edges.",
+        ents, edges, lines = reclue.load_pack(self.pack)
+        top = reclue.dossier(self.pack, 6, ents, edges, [json.loads(l) for l in lines if l.strip()])["members"][0]
+        prose = {"ai_summary": f"TOTP second factor and the Firestore-backed user cache; {top['name']} is the entry with {top['ext_in']} external in-edges.",
                  "responsibilities": ["TOTP + step-up flows", "UserCacheService.java / FirestoreService.java", "step-up token plumbing"],
                  "caveats": ["UserCacheService.java single-carries the seam to subsystem 11"]}
         rep = reclue.reclue(self.pack, ["6"], "1.0.9", self.ledger, backend="claude", runner=_fake_runner(prose))

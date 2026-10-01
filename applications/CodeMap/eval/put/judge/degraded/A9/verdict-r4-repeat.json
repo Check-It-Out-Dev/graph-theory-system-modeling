@@ -1,0 +1,29 @@
+{
+ "rubric": "r4",
+ "verdict": {
+  "rules_violated": 2,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 2,
+  "design_fit": 4,
+  "test_quality": 3,
+  "graph_use": 2,
+  "reasons": {
+   "correctness": "The repository method, the service method and StaleTicketCloseCronJob match the interface exactly. Properties and defaults are correct, the disabled path returns early, and failures are caught and logged. Hidden tests pass 4/4.",
+   "convention_fit": "StaleTicketCloseCronJob uses `@Autowired` field injection instead of `@RequiredArgsConstructor` with a final field. The unit-test rule is only half met: the command ran `-Dtest=X`, not the real class, and closeStaleResolvedTickets has no unit test.",
+   "design_fit": "The service owns the logic and the repository uses a derived query. The job carries ShedLock with the name `support:staleTicketClose` and delegates to the service. Field injection is the one smell. The job sits in `services` rather than a cron subpackage.",
+   "test_quality": "StaleTicketCloseCronJobUnitTest covers enabled, disabled and failure-swallowing paths without Spring. Nothing tests closeStaleResolvedTickets: no check of the cutoff, the CLOSED status, the save calls or the returned count. The harness counted 2/2 against 3 declared tests.",
+   "graph_use": "The only query was a trivial `MATCH (e:Entity) RETURN e.file_path LIMIT 1`. It did not locate the support/ticket package, SupportTicketService's dependents or the existing cron example. Navigation relied on direct reads."
+  },
+  "rubric": "r4",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 1151,
+  "cache_read_input_tokens": 21258,
+  "cache_creation_input_tokens": 0
+ },
+ "is_error": false
+}

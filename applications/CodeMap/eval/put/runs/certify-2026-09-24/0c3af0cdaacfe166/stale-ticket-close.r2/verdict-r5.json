@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 5,
+  "test_quality": 4,
+  "graph_use": 4,
+  "reasons": {
+   "correctness": "The repository derives the finder `findByStatusAndResolvedTimeBefore`. `closeStaleResolvedTickets` marks RESOLVED tickets CLOSED, saves them and returns the count. The cron job honours enabled, days and cron properties with their defaults and logs service failures. Hidden tests pass 4/4.",
+   "convention_fit": "`StaleTicketCloseCronJob` has `@SchedulerLock(name=\"support:staleTicketClose\")`, a cron from a property and `@Value` enabled/days flags. It uses `@RequiredArgsConstructor` with a `private final` service and the `*CronJob` name. It adds no field injection and no side effects outside the database.",
+   "design_fit": "The cron job only delegates. The service owns the close logic inside `@Transactional`. The repository uses a derived query. The footprint is minimal and adds no duplicated lookup. Minor: `LocalDateTime.now()` is called per ticket instead of once.",
+   "test_quality": "`StaleTicketCloseCronJobUnitTest` covers the enabled, disabled and exception-swallowed paths. The service tests assert the CLOSED status, the returned count and the empty case. No test checks the cutoff argument (the matcher is `any(LocalDateTime)`), so the days arithmetic is unpinned.",
+   "graph_use": "Graph queries listed the support/ticket package and existing `*CronJob` files before editing. The agent read `AnonymousConsentCleanupCronJob` as the example and followed it. It found existing tests with find/grep rather than the graph."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 1131,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 36712
+ },
+ "is_error": false
+}

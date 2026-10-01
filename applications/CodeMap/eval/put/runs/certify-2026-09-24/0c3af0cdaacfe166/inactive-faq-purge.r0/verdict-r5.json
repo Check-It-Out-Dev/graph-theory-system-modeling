@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 5,
+  "test_quality": 4,
+  "graph_use": 5,
+  "reasons": {
+   "correctness": "Repository derived query, FaqService#purgeInactiveOlderThan (cutoff = now minus days, deleteAll, returns count) and InactiveFaqPurgeCronJob with the enabled, days and cron property defaults all match the interface. Disabled path returns; failures are caught and logged. Acceptance tests 4/4.",
+   "convention_fit": "The CronJob carries @SchedulerLock with name support:faqPurge. Cron and enabled flag come from properties, the class is named *CronJob, and injection is by constructor via @RequiredArgsConstructor. Work stays in the support/faq package. Unit tests use MockitoExtension. No schema change.",
+   "design_fit": "The purge logic lives in FaqService, the query in FaqRepository and the scheduling in a thin CronJob that delegates. It mirrors the AnonymousConsentCleanupCronJob structure. No duplicated lookup and no new mechanism; the footprint is minimal.",
+   "test_quality": "FaqServiceUnitTest covers the count, the empty case and cutoff computation with an ArgumentCaptor between bounds. CronJob tests cover enabled, disabled and exception paths. The exception test only verifies the call, and both classes use LENIENT strictness.",
+   "graph_use": "Graph queries found the FAQ feature files and existing *CronJob classes before any edit. The agent then read AnonymousConsentCleanupCronJob and its unit test as exemplars, and the new job follows that structure."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 971,
+  "cache_read_input_tokens": 0,
+  "cache_creation_input_tokens": 32474
+ },
+ "is_error": false
+}

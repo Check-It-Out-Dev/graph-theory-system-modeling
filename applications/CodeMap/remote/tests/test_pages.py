@@ -13,6 +13,24 @@ sys.path.insert(0, os.path.join(R, "tools", "pages"))
 import build_quality  # noqa: E402
 
 
+class CampaignTests(unittest.TestCase):
+    def test_pairs_by_persona_and_seed_across_nights(self):
+        sys.path.insert(0, os.path.join(R, "eval", "quality"))
+        import campaign
+        rows = [{"persona": "p", "seed_id": "BE01", "mode": "baseline", "usage": {"input_tokens": 100, "output_tokens": 10}, "num_turns": 12, "duration_ms": 60000,
+                 "report": {"conversations": [{"turns": [{"rating": 3}]}]}},
+                {"persona": "p", "seed_id": "BE01", "mode": "codemap", "usage": {"input_tokens": 50, "output_tokens": 10}, "num_turns": 8, "duration_ms": 30000,
+                 "report": {"conversations": [{"turns": [{"rating": 5}]}]}},
+                {"persona": "p", "seed_id": "BE02", "mode": "baseline", "usage": {}, "num_turns": 3}]
+        pairs = campaign.pairs_of(rows, "n1")
+        self.assertEqual(len(pairs), 1)
+        self.assertEqual((pairs[0]["tokens_ratio"], pairs[0]["turns_delta"], pairs[0]["seconds_delta"]), (round(110 / 60, 3), 4, 30.0))
+        self.assertEqual((pairs[0]["rating_baseline"], pairs[0]["rating_codemap"]), (3, 5))
+        doc = campaign.campaign(os.path.join(R, "eval", "humans", "runs"))
+        self.assertIn("n_pairs", doc)
+        self.assertEqual(doc["gated"], doc["n_pairs"] >= 30)
+
+
 class PagesTests(unittest.TestCase):
     def test_collect_reads_the_nights_and_decisions(self):
         data = build_quality.collect(R)

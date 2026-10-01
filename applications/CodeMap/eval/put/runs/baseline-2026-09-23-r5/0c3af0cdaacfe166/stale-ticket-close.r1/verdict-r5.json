@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 4,
+  "test_quality": 4,
+  "graph_use": 5,
+  "reasons": {
+   "correctness": "Implements the repository finder, `closeStaleResolvedTickets` (RESOLVED before now minus days, set CLOSED, save, return count) and `StaleTicketCloseCronJob` with its enabled flag, days, cron default and swallowed failures. Interface exact; hidden tests 4/4.",
+   "convention_fit": "`@Scheduled` cron and enabled/days come from properties. Carries `@SchedulerLock(name=\"support:staleTicketClose\")`, `*CronJob` name, `@RequiredArgsConstructor` with a private final service. Code stays in the support/ticket feature; no field injection.",
+   "design_fit": "Small footprint: a derived query, a transactional service method, and a thin job delegating to the service. It does not update `lastUpdateTime` when closing, unlike the other status transitions in `SupportTicketService`. Minor inconsistency.",
+   "test_quality": "Mockito-only tests cover enabled, disabled, exception swallowed, bulk close and empty list. The cutoff argument is matched with `any(LocalDateTime)`, so the days-to-cutoff arithmetic is never pinned. `LENIENT` strictness is not needed.",
+   "graph_use": "Graph queries listed the support/ticket package and every `*CronJob` before any edit. The agent then read `NoConsentAccountCleanupCronJob` and `DeferredDeletionCronJob` as examples, and the new job mirrors their structure."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 853,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 37438
+ },
+ "is_error": false
+}

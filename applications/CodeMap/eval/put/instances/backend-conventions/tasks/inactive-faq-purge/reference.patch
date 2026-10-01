@@ -1,0 +1,181 @@
+diff --git a/src/main/java/com/sm/instagram/platform/support/faq/repositories/FaqRepository.java b/src/main/java/com/sm/instagram/platform/support/faq/repositories/FaqRepository.java
+index ecf0032..263fc41 100644
+--- a/src/main/java/com/sm/instagram/platform/support/faq/repositories/FaqRepository.java
++++ b/src/main/java/com/sm/instagram/platform/support/faq/repositories/FaqRepository.java
+@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
+ import org.springframework.data.repository.query.Param;
+ import org.springframework.stereotype.Repository;
+ 
++import java.time.LocalDateTime;
+ import java.util.List;
+ 
+ /**
+@@ -38,6 +39,11 @@ public interface FaqRepository extends BaseRepository<Faq, Long> {
+      */
+     List<Faq> findByActiveTrueOrderByDisplayOrderAsc();
+ 
++    /**
++     * Inactive FAQs last changed before the cutoff (the purge job).
++     */
++    List<Faq> findByActiveFalseAndLastUpdateTimeBefore(LocalDateTime cutoff);
++
+     /**
+      * Search for FAQs containing the search term in question or answer.
+      *
+diff --git a/src/main/java/com/sm/instagram/platform/support/faq/services/FaqService.java b/src/main/java/com/sm/instagram/platform/support/faq/services/FaqService.java
+index 760faf2..63a7f4d 100644
+--- a/src/main/java/com/sm/instagram/platform/support/faq/services/FaqService.java
++++ b/src/main/java/com/sm/instagram/platform/support/faq/services/FaqService.java
+@@ -18,6 +18,7 @@ import org.springframework.data.domain.Pageable;
+ import org.springframework.stereotype.Service;
+ import org.springframework.transaction.annotation.Transactional;
+ 
++import java.time.LocalDateTime;
+ import java.util.ArrayList;
+ import java.util.List;
+ import java.util.Map;
+@@ -158,6 +159,23 @@ public class FaqService extends BaseService<Faq, Long, FaqDtoIn> {
+      * @param newOrder The new display order
+      * @return The updated FAQ
+      */
++    /**
++     * Delete the FAQs that have been inactive for longer than the given number of days.
++     * Called by {@link InactiveFaqPurgeCronJob}.
++     *
++     * @param days how long a FAQ must have been inactive
++     * @return how many FAQs were deleted
++     */
++    @Transactional
++    public int purgeInactiveOlderThan(int days) {
++        LocalDateTime cutoff = LocalDateTime.now().minusDays(days);
++        List<Faq> stale = faqRepository.findByActiveFalseAndLastUpdateTimeBefore(cutoff);
++        faqRepository.deleteAll(stale);
++        log.warn("GDPR: Service=purgeInactiveFaqs, Operation=DELETE, Count={}, Cutoff={}, Purpose=data_retention",
++                stale.size(), cutoff);
++        return stale.size();
++    }
++
+     @Transactional
+     public Faq updateDisplayOrder(Long id, int newOrder) {
+         Faq faq = findById(id);
+diff --git a/src/main/java/com/sm/instagram/platform/support/faq/services/InactiveFaqPurgeCronJob.java b/src/main/java/com/sm/instagram/platform/support/faq/services/InactiveFaqPurgeCronJob.java
+new file mode 100644
+index 0000000..2f7abaf
+--- /dev/null
++++ b/src/main/java/com/sm/instagram/platform/support/faq/services/InactiveFaqPurgeCronJob.java
+@@ -0,0 +1,41 @@
++package com.sm.instagram.platform.support.faq.services;
++
++import lombok.RequiredArgsConstructor;
++import lombok.extern.slf4j.Slf4j;
++import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
++import org.springframework.beans.factory.annotation.Value;
++import org.springframework.scheduling.annotation.Scheduled;
++import org.springframework.stereotype.Component;
++
++/**
++ * Weekly job that deletes FAQs which have been inactive for longer than
++ * {@code support.faq.purge.days} days (default 180).
++ */
++@Slf4j
++@Component
++@RequiredArgsConstructor
++public class InactiveFaqPurgeCronJob {
++
++    private final FaqService faqService;
++
++    @Value("${support.faq.purge.enabled:true}")
++    private boolean enabled;
++
++    @Value("${support.faq.purge.days:180}")
++    private int olderThanDays;
++
++    @Scheduled(cron = "${support.faq.purge.cron:0 0 4 * * SUN}")
++    @SchedulerLock(name = "support:inactiveFaqPurge", lockAtMostFor = "30m", lockAtLeastFor = "1m")
++    public void purgeInactiveFaqs() {
++        if (!enabled) {
++            log.debug("Inactive FAQ purge job disabled via configuration");
++            return;
++        }
++        try {
++            int deleted = faqService.purgeInactiveOlderThan(olderThanDays);
++            log.info("Inactive FAQ purge job finished: deleted={}", deleted);
++        } catch (Exception e) {
++            log.error("Inactive FAQ purge job failed: {}", e.getMessage(), e);
++        }
++    }
++}
+diff --git a/src/test/java/com/sm/instagram/platform/unit/service/InactiveFaqPurgeUnitTest.java b/src/test/java/com/sm/instagram/platform/unit/service/InactiveFaqPurgeUnitTest.java
+new file mode 100644
+index 0000000..89e5d8a
+--- /dev/null
++++ b/src/test/java/com/sm/instagram/platform/unit/service/InactiveFaqPurgeUnitTest.java
+@@ -0,0 +1,68 @@
++package com.sm.instagram.platform.unit.service;
++
++import com.sm.instagram.platform.support.faq.models.Faq;
++import com.sm.instagram.platform.support.faq.repositories.FaqRepository;
++import com.sm.instagram.platform.support.faq.services.FaqService;
++import com.sm.instagram.platform.support.faq.services.InactiveFaqPurgeCronJob;
++import org.junit.jupiter.api.Test;
++import org.junit.jupiter.api.extension.ExtendWith;
++import org.mockito.InjectMocks;
++import org.mockito.Mock;
++import org.mockito.junit.jupiter.MockitoExtension;
++import org.springframework.test.util.ReflectionTestUtils;
++
++import java.time.LocalDateTime;
++import java.util.List;
++
++import static org.assertj.core.api.Assertions.assertThat;
++import static org.assertj.core.api.Assertions.assertThatCode;
++import static org.mockito.ArgumentMatchers.any;
++import static org.mockito.ArgumentMatchers.anyInt;
++import static org.mockito.Mockito.mock;
++import static org.mockito.Mockito.never;
++import static org.mockito.Mockito.verify;
++import static org.mockito.Mockito.when;
++
++@ExtendWith(MockitoExtension.class)
++class InactiveFaqPurgeUnitTest {
++
++    @Mock
++    private FaqRepository faqRepository;
++
++    @InjectMocks
++    private FaqService faqService;
++
++    @Test
++    void deletesTheInactiveFaqsBeforeTheCutoff() {
++        List<Faq> stale = List.of(new Faq(), new Faq());
++        when(faqRepository.findByActiveFalseAndLastUpdateTimeBefore(any(LocalDateTime.class))).thenReturn(stale);
++
++        assertThat(faqService.purgeInactiveOlderThan(180)).isEqualTo(2);
++        verify(faqRepository).deleteAll(stale);
++    }
++
++    @Test
++    void jobDelegatesWhenEnabledAndSkipsWhenDisabled() {
++        FaqService service = mock(FaqService.class);
++        InactiveFaqPurgeCronJob job = new InactiveFaqPurgeCronJob(service);
++        ReflectionTestUtils.setField(job, "enabled", true);
++        ReflectionTestUtils.setField(job, "olderThanDays", 180);
++        job.purgeInactiveFaqs();
++        verify(service).purgeInactiveOlderThan(180);
++
++        FaqService idle = mock(FaqService.class);
++        InactiveFaqPurgeCronJob disabled = new InactiveFaqPurgeCronJob(idle);
++        ReflectionTestUtils.setField(disabled, "enabled", false);
++        disabled.purgeInactiveFaqs();
++        verify(idle, never()).purgeInactiveOlderThan(anyInt());
++    }
++
++    @Test
++    void jobSwallowsFailures() {
++        FaqService service = mock(FaqService.class);
++        when(service.purgeInactiveOlderThan(anyInt())).thenThrow(new IllegalStateException("db"));
++        InactiveFaqPurgeCronJob job = new InactiveFaqPurgeCronJob(service);
++        ReflectionTestUtils.setField(job, "enabled", true);
++        assertThatCode(job::purgeInactiveFaqs).doesNotThrowAnyException();
++    }
++}

@@ -1,0 +1,399 @@
+diff --git a/src/main/java/com/sm/instagram/platform/support/faq/FaqController.java b/src/main/java/com/sm/instagram/platform/support/faq/FaqController.java
+index 3210076f4e2..1ff7f29e2ce 100644
+--- a/src/main/java/com/sm/instagram/platform/support/faq/FaqController.java
++++ b/src/main/java/com/sm/instagram/platform/support/faq/FaqController.java
+@@ -8,6 +8,7 @@ import com.sm.instagram.platform.common.ratelimit.RateLimitKeyType;
+ import com.sm.instagram.platform.common.ratelimit.RateLimitProfile;
+ import com.sm.instagram.platform.support.faq.dtos.FaqDtoIn;
+ import com.sm.instagram.platform.support.faq.dtos.FaqDtoOut;
++import com.sm.instagram.platform.support.faq.dtos.FaqReorderDtoIn;
+ import com.sm.instagram.platform.support.faq.models.Faq;
+ import com.sm.instagram.platform.support.faq.services.FaqService;
+ import jakarta.validation.Valid;
+@@ -194,6 +195,26 @@ public class FaqController extends BaseController<Faq, Long, FaqDtoIn, FaqDtoOut
+         return super.patch(id, updates);
+     }
+ 
++    /**
++     * Reorder the active FAQs of a category in one request.
++     *
++     * @param categoryId Category ID
++     * @param dto        The FAQ ids in the desired display order
++     * @return No content response
++     */
++    @PutMapping("/categories/{categoryId}/order")
++    @PreAuthorize("hasAuthority('ADMIN')")
++    public ResponseEntity<Void> reorderCategory(@PathVariable Long categoryId, @Valid @RequestBody FaqReorderDtoIn dto) {
++        String firebaseUid = getAuthenticatedAdminUid();
++
++        log.info("GDPR: Operation=reorderFaqCategory, FirebaseUID={}, CategoryID={}, Purpose=admin_content_ordering",
++                firebaseUid, categoryId);
++
++        faqService.reorderCategory(categoryId, dto.getFaqIds());
++
++        return ResponseEntity.noContent().build();
++    }
++
+     // ===== HELPER METHODS =====
+ 
+     /**
+diff --git a/src/main/java/com/sm/instagram/platform/support/faq/dtos/FaqReorderDtoIn.java b/src/main/java/com/sm/instagram/platform/support/faq/dtos/FaqReorderDtoIn.java
+new file mode 100644
+index 00000000000..b49670646f3
+--- /dev/null
++++ b/src/main/java/com/sm/instagram/platform/support/faq/dtos/FaqReorderDtoIn.java
+@@ -0,0 +1,25 @@
++package com.sm.instagram.platform.support.faq.dtos;
++
++import jakarta.validation.constraints.NotEmpty;
++import lombok.AllArgsConstructor;
++import lombok.Getter;
++import lombok.NoArgsConstructor;
++import lombok.Setter;
++
++import java.util.List;
++
++/**
++ * DTO for reordering the FAQs of a category in one request.
++ */
++@Getter
++@Setter
++@NoArgsConstructor
++@AllArgsConstructor
++public class FaqReorderDtoIn {
++
++    /**
++     * Ids of the category's active FAQs, in the desired display order.
++     */
++    @NotEmpty(message = "{validation.faq.reorder.faqIds.required}")
++    private List<Long> faqIds;
++}
+diff --git a/src/main/java/com/sm/instagram/platform/support/faq/services/FaqService.java b/src/main/java/com/sm/instagram/platform/support/faq/services/FaqService.java
+index 760faf242df..9e071fbe5a2 100644
+--- a/src/main/java/com/sm/instagram/platform/support/faq/services/FaqService.java
++++ b/src/main/java/com/sm/instagram/platform/support/faq/services/FaqService.java
+@@ -1,6 +1,7 @@
+ package com.sm.instagram.platform.support.faq.services;
+ 
+ import com.sm.instagram.platform.common.base.BaseService;
++import com.sm.instagram.platform.common.exceptions.BusinessRuleTranslatableException;
+ import com.sm.instagram.platform.common.exceptions.ResourceNotFoundException;
+ import com.sm.instagram.platform.common.util.RepositoryResolver;
+ import com.sm.instagram.platform.common.util.filtering.SpecificationBuilder;
+@@ -19,8 +20,10 @@ import org.springframework.stereotype.Service;
+ import org.springframework.transaction.annotation.Transactional;
+ 
+ import java.util.ArrayList;
++import java.util.HashSet;
+ import java.util.List;
+ import java.util.Map;
++import java.util.Set;
+ import java.util.stream.Collectors;
+ 
+ /**
+@@ -165,6 +168,34 @@ public class FaqService extends BaseService<Faq, Long, FaqDtoIn> {
+         return save(faq);
+     }
+ 
++    /**
++     * Reorder the active FAQs of a category in one request.
++     * The given list must hold exactly the ids of the category's active FAQs, each once, in any order.
++     * The FAQ at position i is assigned display order i + 1.
++     *
++     * @param categoryId The category ID
++     * @param faqIds     The active FAQ ids of the category, in the desired display order
++     */
++    @Transactional
++    public void reorderCategory(Long categoryId, List<Long> faqIds) {
++        List<Faq> activeFaqs = getFaqsByCategory(categoryId);
++
++        Set<Long> activeIds = activeFaqs.stream().map(Faq::getId).collect(Collectors.toSet());
++        Set<Long> providedIds = faqIds == null ? new HashSet<>() : new HashSet<>(faqIds);
++
++        if (faqIds == null || faqIds.size() != activeFaqs.size()
++                || providedIds.size() != faqIds.size() || !providedIds.equals(activeIds)) {
++            throw new BusinessRuleTranslatableException("error.business.faq_reorder_mismatch");
++        }
++
++        Map<Long, Faq> faqById = activeFaqs.stream().collect(Collectors.toMap(Faq::getId, faq -> faq));
++        for (int i = 0; i < faqIds.size(); i++) {
++            Faq faq = faqById.get(faqIds.get(i));
++            faq.setDisplayOrder(i + 1);
++            save(faq);
++        }
++    }
++
+     /**
+      * Retrieves a paginated list of entities as DTOs with all conversions done within transaction.
+      * This prevents LazyInitializationException by ensuring all DTO mappings happen inside @Transactional.
+diff --git a/src/main/resources/messages_en.properties b/src/main/resources/messages_en.properties
+index 8d90d4d66d9..8556dc3dc87 100644
+--- a/src/main/resources/messages_en.properties
++++ b/src/main/resources/messages_en.properties
+@@ -62,6 +62,7 @@ error.business.data_integrity=A data integrity error occurred
+ error.business.foreign_key=Cannot complete operation due to related data constraints
+ error.business.not_null=A required field cannot be empty
+ error.business.database_constraint=Database constraint violation occurred
++error.business.faq_reorder_mismatch=The provided FAQ ids do not match the category's active FAQs
+ 
+ # Authentication
+ error.auth.insufficient_permissions=You do not have permission to access this resource
+@@ -472,6 +473,7 @@ validation.faq.question.required=Question is required
+ validation.faq.question.size=Question cannot exceed {max} characters
+ validation.faq.answer.required=Answer is required
+ validation.faq.answer.size=Answer cannot exceed {max} characters
++validation.faq.reorder.faqIds.required=FAQ ids to reorder are required
+ 
+ # ------------------------------------------------------------------------------
+ # Storage/File Domain
+diff --git a/src/main/resources/messages_pl.properties b/src/main/resources/messages_pl.properties
+index b33f77fa5ad..36e3b53f3d8 100644
+--- a/src/main/resources/messages_pl.properties
++++ b/src/main/resources/messages_pl.properties
+@@ -62,6 +62,7 @@ error.business.data_integrity=Wystąpił błąd integralności danych
+ error.business.foreign_key=Nie można wykonać operacji z powodu powiązanych danych
+ error.business.not_null=Wymagane pole nie może być puste
+ error.business.database_constraint=Wystąpiło naruszenie ograniczenia bazy danych
++error.business.faq_reorder_mismatch=Podane identyfikatory FAQ nie odpowiadają aktywnym FAQ tej kategorii
+ 
+ # Uwierzytelnianie
+ error.auth.insufficient_permissions=Nie masz uprawnień do dostępu do tego zasobu
+@@ -472,6 +473,7 @@ validation.faq.question.required=Pytanie jest wymagane
+ validation.faq.question.size=Pytanie nie może przekraczać {max} znaków
+ validation.faq.answer.required=Odpowiedź jest wymagana
+ validation.faq.answer.size=Odpowiedź nie może przekraczać {max} znaków
++validation.faq.reorder.faqIds.required=Identyfikatory FAQ do zmiany kolejności są wymagane
+ 
+ # ------------------------------------------------------------------------------
+ # Storage/File Domain
+diff --git a/src/test/java/com/sm/instagram/platform/unit/service/FaqServiceUnitTest.java b/src/test/java/com/sm/instagram/platform/unit/service/FaqServiceUnitTest.java
+new file mode 100644
+index 00000000000..ad0373e4039
+--- /dev/null
++++ b/src/test/java/com/sm/instagram/platform/unit/service/FaqServiceUnitTest.java
+@@ -0,0 +1,225 @@
++package com.sm.instagram.platform.unit.service;
++
++import com.sm.instagram.platform.common.exceptions.BusinessRuleTranslatableException;
++import com.sm.instagram.platform.common.exceptions.ResourceNotFoundException;
++import com.sm.instagram.platform.common.util.RepositoryResolver;
++import com.sm.instagram.platform.common.util.filtering.SpecificationBuilder;
++import com.sm.instagram.platform.support.faq.models.Faq;
++import com.sm.instagram.platform.support.faq.models.FaqCategory;
++import com.sm.instagram.platform.support.faq.repositories.FaqCategoryRepository;
++import com.sm.instagram.platform.support.faq.repositories.FaqRepository;
++import com.sm.instagram.platform.support.faq.services.FaqService;
++import org.junit.jupiter.api.AfterEach;
++import org.junit.jupiter.api.BeforeEach;
++import org.junit.jupiter.api.DisplayName;
++import org.junit.jupiter.api.Nested;
++import org.junit.jupiter.api.Test;
++import org.junit.jupiter.api.extension.ExtendWith;
++import org.mockito.ArgumentCaptor;
++import org.mockito.Mock;
++import org.mockito.junit.jupiter.MockitoExtension;
++import org.modelmapper.ModelMapper;
++import org.springframework.context.ApplicationContext;
++import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
++import org.springframework.security.core.context.SecurityContext;
++import org.springframework.security.core.context.SecurityContextHolder;
++
++import java.util.List;
++import java.util.Optional;
++
++import static org.assertj.core.api.Assertions.assertThat;
++import static org.assertj.core.api.Assertions.assertThatThrownBy;
++import static org.mockito.ArgumentMatchers.any;
++import static org.mockito.Mockito.never;
++import static org.mockito.Mockito.times;
++import static org.mockito.Mockito.verify;
++import static org.mockito.Mockito.when;
++
++/**
++ * Unit tests for {@link FaqService#reorderCategory(Long, List)}.
++ */
++@ExtendWith(MockitoExtension.class)
++@DisplayName("FaqService Unit Tests")
++class FaqServiceUnitTest {
++
++    private static final String PRINCIPAL = "admin-firebase-uid";
++
++    @Mock
++    private SpecificationBuilder<Faq> specificationBuilder;
++
++    @Mock
++    private FaqRepository faqRepository;
++
++    @Mock
++    private FaqCategoryRepository faqCategoryRepository;
++
++    @Mock
++    private ModelMapper modelMapper;
++
++    @Mock
++    private RepositoryResolver repositoryResolver;
++
++    @Mock
++    private ApplicationContext applicationContext;
++
++    private FaqService service;
++
++    @BeforeEach
++    void setUp() {
++        service = new FaqService(
++                specificationBuilder,
++                faqRepository,
++                faqCategoryRepository,
++                modelMapper,
++                repositoryResolver,
++                applicationContext
++        );
++    }
++
++    private FaqCategory category(Long id) {
++        FaqCategory category = new FaqCategory();
++        category.setId(id);
++        category.setName("Account");
++        return category;
++    }
++
++    private Faq faq(Long id, FaqCategory category, int displayOrder) {
++        Faq faq = new Faq();
++        faq.setId(id);
++        faq.setCategory(category);
++        faq.setQuestion("Question " + id);
++        faq.setAnswer("Answer " + id);
++        faq.setDisplayOrder(displayOrder);
++        faq.setActive(true);
++        return faq;
++    }
++
++    @Nested
++    @DisplayName("reorderCategory - unknown category")
++    class UnknownCategoryTests {
++
++        @Test
++        @DisplayName("keeps the existing not-found behaviour")
++        void throwsResourceNotFoundForUnknownCategory() {
++            when(faqCategoryRepository.findById(404L)).thenReturn(Optional.empty());
++
++            assertThatThrownBy(() -> service.reorderCategory(404L, List.of(1L)))
++                    .isInstanceOf(ResourceNotFoundException.class);
++
++            verify(faqRepository, never()).save(any(Faq.class));
++        }
++    }
++
++    @Nested
++    @DisplayName("reorderCategory - mismatched ids")
++    class MismatchTests {
++
++        @Test
++        @DisplayName("rejects a list missing one of the category's active FAQs")
++        void rejectsMissingId() {
++            FaqCategory cat = category(7L);
++            Faq faq1 = faq(10L, cat, 1);
++            Faq faq2 = faq(11L, cat, 2);
++            when(faqCategoryRepository.findById(7L)).thenReturn(Optional.of(cat));
++            when(faqRepository.findByCategoryAndActiveTrueOrderByDisplayOrderAsc(cat))
++                    .thenReturn(List.of(faq1, faq2));
++
++            assertThatThrownBy(() -> service.reorderCategory(7L, List.of(10L)))
++                    .isInstanceOf(BusinessRuleTranslatableException.class)
++                    .satisfies(e -> assertThat(((BusinessRuleTranslatableException) e).getMessageKey())
++                            .isEqualTo("error.business.faq_reorder_mismatch"));
++
++            verify(faqRepository, never()).save(any(Faq.class));
++        }
++
++        @Test
++        @DisplayName("rejects a list with a duplicated id even when the count matches")
++        void rejectsDuplicateId() {
++            FaqCategory cat = category(7L);
++            Faq faq1 = faq(10L, cat, 1);
++            Faq faq2 = faq(11L, cat, 2);
++            when(faqCategoryRepository.findById(7L)).thenReturn(Optional.of(cat));
++            when(faqRepository.findByCategoryAndActiveTrueOrderByDisplayOrderAsc(cat))
++                    .thenReturn(List.of(faq1, faq2));
++
++            assertThatThrownBy(() -> service.reorderCategory(7L, List.of(10L, 10L)))
++                    .isInstanceOf(BusinessRuleTranslatableException.class);
++
++            verify(faqRepository, never()).save(any(Faq.class));
++        }
++
++        @Test
++        @DisplayName("rejects an id that belongs to another category")
++        void rejectsIdFromAnotherCategory() {
++            FaqCategory cat = category(7L);
++            Faq faq1 = faq(10L, cat, 1);
++            when(faqCategoryRepository.findById(7L)).thenReturn(Optional.of(cat));
++            when(faqRepository.findByCategoryAndActiveTrueOrderByDisplayOrderAsc(cat))
++                    .thenReturn(List.of(faq1));
++
++            assertThatThrownBy(() -> service.reorderCategory(7L, List.of(999L)))
++                    .isInstanceOf(BusinessRuleTranslatableException.class);
++
++            verify(faqRepository, never()).save(any(Faq.class));
++        }
++    }
++
++    @Nested
++    @DisplayName("reorderCategory - valid reorder")
++    class ValidReorderTests {
++
++        @BeforeEach
++        void authenticate() {
++            SecurityContext context = SecurityContextHolder.createEmptyContext();
++            context.setAuthentication(new UsernamePasswordAuthenticationToken(PRINCIPAL, null, List.of()));
++            SecurityContextHolder.setContext(context);
++            when(applicationContext.getBean(FaqService.class)).thenReturn(service);
++        }
++
++        @AfterEach
++        void forget() {
++            SecurityContextHolder.clearContext();
++        }
++
++        @Test
++        @DisplayName("assigns display order i + 1 to the FAQ at position i, in the requested order")
++        void reordersFaqsByRequestedPositions() {
++            FaqCategory cat = category(7L);
++            Faq faq1 = faq(10L, cat, 1);
++            Faq faq2 = faq(11L, cat, 2);
++            Faq faq3 = faq(12L, cat, 3);
++            when(faqCategoryRepository.findById(7L)).thenReturn(Optional.of(cat));
++            when(faqRepository.findByCategoryAndActiveTrueOrderByDisplayOrderAsc(cat))
++                    .thenReturn(List.of(faq1, faq2, faq3));
++            when(faqRepository.save(any(Faq.class))).thenAnswer(inv -> inv.getArgument(0));
++
++            service.reorderCategory(7L, List.of(12L, 10L, 11L));
++
++            assertThat(faq3.getDisplayOrder()).isEqualTo(1);
++            assertThat(faq1.getDisplayOrder()).isEqualTo(2);
++            assertThat(faq2.getDisplayOrder()).isEqualTo(3);
++
++            ArgumentCaptor<Faq> captor = ArgumentCaptor.forClass(Faq.class);
++            verify(faqRepository, times(3)).save(captor.capture());
++            List<Faq> saved = captor.getAllValues();
++            assertThat(saved).extracting(Faq::getId).containsExactly(12L, 10L, 11L);
++            assertThat(saved).extracting(Faq::getUpdaterId).containsOnly(PRINCIPAL);
++        }
++
++        @Test
++        @DisplayName("accepts a single-FAQ category")
++        void reordersSingleFaqCategory() {
++            FaqCategory cat = category(8L);
++            Faq onlyFaq = faq(20L, cat, 1);
++            when(faqCategoryRepository.findById(8L)).thenReturn(Optional.of(cat));
++            when(faqRepository.findByCategoryAndActiveTrueOrderByDisplayOrderAsc(cat))
++                    .thenReturn(List.of(onlyFaq));
++            when(faqRepository.save(any(Faq.class))).thenAnswer(inv -> inv.getArgument(0));
++
++            service.reorderCategory(8L, List.of(20L));
++
++            assertThat(onlyFaq.getDisplayOrder()).isEqualTo(1);
++            verify(faqRepository).save(onlyFaq);
++        }
++    }
++}

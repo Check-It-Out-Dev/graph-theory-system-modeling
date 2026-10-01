@@ -1,0 +1,29 @@
+{
+ "rubric": "r4",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 5,
+  "test_quality": 4,
+  "graph_use": 3,
+  "reasons": {
+   "correctness": "PUT /{categoryId}/order returns 204. reorderCategory rejects missing, duplicate, foreign and null ids with faq_reorder_mismatch, assigns i+1 and saves each FAQ, and keeps ResourceNotFoundException for an unknown category. Hidden tests 6/6.",
+   "convention_fit": "Endpoint has @PreAuthorize ADMIN and inherits the class-level @RateLimit. Constructor injection extended. BusinessRuleTranslatableException key added to en and pl. Request body is a *DtoIn. New MockitoExtension *UnitTest was run.",
+   "design_fit": "Logic sits in FaqService and reuses findByCategoryAndActiveTrueOrderByDisplayOrderAsc and BaseService.save. The controller only delegates and follows the existing GDPR log pattern. Footprint is minimal, with one small DTO.",
+   "test_quality": "FaqServiceReorderUnitTest covers happy path, missing, duplicate, foreign id and unknown category without Spring. Only the missing-id case asserts the message key. Failure cases do not verify that save is never called. It uses LENIENT strictness.",
+   "graph_use": "One graph query listed the support/faq files. It located the feature package, and the files edited came from it. Examples, BaseService.save, message keys and tests were then found through grep, find and file reads, not the graph."
+  },
+  "rubric": "r4",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 1165,
+  "cache_read_input_tokens": 1278,
+  "cache_creation_input_tokens": 25556
+ },
+ "is_error": false
+}

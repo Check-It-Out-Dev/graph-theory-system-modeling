@@ -1,0 +1,29 @@
+{
+ "rubric": "r4",
+ "verdict": {
+  "rules_violated": 1,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 4,
+  "convention_fit": 4,
+  "design_fit": 4,
+  "test_quality": 2,
+  "graph_use": 3,
+  "reasons": {
+   "correctness": "Entity field, display_order INT NOT NULL DEFAULT 0 and both mappings are in place; 4/4 hidden tests pass. The seed gives PLN 0, EUR 1, USD 2, but every other currency defaults to 0 and ties with PLN.",
+   "convention_fit": "The changeset name, header, rollback and changelog.xml include with its month comment follow the convention. The unit tests were added to existing CurrencyServiceUnitTest instead of a new *UnitTest class, as the convention requires.",
+   "design_fit": "A minimal additive change in the currency package. It extends the existing duplicated builder mapping in CurrencyController instead of routing through the service mapping, which keeps a pre-existing smell alive.",
+   "test_quality": "The new assertions only check the entity constructor and DTO getters and setters. No test exercises CurrencyService.toDto or getDataPagedAndFilteredAsDtos, so the displayOrder mapping is not pinned.",
+   "graph_use": "One graph query found the currency files before editing. Changelog discovery, locating the display-order example changeset and finding constructor callers relied on ls, grep and find."
+  },
+  "rubric": "r4",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 1024,
+  "cache_read_input_tokens": 1278,
+  "cache_creation_input_tokens": 25087
+ },
+ "is_error": false
+}

@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 5,
+  "test_quality": 5,
+  "graph_use": 5,
+  "reasons": {
+   "correctness": "Every interface name matches. `closeStaleResolvedTickets` queries RESOLVED tickets before now minus the given days, sets CLOSED, saves each one and returns the count. The cron job skips when disabled and logs failures without rethrowing. Build and all tests are green, hidden tests 4/4.",
+   "convention_fit": "`StaleTicketCloseCronJob` carries `@SchedulerLock(name=\"support:staleTicketClose\")`. Cron, enabled flag and days all come from properties with defaults. Dependencies use `@RequiredArgsConstructor` with a `private final` field. Everything lives in the `support/ticket` feature package, and yml settings are added.",
+   "design_fit": "The service owns the logic and the repository uses a derived query. The job only delegates to the service and handles errors. It follows the structure of the existing CronJobs, adds no new mechanism, and keeps the footprint minimal.",
+   "test_quality": "Service tests capture the cutoff and check it within a time bound. They also assert CLOSED status, a save per ticket, the count, and the empty case. `StaleTicketCloseCronJobUnitTest` covers enabled, disabled and exception-swallowing paths using `MockitoExtension` with no Spring context.",
+   "graph_use": "Before editing, graph queries located the `support/ticket` files, the existing `*CronJob` examples, and the `TESTED_BY` tests and dependents of the service and repository. The agent then read `AnonymousConsentCleanupCronJob` and its test and modelled the new job and test on them."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 1058,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 40217
+ },
+ "is_error": false
+}

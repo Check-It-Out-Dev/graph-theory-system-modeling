@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 4,
+  "test_quality": 5,
+  "graph_use": 5,
+  "reasons": {
+   "correctness": "updateTicketStatus publishes SupportTicketResolvedEvent only for RESOLVED. Listener, port and adapter match the interface. Adapter subject carries the reference. Listener swallows port failures. Build green, 5/5 acceptance, 55/55 existing tests.",
+   "convention_fit": "Listener uses @TransactionalEventListener(AFTER_COMMIT) with catch-and-log. Port and adapter sit in the support/ticket port/adapter packages. Constructor injection via @RequiredArgsConstructor and the existing constructor. MockitoExtension unit tests were added and run.",
+   "design_fit": "Clean event \u2192 listener \u2192 port \u2192 adapter chain, and the service never touches the adapter. EmailTicketNotificationAdapter hardcodes English subject and body with no locale, unlike EmailService's language-aware ticket mails.",
+   "test_quality": "The service test asserts the captured event fields on RESOLVED and never() for other transitions and CLOSED. The listener test covers delegation and a thrown port failure. The adapter test captures recipient and subject. No Spring context.",
+   "graph_use": "Graph queries located the support package files, SupportTicketService dependents and TESTED_BY links, and existing Event/Listener/Port/Adapter examples (InvoiceCreatedEventListener, FakturowniaAdapter). The agent read those examples before writing and mirrored them."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 1044,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 42771
+ },
+ "is_error": false
+}

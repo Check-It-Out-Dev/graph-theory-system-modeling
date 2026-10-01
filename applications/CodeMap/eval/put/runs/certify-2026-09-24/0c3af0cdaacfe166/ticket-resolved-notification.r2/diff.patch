@@ -1,0 +1,367 @@
+diff --git a/src/main/java/com/sm/instagram/platform/support/ticket/adapter/EmailTicketNotificationAdapter.java b/src/main/java/com/sm/instagram/platform/support/ticket/adapter/EmailTicketNotificationAdapter.java
+new file mode 100644
+index 00000000000..9cfabb1baa2
+--- /dev/null
++++ b/src/main/java/com/sm/instagram/platform/support/ticket/adapter/EmailTicketNotificationAdapter.java
+@@ -0,0 +1,26 @@
++package com.sm.instagram.platform.support.ticket.adapter;
++
++import com.sm.instagram.platform.support.common.EmailService;
++import com.sm.instagram.platform.support.ticket.port.TicketNotificationPort;
++import lombok.RequiredArgsConstructor;
++import org.springframework.stereotype.Component;
++
++/**
++ * E-mail implementation of {@link TicketNotificationPort}.
++ * Primary implementation today; the team plans to move to another provider,
++ * which is why callers depend on the port, not on this adapter.
++ */
++@Component
++@RequiredArgsConstructor
++public class EmailTicketNotificationAdapter implements TicketNotificationPort {
++
++    private final EmailService emailService;
++
++    @Override
++    public void notifyResolved(String contactEmail, String ticketReference) {
++        String subject = "Your support ticket " + ticketReference + " has been resolved";
++        String text = "Your support ticket " + ticketReference + " has been marked as resolved. "
++                + "If you still need help, simply reply to your ticket and it will be reopened.";
++        emailService.sendEmail(contactEmail, subject, text);
++    }
++}
+diff --git a/src/main/java/com/sm/instagram/platform/support/ticket/event/SupportTicketResolvedEvent.java b/src/main/java/com/sm/instagram/platform/support/ticket/event/SupportTicketResolvedEvent.java
+new file mode 100644
+index 00000000000..63bb6053cd1
+--- /dev/null
++++ b/src/main/java/com/sm/instagram/platform/support/ticket/event/SupportTicketResolvedEvent.java
+@@ -0,0 +1,24 @@
++package com.sm.instagram.platform.support.ticket.event;
++
++import lombok.Getter;
++import org.springframework.context.ApplicationEvent;
++
++/**
++ * Published when a support ticket transitions to RESOLVED.
++ * Handled by SupportTicketResolvedEventListener AFTER_COMMIT — so the status change
++ * is durable before the customer is notified.
++ */
++@Getter
++public class SupportTicketResolvedEvent extends ApplicationEvent {
++
++    private final Long ticketId;
++    private final String contactEmail;
++    private final String ticketReference;
++
++    public SupportTicketResolvedEvent(Object source, Long ticketId, String contactEmail, String ticketReference) {
++        super(source);
++        this.ticketId = ticketId;
++        this.contactEmail = contactEmail;
++        this.ticketReference = ticketReference;
++    }
++}
+diff --git a/src/main/java/com/sm/instagram/platform/support/ticket/event/SupportTicketResolvedEventListener.java b/src/main/java/com/sm/instagram/platform/support/ticket/event/SupportTicketResolvedEventListener.java
+new file mode 100644
+index 00000000000..8380a8a1399
+--- /dev/null
++++ b/src/main/java/com/sm/instagram/platform/support/ticket/event/SupportTicketResolvedEventListener.java
+@@ -0,0 +1,35 @@
++package com.sm.instagram.platform.support.ticket.event;
++
++import com.sm.instagram.platform.support.ticket.port.TicketNotificationPort;
++import lombok.extern.slf4j.Slf4j;
++import org.springframework.stereotype.Component;
++import org.springframework.transaction.event.TransactionPhase;
++import org.springframework.transaction.event.TransactionalEventListener;
++
++/**
++ * Listens for SupportTicketResolvedEvent and notifies the customer.
++ * AFTER_COMMIT ensures the status change is persisted before we notify.
++ * Failures are caught and logged — the status update itself has already succeeded.
++ */
++@Slf4j
++@Component
++public class SupportTicketResolvedEventListener {
++
++    private final TicketNotificationPort notificationPort;
++
++    public SupportTicketResolvedEventListener(TicketNotificationPort notificationPort) {
++        this.notificationPort = notificationPort;
++    }
++
++    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
++    public void onTicketResolved(SupportTicketResolvedEvent event) {
++        try {
++            notificationPort.notifyResolved(event.getContactEmail(), event.getTicketReference());
++            log.info("Ticket resolution notification sent: ticketId={}, ticketRef={}",
++                    event.getTicketId(), event.getTicketReference());
++        } catch (Exception e) {
++            log.error("Failed to send ticket resolution notification: ticketId={}, ticketRef={}",
++                    event.getTicketId(), event.getTicketReference(), e);
++        }
++    }
++}
+diff --git a/src/main/java/com/sm/instagram/platform/support/ticket/port/TicketNotificationPort.java b/src/main/java/com/sm/instagram/platform/support/ticket/port/TicketNotificationPort.java
+new file mode 100644
+index 00000000000..724621f3047
+--- /dev/null
++++ b/src/main/java/com/sm/instagram/platform/support/ticket/port/TicketNotificationPort.java
+@@ -0,0 +1,17 @@
++package com.sm.instagram.platform.support.ticket.port;
++
++/**
++ * Port for notifying a customer about their support ticket.
++ * Abstracted to allow swapping the delivery channel (e-mail today, another
++ * provider later) without changing business logic.
++ */
++public interface TicketNotificationPort {
++
++    /**
++     * Notify the customer that their ticket has been resolved.
++     *
++     * @param contactEmail    the customer's contact e-mail
++     * @param ticketReference the human-readable ticket reference
++     */
++    void notifyResolved(String contactEmail, String ticketReference);
++}
+diff --git a/src/main/java/com/sm/instagram/platform/support/ticket/services/SupportTicketService.java b/src/main/java/com/sm/instagram/platform/support/ticket/services/SupportTicketService.java
+index 662c193a56e..003cb2ffd77 100644
+--- a/src/main/java/com/sm/instagram/platform/support/ticket/services/SupportTicketService.java
++++ b/src/main/java/com/sm/instagram/platform/support/ticket/services/SupportTicketService.java
+@@ -7,6 +7,7 @@ import com.sm.instagram.platform.common.exceptions.InsufficientPermissionsExcept
+ import com.sm.instagram.platform.common.exceptions.ResourceNotFoundException;
+ import com.sm.instagram.platform.support.common.EmailService;
+ import com.sm.instagram.platform.support.ticket.dtos.*;
++import com.sm.instagram.platform.support.ticket.event.SupportTicketResolvedEvent;
+ import com.sm.instagram.platform.support.ticket.models.*;
+ import com.sm.instagram.platform.support.ticket.repositories.ResponseAttachmentRepository;
+ import com.sm.instagram.platform.support.ticket.repositories.SupportTicketRepository;
+@@ -17,6 +18,7 @@ import com.sm.instagram.platform.user.User;
+ import com.sm.instagram.platform.user.UserRepository;
+ import lombok.extern.slf4j.Slf4j;
+ import org.springframework.beans.factory.annotation.Autowired;
++import org.springframework.context.ApplicationEventPublisher;
+ import org.springframework.context.i18n.LocaleContextHolder;
+ import org.springframework.data.domain.Page;
+ import org.springframework.data.domain.Pageable;
+@@ -45,6 +47,7 @@ public class SupportTicketService {
+     private final PermissionUtils permissionUtils;
+     private final SignedUrlService signedUrlService;
+     private final TicketAccessTokenService accessTokenService;
++    private final ApplicationEventPublisher eventPublisher;
+ 
+     @Autowired
+     public SupportTicketService(
+@@ -57,7 +60,8 @@ public class SupportTicketService {
+             EmailService emailService,
+             PermissionUtils permissionUtils,
+             SignedUrlService signedUrlService,
+-            TicketAccessTokenService accessTokenService) {
++            TicketAccessTokenService accessTokenService,
++            ApplicationEventPublisher eventPublisher) {
+         this.ticketRepository = ticketRepository;
+         this.responseRepository = responseRepository;
+         this.userRepository = userRepository;
+@@ -66,6 +70,7 @@ public class SupportTicketService {
+         this.permissionUtils = permissionUtils;
+         this.signedUrlService = signedUrlService;
+         this.accessTokenService = accessTokenService;
++        this.eventPublisher = eventPublisher;
+     }
+ 
+     /**
+@@ -612,9 +617,17 @@ public class SupportTicketService {
+         ticket.setLastUpdateTime(LocalDateTime.now());
+ 
+         // Save the ticket
+-        ticketRepository.save(ticket);
++        SupportTicket savedTicket = ticketRepository.save(ticket);
+ 
+-        return convertToDto(ticket);
++        if (status == TicketStatus.RESOLVED) {
++            eventPublisher.publishEvent(new SupportTicketResolvedEvent(
++                    this,
++                    savedTicket.getId(),
++                    savedTicket.getContactEmail(),
++                    savedTicket.getTicketReference()));
++        }
++
++        return convertToDto(savedTicket);
+     }
+ 
+     /**
+diff --git a/src/test/java/com/sm/instagram/platform/unit/service/EmailTicketNotificationAdapterUnitTest.java b/src/test/java/com/sm/instagram/platform/unit/service/EmailTicketNotificationAdapterUnitTest.java
+new file mode 100644
+index 00000000000..4b85783377b
+--- /dev/null
++++ b/src/test/java/com/sm/instagram/platform/unit/service/EmailTicketNotificationAdapterUnitTest.java
+@@ -0,0 +1,35 @@
++package com.sm.instagram.platform.unit.service;
++
++import com.sm.instagram.platform.support.common.EmailService;
++import com.sm.instagram.platform.support.ticket.adapter.EmailTicketNotificationAdapter;
++import org.junit.jupiter.api.DisplayName;
++import org.junit.jupiter.api.Test;
++import org.junit.jupiter.api.extension.ExtendWith;
++import org.mockito.InjectMocks;
++import org.mockito.Mock;
++import org.mockito.junit.jupiter.MockitoExtension;
++
++import static org.mockito.ArgumentMatchers.contains;
++import static org.mockito.ArgumentMatchers.eq;
++import static org.mockito.Mockito.verify;
++
++@ExtendWith(MockitoExtension.class)
++@DisplayName("EmailTicketNotificationAdapter Unit Tests")
++class EmailTicketNotificationAdapterUnitTest {
++
++    @Mock
++    private EmailService emailService;
++
++    @InjectMocks
++    private EmailTicketNotificationAdapter adapter;
++
++    @Test
++    @DisplayName("should send an email whose subject contains the ticket reference")
++    void shouldSendEmailWithReferenceInSubject() {
++        // When
++        adapter.notifyResolved("test@example.com", "TKT-12345");
++
++        // Then
++        verify(emailService).sendEmail(eq("test@example.com"), contains("TKT-12345"), contains("TKT-12345"));
++    }
++}
+diff --git a/src/test/java/com/sm/instagram/platform/unit/service/SupportTicketResolvedEventListenerUnitTest.java b/src/test/java/com/sm/instagram/platform/unit/service/SupportTicketResolvedEventListenerUnitTest.java
+new file mode 100644
+index 00000000000..50481fe99e6
+--- /dev/null
++++ b/src/test/java/com/sm/instagram/platform/unit/service/SupportTicketResolvedEventListenerUnitTest.java
+@@ -0,0 +1,52 @@
++package com.sm.instagram.platform.unit.service;
++
++import com.sm.instagram.platform.support.ticket.event.SupportTicketResolvedEvent;
++import com.sm.instagram.platform.support.ticket.event.SupportTicketResolvedEventListener;
++import com.sm.instagram.platform.support.ticket.port.TicketNotificationPort;
++import org.junit.jupiter.api.DisplayName;
++import org.junit.jupiter.api.Test;
++import org.junit.jupiter.api.extension.ExtendWith;
++import org.mockito.InjectMocks;
++import org.mockito.Mock;
++import org.mockito.junit.jupiter.MockitoExtension;
++
++import static org.mockito.Mockito.doThrow;
++import static org.mockito.Mockito.verify;
++
++@ExtendWith(MockitoExtension.class)
++@DisplayName("SupportTicketResolvedEventListener Unit Tests")
++class SupportTicketResolvedEventListenerUnitTest {
++
++    @Mock
++    private TicketNotificationPort notificationPort;
++
++    @InjectMocks
++    private SupportTicketResolvedEventListener listener;
++
++    @Test
++    @DisplayName("should notify the customer through the port when a ticket is resolved")
++    void shouldNotifyCustomerThroughPort() {
++        // Given
++        SupportTicketResolvedEvent event = new SupportTicketResolvedEvent(this, 1L, "test@example.com", "TKT-12345");
++
++        // When
++        listener.onTicketResolved(event);
++
++        // Then
++        verify(notificationPort).notifyResolved("test@example.com", "TKT-12345");
++    }
++
++    @Test
++    @DisplayName("should log and not rethrow when the notification port fails")
++    void shouldLogAndNotRethrowWhenPortFails() {
++        // Given
++        SupportTicketResolvedEvent event = new SupportTicketResolvedEvent(this, 1L, "test@example.com", "TKT-12345");
++        doThrow(new RuntimeException("provider down"))
++                .when(notificationPort).notifyResolved("test@example.com", "TKT-12345");
++
++        // When/Then - must not throw
++        listener.onTicketResolved(event);
++
++        verify(notificationPort).notifyResolved("test@example.com", "TKT-12345");
++    }
++}
+diff --git a/src/test/java/com/sm/instagram/platform/unit/service/SupportTicketServiceUnitTest.java b/src/test/java/com/sm/instagram/platform/unit/service/SupportTicketServiceUnitTest.java
+index d9b38014c5a..b4eaf76716b 100644
+--- a/src/test/java/com/sm/instagram/platform/unit/service/SupportTicketServiceUnitTest.java
++++ b/src/test/java/com/sm/instagram/platform/unit/service/SupportTicketServiceUnitTest.java
+@@ -6,6 +6,7 @@ import com.sm.instagram.platform.common.exceptions.InsufficientPermissionsExcept
+ import com.sm.instagram.platform.common.exceptions.ResourceNotFoundException;
+ import com.sm.instagram.platform.support.common.EmailService;
+ import com.sm.instagram.platform.support.ticket.dtos.*;
++import com.sm.instagram.platform.support.ticket.event.SupportTicketResolvedEvent;
+ import com.sm.instagram.platform.support.ticket.models.*;
+ import com.sm.instagram.platform.support.ticket.repositories.*;
+ import com.sm.instagram.platform.support.ticket.services.SupportTicketService;
+@@ -26,6 +27,7 @@ import org.mockito.Mock;
+ import org.mockito.junit.jupiter.MockitoExtension;
+ import org.mockito.junit.jupiter.MockitoSettings;
+ import org.mockito.quality.Strictness;
++import org.springframework.context.ApplicationEventPublisher;
+ 
+ import java.time.LocalDateTime;
+ import java.util.*;
+@@ -74,6 +76,9 @@ class SupportTicketServiceUnitTest {
+     @Mock
+     private TicketAccessTokenService accessTokenService;
+ 
++    @Mock
++    private ApplicationEventPublisher eventPublisher;
++
+     @InjectMocks
+     private SupportTicketService service;
+ 
+@@ -481,6 +486,45 @@ class SupportTicketServiceUnitTest {
+             // Then
+             assertThat(result.getStatus()).isEqualTo(TicketStatus.CLOSED);
+         }
++
++        @Test
++        @DisplayName("should publish SupportTicketResolvedEvent when transitioning to RESOLVED")
++        void shouldPublishResolvedEventWhenTransitioningToResolved() {
++            // Given
++            testTicket.setStatus(TicketStatus.IN_PROGRESS);
++            when(permissionUtils.getUserId()).thenReturn("admin-uid");
++            when(permissionUtils.isAdmin()).thenReturn(true);
++            when(ticketRepository.findById(1L)).thenReturn(Optional.of(testTicket));
++            when(ticketRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
++
++            // When
++            service.updateTicketStatus(1L, TicketStatus.RESOLVED);
++
++            // Then
++            verify(eventPublisher).publishEvent(argThat(event -> {
++                SupportTicketResolvedEvent resolvedEvent = (SupportTicketResolvedEvent) event;
++                return resolvedEvent.getTicketId().equals(1L)
++                        && resolvedEvent.getContactEmail().equals("test@example.com")
++                        && resolvedEvent.getTicketReference().equals("TKT-12345");
++            }));
++        }
++
++        @Test
++        @DisplayName("should not publish SupportTicketResolvedEvent for other transitions")
++        void shouldNotPublishResolvedEventForOtherTransitions() {
++            // Given
++            testTicket.setStatus(TicketStatus.OPEN);
++            when(permissionUtils.getUserId()).thenReturn("admin-uid");
++            when(permissionUtils.isAdmin()).thenReturn(true);
++            when(ticketRepository.findById(1L)).thenReturn(Optional.of(testTicket));
++            when(ticketRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
++
++            // When
++            service.updateTicketStatus(1L, TicketStatus.IN_PROGRESS);
++
++            // Then
++            verify(eventPublisher, never()).publishEvent(any());
++        }
+     }
+ 
+     // ==================== Customer Response Tests ====================

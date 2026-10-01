@@ -1,0 +1,116 @@
+diff --git a/src/main/java/com/sm/instagram/platform/userpreferences/UserPreferences.java b/src/main/java/com/sm/instagram/platform/userpreferences/UserPreferences.java
+index 9084061dcc8..995349ff742 100644
+--- a/src/main/java/com/sm/instagram/platform/userpreferences/UserPreferences.java
++++ b/src/main/java/com/sm/instagram/platform/userpreferences/UserPreferences.java
+@@ -113,4 +113,10 @@ public class UserPreferences {
+      */
+     @Column(name = "notification_email_support_enabled")
+     private Boolean notificationEmailSupportEnabled = true;
++
++    // ----- optimistic locking -----
++
++    @Version
++    @Column(name = "version")
++    private Long version;
+ }
+\ No newline at end of file
+diff --git a/src/main/resources/db/changelog/2026/09/24-09-2026-add-version-to-user-preferences.sql b/src/main/resources/db/changelog/2026/09/24-09-2026-add-version-to-user-preferences.sql
+new file mode 100644
+index 00000000000..1d879845aa7
+--- /dev/null
++++ b/src/main/resources/db/changelog/2026/09/24-09-2026-add-version-to-user-preferences.sql
+@@ -0,0 +1,9 @@
++--liquibase formatted sql
++--changeset norbert:add-version-to-user-preferences-table
++
++-- Add JPA @Version column to user_preferences table for optimistic locking protection
++-- Prevents the web app from silently overwriting a concurrent mobile app edit (and vice versa)
++ALTER TABLE user_preferences
++ADD COLUMN version BIGINT DEFAULT 0 NOT NULL;
++
++--rollback ALTER TABLE user_preferences DROP COLUMN version;
+diff --git a/src/main/resources/db/changelog/changelog.xml b/src/main/resources/db/changelog/changelog.xml
+index 77f52d5e094..9ccc20c6519 100644
+--- a/src/main/resources/db/changelog/changelog.xml
++++ b/src/main/resources/db/changelog/changelog.xml
+@@ -184,4 +184,7 @@
+     <!-- June 2026: Widen ticket_reference to VARCHAR(32) — pentest 3.3 SecureRandom format is 21 chars -->
+     <include file="2026/09/02-09-2026-widen-ticket-reference-column.sql" relativeToChangelogFile="true"/>
+ 
++    <!-- September 2026: Add JPA @Version column to user_preferences table for optimistic locking protection -->
++    <include file="2026/09/24-09-2026-add-version-to-user-preferences.sql" relativeToChangelogFile="true"/>
++
+ </databaseChangeLog>
+diff --git a/src/test/java/com/sm/instagram/platform/unit/service/UserPreferencesServiceUnitTest.java b/src/test/java/com/sm/instagram/platform/unit/service/UserPreferencesServiceUnitTest.java
+index 7e5175d6055..6a2b7d698b7 100644
+--- a/src/test/java/com/sm/instagram/platform/unit/service/UserPreferencesServiceUnitTest.java
++++ b/src/test/java/com/sm/instagram/platform/unit/service/UserPreferencesServiceUnitTest.java
+@@ -1,12 +1,16 @@
+ package com.sm.instagram.platform.unit.service;
+ 
+ import com.sm.instagram.platform.common.authorization.PermissionUtils;
++import com.sm.instagram.platform.common.util.mappers.EnumTranslationService;
++import com.sm.instagram.platform.common.util.mappers.UpdaterIdConverter;
+ import com.sm.instagram.platform.notification.EmailFrequency;
+ import com.sm.instagram.platform.user.User;
+ import com.sm.instagram.platform.user.UserRepository;
+ import com.sm.instagram.platform.userpreferences.UserPreferences;
+ import com.sm.instagram.platform.userpreferences.UserPreferencesDtoIn;
++import com.sm.instagram.platform.userpreferences.UserPreferencesMapping;
+ import com.sm.instagram.platform.userpreferences.UserPreferencesRepository;
++import jakarta.persistence.Version;
+ import org.junit.jupiter.api.BeforeEach;
+ import org.junit.jupiter.api.DisplayName;
+ import org.junit.jupiter.api.Nested;
+@@ -17,7 +21,9 @@ import org.junit.jupiter.params.provider.EnumSource;
+ import org.junit.jupiter.params.provider.ValueSource;
+ import org.mockito.Mock;
+ import org.mockito.junit.jupiter.MockitoExtension;
++import org.modelmapper.ModelMapper;
+ 
++import java.lang.reflect.Field;
+ import java.util.HashMap;
+ import java.util.Map;
+ import java.util.Optional;
+@@ -167,6 +173,41 @@ class UserPreferencesServiceUnitTest {
+         }
+     }
+ 
++    @Nested
++    @DisplayName("Optimistic Locking Tests")
++    class OptimisticLockingTests {
++
++        @Test
++        @DisplayName("version field should be annotated with @Version and typed Long")
++        void versionFieldShouldCarryVersionAnnotationAndBeLong() throws NoSuchFieldException {
++            // Given
++            Field versionField = UserPreferences.class.getDeclaredField("version");
++
++            // Then
++            assertThat(versionField.getType()).isEqualTo(Long.class);
++            assertThat(versionField.isAnnotationPresent(Version.class)).isTrue();
++        }
++
++        @Test
++        @DisplayName("mapping a DtoIn onto existing preferences should preserve the current version")
++        void mappingDtoInShouldPreserveExistingVersion() {
++            // Given: a real mapper configured the same way UserPreferencesService uses it,
++            // and preferences already persisted with a version set by a previous save
++            ModelMapper modelMapper = new UserPreferencesMapping(new EnumTranslationService(), new UpdaterIdConverter())
++                    .configureMapping(new ModelMapper());
++            testPreferences.setVersion(7L);
++            UserPreferencesDtoIn dtoIn = new UserPreferencesDtoIn();
++            dtoIn.setLanguage("pl");
++            dtoIn.setTimezone("Europe/Warsaw");
++
++            // When: mapping in place, exactly as UserPreferencesService#updateCurrentUserPreferences does
++            modelMapper.map(dtoIn, testPreferences);
++
++            // Then: the version travelling with the row is untouched by the incoming DTO
++            assertThat(testPreferences.getVersion()).isEqualTo(7L);
++        }
++    }
++
+     @Nested
+     @DisplayName("CommunicationFrequency Enum Tests")
+     class CommunicationFrequencyTests {

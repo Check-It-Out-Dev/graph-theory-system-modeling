@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 1,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 3,
+  "convention_fit": 4,
+  "design_fit": 4,
+  "test_quality": 4,
+  "graph_use": 4,
+  "reasons": {
+   "correctness": "Port, adapter, PLN=1, case-insensitive match, HALF_UP scale 2 and error key all work; 5/5 hidden tests pass. But the application.yml insertion split `cors:`, so `max-age: 86400` now binds as `currency.max-age`, silently dropping the CORS setting.",
+   "convention_fit": "The port sits in `currency/port` and the adapter in `currency/adapter`. The service depends on the port, uses constructor injection, and throws `BusinessRuleTranslatableException` with keys in both message files. The yml edit changes untouched `cors` config, breaking the change-only-what-is-needed rule.",
+   "design_fit": "Cohesive layout and the service depends only on the port type. The adapter scans the rates map with `equalsIgnoreCase` on every call instead of normalising keys once. The misplaced yml block corrupts an unrelated config section.",
+   "test_quality": "`CurrencyConversionServiceUnitTest` covers the rate, HALF_UP rounding and the missing-rate key with its args. `FixedExchangeRateAdapterUnitTest` covers PLN, case-insensitivity and unknown codes but lacks `@ExtendWith(MockitoExtension.class)`. There is no null-ISO test.",
+   "graph_use": "Graph queries for `*Port.java`, currency entities and the registry package came before any edit and led to the CompanyRegistryPort/adapter example. Later navigation (config binding, yml, messages) relied on grep and reads."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 1322,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 24250
+ },
+ "is_error": false
+}

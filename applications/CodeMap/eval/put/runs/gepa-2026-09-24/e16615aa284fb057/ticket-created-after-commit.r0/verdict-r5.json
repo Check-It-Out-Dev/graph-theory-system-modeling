@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 5,
+  "test_quality": 5,
+  "graph_use": 5,
+  "reasons": {
+   "correctness": "createTicket publishes SupportTicketCreatedEvent through ApplicationEventPublisher with all six values and no longer calls EmailService. The listener is @TransactionalEventListener(AFTER_COMMIT). Interface names match. Build green, hidden tests 3/3.",
+   "convention_fit": "Event and listener sit in support/ticket/event. The listener uses @RequiredArgsConstructor with a private final EmailService. The publisher is added to the explicit constructor. AFTER_COMMIT is set, and the listener catches and logs its failures. A MockitoExtension unit test is added and was run.",
+   "design_fit": "Reuses the ApplicationEvent/listener pattern read from InvoiceCreatedEvent and its listener. Footprint is minimal. EmailService stays in the service only because addAdminResponse still uses it. No duplicated logic and no new mechanism.",
+   "test_quality": "The listener unit test covers the send with exact arguments and the swallowed failure path. SupportTicketServiceUnitTest captures the event, asserts all six fields and verifies emailService is never called. The integration test is adapted to assert the recorded event.",
+   "graph_use": "Graph queries found the ticket files, existing Event/EventListener examples, TESTED_BY tests and dependents of SupportTicketService before any edit. The agent then read the InvoiceCreated exemplars and followed their structure."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 832,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 41183
+ },
+ "is_error": false
+}

@@ -1,0 +1,29 @@
+{
+ "rubric": "r4",
+ "verdict": {
+  "rules_violated": 1,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 3,
+  "design_fit": 5,
+  "test_quality": 1,
+  "graph_use": 3,
+  "reasons": {
+   "correctness": "SupportTicket gains `@Version private Long version`. The changeset adds `version BIGINT DEFAULT 0 NOT NULL` to support_ticket and is included in changelog.xml. Build is green, hidden tests pass 2/2 and existing tests pass 229/229.",
+   "convention_fit": "The changeset path, name, rollback and dated changelog comment follow the Liquibase convention, and no existing changeset was edited. The unit-test convention is broken: no new *UnitTest class pins the optimistic-locking behaviour.",
+   "design_fit": "Three-file footprint that reuses the existing @Version pattern from AppliedOpportunity and its 20-12-2025 changeset. No new mechanism, no unrelated edits, and the names are clear.",
+   "test_quality": "The agent added no tests (0/0). It only ran the existing SupportTicket unit tests. Nothing asserts the @Version field or the versioning behaviour.",
+   "graph_use": "One graph query listed the support/ticket files up front. After that, the reference example and the changeset pattern were found through repeated grep for @Version, version and applied_opportunity, not through the graph."
+  },
+  "rubric": "r4",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 1082,
+  "cache_read_input_tokens": 1278,
+  "cache_creation_input_tokens": 18139
+ },
+ "is_error": false
+}

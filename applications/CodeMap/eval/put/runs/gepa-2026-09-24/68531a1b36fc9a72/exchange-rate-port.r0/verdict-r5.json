@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 5,
+  "test_quality": 5,
+  "graph_use": 5,
+  "reasons": {
+   "correctness": "All interface names match. The adapter matches ISO codes case-insensitively and forces PLN=1. toPln rounds to 2 decimals HALF_UP and throws BusinessRuleTranslatableException with the key and ISO code. Build green, 5/5 hidden and 41/41 existing tests pass.",
+   "convention_fit": "ExchangeRatePort is in currency/port and FixedExchangeRateAdapter in currency/adapter. Both use explicit constructor injection. The new key is in messages_en and messages_pl. The agent read the InvoicingPort/FakturowniaAdapter exemplar and added *UnitTest classes with MockitoExtension.",
+   "design_fit": "CurrencyConversionService depends only on ExchangeRatePort, so the provider can be swapped. Rates are normalised once in the adapter constructor. The footprint is small, the rates come from application.yml, and no logic is duplicated.",
+   "test_quality": "CurrencyConversionServiceUnitTest covers the conversion, a HALF_UP edge (10.005 to 10.01), and the missing-rate path with key and args asserted. The adapter test covers case-insensitivity, PLN=1 including a configured-PLN override, unknown and null codes. No Spring context.",
+   "graph_use": "Before any edit, graph queries found the existing Port/Adapter/Properties classes, the currency files, TranslatableException subclasses, and the TESTED_BY tests. The agent then read the Fakturownia port/adapter/properties and followed them. Some grep/find fallback was used."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 1042,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 26191
+ },
+ "is_error": false
+}

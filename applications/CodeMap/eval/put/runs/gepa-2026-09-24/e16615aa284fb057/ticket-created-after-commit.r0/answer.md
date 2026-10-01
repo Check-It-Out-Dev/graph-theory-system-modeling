@@ -1,0 +1,7 @@
+- Added `SupportTicketCreatedEvent` and `SupportTicketCreatedEventListener` (`AFTER_COMMIT`, try/catch-and-log) under `src/main/java/.../support/ticket/event/`, following the `InvoiceCreatedEvent`/`Listener` exemplar.
+- `SupportTicketService.createTicket` (`services/SupportTicketService.java`) now publishes `SupportTicketCreatedEvent` via constructor-injected `ApplicationEventPublisher` instead of calling `EmailService` directly; `EmailService` is still used for the admin-response email elsewhere.
+- New unit test `support/ticket/event/SupportTicketCreatedEventListenerUnitTest.java` (main path + swallow-and-log path).
+- Updated `unit/service/SupportTicketServiceUnitTest.java` to mock the new `ApplicationEventPublisher` and assert `createTicket` publishes the event (captor) and no longer calls `EmailService` directly.
+- Updated `integration/service/supportticket/SupportTicketService_Create_IntegrationTest.java` (its old `verify(emailService)...` assertion could never pass once sending moved to `AFTER_COMMIT`, since integration tests roll back) to assert the event is published via `@RecordApplicationEvents`.
+
+Tests run: `SupportTicketServiceUnitTest` + `SupportTicketCreatedEventListenerUnitTest` — 56 passed, 0 failed. `mvn test-compile -Ptest` — green.

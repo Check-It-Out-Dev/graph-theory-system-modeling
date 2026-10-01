@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 5,
+  "test_quality": 4,
+  "graph_use": 5,
+  "reasons": {
+   "correctness": "Every stated behaviour is present: the derived query findByStatusAndResolvedTimeBefore, closeStaleResolvedTickets with cutoff now minus days, save and count, and a disabled guard plus caught exception in closeStaleTickets. Property names and defaults match. All 4 hidden tests pass.",
+   "convention_fit": "The @Scheduled cron comes from a property with a default. @SchedulerLock is named support:staleTicketClose. The enabled flag uses @Value with default true. The class is a *CronJob and uses @RequiredArgsConstructor with a private final service. The code sits in the support/ticket feature package.",
+   "design_fit": "The job only delegates, and the service owns the close logic. The repository gets a derived query in place of a hand-written @Query. The pattern follows AnonymousConsentCleanupCronJob. The footprint is minimal and adds no new mechanism.",
+   "test_quality": "Tests cover enabled, disabled, exception swallowed and configured days in the job, plus count, cutoff capture and the empty case in the service. No Spring context. LENIENT strictness weakens the stubs, and lastUpdateTime is not asserted.",
+   "graph_use": "Before editing, graph queries found the support/ticket files, the existing *CronJob examples and the dependents of SupportTicketService. The agent then read AnonymousConsentCleanupCronJob and its unit test and followed their structure."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 1177,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 40578
+ },
+ "is_error": false
+}

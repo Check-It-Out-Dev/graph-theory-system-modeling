@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 5,
+  "test_quality": 4,
+  "graph_use": 4,
+  "reasons": {
+   "correctness": "Adds FaqRepository#findByActiveFalseAndLastUpdateTimeBefore and FaqService#purgeInactiveOlderThan returning the deleted count. InactiveFaqPurgeCronJob has the enabled, days and cron properties, a disabled no-op and catch/log. Build green; hidden tests 4/4.",
+   "convention_fit": "The @Scheduled cron comes from a property and carries @SchedulerLock named faq:inactivePurge. Enabled flag is read via @Value. Class uses @RequiredArgsConstructor with a private final FaqService. The cron class follows the *CronJob name. Stays in the faq feature package; no field injection.",
+   "design_fit": "Derived query sits in the repository, purge logic in the service, and the cron job only delegates. The job structure mirrors AnonymousConsentCleanupCronJob. The footprint is minimal, with no duplicated lookup and no new mechanism.",
+   "test_quality": "FaqPurgeUnitTest covers the count, the captured cutoff and the empty-list skip. The cron test covers enabled, disabled and the swallowed exception. Both use lenient strictness, and the enabled test stubs a return of 7 that is never asserted.",
+   "graph_use": "Graph queries listed the faq package entities and the existing *CronJob files before editing, and the job follows the found AnonymousConsentCleanupCronJob. Several failed reads followed and were recovered by glob; test locations were found through directory globs."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 1094,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 32626
+ },
+ "is_error": false
+}

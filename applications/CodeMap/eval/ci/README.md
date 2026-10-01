@@ -1,6 +1,6 @@
 # The evaluation gate — model and prompt evaluation on a runner with no GPU
 
-`python -m pytest applications/CodeMap/eval/ci` · 127 checks · 0.2 s · no model, no GPU, no
+`python -m pytest applications/CodeMap/eval/ci` · 198 checks · 0.2 s · no model, no GPU, no
 network, no credential.
 
 ## The problem this solves
@@ -64,7 +64,11 @@ Nothing forces the runs and `eval/q/mfq_all.jsonl` to stay the same corpus, and 
 quietly re-classified would leave every published rate intact and every published rate wrong.
 So every run is checked question for question against the bank. Then `claims.json` ties each
 figure in the prose to the artifact behind it: the literal text must still be in the document,
-and the artifact re-scored today must still round to it at the claim's own precision.
+and the artifact re-scored today must still round to it at the claim's own precision. The
+prompt-under-test figures (the root README's Part 2) are the `put` section: each names a committed
+campaign summary or calibration under `eval/put/`, a dotted path inside it and the decimals it is
+written with, so the certification verdict, the GEPA scores and the judge's agreement cannot drift
+from the runs that produced them.
 
 ## What is not gated, and why
 

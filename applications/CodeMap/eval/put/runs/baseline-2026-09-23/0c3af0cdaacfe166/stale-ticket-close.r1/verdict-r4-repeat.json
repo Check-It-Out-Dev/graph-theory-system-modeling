@@ -1,0 +1,29 @@
+{
+ "rubric": "r4",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 4,
+  "test_quality": 4,
+  "graph_use": 4,
+  "reasons": {
+   "correctness": "Derived query findByStatusAndResolvedTimeBefore, @Transactional closeStaleResolvedTickets returning the count, and a CronJob with enabled/days/cron properties and the stated defaults. The try/catch logs failures. Hidden tests 4/4, build green.",
+   "convention_fit": "@SchedulerLock is named support:staleTicketClose, cron and enabled flag come from properties, and the class is named *CronJob. Constructor injection via @RequiredArgsConstructor. Code stays in the support/ticket feature package. The new unit test uses MockitoExtension with no Spring context.",
+   "design_fit": "Small footprint that reuses the repository and service. Two smells: the job logs 'completed' twice, once in the try and once after it. The per-ticket save inside the transaction is redundant, though the interface asks for tickets to be saved.",
+   "test_quality": "Covers the service happy path and the empty case, plus the job's enabled, disabled and exception paths. The cutoff is matched with any(LocalDateTime), so the days-to-cutoff arithmetic is not pinned. The job test sets Strictness.LENIENT without need.",
+   "graph_use": "Graph queries listed the support/ticket package files and the existing *CronJob classes before any edit. The agent then read NoConsentAccountCleanupCronJob as its example. It located the existing test files with find rather than the graph."
+  },
+  "rubric": "r4",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 1037,
+  "cache_read_input_tokens": 1278,
+  "cache_creation_input_tokens": 23051
+ },
+ "is_error": false
+}

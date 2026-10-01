@@ -1,0 +1,430 @@
+[
+ {
+  "i": 1,
+  "name": "mcp__graph__graph_query",
+  "input": {
+   "statement": "MATCH (e:Entity) WHERE e.file_path STARTS WITH 'backend/src/main/java/com/sm/instagram/platform/support' RETURN e.file_path, e.layer, e.name ORDER BY e.file_path"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "{\"columns\": [\"e.file_path\", \"e.layer\", \"e.name\"], \"rows\": [[\"backend/src/main/java/com/sm/instagram/platform/support/common/EmailService.java\", \"Process\", \"EmailService.java\"], [\"backend/src/main/java"
+ },
+ {
+  "i": 2,
+  "name": "mcp__graph__graph_query",
+  "input": {
+   "statement": "MATCH (e:Entity) WHERE e.file_path STARTS WITH 'backend/src/main/' AND (e.name ENDS WITH 'Port.java' OR e.name ENDS WITH 'Adapter.java' OR e.name ENDS WITH 'EventListener.java') RETURN e.name, e.file_path ORDER BY e.name"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "{\"columns\": [\"e.name\", \"e.file_path\"], \"rows\": [[\"BialaListaVatAdapter.java\", \"backend/src/main/java/com/sm/instagram/platform/registry/adapter/bialista/BialaListaVatAdapter.java\"], [\"CeidgRegistryAda"
+ },
+ {
+  "i": 3,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-resolved-notification.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\subscription\\event\\InvoiceCreatedEventListener.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.subscription.event;\n2\t\n3\timport com.sm.instagram.platform.subscription.invoicing.InvoiceRetryService;\n4\timport lombok.RequiredArgsConstructor;\n5\timport lombok.exter"
+ },
+ {
+  "i": 4,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-resolved-notification.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\services\\SupportTicketService.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.support.ticket.services;\n2\t\n3\timport com.sm.instagram.platform.common.authorization.PermissionUtils;\n4\timport com.sm.instagram.platform.common.exceptions.Authentica"
+ },
+ {
+  "i": 5,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-resolved-notification.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\common\\EmailService.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.support.common;\n2\t\n3\timport com.sm.instagram.platform.common.email.config.EmailConfigurationProperties;\n4\timport com.sm.instagram.platform.common.exceptions.Externa"
+ },
+ {
+  "i": 6,
+  "name": "Bash",
+  "input": {
+   "command": "find src/main/java/com/sm/instagram/platform/subscription/event -iname \"*Event*.java\" 2>/dev/null; echo ---; find src/main/java/com/sm/instagram/platform/registry/port -iname \"*.java\"",
+   "description": "List subscription event files and registry port files"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "src/main/java/com/sm/instagram/platform/subscription/event/InvoiceCreatedEvent.java\nsrc/main/java/com/sm/instagram/platform/subscription/event/InvoiceCreatedEventListener.java\nsrc/main/java/com/sm/ins"
+ },
+ {
+  "i": 7,
+  "name": "Bash",
+  "input": {
+   "command": "find src/main/java/com/sm/instagram/platform/subscription -iname \"*.java\" | xargs -I{} basename {}",
+   "description": "List subscription package files"
+  },
+  "after_marker": false,
+  "is_error": true,
+  "result_head": "Permission to use Bash has been denied because Claude Code is running in don't ask mode. IMPORTANT: You *may* attempt to accomplish this action using other tools that might naturally be used to accomp"
+ },
+ {
+  "i": 8,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-resolved-notification.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\subscription\\event\\SubscriptionNotificationEvent.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.subscription.event;\n2\t\n3\timport com.sm.instagram.platform.notification.NotificationType;\n4\timport com.sm.instagram.platform.user.User;\n5\timport lombok.Getter;\n6\timp"
+ },
+ {
+  "i": 9,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-resolved-notification.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\registry\\port\\VatRegistryPort.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.registry.port;\n2\t\n3\t/**\n4\t * Port interface for VAT taxpayer status verification.\n5\t * Primary implementation: Ministry of Finance Biała Lista (White List) REST API"
+ },
+ {
+  "i": 10,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-resolved-notification.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\registry\\adapter\\bialista\\BialaListaVatAdapter.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.registry.adapter.bialista;\n2\t\n3\timport com.sm.instagram.platform.registry.config.RegistryProperties;\n4\timport com.sm.instagram.platform.registry.port.VatRegistryPor"
+ },
+ {
+  "i": 11,
+  "name": "Bash",
+  "input": {
+   "command": "powershell -Command \"Get-ChildItem -Path src/test/java/com/sm/instagram/platform/support/ticket -Filter '*.java' -Recurse | Select-Object -ExpandProperty FullName\"",
+   "description": "List existing support ticket test files"
+  },
+  "after_marker": false,
+  "is_error": true,
+  "result_head": "Permission to use Bash has been denied because Claude Code is running in don't ask mode. IMPORTANT: You *may* attempt to accomplish this action using other tools that might naturally be used to accomp"
+ },
+ {
+  "i": 12,
+  "name": "Glob",
+  "input": {
+   "pattern": "src/test/java/com/sm/instagram/platform/support/ticket/**/*.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "src\\test\\java\\com\\sm\\instagram\\platform\\support\\ticket\\services\\TicketAccessTokenServiceUnitTest.java"
+ },
+ {
+  "i": 13,
+  "name": "Grep",
+  "input": {
+   "pattern": "ApplicationEventPublisher",
+   "path": "src/main/java",
+   "output_mode": "files_with_matches"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "Found 8 files\nsrc\\main\\java\\com\\sm\\instagram\\platform\\user\\UserService.java\nsrc\\main\\java\\com\\sm\\instagram\\platform\\subscription\\SubscriptionService.java\nsrc\\main\\java\\com\\sm\\instagram\\platform\\regist"
+ },
+ {
+  "i": 14,
+  "name": "mcp__graph__graph_query",
+  "input": {
+   "statement": "MATCH (e:Entity {file_path: 'backend/src/main/java/com/sm/instagram/platform/support/ticket/services/SupportTicketService.java'})-[r:Dep]->(t:Entity) WHERE r.rel='TESTED_BY' RETURN t.file_path"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "{\"columns\": [\"t.file_path\"], \"rows\": [[\"backend/src/test/java/com/sm/instagram/platform/unit/service/SupportTicketServiceUnitTest.java\"]], \"row_count\": 1, \"truncated\": false}"
+ },
+ {
+  "i": 15,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-resolved-notification.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\SupportTicketServiceUnitTest.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.unit.service;\n2\t\n3\timport com.sm.instagram.platform.common.authorization.PermissionUtils;\n4\timport com.sm.instagram.platform.common.exceptions.BusinessRuleTranslata"
+ },
+ {
+  "i": 16,
+  "name": "Grep",
+  "input": {
+   "pattern": "emailService\\.sendEmail\\(",
+   "path": "src/main/java",
+   "output_mode": "content",
+   "-n": true
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "No matches found"
+ },
+ {
+  "i": 17,
+  "name": "Write",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-resolved-notification.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\event\\SupportTicketResolvedEvent.java",
+   "content": "<681 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "File created successfully at: C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-resolved-notification.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\event\\SupportTicketResolvedEvent.java"
+ },
+ {
+  "i": 18,
+  "name": "Write",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-resolved-notification.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\port\\TicketNotificationPort.java",
+   "content": "<535 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "File created successfully at: C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-resolved-notification.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\port\\TicketNotificationPort.java (fil"
+ },
+ {
+  "i": 19,
+  "name": "Write",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-resolved-notification.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\adapter\\EmailTicketNotificationAdapter.java",
+   "content": "<931 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "File created successfully at: C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-resolved-notification.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\adapter\\EmailTicketNotificationAdapte"
+ },
+ {
+  "i": 20,
+  "name": "Write",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-resolved-notification.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\event\\SupportTicketResolvedEventListener.java",
+   "content": "<1169 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "File created successfully at: C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-resolved-notification.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\event\\SupportTicketResolvedEventListe"
+ },
+ {
+  "i": 21,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-resolved-notification.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\services\\SupportTicketService.java",
+   "old_string": "<851 chars>",
+   "new_string": "<995 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-resolved-notification.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\services\\SupportTicketService.java has been updated succes"
+ },
+ {
+  "i": 22,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-resolved-notification.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\services\\SupportTicketService.java",
+   "old_string": "<1099 chars>",
+   "new_string": "<1259 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-resolved-notification.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\services\\SupportTicketService.java has been updated succes"
+ },
+ {
+  "i": 23,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-resolved-notification.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\services\\SupportTicketService.java",
+   "old_string": "<451 chars>",
+   "new_string": "<788 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-resolved-notification.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\services\\SupportTicketService.java has been updated succes"
+ },
+ {
+  "i": 24,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-resolved-notification.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\SupportTicketServiceUnitTest.java",
+   "old_string": "<249 chars>",
+   "new_string": "<428 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-resolved-notification.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\SupportTicketServiceUnitTest.java has been updated successfu"
+ },
+ {
+  "i": 25,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-resolved-notification.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\SupportTicketServiceUnitTest.java",
+   "old_string": "<126 chars>",
+   "new_string": "<191 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-resolved-notification.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\SupportTicketServiceUnitTest.java has been updated successfu"
+ },
+ {
+  "i": 26,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-resolved-notification.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\SupportTicketServiceUnitTest.java",
+   "old_string": "<90 chars>",
+   "new_string": "<1976 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-resolved-notification.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\SupportTicketServiceUnitTest.java has been updated successfu"
+ },
+ {
+  "i": 27,
+  "name": "Glob",
+  "input": {
+   "pattern": "src/test/java/**/*EventListenerUnitTest.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "No files found"
+ },
+ {
+  "i": 28,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-resolved-notification.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\support\\ticket\\services\\TicketAccessTokenServiceUnitTest.java",
+   "limit": 40
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.support.ticket.services;\n2\t\n3\timport com.sm.instagram.platform.auth.filter.HmacUtils;\n4\timport org.junit.jupiter.api.BeforeEach;\n5\timport org.junit.jupiter.api.Test"
+ },
+ {
+  "i": 29,
+  "name": "Write",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-resolved-notification.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\support\\ticket\\event\\SupportTicketResolvedEventListenerUnitTest.java",
+   "content": "<1895 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "File created successfully at: C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-resolved-notification.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\support\\ticket\\event\\SupportTicketResolvedEventListe"
+ },
+ {
+  "i": 30,
+  "name": "Write",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-resolved-notification.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\support\\ticket\\event\\SupportTicketResolvedEventListenerUnitTest.java",
+   "content": "<1449 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-resolved-notification.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\support\\ticket\\event\\SupportTicketResolvedEventListenerUnitTest.java has "
+ },
+ {
+  "i": 31,
+  "name": "Write",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-resolved-notification.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\support\\ticket\\adapter\\EmailTicketNotificationAdapterUnitTest.java",
+   "content": "<920 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "File created successfully at: C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-resolved-notification.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\support\\ticket\\adapter\\EmailTicketNotificationAdapte"
+ },
+ {
+  "i": 32,
+  "name": "Bash",
+  "input": {
+   "command": "cd \"C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-resolved-notification.r0\" && ./mvnw -q test -Ptest -Dtest=SupportTicketServiceUnitTest,SupportTicketResolvedEventListenerUnitTest,EmailTicketNotificationAdapterUnitTest -Dsurefire.failIfNoSpecifiedTests=false 2>&1 | tail -150",
+   "description": "Run unit tests for the changed and new classes",
+   "timeout": 300000
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's docu"
+ },
+ {
+  "i": 33,
+  "name": "Bash",
+  "input": {
+   "command": "cd \"C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-resolved-notification.r0\" && ./mvnw -q test -Ptest -Dtest=SupportTicketServiceUnitTest,SupportTicketResolvedEventListenerUnitTest,EmailTicketNotificationAdapterUnitTest -Dsurefire.failIfNoSpecifiedTests=false; echo \"EXIT_CODE=$?\"",
+   "description": "Re-run targeted unit tests and print exit code",
+   "timeout": 300000
+  },
+  "after_marker": false,
+  "is_error": true,
+  "result_head": "Permission to use Bash has been denied because Claude Code is running in don't ask mode. IMPORTANT: You *may* attempt to accomplish this action using other tools that might naturally be used to accomp"
+ },
+ {
+  "i": 34,
+  "name": "Glob",
+  "input": {
+   "pattern": "target/surefire-reports/*SupportTicket*.txt"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "target\\surefire-reports\\com.sm.instagram.platform.support.ticket.event.SupportTicketResolvedEventListenerUnitTest.txt\ntarget\\surefire-reports\\com.sm.instagram.platform.unit.service.SupportTicketServic"
+ },
+ {
+  "i": 35,
+  "name": "Glob",
+  "input": {
+   "pattern": "target/surefire-reports/*EmailTicketNotification*.txt"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "target\\surefire-reports\\com.sm.instagram.platform.support.ticket.adapter.EmailTicketNotificationAdapterUnitTest.txt"
+ },
+ {
+  "i": 36,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-resolved-notification.r0\\target\\surefire-reports\\com.sm.instagram.platform.unit.service.SupportTicketServiceUnitTest.txt"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\t-------------------------------------------------------------------------------\n2\tTest set: com.sm.instagram.platform.unit.service.SupportTicketServiceUnitTest\n3\t------------------------------------"
+ },
+ {
+  "i": 37,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-resolved-notification.r0\\target\\surefire-reports\\com.sm.instagram.platform.support.ticket.event.SupportTicketResolvedEventListenerUnitTest.txt"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\t-------------------------------------------------------------------------------\n2\tTest set: com.sm.instagram.platform.support.ticket.event.SupportTicketResolvedEventListenerUnitTest\n3\t--------------"
+ },
+ {
+  "i": 38,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-resolved-notification.r0\\target\\surefire-reports\\com.sm.instagram.platform.support.ticket.adapter.EmailTicketNotificationAdapterUnitTest.txt"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\t-------------------------------------------------------------------------------\n2\tTest set: com.sm.instagram.platform.support.ticket.adapter.EmailTicketNotificationAdapterUnitTest\n3\t----------------"
+ },
+ {
+  "i": 39,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-ticket-resolved-notification.r0\\target\\surefire-reports\\com.sm.instagram.platform.unit.service.SupportTicketServiceUnitTest$StatusTransitionTests.txt"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\t-------------------------------------------------------------------------------\n2\tTest set: com.sm.instagram.platform.unit.service.SupportTicketServiceUnitTest$StatusTransitionTests\n3\t--------------"
+ }
+]

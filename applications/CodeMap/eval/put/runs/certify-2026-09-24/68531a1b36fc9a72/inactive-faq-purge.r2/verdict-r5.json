@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 5,
+  "test_quality": 5,
+  "graph_use": 5,
+  "reasons": {
+   "correctness": "The derived query findByActiveFalseAndLastUpdateTimeBefore, purgeInactiveOlderThan returning the count, and the cron job with enabled/days/cron defaults all match the interface. The disabled path returns and failures are logged. 4/4 hidden and 65/65 existing tests pass.",
+   "convention_fit": "InactiveFaqPurgeCronJob has @SchedulerLock(name=\"faq:inactivePurge\"), a cron from ${support.faq.purge.cron}, @Value enabled:true and @RequiredArgsConstructor constructor injection. It lives in the faq feature package, config is in application.yml, and unit tests were run.",
+   "design_fit": "The job only delegates to FaqService and catches failures. The service owns the cutoff logic and the repository owns the derived query. It reuses the existing ShedLock and @Value job pattern from AnonymousConsentCleanupCronJob, with no duplicated lookup and a minimal footprint.",
+   "test_quality": "FaqServiceUnitTest covers the delete count, cutoff computation via ArgumentCaptor and the empty case. InactiveFaqPurgeCronJobUnitTest covers enabled, disabled (verifyNoInteractions) and exception swallowing. Both use MockitoExtension with no Spring context.",
+   "graph_use": "Before any edit, graph queries found the faq files, their dependents, the TESTED_BY tests and the existing *CronJob examples. The agent then read AnonymousConsentCleanupCronJob and its unit test and mirrored their structure."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 964,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 33639
+ },
+ "is_error": false
+}

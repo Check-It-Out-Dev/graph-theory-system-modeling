@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 4,
+  "test_quality": 5,
+  "graph_use": 4,
+  "reasons": {
+   "correctness": "PUT /categories/{categoryId}/order returns 204. reorderCategory rejects missing, duplicate, foreign and null ids with error.business.faq_reorder_mismatch, keeps ResourceNotFoundException for an unknown category, and assigns i+1. Acceptance tests pass 6/6.",
+   "convention_fit": "Endpoint carries @PreAuthorize ADMIN and inherits the class-level @RateLimit. Request body is FaqReorderDtoIn. BusinessRuleTranslatableException is thrown with the new key added to messages_en and messages_pl. The existing constructor is unchanged.",
+   "design_fit": "reorderCategory repeats the category findById/orElseThrow and findByCategoryAndActiveTrueOrderByDisplayOrderAsc lookup that getFaqsByCategory already performs, instead of calling it. Otherwise the change is small, logic sits in the service, and the controller only delegates.",
+   "test_quality": "FaqServiceUnitTest uses MockitoExtension with no Spring context. It covers the happy path with captured save order, unknown category, missing, duplicate, foreign and null lists, and asserts that no save happens on failure. A controller unit test checks delegation and the 204.",
+   "graph_use": "Graph queries found the support/faq files, their TESTED_BY tests and their dependents before any edit. Exception, test-style and BaseService examples were then found by find/grep/ls rather than the graph."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 1107,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 37935
+ },
+ "is_error": false
+}

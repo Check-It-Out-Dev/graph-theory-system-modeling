@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 4,
+  "test_quality": 4,
+  "graph_use": 3,
+  "reasons": {
+   "correctness": "reorderCategory rejects missing, foreign, duplicate and null ids with error.business.faq_reorder_mismatch. It keeps ResourceNotFoundException for an unknown category and sets displayOrder i+1. The PUT endpoint returns 204. Hidden tests 6/6 and build green.",
+   "convention_fit": "The endpoint has @PreAuthorize ADMIN and inherits class-level @RateLimit. FaqReorderDtoIn is a *DtoIn. The code throws BusinessRuleTranslatableException, both keys are in messages_en and messages_pl, and the controller is constructor-injected. The *UnitTest uses MockitoExtension.",
+   "design_fit": "reorderCategory repeats the category findById/orElseThrow and active-FAQ lookup that getFaqsByCategory already performs, instead of reusing it. Otherwise the logic sits in FaqService and the controller only delegates. The footprint is small.",
+   "test_quality": "FaqServiceUnitTest has 7 fast Mockito tests covering order assignment, missing, foreign, duplicate and null ids, and unknown category, with messageKey asserted. No test verifies that save is called. Lenient strictness and the unneeded SecurityContext setup add noise.",
+   "graph_use": "One graph query listed the support/faq package files at the start. After that the agent navigated by glob, grep and reads for exceptions, BaseService and test examples. The graph was not used for dependents or examples."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 1085,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 34818
+ },
+ "is_error": false
+}

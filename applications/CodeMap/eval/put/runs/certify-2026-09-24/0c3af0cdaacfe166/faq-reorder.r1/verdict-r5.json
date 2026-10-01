@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 4,
+  "test_quality": 4,
+  "graph_use": 3,
+  "reasons": {
+   "correctness": "PUT /{categoryId}/order returns 204 and calls FaqService#reorderCategory. It rejects missing, extra, duplicate and null ids with error.business.faq_reorder_mismatch, sets order i+1 and saves each FAQ. Unknown category still throws ResourceNotFoundException. Acceptance tests 6/6.",
+   "convention_fit": "The endpoint has @PreAuthorize ADMIN and inherits the class-level @RateLimit. The body is FaqReorderDtoIn. The error is BusinessRuleTranslatableException with its key in messages_en and messages_pl. FaqService is constructor-injected. The new unit test class exists.",
+   "design_fit": "Validation and ordering logic sit in FaqService and the controller only delegates. The category findById/orElseThrow lookup repeats the one in getFaqsByCategory instead of reusing it. Otherwise the footprint is small and cohesive.",
+   "test_quality": "FaqServiceUnitTest uses MockitoExtension with no Spring context. Seven cases cover ordering, any order, missing, foreign, duplicate and null ids, and unknown category, with messageKey assertions. No test verifies save() is called, and LENIENT strictness hides unused stubs.",
+   "graph_use": "One initial graph query listed the support/faq files. After that, navigation relied on glob, grep and reads to find BusinessRuleTranslatableException, BaseService and example unit tests."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 1081,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 34472
+ },
+ "is_error": false
+}

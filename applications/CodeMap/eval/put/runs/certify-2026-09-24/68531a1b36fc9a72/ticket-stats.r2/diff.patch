@@ -1,0 +1,495 @@
+diff --git a/src/main/java/com/sm/instagram/platform/support/ticket/SupportTicketController.java b/src/main/java/com/sm/instagram/platform/support/ticket/SupportTicketController.java
+index 5da9da7f57f..50e8023000f 100644
+--- a/src/main/java/com/sm/instagram/platform/support/ticket/SupportTicketController.java
++++ b/src/main/java/com/sm/instagram/platform/support/ticket/SupportTicketController.java
+@@ -24,6 +24,7 @@ import org.springframework.security.core.Authentication;
+ import org.springframework.security.core.context.SecurityContextHolder;
+ import org.springframework.web.bind.annotation.*;
+ 
++import java.time.LocalDate;
+ import java.util.List;
+ 
+ /**
+@@ -397,4 +398,40 @@ public class SupportTicketController {
+ 
+         return ResponseEntity.ok(ticket);
+     }
++
++    /**
++     * Get ticket creation counts by status for a date range.
++     * Admin endpoint.
++     *
++     * @param from Start date (inclusive)
++     * @param to   End date (inclusive)
++     * @return Counts by status and the total
++     */
++    @GetMapping("/admin/stats")
++    @PreAuthorize("isAuthenticated() && hasAuthority('ADMIN')")
++    public ResponseEntity<TicketStatsDtoOut> getTicketStats(
++            @RequestParam LocalDate from,
++            @RequestParam LocalDate to) {
++
++        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
++        if (auth == null || auth.getPrincipal() == null) {
++            log.error("Authentication not available in security context");
++            throw new AuthenticationTranslatableException("error.auth.not_authenticated");
++        }
++        String adminUid = auth.getName();
++
++        // GDPR: Log admin stats access
++        log.info("GDPR: Operation=getTicketStats, FirebaseUID={}, Purpose=support_management, DataAccessed=ticket.stats",
++                adminUid);
++
++        log.info("Admin retrieving ticket stats from {} to {}", from, to);
++        long startTime = System.currentTimeMillis();
++
++        TicketStatsDtoOut stats = ticketService.getTicketStats(from, to);
++
++        long duration = System.currentTimeMillis() - startTime;
++        log.info("Successfully retrieved ticket stats in {}ms", duration);
++
++        return ResponseEntity.ok(stats);
++    }
+ }
+diff --git a/src/main/java/com/sm/instagram/platform/support/ticket/dtos/TicketStatsDtoOut.java b/src/main/java/com/sm/instagram/platform/support/ticket/dtos/TicketStatsDtoOut.java
+new file mode 100644
+index 00000000000..e85117156f3
+--- /dev/null
++++ b/src/main/java/com/sm/instagram/platform/support/ticket/dtos/TicketStatsDtoOut.java
+@@ -0,0 +1,30 @@
++package com.sm.instagram.platform.support.ticket.dtos;
++
++import com.sm.instagram.platform.support.ticket.models.TicketStatus;
++import lombok.AllArgsConstructor;
++import lombok.Getter;
++import lombok.NoArgsConstructor;
++import lombok.Setter;
++
++import java.util.Map;
++
++/**
++ * DTO for admin ticket-creation statistics over a date range.
++ */
++@Getter
++@Setter
++@NoArgsConstructor
++@AllArgsConstructor
++public class TicketStatsDtoOut {
++
++    /**
++     * Number of tickets created in the period, per status. Every status is
++     * present, with 0 when no ticket of that status was created.
++     */
++    private Map<TicketStatus, Long> countsByStatus;
++
++    /**
++     * Total number of tickets created in the period, across all statuses.
++     */
++    private long total;
++}
+diff --git a/src/main/java/com/sm/instagram/platform/support/ticket/repositories/SupportTicketRepository.java b/src/main/java/com/sm/instagram/platform/support/ticket/repositories/SupportTicketRepository.java
+index 2538882a2f2..1366ab5b154 100644
+--- a/src/main/java/com/sm/instagram/platform/support/ticket/repositories/SupportTicketRepository.java
++++ b/src/main/java/com/sm/instagram/platform/support/ticket/repositories/SupportTicketRepository.java
+@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
+ import org.springframework.data.repository.query.Param;
+ import org.springframework.stereotype.Repository;
+ 
++import java.time.LocalDateTime;
+ import java.util.List;
+ import java.util.Optional;
+ 
+@@ -104,4 +105,14 @@ public interface SupportTicketRepository extends BaseRepository<SupportTicket, L
+             "LOWER(t.subject) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
+             "LOWER(t.description) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
+     Page<SupportTicket> search(@Param("searchTerm") String searchTerm, Pageable pageable);
++
++    /**
++     * Count tickets with the given status created within a time range.
++     *
++     * @param status The ticket status
++     * @param start  Range start (inclusive)
++     * @param end    Range end (exclusive)
++     * @return The number of matching tickets
++     */
++    long countByStatusAndCreatedTimeBetween(TicketStatus status, LocalDateTime start, LocalDateTime end);
+ }
+\ No newline at end of file
+diff --git a/src/main/java/com/sm/instagram/platform/support/ticket/services/SupportTicketService.java b/src/main/java/com/sm/instagram/platform/support/ticket/services/SupportTicketService.java
+index 662c193a56e..4ecdca5856d 100644
+--- a/src/main/java/com/sm/instagram/platform/support/ticket/services/SupportTicketService.java
++++ b/src/main/java/com/sm/instagram/platform/support/ticket/services/SupportTicketService.java
+@@ -5,6 +5,7 @@ import com.sm.instagram.platform.common.exceptions.AuthenticationTranslatableExc
+ import com.sm.instagram.platform.common.exceptions.BusinessRuleTranslatableException;
+ import com.sm.instagram.platform.common.exceptions.InsufficientPermissionsException;
+ import com.sm.instagram.platform.common.exceptions.ResourceNotFoundException;
++import com.sm.instagram.platform.common.exceptions.ValidationTranslatableException;
+ import com.sm.instagram.platform.support.common.EmailService;
+ import com.sm.instagram.platform.support.ticket.dtos.*;
+ import com.sm.instagram.platform.support.ticket.models.*;
+@@ -24,9 +25,12 @@ import org.springframework.data.jpa.domain.Specification;
+ import org.springframework.stereotype.Service;
+ import org.springframework.transaction.annotation.Transactional;
+ 
++import java.time.LocalDate;
+ import java.time.LocalDateTime;
+ import java.util.ArrayList;
++import java.util.EnumMap;
+ import java.util.List;
++import java.util.Map;
+ import java.util.Optional;
+ import java.util.stream.Collectors;
+ 
+@@ -617,6 +621,50 @@ public class SupportTicketService {
+         return convertToDto(ticket);
+     }
+ 
++    /**
++     * Get ticket creation counts by status for a date range.
++     * Admin endpoint.
++     *
++     * @param from Start date (inclusive)
++     * @param to   End date (inclusive)
++     * @return Counts by status (every status present) and the total
++     * @throws InsufficientPermissionsException if the caller is not an admin
++     * @throws ValidationTranslatableException  if {@code from} is after {@code to}
++     */
++    @Transactional(readOnly = true)
++    public TicketStatsDtoOut getTicketStats(LocalDate from, LocalDate to) {
++        String adminUid = permissionUtils.getUserId();
++
++        // GDPR: Log admin stats access
++        log.info("GDPR: Operation=getTicketStats, FirebaseUID={}, From={}, To={}, Purpose=support_management, DataAccessed=ticket.stats",
++                adminUid, from, to);
++
++        if (!permissionUtils.isAdmin()) {
++            throw new InsufficientPermissionsException(
++                    "error.auth.insufficient_permissions",
++                    adminUid,
++                    "getTicketStats",
++                    "SupportTicket#stats");
++        }
++
++        if (from.isAfter(to)) {
++            throw new ValidationTranslatableException("error.validation.invalid_date_range");
++        }
++
++        LocalDateTime start = from.atStartOfDay();
++        LocalDateTime end = to.plusDays(1).atStartOfDay();
++
++        Map<TicketStatus, Long> countsByStatus = new EnumMap<>(TicketStatus.class);
++        long total = 0;
++        for (TicketStatus status : TicketStatus.values()) {
++            long count = ticketRepository.countByStatusAndCreatedTimeBetween(status, start, end);
++            countsByStatus.put(status, count);
++            total += count;
++        }
++
++        return new TicketStatsDtoOut(countsByStatus, total);
++    }
++
+     /**
+      * Get a ticket by ID.
+      *
+diff --git a/src/main/resources/messages_en.properties b/src/main/resources/messages_en.properties
+index 8d90d4d66d9..87104fff18b 100644
+--- a/src/main/resources/messages_en.properties
++++ b/src/main/resources/messages_en.properties
+@@ -35,6 +35,7 @@ error.validation.invalid_argument=Invalid argument provided
+ error.validation.invalid_parameter=Invalid parameter: {0}
+ error.validation.file_not_found=File not found: {0}
+ error.validation.invalid_enum_value=Invalid value ''{0}''. Please check the allowed values
++error.validation.invalid_date_range=The start date must not be after the end date
+ 
+ # Business
+ error.business.item_not_found={0} not found
+diff --git a/src/main/resources/messages_pl.properties b/src/main/resources/messages_pl.properties
+index b33f77fa5ad..e8ac563d909 100644
+--- a/src/main/resources/messages_pl.properties
++++ b/src/main/resources/messages_pl.properties
+@@ -35,6 +35,7 @@ error.validation.invalid_argument=Podano nieprawidłowy argument
+ error.validation.invalid_parameter=Nieprawidłowy parametr: {0}
+ error.validation.file_not_found=Plik nie znaleziony: {0}
+ error.validation.invalid_enum_value=Nieprawidłowa wartość ''{0}''. Sprawdź dozwolone wartości
++error.validation.invalid_date_range=Data początkowa nie może być późniejsza niż data końcowa
+ 
+ # Biznes
+ error.business.item_not_found={0} nie znaleziono
+diff --git a/src/test/java/com/sm/instagram/platform/support/ticket/services/SupportTicketServiceStatsUnitTest.java b/src/test/java/com/sm/instagram/platform/support/ticket/services/SupportTicketServiceStatsUnitTest.java
+new file mode 100644
+index 00000000000..c9c2b1768a2
+--- /dev/null
++++ b/src/test/java/com/sm/instagram/platform/support/ticket/services/SupportTicketServiceStatsUnitTest.java
+@@ -0,0 +1,165 @@
++package com.sm.instagram.platform.support.ticket.services;
++
++import com.sm.instagram.platform.common.authorization.PermissionUtils;
++import com.sm.instagram.platform.common.exceptions.InsufficientPermissionsException;
++import com.sm.instagram.platform.common.exceptions.ValidationTranslatableException;
++import com.sm.instagram.platform.support.common.EmailService;
++import com.sm.instagram.platform.support.ticket.dtos.TicketStatsDtoOut;
++import com.sm.instagram.platform.support.ticket.models.TicketStatus;
++import com.sm.instagram.platform.support.ticket.repositories.ResponseAttachmentRepository;
++import com.sm.instagram.platform.support.ticket.repositories.SupportTicketRepository;
++import com.sm.instagram.platform.support.ticket.repositories.TicketAttachmentRepository;
++import com.sm.instagram.platform.support.ticket.repositories.TicketResponseRepository;
++import com.sm.instagram.platform.storage.service.SignedUrlService;
++import com.sm.instagram.platform.user.UserRepository;
++import org.junit.jupiter.api.DisplayName;
++import org.junit.jupiter.api.Test;
++import org.junit.jupiter.api.extension.ExtendWith;
++import org.mockito.InjectMocks;
++import org.mockito.Mock;
++import org.mockito.junit.jupiter.MockitoExtension;
++
++import java.time.LocalDate;
++import java.time.LocalDateTime;
++import java.util.Map;
++
++import static org.assertj.core.api.Assertions.assertThat;
++import static org.assertj.core.api.Assertions.assertThatThrownBy;
++import static org.mockito.Mockito.verify;
++import static org.mockito.Mockito.verifyNoInteractions;
++import static org.mockito.Mockito.when;
++
++/**
++ * Unit tests for {@link SupportTicketService#getTicketStats(LocalDate, LocalDate)}.
++ */
++@ExtendWith(MockitoExtension.class)
++@DisplayName("SupportTicketService#getTicketStats Unit Tests")
++class SupportTicketServiceStatsUnitTest {
++
++    @Mock
++    private SupportTicketRepository ticketRepository;
++
++    @Mock
++    private TicketResponseRepository responseRepository;
++
++    @Mock
++    private TicketAttachmentRepository ticketAttachmentRepository;
++
++    @Mock
++    private ResponseAttachmentRepository responseAttachmentRepository;
++
++    @Mock
++    private UserRepository userRepository;
++
++    @Mock
++    private TicketReferenceService referenceService;
++
++    @Mock
++    private EmailService emailService;
++
++    @Mock
++    private PermissionUtils permissionUtils;
++
++    @Mock
++    private SignedUrlService signedUrlService;
++
++    @Mock
++    private TicketAccessTokenService accessTokenService;
++
++    @InjectMocks
++    private SupportTicketService service;
++
++    private static final LocalDate FROM = LocalDate.of(2026, 1, 10);
++    private static final LocalDate TO = LocalDate.of(2026, 1, 15);
++    private static final LocalDateTime START = FROM.atStartOfDay();
++    private static final LocalDateTime END = TO.plusDays(1).atStartOfDay();
++
++    @Test
++    @DisplayName("counts every status and sums the total for an admin caller")
++    void countsEveryStatusAndSumsTheTotalForAdmin() {
++        when(permissionUtils.getUserId()).thenReturn("admin-uid");
++        when(permissionUtils.isAdmin()).thenReturn(true);
++        when(ticketRepository.countByStatusAndCreatedTimeBetween(TicketStatus.OPEN, START, END)).thenReturn(3L);
++        when(ticketRepository.countByStatusAndCreatedTimeBetween(TicketStatus.IN_PROGRESS, START, END)).thenReturn(1L);
++        when(ticketRepository.countByStatusAndCreatedTimeBetween(TicketStatus.WAITING_FOR_CUSTOMER, START, END)).thenReturn(0L);
++        when(ticketRepository.countByStatusAndCreatedTimeBetween(TicketStatus.RESOLVED, START, END)).thenReturn(2L);
++        when(ticketRepository.countByStatusAndCreatedTimeBetween(TicketStatus.CLOSED, START, END)).thenReturn(4L);
++
++        TicketStatsDtoOut result = service.getTicketStats(FROM, TO);
++
++        Map<TicketStatus, Long> counts = result.getCountsByStatus();
++        assertThat(counts).hasSize(TicketStatus.values().length);
++        assertThat(counts.get(TicketStatus.OPEN)).isEqualTo(3L);
++        assertThat(counts.get(TicketStatus.IN_PROGRESS)).isEqualTo(1L);
++        assertThat(counts.get(TicketStatus.WAITING_FOR_CUSTOMER)).isEqualTo(0L);
++        assertThat(counts.get(TicketStatus.RESOLVED)).isEqualTo(2L);
++        assertThat(counts.get(TicketStatus.CLOSED)).isEqualTo(4L);
++        assertThat(result.getTotal()).isEqualTo(10L);
++
++        verify(ticketRepository).countByStatusAndCreatedTimeBetween(TicketStatus.OPEN, START, END);
++        verify(ticketRepository).countByStatusAndCreatedTimeBetween(TicketStatus.CLOSED, START, END);
++    }
++
++    @Test
++    @DisplayName("reports zero for every status when no ticket was created in the period")
++    void reportsZeroForEveryStatusWhenNoTicketsExist() {
++        when(permissionUtils.getUserId()).thenReturn("admin-uid");
++        when(permissionUtils.isAdmin()).thenReturn(true);
++        // No stubbing of countByStatusAndCreatedTimeBetween: the mock's default
++        // 0L return is exactly the "0 when none" outcome the interface requires.
++
++        TicketStatsDtoOut result = service.getTicketStats(FROM, TO);
++
++        assertThat(result.getCountsByStatus()).hasSize(TicketStatus.values().length);
++        assertThat(result.getCountsByStatus().values()).allMatch(count -> count == 0L);
++        assertThat(result.getTotal()).isEqualTo(0L);
++
++        for (TicketStatus status : TicketStatus.values()) {
++            verify(ticketRepository).countByStatusAndCreatedTimeBetween(status, START, END);
++        }
++    }
++
++    @Test
++    @DisplayName("treats a single-day range as from's start of day to the day after")
++    void treatsASingleDayRangeAsFromsStartOfDayToTheDayAfter() {
++        LocalDate day = LocalDate.of(2026, 3, 1);
++        LocalDateTime dayStart = day.atStartOfDay();
++        LocalDateTime dayEnd = day.plusDays(1).atStartOfDay();
++
++        when(permissionUtils.getUserId()).thenReturn("admin-uid");
++        when(permissionUtils.isAdmin()).thenReturn(true);
++        when(ticketRepository.countByStatusAndCreatedTimeBetween(TicketStatus.OPEN, dayStart, dayEnd)).thenReturn(5L);
++
++        TicketStatsDtoOut result = service.getTicketStats(day, day);
++
++        assertThat(result.getCountsByStatus().get(TicketStatus.OPEN)).isEqualTo(5L);
++        assertThat(result.getTotal()).isEqualTo(5L);
++        verify(ticketRepository).countByStatusAndCreatedTimeBetween(TicketStatus.OPEN, dayStart, dayEnd);
++    }
++
++    @Test
++    @DisplayName("rejects a from date after the to date without querying the repository")
++    void rejectsAFromDateAfterTheToDate() {
++        when(permissionUtils.getUserId()).thenReturn("admin-uid");
++        when(permissionUtils.isAdmin()).thenReturn(true);
++
++        assertThatThrownBy(() -> service.getTicketStats(TO, FROM))
++                .isInstanceOf(ValidationTranslatableException.class)
++                .hasFieldOrPropertyWithValue("messageKey", "error.validation.invalid_date_range");
++
++        verifyNoInteractions(ticketRepository);
++    }
++
++    @Test
++    @DisplayName("denies a non-admin caller with the same error updateTicketStatus gives")
++    void deniesANonAdminCaller() {
++        when(permissionUtils.getUserId()).thenReturn("user-uid");
++        when(permissionUtils.isAdmin()).thenReturn(false);
++
++        assertThatThrownBy(() -> service.getTicketStats(FROM, TO))
++                .isInstanceOf(InsufficientPermissionsException.class)
++                .hasFieldOrPropertyWithValue("messageKey", "error.auth.insufficient_permissions");
++
++        verifyNoInteractions(ticketRepository);
++    }
++}
+diff --git a/src/test/java/com/sm/instagram/platform/unit/controller/SupportTicketControllerStatsUnitTest.java b/src/test/java/com/sm/instagram/platform/unit/controller/SupportTicketControllerStatsUnitTest.java
+new file mode 100644
+index 00000000000..2bcc56c2e52
+--- /dev/null
++++ b/src/test/java/com/sm/instagram/platform/unit/controller/SupportTicketControllerStatsUnitTest.java
+@@ -0,0 +1,101 @@
++package com.sm.instagram.platform.unit.controller;
++
++import com.sm.instagram.platform.common.exceptions.AuthenticationTranslatableException;
++import com.sm.instagram.platform.support.ticket.SupportTicketController;
++import com.sm.instagram.platform.support.ticket.dtos.TicketStatsDtoOut;
++import com.sm.instagram.platform.support.ticket.models.TicketStatus;
++import com.sm.instagram.platform.support.ticket.services.SupportTicketService;
++import jakarta.servlet.http.HttpServletRequest;
++import org.junit.jupiter.api.BeforeEach;
++import org.junit.jupiter.api.DisplayName;
++import org.junit.jupiter.api.Test;
++import org.junit.jupiter.api.extension.ExtendWith;
++import org.mockito.InjectMocks;
++import org.mockito.Mock;
++import org.mockito.junit.jupiter.MockitoExtension;
++import org.springframework.http.HttpStatus;
++import org.springframework.http.ResponseEntity;
++import org.springframework.security.core.Authentication;
++import org.springframework.security.core.context.SecurityContext;
++import org.springframework.security.core.context.SecurityContextHolder;
++
++import java.time.LocalDate;
++import java.util.EnumMap;
++import java.util.Map;
++
++import static org.assertj.core.api.Assertions.assertThat;
++import static org.assertj.core.api.Assertions.assertThatThrownBy;
++import static org.mockito.Mockito.verify;
++import static org.mockito.Mockito.when;
++
++/**
++ * Unit tests for {@link SupportTicketController#getTicketStats(LocalDate, LocalDate)}.
++ */
++@ExtendWith(MockitoExtension.class)
++@DisplayName("SupportTicketController#getTicketStats Unit Tests")
++class SupportTicketControllerStatsUnitTest {
++
++    @Mock
++    private SupportTicketService ticketService;
++
++    @Mock
++    private HttpServletRequest httpServletRequest;
++
++    @Mock
++    private SecurityContext securityContext;
++
++    @Mock
++    private Authentication authentication;
++
++    @InjectMocks
++    private SupportTicketController controller;
++
++    private static final String TEST_FIREBASE_UID = "admin-firebase-uid";
++    private static final LocalDate FROM = LocalDate.of(2026, 2, 1);
++    private static final LocalDate TO = LocalDate.of(2026, 2, 28);
++
++    @BeforeEach
++    void setUp() {
++        when(securityContext.getAuthentication()).thenReturn(authentication);
++        SecurityContextHolder.setContext(securityContext);
++    }
++
++    @Test
++    @DisplayName("returns the stats computed by the service for the requested range")
++    void returnsTheStatsComputedByTheServiceForTheRequestedRange() {
++        when(authentication.getPrincipal()).thenReturn(TEST_FIREBASE_UID);
++        Map<TicketStatus, Long> counts = new EnumMap<>(TicketStatus.class);
++        for (TicketStatus status : TicketStatus.values()) {
++            counts.put(status, 0L);
++        }
++        counts.put(TicketStatus.OPEN, 7L);
++        TicketStatsDtoOut expected = new TicketStatsDtoOut(counts, 7L);
++
++        when(ticketService.getTicketStats(FROM, TO)).thenReturn(expected);
++
++        ResponseEntity<TicketStatsDtoOut> response = controller.getTicketStats(FROM, TO);
++
++        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
++        assertThat(response.getBody()).isSameAs(expected);
++        assertThat(response.getBody().getTotal()).isEqualTo(7L);
++        verify(ticketService).getTicketStats(FROM, TO);
++    }
++
++    @Test
++    @DisplayName("throws when authentication is missing from the security context")
++    void throwsWhenAuthenticationIsMissing() {
++        when(securityContext.getAuthentication()).thenReturn(null);
++
++        assertThatThrownBy(() -> controller.getTicketStats(FROM, TO))
++                .isInstanceOf(AuthenticationTranslatableException.class);
++    }
++
++    @Test
++    @DisplayName("throws when the principal is missing from the authentication")
++    void throwsWhenThePrincipalIsMissing() {
++        when(authentication.getPrincipal()).thenReturn(null);
++
++        assertThatThrownBy(() -> controller.getTicketStats(FROM, TO))
++                .isInstanceOf(AuthenticationTranslatableException.class);
++    }
++}

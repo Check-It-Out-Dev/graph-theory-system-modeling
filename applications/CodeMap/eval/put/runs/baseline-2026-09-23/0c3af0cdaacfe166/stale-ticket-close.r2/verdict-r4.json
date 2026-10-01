@@ -1,0 +1,29 @@
+{
+ "rubric": "r4",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 4,
+  "test_quality": 4,
+  "graph_use": 4,
+  "reasons": {
+   "correctness": "Repository finder, @Transactional closeStaleResolvedTickets and StaleTicketCloseCronJob match the interface names, property keys and defaults. The disabled flag skips the job and service exceptions are caught and logged. Hidden tests 4/4, build green.",
+   "convention_fit": "@SchedulerLock uses the name support:staleTicketClose, the cron and enabled flag come from @Value properties, and the class is named *CronJob. Injection is constructor-based via @RequiredArgsConstructor, code stays in the support/ticket feature package, and new tests use MockitoExtension with no Spring context.",
+   "design_fit": "Small, cohesive footprint: the query is in the repository and the logic in the service. The cron job sits in services/ rather than a cron subpackage like subscription/cron. It sets CLOSED directly without checking whether an existing status-transition path should be reused.",
+   "test_quality": "Service tests cover the closing path and the empty list, asserting status, count and saves. Cron tests cover enabled, disabled and exception paths. No test pins the cutoff value passed to the repository. Strictness is LENIENT, and the exception test only verifies the call.",
+   "graph_use": "Graph queries listed the support/ticket files and the existing *CronJob classes before editing, which led to reading AnonymousConsentCleanupCronJob. Test locations and @Value usage were then found with find/grep rather than graph queries."
+  },
+  "rubric": "r4",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 988,
+  "cache_read_input_tokens": 1278,
+  "cache_creation_input_tokens": 22216
+ },
+ "is_error": false
+}

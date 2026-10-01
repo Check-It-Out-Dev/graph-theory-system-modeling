@@ -1,0 +1,325 @@
+<title>Anchor Bench</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600&display=swap">
+<style>
+:root{
+  --ground:#F4F6F4; --surface:#FFFFFF; --sunk:#EBEFEC; --ink:#18201D; --muted:#5B6863; --rule:#D5DCD8;
+  --accent:#1D6F55; --accent-ink:#FFFFFF; --accent-soft:#DCEFE6;
+  --add:#E2F3E8; --add-ink:#17532F; --del:#FBE6E2; --del-ink:#7A2618; --hunk:#E7ECF4; --hunk-ink:#34507A;
+  --ok:#1E7A45; --warn:#9A6A00; --bad:#B23A22;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --cond:"IBM Plex Sans Condensed","IBM Plex Sans",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ground:#111513; --surface:#181E1B; --sunk:#1F2622; --ink:#E3EAE6; --muted:#98A69F; --rule:#2E3833;
+    --accent:#5CC49A; --accent-ink:#0B1A13; --accent-soft:#1D3A2E;
+    --add:#15301F; --add-ink:#9BE0B4; --del:#3A1B16; --del-ink:#F2A89A; --hunk:#1C2636; --hunk-ink:#A9C1E8;
+    --ok:#6FD39A; --warn:#E3B34F; --bad:#F08A73;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#111513; --surface:#181E1B; --sunk:#1F2622; --ink:#E3EAE6; --muted:#98A69F; --rule:#2E3833;
+  --accent:#5CC49A; --accent-ink:#0B1A13; --accent-soft:#1D3A2E;
+  --add:#15301F; --add-ink:#9BE0B4; --del:#3A1B16; --del-ink:#F2A89A; --hunk:#1C2636; --hunk-ink:#A9C1E8;
+  --ok:#6FD39A; --warn:#E3B34F; --bad:#F08A73;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font:14px/1.5 var(--sans);margin:0}
+.wrap{padding-inline:16px;padding-block:0 48px;max-width:1500px;margin:0 auto}
+header.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--ground);border-bottom:1px solid var(--rule);padding-block:10px}
+.bar-top{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:baseline;justify-content:space-between}
+h1{font:600 20px/1.2 var(--cond);letter-spacing:.01em;margin:0}
+.sub{color:var(--muted);font-size:13px}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.tab{font:500 13px var(--mono);border:1px solid var(--rule);background:var(--surface);color:var(--ink);border-radius:6px;padding:5px 10px;cursor:pointer;display:flex;gap:6px;align-items:center}
+.tab[aria-current="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.tab .dot{width:7px;height:7px;border-radius:50%;background:var(--rule)}
+.tab.done .dot{background:var(--ok)}
+.tab[aria-current="true"] .dot{background:var(--accent-ink)}
+.progress{font:500 13px var(--mono);color:var(--muted)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 420px;gap:20px;margin-top:18px;align-items:start}
+@media (max-width:1000px){.grid{grid-template-columns:minmax(0,1fr)}}
+.task h2{font:600 18px/1.3 var(--cond);margin:0 0 4px;text-wrap:balance}
+.meta{font:12px var(--mono);color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 14px}
+.task p{max-width:75ch;margin:10px 0}
+.iface{margin:0;padding-left:18px;max-width:80ch;color:var(--ink)}
+.iface li{margin:4px 0;font-size:13px}
+code,.mono{font-family:var(--mono);font-size:12.5px}
+.facts{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+.chip{font:500 12px var(--mono);border-radius:999px;padding:3px 10px;background:var(--sunk);color:var(--ink)}
+.chip.ok{background:var(--add);color:var(--add-ink)} .chip.bad{background:var(--del);color:var(--del-ink)}
+.sect{font:600 12px var(--sans);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:22px 0 8px}
+.file{border:1px solid var(--rule);border-radius:8px;background:var(--surface);margin-bottom:12px;overflow:hidden}
+.file summary{cursor:pointer;padding:8px 12px;font:500 12.5px var(--mono);display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;background:var(--sunk);list-style:none}
+.file summary::-webkit-details-marker{display:none}
+.file summary .n{margin-left:auto;color:var(--muted)}
+.file summary .n b{color:var(--add-ink);font-weight:500} .file summary .n i{color:var(--del-ink);font-style:normal}
+.tag{font-size:11px;padding:1px 6px;border-radius:4px;background:var(--accent-soft);color:var(--ink)}
+.code{overflow-x:auto;font:12.5px/1.55 var(--mono);tab-size:4}
+.code div{white-space:pre;padding:0 12px;min-height:1.55em}
+.code .a{background:var(--add);color:var(--add-ink)}
+.code .d{background:var(--del);color:var(--del-ink)}
+.code .h{background:var(--hunk);color:var(--hunk-ink)}
+.code .c{color:var(--ink)}
+.checks{width:100%;border-collapse:collapse;font-size:13px}
+.checks td{border-top:1px solid var(--rule);padding:6px 8px 6px 0;vertical-align:top}
+.checks td:first-child{font-family:var(--mono);font-size:12px;white-space:nowrap}
+.pass{color:var(--ok);font-weight:600} .fail{color:var(--bad);font-weight:600}
+.box{border:1px solid var(--rule);border-radius:8px;background:var(--surface);padding:12px 14px}
+details.more summary{cursor:pointer;color:var(--accent);font-weight:500;margin:6px 0}
+.work{font:12px/1.5 var(--mono);white-space:pre-wrap;word-break:break-word;background:var(--sunk);border-radius:6px;padding:10px;max-height:420px;overflow:auto}
+aside.panel{position:sticky;top:calc(env(safe-area-inset-top,0px) + 118px);max-height:calc(100vh - 130px);overflow:auto;display:flex;flex-direction:column;gap:12px}
+@media (max-width:1000px){aside.panel{position:static;max-height:none}}
+.crit{border:1px solid var(--rule);border-radius:8px;background:var(--surface);padding:12px 14px}
+.crit.mine{border-color:var(--accent)}
+.crit h3{font:600 14px var(--sans);margin:0;display:flex;align-items:baseline;gap:8px}
+.crit h3 .req{font:500 11px var(--mono);color:var(--accent)}
+.ai{display:flex;gap:10px;align-items:flex-start;margin-top:8px}
+.ai .num{font:600 20px/1 var(--mono);min-width:44px;text-align:center;padding:6px 0;border-radius:6px;background:var(--sunk)}
+.ai .num small{display:block;font:400 10px var(--mono);color:var(--muted);margin-top:3px}
+.ai p{margin:0;font-size:13px;color:var(--ink)}
+.ai .who{font:500 11px var(--mono);color:var(--muted);display:block;margin-bottom:2px}
+.scale{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-top:10px}
+.scale button{font:600 15px var(--mono);padding:8px 0;border:1px solid var(--rule);background:var(--ground);color:var(--ink);border-radius:6px;cursor:pointer}
+.scale button:hover{border-color:var(--accent)}
+.scale button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.anchors-txt{font-size:12px;color:var(--muted);margin-top:8px}
+.anchors-txt b{font-family:var(--mono);color:var(--ink);font-weight:500}
+button:focus-visible,.tab:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+textarea{width:100%;min-height:64px;font:13px var(--sans);border:1px solid var(--rule);border-radius:6px;background:var(--ground);color:var(--ink);padding:8px}
+.actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{font:600 13px var(--sans);border-radius:6px;padding:8px 14px;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--accent)}
+.status{font:12px var(--mono);color:var(--muted)}
+.toggle{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--muted);cursor:pointer}
+.blind .ai{display:none}
+pre.json{font:12px var(--mono);background:var(--sunk);padding:10px;border-radius:6px;overflow:auto;max-height:220px}
+.conv{font-size:13px;max-width:90ch}
+.conv dt{font:500 12px var(--mono);margin-top:8px}
+.conv dd{margin:2px 0 0 0;color:var(--ink)}
+@media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important}}
+</style>
+
+<div class="wrap">
+  <header class="bar">
+    <div class="bar-top">
+      <div>
+        <h1>Anchor Bench — judge r4 calibration</h1>
+        <div class="sub">8 baseline runs by the Sonnet coder under prompt v1. Score the three criteria; the AI judge's verdict sits beside each.</div>
+      </div>
+      <div class="actions">
+        <label class="toggle"><input type="checkbox" id="blind"> Hide AI scores until I score</label>
+        <span class="progress" id="progress"></span>
+      </div>
+    </div>
+    <nav class="tabs" id="tabs" aria-label="Anchors"></nav>
+  </header>
+
+  <div class="grid">
+    <main id="main"></main>
+    <aside class="panel" id="panel"></aside>
+  </div>
+
+  <section>
+    <div class="sect">All scores</div>
+    <div class="box">
+      <div class="actions">
+        <button class="btn ghost" id="copy" type="button">Copy scores as JSON</button>
+        <span class="status" id="save-status">Connecting to storage…</span>
+      </div>
+      <pre class="json" id="json"></pre>
+    </div>
+    <details class="more"><summary>The written conventions the judge grades against</summary><dl class="conv" id="conv"></dl></details>
+  </section>
+</div>
+
+<script>
+const DATA = /*DATA*/null;
+const OWNER = ["convention_fit","design_fit","test_quality"];
+const OTHER = ["correctness","graph_use"];
+const LABEL = {correctness:"Correctness",convention_fit:"Convention fit",design_fit:"Design fit",test_quality:"Test quality",graph_use:"Graph use"};
+const ANCH = (() => {                       // 5/3/1 anchors from rubric-r4.md
+  const out = {}; let cur = null;
+  for (const line of DATA.rubric.split("\n")) {
+    const m = line.match(/^(\w+): (.*)$/); if (m && LABEL[m[1]]) { cur = m[1]; out[cur] = {q: m[2], a: {}}; continue; }
+    const s = line.match(/^\s+([531]) = (.*)$/); if (s && cur) out[cur].a[s[1]] = s[2];
+  }
+  return out;
+})();
+const scores = {};                          // id -> {convention_fit, design_fit, test_quality, note}
+let current = DATA.anchors[0].id, db = null;
+const $ = s => document.querySelector(s);
+const el = (t, cls, txt) => { const e = document.createElement(t); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+
+try { const s = JSON.parse(localStorage.getItem("anchor-bench") || "{}"); Object.assign(scores, s.scores || {}); if (s.current) current = s.current; $("#blind").checked = !!s.blind; } catch (e) {}
+function remember(){ try { localStorage.setItem("anchor-bench", JSON.stringify({scores, current, blind: $("#blind").checked})); } catch (e) {} }
+const done = id => OWNER.every(c => scores[id] && scores[id][c]);
+
+function parseDiff(txt){
+  const files = []; let f = null;
+  for (const line of txt.split("\n")) {
+    if (line.startsWith("diff --git ")) { const m = line.match(/ b\/(.*)$/); f = {path: m ? m[1] : line, lines: [], add: 0, del: 0, isNew: false}; files.push(f); continue; }
+    if (!f) continue;
+    if (line.startsWith("new file mode")) { f.isNew = true; continue; }
+    if (/^(index |--- |\+\+\+ |deleted file mode|similarity|rename )/.test(line)) continue;
+    if (line.startsWith("@@")) f.lines.push(["h", line]);
+    else if (line.startsWith("+")) { f.lines.push(["a", line]); f.add++; }
+    else if (line.startsWith("-")) { f.lines.push(["d", line]); f.del++; }
+    else f.lines.push(["c", line]);
+  }
+  return files;
+}
+const short = p => p.replace(/^src\/(main|test)\/java\/com\/sm\/instagram\/platform\//, "$1: ").replace(/^src\/main\/resources\//, "resources: ");
+const fmt = a => Array.isArray(a) ? `${a[0]}/${a[1]}` : "—";
+
+function renderTabs(){
+  const nav = $("#tabs"); nav.replaceChildren();
+  for (const a of DATA.anchors) {
+    const b = el("button", "tab" + (done(a.id) ? " done" : "")); b.type = "button";
+    b.setAttribute("aria-current", a.id === current ? "true" : "false");
+    b.append(el("span", "dot"), document.createTextNode(`${a.id} · ${a.task} r${a.rep}`));
+    b.onclick = () => { current = a.id; remember(); render(); window.scrollTo({top: 0}); };
+    nav.append(b);
+  }
+  const n = DATA.anchors.filter(a => done(a.id)).length;
+  $("#progress").textContent = `${n}/8 scored`;
+}
+
+function renderMain(a){
+  const m = $("#main"); m.replaceChildren();
+  const t = el("section", "task");
+  t.append(el("h2", null, a.title));
+  const meta = el("div", "meta");
+  meta.append(el("span", null, `${a.id} · ${a.run.split("/").pop()}`), el("span", null, `tags: ${a.tags.join(", ")}`));
+  t.append(meta, el("p", null, a.text));
+  t.append(el("div", "sect", "Interface the hidden tests call"));
+  const ul = el("ul", "iface");
+  for (const i of a.interface) { const li = el("li"); li.innerHTML = i.replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c])).replace(/`([^`]+)`/g, "<code>$1</code>"); ul.append(li); }
+  t.append(ul);
+
+  const ts = a.tests, facts = el("div", "facts");
+  const chip = (txt, good) => el("span", "chip " + (good === true ? "ok" : good === false ? "bad" : ""), txt);
+  facts.append(chip(ts.build ? "build green" : "build red", !!ts.build));
+  facts.append(chip(`hidden acceptance ${fmt(ts.hidden)}`, ts.hidden && ts.hidden[0] === ts.hidden[1]));
+  facts.append(chip(`own unit tests ${fmt(ts.own)}` + (ts.own_classes && ts.own_classes.length ? ` (${ts.own_classes.join(", ")})` : " (none new)"), ts.own && ts.own[1] > 0 ? ts.own[0] === ts.own[1] : false));
+  facts.append(chip(`pass-to-pass ${fmt(ts.p2p)}`, ts.p2p && ts.p2p[0] === ts.p2p[1]));
+  const v = a.judge;
+  facts.append(chip(`judge counts: ${v.rules_violated} rule(s) broken · ${v.files_out_of_scope} out of scope · ${v.parallel_mechanisms} parallel`));
+  t.append(facts);
+  m.append(t);
+
+  const files = parseDiff(a.diff);
+  const tot = files.reduce((s, f) => [s[0] + f.add, s[1] + f.del], [0, 0]);
+  m.append(el("div", "sect", `The diff · ${files.length} files · +${tot[0]} −${tot[1]}`));
+  for (const f of files) {
+    const d = el("details", "file"); d.open = true;
+    const s = el("summary");
+    s.append(el("span", null, short(f.path)));
+    if (f.isNew) s.append(el("span", "tag", "new"));
+    const n = el("span", "n"); n.innerHTML = `<b>+${f.add}</b> <i>−${f.del}</i>`; s.append(n);
+    const code = el("div", "code");
+    for (const [k, l] of f.lines) code.append(el("div", k, l));
+    d.append(s, code); m.append(d);
+  }
+
+  m.append(el("div", "sect", "Deterministic checks (harness)"));
+  const tb = el("table", "checks");
+  for (const c of a.checks) {
+    const tr = el("tr");
+    tr.append(el("td", null, c.rule), el("td", c.passed ? "pass" : "fail", c.passed ? "pass" : (c.value != null ? c.value.toFixed(2) : "fail")), el("td", null, c.seen));
+    tb.append(tr);
+  }
+  const wrap = el("div", "box"); wrap.style.overflowX = "auto"; wrap.append(tb); m.append(wrap);
+
+  const wd = el("details", "more"); wd.append(el("summary", null, "How the agent worked (graph queries, reads, edits, commands in order)"), el("div", "work", a.work));
+  m.append(wd);
+}
+
+function renderPanel(a){
+  const p = $("#panel"); p.replaceChildren();
+  p.classList.toggle("blind", $("#blind").checked && !done(a.id));
+  const mine = scores[a.id] || (scores[a.id] = {});
+  const block = (c, owner) => {
+    const box = el("div", "crit" + (owner ? " mine" : ""));
+    const h = el("h3", null, LABEL[c]); if (owner) h.append(el("span", "req", "your score"));
+    box.append(h);
+    const ai = el("div", "ai"), num = el("div", "num", String(a.judge[c]));
+    const rep = a.judge_repeat[c]; num.append(el("small", null, rep != null && rep !== a.judge[c] ? `rpt ${rep}` : "AI"));
+    const txt = el("p"); txt.append(el("span", "who", "AI judge (Opus, rubric r4)"), document.createTextNode(a.judge.reasons[c] || ""));
+    ai.append(num, txt); box.append(ai);
+    if (owner) {
+      const sc = el("div", "scale"); sc.setAttribute("role", "group"); sc.setAttribute("aria-label", LABEL[c]);
+      for (let i = 1; i <= 5; i++) {
+        const b = el("button", null, String(i)); b.type = "button"; b.id = `s-${a.id}-${c}-${i}`;
+        b.setAttribute("aria-pressed", mine[c] === i ? "true" : "false");
+        b.onclick = () => { mine[c] = i; changed(a.id); };
+        sc.append(b);
+      }
+      box.append(sc);
+      const an = ANCH[c]; if (an) { const at = el("div", "anchors-txt"); at.innerHTML = ["5","3","1"].map(k => `<b>${k}</b> ${an.a[k] || ""}`).join("<br>"); box.append(at); }
+    }
+    return box;
+  };
+  for (const c of OWNER) p.append(block(c, true));
+  const note = el("div", "crit");
+  note.append(el("h3", null, "Note (optional)"));
+  const ta = el("textarea"); ta.id = `note-${a.id}`; ta.value = mine.note || ""; ta.placeholder = "Where you disagree with the judge, and why";
+  ta.oninput = () => { mine.note = ta.value; clearTimeout(ta._t); ta._t = setTimeout(() => changed(a.id, true), 600); };
+  note.append(ta); p.append(note);
+  const nav = el("div", "actions");
+  const idx = DATA.anchors.findIndex(x => x.id === a.id);
+  if (idx < 7) { const nx = el("button", "btn", `Next: ${DATA.anchors[idx + 1].id}`); nx.type = "button"; nx.onclick = () => { current = DATA.anchors[idx + 1].id; remember(); render(); window.scrollTo({top: 0}); }; nav.append(nx); }
+  p.append(nav);
+  const ctx = el("div", "sect", "Judge on the other two criteria (not scored by you)"); p.append(ctx);
+  for (const c of OTHER) p.append(block(c, false));
+}
+
+function renderJson(){
+  const out = {};
+  for (const a of DATA.anchors) { const s = scores[a.id]; if (s && OWNER.some(c => s[c])) { out[a.id] = {}; for (const c of OWNER) if (s[c]) out[a.id][c] = s[c]; if (s.note) out[a.id].note = s.note; } }
+  $("#json").textContent = JSON.stringify(out, null, 1);
+  return out;
+}
+
+async function changed(id, quiet){
+  remember();
+  if (!quiet) render();
+  else renderJson();
+  if (!db) return;
+  const s = scores[id], doc = {task: DATA.anchors.find(a => a.id === id).run, at: new Date().toISOString()};
+  for (const c of OWNER) if (s[c]) doc[c] = s[c];
+  if (s.note) doc.note = s.note;
+  try { await db.doc(`scores/${id}`).set(doc); $("#save-status").textContent = `Saved ${id} — Claude reads these directly.`; }
+  catch (e) { $("#save-status").textContent = `Not saved (${e.code || e.message}). Use "Copy scores as JSON" and paste them in chat.`; }
+}
+
+function render(){
+  const a = DATA.anchors.find(x => x.id === current) || DATA.anchors[0];
+  renderTabs(); renderMain(a); renderPanel(a); renderJson();
+}
+
+$("#blind").onchange = () => { remember(); render(); };
+$("#copy").onclick = async () => {
+  const txt = $("#json").textContent;
+  try { await navigator.clipboard.writeText(txt); $("#copy").textContent = "Copied"; setTimeout(() => $("#copy").textContent = "Copy scores as JSON", 1500); }
+  catch (e) { const r = document.createRange(); r.selectNodeContents($("#json")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); }
+};
+const conv = $("#conv");
+for (const [id, txt] of DATA.conventions) conv.append(el("dt", null, id), el("dd", null, txt));
+render();
+
+(async () => {
+  try { db = window.claude && await window.claude.use("db"); } catch (e) { db = null; }
+  if (!db) { $("#save-status").textContent = "Storage unavailable here. Scores stay in this browser; copy the JSON and paste it in chat."; return; }
+  try {
+    const snap = await db.collection("scores").get();
+    for (const d of snap.docs) { const v = d.data() || {}; const s = scores[d.id] || (scores[d.id] = {}); for (const c of OWNER) if (v[c]) s[c] = v[c]; if (v.note && !s.note) s.note = v.note; }
+    $("#save-status").textContent = `Connected. ${snap.size} anchor(s) stored. Each click saves.`;
+    remember(); render();
+  } catch (e) { $("#save-status").textContent = `Could not read stored scores (${e.code || e.message}).`; }
+})();
+</script>

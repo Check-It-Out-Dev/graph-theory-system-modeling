@@ -1,0 +1,329 @@
+diff --git a/src/main/java/com/sm/instagram/platform/support/faq/repositories/FaqRepository.java b/src/main/java/com/sm/instagram/platform/support/faq/repositories/FaqRepository.java
+index ecf00322644..509598b5708 100644
+--- a/src/main/java/com/sm/instagram/platform/support/faq/repositories/FaqRepository.java
++++ b/src/main/java/com/sm/instagram/platform/support/faq/repositories/FaqRepository.java
+@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
+ import org.springframework.data.repository.query.Param;
+ import org.springframework.stereotype.Repository;
+ 
++import java.time.LocalDateTime;
+ import java.util.List;
+ 
+ /**
+@@ -58,4 +59,12 @@ public interface FaqRepository extends BaseRepository<Faq, Long> {
+      */
+     @Query("SELECT COALESCE(MAX(f.displayOrder), 0) FROM Faq f WHERE f.category.id = :categoryId")
+     int getMaxDisplayOrder(@Param("categoryId") Long categoryId);
++
++    /**
++     * Find all inactive FAQs last updated before the given cutoff.
++     *
++     * @param cutoff The cutoff timestamp
++     * @return List of inactive FAQs older than the cutoff
++     */
++    List<Faq> findByActiveFalseAndLastUpdateTimeBefore(LocalDateTime cutoff);
+ }
+\ No newline at end of file
+diff --git a/src/main/java/com/sm/instagram/platform/support/faq/services/FaqService.java b/src/main/java/com/sm/instagram/platform/support/faq/services/FaqService.java
+index 760faf242df..eb3fe9df95c 100644
+--- a/src/main/java/com/sm/instagram/platform/support/faq/services/FaqService.java
++++ b/src/main/java/com/sm/instagram/platform/support/faq/services/FaqService.java
+@@ -18,6 +18,7 @@ import org.springframework.data.domain.Pageable;
+ import org.springframework.stereotype.Service;
+ import org.springframework.transaction.annotation.Transactional;
+ 
++import java.time.LocalDateTime;
+ import java.util.ArrayList;
+ import java.util.List;
+ import java.util.Map;
+@@ -151,6 +152,20 @@ public class FaqService extends BaseService<Faq, Long, FaqDtoIn> {
+         log.info("GDPR: Service=softDelete_complete, EntityID={}, Status=inactive", id);
+     }
+ 
++    /**
++     * Permanently delete FAQs that have been inactive for longer than the given number of days.
++     *
++     * @param days Number of days a FAQ must have been inactive to be purged
++     * @return Number of FAQs deleted
++     */
++    @Transactional
++    public int purgeInactiveOlderThan(int days) {
++        LocalDateTime cutoff = LocalDateTime.now().minusDays(days);
++        List<Faq> inactiveFaqs = faqRepository.findByActiveFalseAndLastUpdateTimeBefore(cutoff);
++        faqRepository.deleteAll(inactiveFaqs);
++        return inactiveFaqs.size();
++    }
++
+     /**
+      * Update FAQ display order.
+      *
+diff --git a/src/main/java/com/sm/instagram/platform/support/faq/services/InactiveFaqPurgeCronJob.java b/src/main/java/com/sm/instagram/platform/support/faq/services/InactiveFaqPurgeCronJob.java
+new file mode 100644
+index 00000000000..4f96b5caa55
+--- /dev/null
++++ b/src/main/java/com/sm/instagram/platform/support/faq/services/InactiveFaqPurgeCronJob.java
+@@ -0,0 +1,48 @@
++package com.sm.instagram.platform.support.faq.services;
++
++import lombok.RequiredArgsConstructor;
++import lombok.extern.slf4j.Slf4j;
++import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
++import org.springframework.beans.factory.annotation.Value;
++import org.springframework.scheduling.annotation.Scheduled;
++import org.springframework.stereotype.Component;
++
++/**
++ * Weekly cron job that permanently deletes FAQs that have been inactive
++ * for longer than the configured number of days.
++ */
++@Slf4j
++@Component
++@RequiredArgsConstructor
++public class InactiveFaqPurgeCronJob {
++
++    private final FaqService faqService;
++
++    @Value("${support.faq.purge.enabled:true}")
++    private boolean enabled;
++
++    @Value("${support.faq.purge.days:180}")
++    private int olderThanDays;
++
++    @Scheduled(cron = "${support.faq.purge.cron:0 0 4 * * SUN}")
++    @SchedulerLock(
++            name = "support:faqPurge",
++            lockAtMostFor = "30m",
++            lockAtLeastFor = "5m"
++    )
++    public void purgeInactiveFaqs() {
++        if (!enabled) {
++            log.debug("Inactive FAQ purge cron job disabled via configuration");
++            return;
++        }
++
++        log.info("Starting inactive FAQ purge, olderThanDays={}", olderThanDays);
++
++        try {
++            int deleted = faqService.purgeInactiveOlderThan(olderThanDays);
++            log.info("Inactive FAQ purge completed: deleted={}", deleted);
++        } catch (Exception e) {
++            log.error("Inactive FAQ purge failed: {}", e.getMessage(), e);
++        }
++    }
++}
+diff --git a/src/main/resources/application.yml b/src/main/resources/application.yml
+index ad9fbdab428..82bc283ab79 100644
+--- a/src/main/resources/application.yml
++++ b/src/main/resources/application.yml
+@@ -468,6 +468,14 @@ consent:
+     cron: "0 0 3 * * SUN"     # Weekly on Sunday at 3 AM
+     retention-days: 365        # Delete anonymous records older than this
+ 
++# Support Module
++support:
++  faq:
++    purge:
++      enabled: true
++      cron: "0 0 4 * * SUN"  # Weekly on Sunday at 4 AM
++      days: 180                # Delete FAQs inactive for longer than this
++
+ # =============================================================================
+ # REGISTRY MODULE — POLISH PUBLIC REGISTRY APIs
+ # =============================================================================
+diff --git a/src/test/java/com/sm/instagram/platform/unit/service/FaqServiceUnitTest.java b/src/test/java/com/sm/instagram/platform/unit/service/FaqServiceUnitTest.java
+new file mode 100644
+index 00000000000..b1f234915d7
+--- /dev/null
++++ b/src/test/java/com/sm/instagram/platform/unit/service/FaqServiceUnitTest.java
+@@ -0,0 +1,114 @@
++package com.sm.instagram.platform.unit.service;
++
++import com.sm.instagram.platform.common.util.RepositoryResolver;
++import com.sm.instagram.platform.common.util.filtering.SpecificationBuilder;
++import com.sm.instagram.platform.support.faq.models.Faq;
++import com.sm.instagram.platform.support.faq.repositories.FaqCategoryRepository;
++import com.sm.instagram.platform.support.faq.repositories.FaqRepository;
++import com.sm.instagram.platform.support.faq.services.FaqService;
++import org.junit.jupiter.api.BeforeEach;
++import org.junit.jupiter.api.DisplayName;
++import org.junit.jupiter.api.Nested;
++import org.junit.jupiter.api.Test;
++import org.junit.jupiter.api.extension.ExtendWith;
++import org.mockito.ArgumentCaptor;
++import org.mockito.Mock;
++import org.mockito.junit.jupiter.MockitoExtension;
++import org.mockito.junit.jupiter.MockitoSettings;
++import org.mockito.quality.Strictness;
++import org.modelmapper.ModelMapper;
++import org.springframework.context.ApplicationContext;
++
++import java.time.LocalDateTime;
++import java.util.List;
++
++import static org.assertj.core.api.Assertions.assertThat;
++import static org.mockito.ArgumentMatchers.any;
++import static org.mockito.Mockito.*;
++
++@ExtendWith(MockitoExtension.class)
++@MockitoSettings(strictness = Strictness.LENIENT)
++@DisplayName("FaqService Unit Tests")
++class FaqServiceUnitTest {
++
++    @Mock
++    private SpecificationBuilder<Faq> specificationBuilder;
++
++    @Mock
++    private FaqRepository faqRepository;
++
++    @Mock
++    private FaqCategoryRepository faqCategoryRepository;
++
++    @Mock
++    private ModelMapper modelMapper;
++
++    @Mock
++    private RepositoryResolver repositoryResolver;
++
++    @Mock
++    private ApplicationContext applicationContext;
++
++    private FaqService service;
++
++    @BeforeEach
++    void setUp() {
++        service = new FaqService(
++                specificationBuilder,
++                faqRepository,
++                faqCategoryRepository,
++                modelMapper,
++                repositoryResolver,
++                applicationContext
++        );
++    }
++
++    @Nested
++    @DisplayName("purgeInactiveOlderThan")
++    class PurgeInactiveOlderThan {
++
++        @Test
++        @DisplayName("should delete inactive FAQs older than cutoff and return count")
++        void should_delete_inactive_faqs_older_than_cutoff() {
++            Faq faq1 = new Faq();
++            faq1.setId(1L);
++            Faq faq2 = new Faq();
++            faq2.setId(2L);
++            List<Faq> inactiveFaqs = List.of(faq1, faq2);
++
++            when(faqRepository.findByActiveFalseAndLastUpdateTimeBefore(any(LocalDateTime.class)))
++                    .thenReturn(inactiveFaqs);
++
++            int deleted = service.purgeInactiveOlderThan(180);
++
++            assertThat(deleted).isEqualTo(2);
++            verify(faqRepository).deleteAll(inactiveFaqs);
++        }
++
++        @Test
++        @DisplayName("should return zero when no inactive FAQs are old enough")
++        void should_return_zero_when_nothing_to_purge() {
++            when(faqRepository.findByActiveFalseAndLastUpdateTimeBefore(any(LocalDateTime.class)))
++                    .thenReturn(List.of());
++
++            int deleted = service.purgeInactiveOlderThan(180);
++
++            assertThat(deleted).isZero();
++            verify(faqRepository).deleteAll(List.of());
++        }
++
++        @Test
++        @DisplayName("should use a cutoff of now minus the given number of days")
++        void should_use_cutoff_of_now_minus_days() {
++            ArgumentCaptor<LocalDateTime> cutoffCaptor = ArgumentCaptor.forClass(LocalDateTime.class);
++            when(faqRepository.findByActiveFalseAndLastUpdateTimeBefore(cutoffCaptor.capture()))
++                    .thenReturn(List.of());
++
++            LocalDateTime before = LocalDateTime.now().minusDays(180);
++            service.purgeInactiveOlderThan(180);
++            LocalDateTime after = LocalDateTime.now().minusDays(180);
++
++            assertThat(cutoffCaptor.getValue()).isBetween(before, after);
++        }
++    }
++}
+diff --git a/src/test/java/com/sm/instagram/platform/unit/service/InactiveFaqPurgeCronJobUnitTest.java b/src/test/java/com/sm/instagram/platform/unit/service/InactiveFaqPurgeCronJobUnitTest.java
+new file mode 100644
+index 00000000000..2a93ec4c996
+--- /dev/null
++++ b/src/test/java/com/sm/instagram/platform/unit/service/InactiveFaqPurgeCronJobUnitTest.java
+@@ -0,0 +1,71 @@
++package com.sm.instagram.platform.unit.service;
++
++import com.sm.instagram.platform.support.faq.services.FaqService;
++import com.sm.instagram.platform.support.faq.services.InactiveFaqPurgeCronJob;
++import org.junit.jupiter.api.BeforeEach;
++import org.junit.jupiter.api.DisplayName;
++import org.junit.jupiter.api.Nested;
++import org.junit.jupiter.api.Test;
++import org.junit.jupiter.api.extension.ExtendWith;
++import org.mockito.Mock;
++import org.mockito.junit.jupiter.MockitoExtension;
++import org.mockito.junit.jupiter.MockitoSettings;
++import org.mockito.quality.Strictness;
++import org.springframework.test.util.ReflectionTestUtils;
++
++import static org.mockito.Mockito.*;
++
++@ExtendWith(MockitoExtension.class)
++@MockitoSettings(strictness = Strictness.LENIENT)
++@DisplayName("InactiveFaqPurgeCronJob Unit Tests")
++class InactiveFaqPurgeCronJobUnitTest {
++
++    @Mock
++    private FaqService faqService;
++
++    private InactiveFaqPurgeCronJob cronJob;
++
++    @BeforeEach
++    void setUp() {
++        cronJob = new InactiveFaqPurgeCronJob(faqService);
++        ReflectionTestUtils.setField(cronJob, "olderThanDays", 180);
++    }
++
++    @Nested
++    @DisplayName("purgeInactiveFaqs")
++    class PurgeInactiveFaqs {
++
++        @Test
++        @DisplayName("should purge inactive FAQs when enabled")
++        void should_purge_when_enabled() {
++            ReflectionTestUtils.setField(cronJob, "enabled", true);
++            when(faqService.purgeInactiveOlderThan(180)).thenReturn(3);
++
++            cronJob.purgeInactiveFaqs();
++
++            verify(faqService).purgeInactiveOlderThan(180);
++        }
++
++        @Test
++        @DisplayName("should skip when disabled")
++        void should_skip_when_disabled() {
++            ReflectionTestUtils.setField(cronJob, "enabled", false);
++
++            cronJob.purgeInactiveFaqs();
++
++            verifyNoInteractions(faqService);
++        }
++
++        @Test
++        @DisplayName("should catch and log exceptions without rethrowing")
++        void should_catch_and_log_exceptions_without_rethrowing() {
++            ReflectionTestUtils.setField(cronJob, "enabled", true);
++            doThrow(new RuntimeException("DB connection failed"))
++                    .when(faqService).purgeInactiveOlderThan(180);
++
++            cronJob.purgeInactiveFaqs();
++
++            verify(faqService).purgeInactiveOlderThan(180);
++        }
++    }
++}

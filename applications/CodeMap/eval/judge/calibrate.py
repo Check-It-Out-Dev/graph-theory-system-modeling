@@ -1,7 +1,14 @@
-"""Calibration: is the judge worth believing? Cohen's κ between the judge's `correct >= 4` and the
+"""Calibration: is the judge worth believing? Cohen's κ between the judge's `located >= 4` and the
 execution oracle on rows that have one (hard gate: >= 0.6), κ against the users' `rating >= 4` where
 both exist (reported), agreement with the reranker signal, and anchor drift: a frozen set of items
 with their first scores is re-scored every run; a mean shift above 0.3 or a κ drop above 0.1 is drift.
+
+The κ paradox (Feinstein & Cicchetti 1990): when almost every oracle row is a hit, κ's chance term
+eats the agreement — 29/34 identical verdicts can score κ 0.25. So the raw agreement, the prevalence
+(mean yes-rate of the two raters) and Gwet's AC1 (a chance-corrected agreement that is stable under
+skew) are reported beside κ every time, and the verdict has two routes, both printed: κ >= gate; or,
+only when prevalence is outside [0.15, 0.85], agreement >= 0.8 and AC1 >= gate. `basis` names the
+route that held. Neither threshold moves per night.
 
     python eval/judge/calibrate.py --run eval/judge/runs/D.json [--anchors eval/judge/anchors.jsonl]
                                    [--freeze-anchors N] [--gate 0.6]      exit 3 when uncalibrated, 4 on drift
@@ -25,16 +32,55 @@ def cohen_kappa(pairs):
     pa = sum(1 for a, _ in pairs if a) / n
     pb = sum(1 for _, b in pairs if b) / n
     pe = pa * pb + (1 - pa) * (1 - pb)
-    if pe == 1.0:
-        return 1.0 if po == 1.0 else 0.0
+    if abs(1.0 - pe) < 1e-12:  # no variance: agreement is all there is
+        return 1.0 if abs(1.0 - po) < 1e-12 else 0.0
     return round((po - pe) / (1 - pe), 4)
+
+
+def gwet_ac1(pairs):
+    """Gwet's AC1 over boolean pairs: (p_o - p_e) / (1 - p_e) with p_e = 2·π·(1-π), π the mean yes-rate."""
+    pairs = [(bool(a), bool(b)) for a, b in pairs]
+    n = len(pairs)
+    if n < 2:
+        return None
+    po = sum(1 for a, b in pairs if a == b) / n
+    pi = (sum(1 for a, _ in pairs if a) / n + sum(1 for _, b in pairs if b) / n) / 2
+    pe = 2 * pi * (1 - pi)
+    if abs(1.0 - pe) < 1e-12:
+        return None
+    return round((po - pe) / (1 - pe), 4)
+
+
+def agreement_stats(pairs):
+    """-> {agreement, prevalence, ac1} for the same pairs κ is computed on (None when fewer than 2)."""
+    pairs = [(bool(a), bool(b)) for a, b in pairs]
+    n = len(pairs)
+    if n < 2:
+        return {"agreement": None, "prevalence": None, "ac1": None}
+    po = sum(1 for a, b in pairs if a == b) / n
+    pi = (sum(1 for a, _ in pairs if a) / n + sum(1 for _, b in pairs if b) / n) / 2
+    return {"agreement": round(po, 4), "prevalence": round(pi, 4), "ac1": gwet_ac1(pairs)}
+
+
+def oracle_pairs(rows):
+    return [(r["judge"]["located"] >= 4, r["oracle"]["success"]) for r in rows
+            if r.get("judge") and r["judge"].get("located") is not None and r.get("oracle", {}).get("has")]
 
 
 def kappa_oracle(rows):
     """judge.located vs the execution oracle: both answer "is this the right place?"."""
-    pairs = [(r["judge"]["located"] >= 4, r["oracle"]["success"]) for r in rows
-             if r.get("judge") and r["judge"].get("located") is not None and r.get("oracle", {}).get("has")]
+    pairs = oracle_pairs(rows)
     return cohen_kappa(pairs), len(pairs)
+
+
+def verdict(kappa, stats, gate=0.6, skew=0.85):
+    """-> (calibrated, basis). κ route first; the AC1 route only when prevalence is skewed past `skew`."""
+    if kappa is not None and kappa >= gate:
+        return True, "kappa"
+    p, a, ac1 = stats.get("prevalence"), stats.get("agreement"), stats.get("ac1")
+    if p is not None and (p >= skew or p <= 1 - skew) and a is not None and a >= 0.8 and ac1 is not None and ac1 >= gate:
+        return True, "ac1"
+    return False, None
 
 
 def kappa_human(rows):
@@ -90,13 +136,16 @@ def freeze_anchors(rows, path, n):
 def calibrate(doc, anchors, gate=0.6):
     rows = doc["rows"]
     ko, n_o = kappa_oracle(rows)
+    stats = agreement_stats(oracle_pairs(rows))
     kh, n_h = kappa_human(rows)
     ar, n_r = agreement_rr(rows)
     drift = anchor_drift(rows, anchors)
-    return {"kappa_oracle": ko, "n_oracle": n_o, "kappa_human": kh, "n_human": n_h,
+    ok, basis = verdict(ko, stats, gate)
+    return {"kappa_oracle": ko, "n_oracle": n_o, "agreement_oracle": stats["agreement"], "prevalence_oracle": stats["prevalence"],
+            "ac1_oracle": stats["ac1"], "basis": basis, "kappa_human": kh, "n_human": n_h,
             "agreement_rr": ar, "n_rr": n_r, "anchors": drift, "gate": gate,
-            "calibrated": (ko is not None and ko >= gate),
-            "verdict": ("calibrated" if (ko is not None and ko >= gate) else ("uncalibrated" if ko is not None else "no oracle rows"))}
+            "calibrated": ok,
+            "verdict": ("calibrated" if ok else ("uncalibrated" if ko is not None else "no oracle rows"))}
 
 
 def main(argv=None):

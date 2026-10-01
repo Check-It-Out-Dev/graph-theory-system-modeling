@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 5,
+  "test_quality": 4,
+  "graph_use": 5,
+  "reasons": {
+   "correctness": "The repository finder, closeStaleResolvedTickets (cutoff now minus days, sets CLOSED, saves, returns count) and StaleTicketCloseCronJob (enabled flag, days, cron property, error caught) match the interface. Hidden tests pass 4/4.",
+   "convention_fit": "@SchedulerLock is named support:staleTicketClose. Cron and enabled come from properties with defaults. The class is named *CronJob and uses @RequiredArgsConstructor with a private final service. No @Autowired field injection. Code stays in support/ticket.",
+   "design_fit": "The cron job only delegates, and the status logic sits in the service. It reuses the existing ShedLock/@Scheduled pattern and the derived-query repository style. Config is added to application.yml. Footprint is minimal and there is no duplicated lookup.",
+   "test_quality": "The new StaleTicketCloseCronJobUnitTest covers enabled, disabled and the swallowed exception. Service tests cover the count, CLOSED status, cutoff window and the empty case. Strictness.LENIENT is unnecessary, and no assertion checks lastUpdateTime or rules out a rethrow beyond the implicit check.",
+   "graph_use": "Graph queries located the support/ticket files and the existing *CronJob exemplars, and the TESTED_BY edge found SupportTicketServiceUnitTest before editing. The edits followed AnonymousConsentCleanupCronJob and InvoiceRetryCronJob."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 1015,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 40729
+ },
+ "is_error": false
+}

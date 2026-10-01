@@ -74,6 +74,10 @@ processed_data/
 !applications/CodeMap/eval/judge/runs/*.json
 !applications/CodeMap/eval/quality/runs/*.json
 !applications/CodeMap/eval/optimize/runs/*.json
+!applications/CodeMap/eval/erdos/runs/*.json
+!applications/CodeMap/eval/erdos/gold/*.json
+applications/CodeMap/eval/erdos/runs/*/*.events.jsonl
+applications/CodeMap/eval/erdos/runs/*/erdos_prompt.md
 !applications/CodeMap/observability/grafana/*.json
 applications/CodeMap/telemetry/events.jsonl
 applications/CodeMap/telemetry/navigator-active.md
@@ -131,3 +135,22 @@ applications/CodeMap/eval/optimize/runs/*.log.jsonl
 
 # the graph pack is a GitHub Release (tools/pack/fetch_pack.py --latest), never a commit
 applications/CodeMap/graph/pack/
+
+applications/CodeMap/eval/erdos/runs/*/*/*.events.jsonl
+applications/CodeMap/eval/erdos/runs/*/*/erdos_prompt.md
+applications/CodeMap/eval/erdos/runs/*/gepa/
+
+# Prompt under test (applications/CodeMap/eval/put): the JSON artifacts are the evidence and are tracked;
+# full agent streams stay in the Actions artifact and the campaign's Release asset (sha256 in RUNS.md).
+!applications/CodeMap/eval/put/**/*.json
+# the check fixtures are run artifacts too (calls.json, tests.json, meta.json, fixture.json): without them the
+# suite passes on the machine that built them and fails everywhere else
+!applications/CodeMap/remote/tests/fixtures/put/**/*.json
+applications/CodeMap/eval/put/runs/**/events.jsonl
+applications/CodeMap/eval/put/runs/**/surefire/
+applications/CodeMap/eval/put/runs/**/gepa/gepa_state.bin
+applications/CodeMap/eval/put/runs/**/*.log
+applications/CodeMap/eval/put/runs/**/acceptance/
+!applications/CodeMap/eval/put/instances/**/models/
+!applications/CodeMap/remote/tests/fixtures/put/**/models/
+!applications/CodeMap/eval/put/runs/**/models/

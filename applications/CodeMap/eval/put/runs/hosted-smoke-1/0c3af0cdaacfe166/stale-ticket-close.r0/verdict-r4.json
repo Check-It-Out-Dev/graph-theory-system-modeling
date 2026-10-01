@@ -1,0 +1,29 @@
+{
+ "rubric": "r4",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 5,
+  "test_quality": 4,
+  "graph_use": 5,
+  "reasons": {
+   "correctness": "The repository method, `closeStaleResolvedTickets` and `StaleTicketCloseCronJob` match the interface exactly. Defaults are 14 days and `0 30 3 * * *`; the disabled flag returns early; the service exception is logged, not thrown. Build is green and hidden tests pass 4/4.",
+   "convention_fit": "`@SchedulerLock(name=\"support:staleTicketClose\")`, cron and enabled read via `@Value`, `*CronJob` name, `@RequiredArgsConstructor` injection, code in the support/ticket feature package. Both unit tests use `MockitoExtension`, no Spring context, and were run.",
+   "design_fit": "The job delegates to the service, the service owns the logic, and the repository gets a derived query. It reuses existing ShedLock and scheduling patterns. The footprint is minimal and adds no parallel mechanism.",
+   "test_quality": "Covers the close-and-count case, the empty result, the disabled flag and the swallowed exception. The cutoff is matched with `any(LocalDateTime)`, so the olderThanDays arithmetic is never pinned. `LENIENT` strictness weakens the mocks.",
+   "graph_use": "Graph queries listed the support/ticket package files and found existing CronJob classes before editing. The agent then read `AnonymousConsentCleanupCronJob` and `TrialExpiryNotifierCronJob` and followed their structure. `find`/`grep` were used only to locate tests and properties."
+  },
+  "rubric": "r4",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 1036,
+  "cache_read_input_tokens": 1278,
+  "cache_creation_input_tokens": 8324
+ },
+ "is_error": false
+}

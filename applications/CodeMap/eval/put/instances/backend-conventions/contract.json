@@ -1,0 +1,257 @@
+{
+ "_": [
+  "The contract of the instance backend-conventions: what is measured, how, with which weights and thresholds.",
+  "Written and committed before the first coder run (arc 5, S2, 2026-09-23). Law: never moved after a result is seen.",
+  "Every <rule id> of the seed prompt has one row in rules; test_put_contract fails when a rule has no check.",
+  "applies: 'all' or a list of task tags; a rule that does not apply to a task leaves that task's denominators.",
+  "kind: deterministic (computed from the diff, the tool trace or the test reports) or judge (a criterion of rubric r4)."
+ ],
+ "instance": "backend-conventions",
+ "base_sha": "ff43730b75b7a40f4874f811251c5b72311dbbc9",
+ "models": {
+  "coder": "sonnet",
+  "judge": "opus",
+  "reflector": "opus",
+  "preflight": "claude-haiku-4-5-20251001"
+ },
+ "models_resolved_2026_09_23": {
+  "sonnet": "claude-sonnet-5",
+  "opus": "claude-opus-5-5"
+ },
+ "runner": {
+  "max_turns": 150,
+  "timeout_s": 2400,
+  "output_budget_tokens": 80000,
+  "tools": [
+   "Read",
+   "Grep",
+   "Glob",
+   "Edit",
+   "Write",
+   "Bash"
+  ],
+  "allowed_tools": [
+   "Read",
+   "Grep",
+   "Glob",
+   "Edit",
+   "Write",
+   "mcp__graph__*",
+   "Bash(./mvnw *)",
+   "Bash(./mvnw.cmd *)",
+   "Bash(git diff*)",
+   "Bash(git status*)",
+   "Bash(ls*)"
+  ]
+ },
+ "rules": [
+  {
+   "id": "graph_first",
+   "applies": "all",
+   "kind": "deterministic",
+   "group": "process",
+   "predicate": "at least one graph query before the first Edit or Write (1); a graph query only after it (0.5); none (0). Clarified 2026-09-23 before any baseline run: the rule says 'before you change code', so read-only Bash does not count as a change."
+  },
+  {
+   "id": "exemplar_read",
+   "applies": "all",
+   "kind": "deterministic",
+   "group": "process",
+   "predicate": "before the first Edit or Write, a Read of an existing src/main or db/changelog file, other than the files the task changes, whose base content matches one of the task's exemplar patterns"
+  },
+  {
+   "id": "feature_first",
+   "applies": "all",
+   "kind": "deterministic",
+   "group": "conventions",
+   "predicate": "share of new src/main files placed under one of the task's feature package prefixes"
+  },
+  {
+   "id": "constructor_injection",
+   "applies": "all",
+   "kind": "deterministic",
+   "group": "conventions",
+   "predicate": "no added @Autowired line in src/main; every new @Service, @Component, @RestController or @Configuration class has @RequiredArgsConstructor or declares a constructor"
+  },
+  {
+   "id": "after_commit_listener",
+   "applies": [
+    "event"
+   ],
+   "kind": "deterministic",
+   "group": "conventions",
+   "predicate": "per added listener method: @TransactionalEventListener with phase AFTER_COMMIT (1) and no @EventListener; its body has a catch (0.5 each)"
+  },
+  {
+   "id": "scheduler_lock",
+   "applies": [
+    "cron"
+   ],
+   "kind": "deterministic",
+   "group": "conventions",
+   "predicate": "per added @Scheduled method: @SchedulerLock present; lock name matches area:jobName; cron from a ${...} property; an enabled flag from @Value(\"${...}\") in the class; class name ends with CronJob (mean of 5)"
+  },
+  {
+   "id": "ports_adapters",
+   "applies": [
+    "vendor"
+   ],
+   "kind": "deterministic",
+   "group": "conventions",
+   "predicate": "a new interface *Port under the task's port_dir; a new class *Adapter under adapter_dir implementing it; no file outside adapter_dir imports an adapter class (mean of 3)"
+  },
+  {
+   "id": "translatable_errors",
+   "applies": [
+    "i18n"
+   ],
+   "kind": "deterministic",
+   "group": "conventions",
+   "predicate": "every exception the added src/main code creates (`new XException(` or `new XError(`, thrown directly or from a supplier) is a TranslatableException type (the class or a subclass, known at the base or added in the diff); every task i18n key and every error./validation. key literal in added code is present in both messages_en.properties and messages_pl.properties (mean of the two shares). Clarified 2026-09-23 before any baseline run: suppliers such as orElseThrow(() -> new X()) count."
+  },
+  {
+   "id": "liquibase_changeset",
+   "applies": [
+    "schema"
+   ],
+   "kind": "deterministic",
+   "group": "conventions",
+   "predicate": "a new changeset file whose path matches db/changelog/YYYY/MM/DD-MM-YYYY-kebab.sql; its first line is the formatted-sql header; it has a --changeset author:id line; it has a -- rollback line; changelog.xml adds its include preceded by a <!-- Month YYYY: comment; no existing changeset is modified; the changeset touches the task's table and column (mean of 7)"
+  },
+  {
+   "id": "version_field",
+   "applies": [
+    "version"
+   ],
+   "kind": "deterministic",
+   "group": "conventions",
+   "predicate": "the contended entity gains @Version on a version field (1) and a changeset the diff adds or edits adds the version column (1) (mean of 2); editing an old changeset is liquibase_changeset's failure, not this rule's"
+  },
+  {
+   "id": "controller_guards",
+   "applies": [
+    "endpoint"
+   ],
+   "kind": "deterministic",
+   "group": "conventions",
+   "predicate": "per added @GetMapping/@PostMapping/@PutMapping/@PatchMapping/@DeleteMapping/@RequestMapping method in a controller: @PreAuthorize on the method, and @RateLimit on the method or the class"
+  },
+  {
+   "id": "dto_naming",
+   "applies": [
+    "endpoint"
+   ],
+   "kind": "deterministic",
+   "group": "conventions",
+   "predicate": "per added mapping method: every @RequestBody type ends with DtoIn; the returned body type (inside ResponseEntity<...>, List<...>, Page<...>) ends with DtoOut, or is Void"
+  },
+  {
+   "id": "tests_written",
+   "applies": "all",
+   "kind": "deterministic",
+   "group": "tests",
+   "predicate": "0 when no new *UnitTest.java under src/test; else the mean of: uses MockitoExtension and no @SpringBootTest/@DataJpaTest/@WebMvcTest; compiles; its tests pass"
+  },
+  {
+   "id": "build_green",
+   "applies": "all",
+   "kind": "deterministic",
+   "group": "gate",
+   "predicate": "mvnw -q test-compile exits 0 on the agent's working tree"
+  },
+  {
+   "id": "scope",
+   "applies": "all",
+   "kind": "deterministic",
+   "group": "gate",
+   "predicate": "no test file deleted; no file outside src/main, src/test and the two message bundles changed; at most 12 files changed"
+  },
+  {
+   "id": "marker",
+   "applies": "all",
+   "kind": "deterministic",
+   "group": "gate",
+   "predicate": "the completion line is present in the final answer and no tool call follows it"
+  },
+  {
+   "id": "hidden_pass",
+   "applies": "all",
+   "kind": "deterministic",
+   "group": "correctness",
+   "predicate": "passed / total over the task's hidden acceptance tests (FAIL_TO_PASS) and its pass_to_pass classes, from the surefire reports; 0 when the build fails"
+  }
+ ],
+ "judge": {
+  "rubric": "r4",
+  "criteria": [
+   "correctness",
+   "convention_fit",
+   "design_fit",
+   "test_quality",
+   "graph_use"
+  ],
+  "scale": [
+   1,
+   5
+  ],
+  "binarise_at": 4
+ },
+ "weights": {
+  "hidden_pass": 0.3,
+  "conventions_det": 0.15,
+  "tests_written": 0.1,
+  "process_det": 0.1,
+  "convention_fit": 0.1,
+  "design_fit": 0.1,
+  "correctness": 0.05,
+  "test_quality": 0.05,
+  "graph_use": 0.05
+ },
+ "weight_groups": {
+  "conventions_det": [
+   "feature_first",
+   "constructor_injection",
+   "after_commit_listener",
+   "scheduler_lock",
+   "ports_adapters",
+   "translatable_errors",
+   "liquibase_changeset",
+   "version_field",
+   "controller_guards",
+   "dto_naming"
+  ],
+  "process_det": [
+   "graph_first",
+   "exemplar_read"
+  ]
+ },
+ "gates": {
+  "build_green": "a run whose build is red scores hidden_pass 0 and tests_written 0; the gate rows are reported, not weighted"
+ },
+ "statistics": {
+  "z": 1.96,
+  "obligatory_lower_bound": 0.9,
+  "rule_pass_threshold": 1.0,
+  "rule_pass_note": "a rule passes a run when its value is 1.0 (partial credit counts in the score, never in a compliance rate)",
+  "plateau_k": 3,
+  "delta": "max(judge MAD of S over the seed's runs judged twice, 1.96 * pooled SD of S over replicates * sqrt(2 / (T * k)))",
+  "min_gain_floor": 0.03,
+  "bootstrap_resamples": 10000,
+  "bootstrap_seed": 20260923,
+  "k_baseline": 3,
+  "k_certify_seed": 3,
+  "k_certify_promoted": 4,
+  "min_examples_for_promotion": 18,
+  "gepa_max_metric_calls": 60,
+  "gepa_minibatch": 3
+ },
+ "prompt": {
+  "seed": "prompt/v1.md",
+  "max_body_chars": 24000,
+  "required_includes": [
+   "references/tools.md",
+   "references/topology.md"
+  ],
+  "marker": "=== ANSWER COMPLETE ==="
+ }
+}

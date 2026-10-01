@@ -1,0 +1,29 @@
+{
+ "rubric": "r4",
+ "verdict": {
+  "rules_violated": 1,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 3,
+  "convention_fit": 4,
+  "design_fit": 4,
+  "test_quality": 4,
+  "graph_use": 4,
+  "reasons": {
+   "correctness": "Port, adapter, service, rounding, PLN=1, case-insensitive match and exception key all match the interface. The application.yml insert split the cors block: `max-age: 86400` now sits under `currency`, so CORS loses its max-age.",
+   "convention_fit": "The port/adapter split, constructor injection and BusinessRuleTranslatableException are correct, and the key is in both messages files. FixedExchangeRateAdapterUnitTest lacks @ExtendWith(MockitoExtension.class), which the unit-test convention requires.",
+   "design_fit": "Cohesive currency/port and currency/adapter packages; the service depends only on ExchangeRatePort. The adapter scans every entry per lookup instead of normalising keys once. The careless yml insertion corrupts unrelated cors config.",
+   "test_quality": "Covers rate multiplication, HALF_UP rounding, missing-rate exception key and args, PLN=1, case-insensitivity and unknown code. No Spring context. The null isoCode path is untested.",
+   "graph_use": "Graph queries found existing *Port files, the currency package and the registry port/adapter example before any edit. The edits followed CompanyRegistryPort/GusBir1RegistryAdapter. Config and exception lookups relied on grep."
+  },
+  "rubric": "r4",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 1162,
+  "cache_read_input_tokens": 1278,
+  "cache_creation_input_tokens": 23733
+ },
+ "is_error": false
+}

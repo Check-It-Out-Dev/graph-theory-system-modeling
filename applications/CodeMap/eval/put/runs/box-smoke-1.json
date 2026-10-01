@@ -1,0 +1,375 @@
+{
+ "schema": 1,
+ "label": "box-smoke-1",
+ "mode": "smoke",
+ "instance": "backend-conventions",
+ "base_sha": "ff43730b75b7a40f4874f811251c5b72311dbbc9",
+ "prompt_version": "put@0c3af0cdaacfe166",
+ "prompt_origin": "prompt/v1.md",
+ "models": {
+  "coder": "sonnet",
+  "judge": "opus",
+  "reflector": "opus",
+  "preflight": "claude-haiku-4-5-20251001"
+ },
+ "weights": {
+  "hidden_pass": 0.3,
+  "conventions_det": 0.15,
+  "tests_written": 0.1,
+  "process_det": 0.1,
+  "convention_fit": 0.1,
+  "design_fit": 0.1,
+  "correctness": 0.05,
+  "test_quality": 0.05,
+  "graph_use": 0.05
+ },
+ "runs": 1,
+ "score": 0.9125,
+ "per_task": {
+  "faq-reorder": {
+   "scores": [
+    0.9125
+   ],
+   "mean": 0.9125
+  }
+ },
+ "rules": {
+  "graph_first": {
+   "passed": 1,
+   "n": 1,
+   "rate": 1.0,
+   "wilson": [
+    0.2065,
+    1.0
+   ],
+   "obligatory": false,
+   "mean_value": 1.0
+  },
+  "exemplar_read": {
+   "passed": 1,
+   "n": 1,
+   "rate": 1.0,
+   "wilson": [
+    0.2065,
+    1.0
+   ],
+   "obligatory": false,
+   "mean_value": 1.0
+  },
+  "feature_first": {
+   "passed": 1,
+   "n": 1,
+   "rate": 1.0,
+   "wilson": [
+    0.2065,
+    1.0
+   ],
+   "obligatory": false,
+   "mean_value": 1.0
+  },
+  "constructor_injection": {
+   "passed": 1,
+   "n": 1,
+   "rate": 1.0,
+   "wilson": [
+    0.2065,
+    1.0
+   ],
+   "obligatory": false,
+   "mean_value": 1.0
+  },
+  "after_commit_listener": {
+   "passed": 0,
+   "n": 0,
+   "rate": null,
+   "wilson": [
+    0.0,
+    1.0
+   ],
+   "obligatory": false,
+   "mean_value": null
+  },
+  "scheduler_lock": {
+   "passed": 0,
+   "n": 0,
+   "rate": null,
+   "wilson": [
+    0.0,
+    1.0
+   ],
+   "obligatory": false,
+   "mean_value": null
+  },
+  "ports_adapters": {
+   "passed": 0,
+   "n": 0,
+   "rate": null,
+   "wilson": [
+    0.0,
+    1.0
+   ],
+   "obligatory": false,
+   "mean_value": null
+  },
+  "translatable_errors": {
+   "passed": 1,
+   "n": 1,
+   "rate": 1.0,
+   "wilson": [
+    0.2065,
+    1.0
+   ],
+   "obligatory": false,
+   "mean_value": 1.0
+  },
+  "liquibase_changeset": {
+   "passed": 0,
+   "n": 0,
+   "rate": null,
+   "wilson": [
+    0.0,
+    1.0
+   ],
+   "obligatory": false,
+   "mean_value": null
+  },
+  "version_field": {
+   "passed": 0,
+   "n": 0,
+   "rate": null,
+   "wilson": [
+    0.0,
+    1.0
+   ],
+   "obligatory": false,
+   "mean_value": null
+  },
+  "controller_guards": {
+   "passed": 1,
+   "n": 1,
+   "rate": 1.0,
+   "wilson": [
+    0.2065,
+    1.0
+   ],
+   "obligatory": false,
+   "mean_value": 1.0
+  },
+  "dto_naming": {
+   "passed": 1,
+   "n": 1,
+   "rate": 1.0,
+   "wilson": [
+    0.2065,
+    1.0
+   ],
+   "obligatory": false,
+   "mean_value": 1.0
+  },
+  "tests_written": {
+   "passed": 1,
+   "n": 1,
+   "rate": 1.0,
+   "wilson": [
+    0.2065,
+    1.0
+   ],
+   "obligatory": false,
+   "mean_value": 1.0
+  },
+  "build_green": {
+   "passed": 1,
+   "n": 1,
+   "rate": 1.0,
+   "wilson": [
+    0.2065,
+    1.0
+   ],
+   "obligatory": false,
+   "mean_value": 1.0
+  },
+  "scope": {
+   "passed": 1,
+   "n": 1,
+   "rate": 1.0,
+   "wilson": [
+    0.2065,
+    1.0
+   ],
+   "obligatory": false,
+   "mean_value": 1.0
+  },
+  "marker": {
+   "passed": 1,
+   "n": 1,
+   "rate": 1.0,
+   "wilson": [
+    0.2065,
+    1.0
+   ],
+   "obligatory": false,
+   "mean_value": 1.0
+  },
+  "hidden_pass": {
+   "passed": 1,
+   "n": 1,
+   "rate": 1.0,
+   "wilson": [
+    0.2065,
+    1.0
+   ],
+   "obligatory": false,
+   "mean_value": 1.0
+  }
+ },
+ "unjudged": 0,
+ "records": [
+  {
+   "task": "faq-reorder",
+   "split": "train",
+   "rep": 0,
+   "checks": {
+    "graph_first": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "1 graph queries before the first edit (1 in all)"
+    },
+    "exemplar_read": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "read before the first edit: BusinessRuleTranslatableException.java, FaqCategoryController.java"
+    },
+    "feature_first": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "1 of 1 new main files under the feature package"
+    },
+    "constructor_injection": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "0 added @Autowired lines; 0 new beans with final fields and no constructor"
+    },
+    "after_commit_listener": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "scheduler_lock": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "ports_adapters": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "translatable_errors": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "2 of 2 added throws are translatable; 2 of 2 message keys in both bundles"
+    },
+    "liquibase_changeset": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "version_field": {
+     "value": null,
+     "applicable": false,
+     "passed": null,
+     "seen": "does not apply to this task"
+    },
+    "controller_guards": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "reorderCategory: PreAuthorize=True, RateLimit=True"
+    },
+    "dto_naming": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "reorderCategory: body FaqReorderDtoIn, returns Void"
+    },
+    "tests_written": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "1 new unit test classes; Mockito without a Spring context=1/1; compiles=True; pass=True"
+    },
+    "build_green": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "test-compile green"
+    },
+    "scope": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "6 files changed; 0 outside src/main and src/test; 0 tests deleted"
+    },
+    "marker": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "marker=present, 0 tool calls after it"
+    },
+    "hidden_pass": {
+     "value": 1.0,
+     "applicable": true,
+     "passed": true,
+     "seen": "hidden 6/6, pass-to-pass 65/65"
+    }
+   },
+   "verdict": {
+    "rules_violated": 1,
+    "files_out_of_scope": 0,
+    "parallel_mechanisms": 0,
+    "correctness": 5,
+    "convention_fit": 3,
+    "design_fit": 5,
+    "test_quality": 4,
+    "graph_use": 3,
+    "reasons": {
+     "correctness": "reorderCategory validates size, set equality and duplicates, then assigns i+1 and saves each FAQ. It throws ResourceNotFoundException for an unknown category and returns 204. The hidden tests pass 6/6.",
+     "convention_fit": "The new PUT endpoint in FaqController has @PreAuthorize but no @RateLimit, although the controller imports RateLimitProfile for per-method use. The message key is in both properties files, the body is a DtoIn, and the test uses MockitoExtension.",
+     "design_fit": "The logic sits in FaqService and reuses the existing repository query, BaseService.save and BusinessRuleTranslatableException. The controller only delegates. The footprint is minimal and adds no new mechanism.",
+     "test_quality": "FaqServiceUnitTest covers the happy path, unknown category, missing id, foreign id and duplicate id, asserting messageKey. The null list is untested, strictness is LENIENT, and SecurityContextHolder is never cleared after the tests.",
+     "graph_use": "One graph query listed the faq files, and the agent then read them. It found the exception, test examples and save behaviour through repeated grep and shell commands, not the graph."
+    },
+    "rubric": "r4",
+    "model": "claude-opus-5-5"
+   },
+   "score": 0.9125,
+   "components": {
+    "hidden_pass": 1.0,
+    "conventions_det": 1.0,
+    "tests_written": 1.0,
+    "process_det": 1.0,
+    "convention_fit": 0.5,
+    "design_fit": 1.0,
+    "correctness": 1.0,
+    "test_quality": 0.75,
+    "graph_use": 0.5
+   },
+   "run": "box-smoke-1\\0c3af0cdaacfe166\\faq-reorder.r0"
+  }
+ ],
+ "finished_at": "2026-09-23T17:59:55+0200",
+ "k": 1,
+ "tasks": [
+  "faq-reorder"
+ ],
+ "preflight": "expected 32127514a15b65d3, the model said '32127514a15b65d3', context 8849 tokens"
+}

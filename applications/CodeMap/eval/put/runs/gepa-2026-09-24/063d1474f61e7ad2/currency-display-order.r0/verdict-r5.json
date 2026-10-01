@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 4,
+  "convention_fit": 5,
+  "design_fit": 4,
+  "test_quality": 4,
+  "graph_use": 3,
+  "reasons": {
+   "correctness": "Column, entity field, DTO field, service paged mapping and both controller mappings carry displayOrder; tests pass. The seed gives PLN 0, which equals the default for every unseeded currency, so PLN is not guaranteed to come first.",
+   "convention_fit": "The changeset follows the rules: 2026/09 path, DD-MM-YYYY kebab name, formatted-sql header, changeset id, rollback line, and include appended with a month comment. It adds a new MockitoExtension unit test. No other convention applies.",
+   "design_fit": "Minimal additions to the existing mappings. The controller builder mappings duplicate the service mapping, but that duplication predates the change. The new test declares package currency while sitting in the unit/service directory, a placement smell.",
+   "test_quality": "CurrencyServiceMappingUnitTest covers both toDto and getDataPagedAndFilteredAsDtos without a Spring context. The toDto test asserts 0, the int default, so it cannot detect a missing mapping. The changeset seed is untested.",
+   "graph_use": "The first step was a graph query that found the currency files, and a later query mapped the controller's dependencies. Changelog discovery and test discovery relied on find, glob and grep. A TESTED_BY query ran only after the edits."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 1061,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 35181
+ },
+ "is_error": false
+}

@@ -1,0 +1,29 @@
+{
+ "rubric": "r4",
+ "verdict": {
+  "rules_violated": 1,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 4,
+  "design_fit": 5,
+  "test_quality": 1,
+  "graph_use": 3,
+  "reasons": {
+   "correctness": "SupportTicket gets `@Version private Long version`, and the changeset adds `version BIGINT NOT NULL DEFAULT 0`, matching the interface. Hidden acceptance tests 2/2, build green, 229/229 existing tests pass.",
+   "convention_fit": "The changeset follows the conventions: `DD-MM-YYYY-kebab` name under 2026/09, liquibase header, changeset id, rollback, and a month comment on the changelog.xml include at the end. It breaks one rule: no new `*UnitTest` class ships with the entity change.",
+   "design_fit": "Smallest footprint: one field on the entity, one changeset, one include. It copies the existing AppliedOpportunityContent `@Version` pattern. No new mechanism and no out-of-scope files.",
+   "test_quality": "The agent's own tests are 0/0. It only re-ran existing SupportTicket unit tests. Nothing pins the `@Version` mapping or the conflict behaviour, for example an optimistic-lock failure on a stale write.",
+   "graph_use": "A single graph query listed the support/ticket entity files. The changelog example and the `@Version` precedent were found through glob and grep instead. Dependents of SupportTicket were checked with grep, not the graph."
+  },
+  "rubric": "r4",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 827,
+  "cache_read_input_tokens": 1278,
+  "cache_creation_input_tokens": 18462
+ },
+ "is_error": false
+}

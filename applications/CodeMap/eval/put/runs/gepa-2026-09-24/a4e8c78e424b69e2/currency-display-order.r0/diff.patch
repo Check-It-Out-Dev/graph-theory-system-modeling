@@ -1,0 +1,336 @@
+diff --git a/src/main/java/com/sm/instagram/platform/currency/Currency.java b/src/main/java/com/sm/instagram/platform/currency/Currency.java
+index ca2953f4ddb..49dc3a4324b 100644
+--- a/src/main/java/com/sm/instagram/platform/currency/Currency.java
++++ b/src/main/java/com/sm/instagram/platform/currency/Currency.java
+@@ -42,5 +42,8 @@ public class Currency {
+     @Column(nullable = false)
+     @Size(max = 3, message = "country code cannot exceed 3 characters")
+     private String countryCode;
++
++    @Column(name = "display_order", nullable = false)
++    private int displayOrder;
+ }
+ 
+diff --git a/src/main/java/com/sm/instagram/platform/currency/CurrencyController.java b/src/main/java/com/sm/instagram/platform/currency/CurrencyController.java
+index 089f8401a2e..ce3540b9f48 100644
+--- a/src/main/java/com/sm/instagram/platform/currency/CurrencyController.java
++++ b/src/main/java/com/sm/instagram/platform/currency/CurrencyController.java
+@@ -95,6 +95,7 @@ public class CurrencyController extends BaseController<Currency, Long, CurrencyD
+                 .isoCode(entity.getIsoCode())
+                 .sign(entity.getSign())
+                 .countryCode(entity.getCountryCode())
++                .displayOrder(entity.getDisplayOrder())
+                 .build();
+ 
+         long duration = System.currentTimeMillis() - startTime;
+@@ -152,6 +153,7 @@ public class CurrencyController extends BaseController<Currency, Long, CurrencyD
+                         .isoCode(entity.getIsoCode())
+                         .sign(entity.getSign())
+                         .countryCode(entity.getCountryCode())
++                        .displayOrder(entity.getDisplayOrder())
+                         .build()
+         );
+ 
+diff --git a/src/main/java/com/sm/instagram/platform/currency/CurrencyDtoOut.java b/src/main/java/com/sm/instagram/platform/currency/CurrencyDtoOut.java
+index ec70b82423c..19d613c3086 100644
+--- a/src/main/java/com/sm/instagram/platform/currency/CurrencyDtoOut.java
++++ b/src/main/java/com/sm/instagram/platform/currency/CurrencyDtoOut.java
+@@ -19,4 +19,5 @@ public class CurrencyDtoOut {
+     private String isoCode;
+     private String sign;
+     private String countryCode;
++    private int displayOrder;
+ }
+diff --git a/src/main/java/com/sm/instagram/platform/currency/CurrencyService.java b/src/main/java/com/sm/instagram/platform/currency/CurrencyService.java
+index 840352b3aa1..0ab019277cb 100644
+--- a/src/main/java/com/sm/instagram/platform/currency/CurrencyService.java
++++ b/src/main/java/com/sm/instagram/platform/currency/CurrencyService.java
+@@ -137,6 +137,7 @@ public class CurrencyService extends BaseService<Currency, Long, CurrencyDto> {
+             dto.setIsoCode(entity.getIsoCode());
+             dto.setSign(entity.getSign());
+             dto.setCountryCode(entity.getCountryCode());
++            dto.setDisplayOrder(entity.getDisplayOrder());
+ 
+             return dto;
+         });
+diff --git a/src/main/resources/db/changelog/2026/09/24-09-2026-add-display-order-to-currency.sql b/src/main/resources/db/changelog/2026/09/24-09-2026-add-display-order-to-currency.sql
+new file mode 100644
+index 00000000000..8500396c5df
+--- /dev/null
++++ b/src/main/resources/db/changelog/2026/09/24-09-2026-add-display-order-to-currency.sql
+@@ -0,0 +1,10 @@
++--liquibase formatted sql
++--changeset system:add-display-order-to-currency
++
++ALTER TABLE currency ADD COLUMN IF NOT EXISTS display_order INT NOT NULL DEFAULT 0;
++
++UPDATE currency SET display_order = 1 WHERE iso_code = 'PLN';
++UPDATE currency SET display_order = 2 WHERE iso_code = 'EUR';
++UPDATE currency SET display_order = 3 WHERE iso_code = 'USD';
++
++-- rollback ALTER TABLE currency DROP COLUMN display_order;
+diff --git a/src/main/resources/db/changelog/changelog.xml b/src/main/resources/db/changelog/changelog.xml
+index 77f52d5e094..f6d1b5683e6 100644
+--- a/src/main/resources/db/changelog/changelog.xml
++++ b/src/main/resources/db/changelog/changelog.xml
+@@ -184,4 +184,7 @@
+     <!-- June 2026: Widen ticket_reference to VARCHAR(32) — pentest 3.3 SecureRandom format is 21 chars -->
+     <include file="2026/09/02-09-2026-widen-ticket-reference-column.sql" relativeToChangelogFile="true"/>
+ 
++    <!-- September 2026: Give currencies a team-chosen display order (PLN first) instead of alphabetical -->
++    <include file="2026/09/24-09-2026-add-display-order-to-currency.sql" relativeToChangelogFile="true"/>
++
+ </databaseChangeLog>
+diff --git a/src/test/java/com/sm/instagram/platform/unit/service/AddressAndCurrencyUnitTest.java b/src/test/java/com/sm/instagram/platform/unit/service/AddressAndCurrencyUnitTest.java
+index be94fc6a9a1..4c9ed60cb0f 100644
+--- a/src/test/java/com/sm/instagram/platform/unit/service/AddressAndCurrencyUnitTest.java
++++ b/src/test/java/com/sm/instagram/platform/unit/service/AddressAndCurrencyUnitTest.java
+@@ -266,7 +266,7 @@ class AddressAndCurrencyUnitTest {
+         @Test
+         @DisplayName("all-args constructor should work")
+         void allArgsConstructorShouldWork() {
+-            CurrencyDtoOut dto = new CurrencyDtoOut(1L, "Euro", "Euro", "EUR", "E", "EU");
++            CurrencyDtoOut dto = new CurrencyDtoOut(1L, "Euro", "Euro", "EUR", "E", "EU", 2);
+ 
+             assertThat(dto.getId()).isEqualTo(1L);
+             assertThat(dto.getName()).isEqualTo("Euro");
+diff --git a/src/test/java/com/sm/instagram/platform/unit/service/CurrencyDisplayOrderUnitTest.java b/src/test/java/com/sm/instagram/platform/unit/service/CurrencyDisplayOrderUnitTest.java
+new file mode 100644
+index 00000000000..0d05331b0df
+--- /dev/null
++++ b/src/test/java/com/sm/instagram/platform/unit/service/CurrencyDisplayOrderUnitTest.java
+@@ -0,0 +1,113 @@
++package com.sm.instagram.platform.unit.service;
++
++import com.sm.instagram.platform.common.util.RepositoryResolver;
++import com.sm.instagram.platform.common.util.filtering.SpecificationBuilder;
++import com.sm.instagram.platform.currency.Currency;
++import com.sm.instagram.platform.currency.CurrencyDtoOut;
++import com.sm.instagram.platform.currency.CurrencyRepository;
++import com.sm.instagram.platform.currency.CurrencyService;
++import org.junit.jupiter.api.BeforeEach;
++import org.junit.jupiter.api.DisplayName;
++import org.junit.jupiter.api.Test;
++import org.junit.jupiter.api.extension.ExtendWith;
++import org.mockito.Mock;
++import org.mockito.junit.jupiter.MockitoExtension;
++import org.mockito.junit.jupiter.MockitoSettings;
++import org.mockito.quality.Strictness;
++import org.modelmapper.ModelMapper;
++import org.springframework.context.ApplicationContext;
++import org.springframework.data.domain.Page;
++import org.springframework.data.domain.PageImpl;
++import org.springframework.data.domain.PageRequest;
++import org.springframework.data.domain.Pageable;
++import org.springframework.data.jpa.domain.Specification;
++
++import java.lang.reflect.Constructor;
++import java.util.List;
++import java.util.Map;
++
++import static org.assertj.core.api.Assertions.assertThat;
++import static org.mockito.ArgumentMatchers.any;
++import static org.mockito.ArgumentMatchers.anyMap;
++import static org.mockito.Mockito.mock;
++import static org.mockito.Mockito.when;
++
++/**
++ * Unit tests for the currency display order: both mapping paths of
++ * CurrencyService must carry it from the entity to CurrencyDtoOut so clients
++ * can order currencies the way the team chose (PLN first) instead of alphabetically.
++ */
++@ExtendWith(MockitoExtension.class)
++@MockitoSettings(strictness = Strictness.LENIENT)
++@DisplayName("Currency displayOrder Unit Tests")
++class CurrencyDisplayOrderUnitTest {
++
++    @Mock
++    private SpecificationBuilder<Currency> specificationBuilder;
++
++    @Mock
++    private CurrencyRepository currencyRepository;
++
++    @Mock
++    private RepositoryResolver repositoryResolver;
++
++    @Mock
++    private ApplicationContext applicationContext;
++
++    private CurrencyService service;
++
++    private Currency pln;
++    private Currency eur;
++
++    @BeforeEach
++    void setUp() throws ReflectiveOperationException {
++        // CurrencyService's constructor is protected (constructor_injection convention),
++        // so a test outside its package reaches it reflectively.
++        Constructor<CurrencyService> constructor = CurrencyService.class.getDeclaredConstructor(
++                SpecificationBuilder.class, CurrencyRepository.class, ModelMapper.class,
++                RepositoryResolver.class, ApplicationContext.class);
++        constructor.setAccessible(true);
++        service = constructor.newInstance(specificationBuilder, currencyRepository, new ModelMapper(),
++                repositoryResolver, applicationContext);
++
++        pln = new Currency(1L, "Polish Zloty", "PLN", "zl", "PL", 1);
++        eur = new Currency(2L, "Euro", "EUR", "EUR", "DE", 2);
++    }
++
++    @Test
++    @DisplayName("toDto copies displayOrder from entity to CurrencyDtoOut")
++    void toDtoCopiesDisplayOrder() {
++        CurrencyDtoOut dto = service.toDto(pln);
++
++        assertThat(dto.getDisplayOrder()).isEqualTo(1);
++    }
++
++    @Test
++    @DisplayName("getDataPagedAndFilteredAsDtos copies displayOrder for every row")
++    void getDataPagedAndFilteredAsDtosCopiesDisplayOrder() {
++        Pageable pageable = PageRequest.of(0, 10);
++        Page<Currency> page = new PageImpl<>(List.of(pln, eur), pageable, 2);
++        when(specificationBuilder.createSpecification(anyMap())).thenReturn(mock(Specification.class));
++        when(currencyRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(page);
++
++        Page<CurrencyDtoOut> result = service.getDataPagedAndFilteredAsDtos(pageable, Map.of());
++
++        assertThat(result.getContent()).extracting(CurrencyDtoOut::getDisplayOrder).containsExactly(1, 2);
++    }
++
++    @Test
++    @DisplayName("PLN's lower displayOrder puts it ahead of currencies seeded after it")
++    void plnDisplayOrderPutsItFirst() {
++        Pageable pageable = PageRequest.of(0, 10);
++        Page<Currency> page = new PageImpl<>(List.of(pln, eur), pageable, 2);
++        when(specificationBuilder.createSpecification(anyMap())).thenReturn(mock(Specification.class));
++        when(currencyRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(page);
++
++        Page<CurrencyDtoOut> result = service.getDataPagedAndFilteredAsDtos(pageable, Map.of());
++
++        List<CurrencyDtoOut> sorted = result.getContent().stream()
++                .sorted((a, b) -> Integer.compare(a.getDisplayOrder(), b.getDisplayOrder()))
++                .toList();
++        assertThat(sorted.get(0).getIsoCode()).isEqualTo("PLN");
++    }
++}
+diff --git a/src/test/java/com/sm/instagram/platform/unit/service/CurrencyServiceUnitTest.java b/src/test/java/com/sm/instagram/platform/unit/service/CurrencyServiceUnitTest.java
+index 3467c69f7d3..8f3d194a6a5 100644
+--- a/src/test/java/com/sm/instagram/platform/unit/service/CurrencyServiceUnitTest.java
++++ b/src/test/java/com/sm/instagram/platform/unit/service/CurrencyServiceUnitTest.java
+@@ -63,7 +63,7 @@ class CurrencyServiceUnitTest {
+         @DisplayName("should create currency using all-args constructor")
+         void shouldCreateCurrencyUsingAllArgsConstructor() {
+             // Given
+-            Currency currency = new Currency(1L, "Euro", "EUR", "€", "EU");
++            Currency currency = new Currency(1L, "Euro", "EUR", "€", "EU", 2);
+ 
+             // Then
+             assertThat(currency.getId()).isEqualTo(1L);
+@@ -119,7 +119,7 @@ class CurrencyServiceUnitTest {
+         @DisplayName("should pass validation for valid currency")
+         void shouldPassValidationForValidCurrency() {
+             // Given
+-            Currency currency = new Currency(null, "US Dollar", "USD", "$", "US");
++            Currency currency = new Currency(null, "US Dollar", "USD", "$", "US", 0);
+ 
+             // When
+             Set<ConstraintViolation<Currency>> violations = validator.validate(currency);
+@@ -134,7 +134,7 @@ class CurrencyServiceUnitTest {
+         @DisplayName("should fail validation for blank name")
+         void shouldFailValidationForBlankName(String name) {
+             // Given
+-            Currency currency = new Currency(null, name, "USD", "$", "US");
++            Currency currency = new Currency(null, name, "USD", "$", "US", 0);
+ 
+             // When
+             Set<ConstraintViolation<Currency>> violations = validator.validate(currency);
+@@ -151,7 +151,7 @@ class CurrencyServiceUnitTest {
+         @DisplayName("should fail validation for blank ISO code")
+         void shouldFailValidationForBlankIsoCode(String isoCode) {
+             // Given
+-            Currency currency = new Currency(null, "US Dollar", isoCode, "$", "US");
++            Currency currency = new Currency(null, "US Dollar", isoCode, "$", "US", 0);
+ 
+             // When
+             Set<ConstraintViolation<Currency>> violations = validator.validate(currency);
+@@ -168,7 +168,7 @@ class CurrencyServiceUnitTest {
+         @DisplayName("should fail validation for blank sign")
+         void shouldFailValidationForBlankSign(String sign) {
+             // Given
+-            Currency currency = new Currency(null, "US Dollar", "USD", sign, "US");
++            Currency currency = new Currency(null, "US Dollar", "USD", sign, "US", 0);
+ 
+             // When
+             Set<ConstraintViolation<Currency>> violations = validator.validate(currency);
+@@ -183,7 +183,7 @@ class CurrencyServiceUnitTest {
+         @DisplayName("should fail validation for ISO code longer than 3 characters")
+         void shouldFailValidationForLongIsoCode() {
+             // Given
+-            Currency currency = new Currency(null, "Dollar", "USDX", "$", "US");
++            Currency currency = new Currency(null, "Dollar", "USDX", "$", "US", 0);
+ 
+             // When
+             Set<ConstraintViolation<Currency>> violations = validator.validate(currency);
+@@ -198,7 +198,7 @@ class CurrencyServiceUnitTest {
+         @DisplayName("should fail validation for sign longer than 3 characters")
+         void shouldFailValidationForLongSign() {
+             // Given
+-            Currency currency = new Currency(null, "Dollar", "USD", "$$$$", "US");
++            Currency currency = new Currency(null, "Dollar", "USD", "$$$$", "US", 0);
+ 
+             // When
+             Set<ConstraintViolation<Currency>> violations = validator.validate(currency);
+@@ -213,7 +213,7 @@ class CurrencyServiceUnitTest {
+         @DisplayName("should fail validation for country code longer than 3 characters")
+         void shouldFailValidationForLongCountryCode() {
+             // Given
+-            Currency currency = new Currency(null, "Dollar", "USD", "$", "USAX");
++            Currency currency = new Currency(null, "Dollar", "USD", "$", "USAX", 0);
+ 
+             // When
+             Set<ConstraintViolation<Currency>> violations = validator.validate(currency);
+@@ -229,7 +229,7 @@ class CurrencyServiceUnitTest {
+         void shouldFailValidationForLongName() {
+             // Given
+             String longName = "A".repeat(256);
+-            Currency currency = new Currency(null, longName, "USD", "$", "US");
++            Currency currency = new Currency(null, longName, "USD", "$", "US", 0);
+ 
+             // When
+             Set<ConstraintViolation<Currency>> violations = validator.validate(currency);
+@@ -353,7 +353,7 @@ class CurrencyServiceUnitTest {
+         void shouldHandleCurrencyWithMaxLengthName() {
+             // Given
+             String maxName = "A".repeat(255);
+-            Currency currency = new Currency(null, maxName, "USD", "$", "US");
++            Currency currency = new Currency(null, maxName, "USD", "$", "US", 0);
+ 
+             // When
+             Set<ConstraintViolation<Currency>> violations = validator.validate(currency);
+@@ -367,7 +367,7 @@ class CurrencyServiceUnitTest {
+         @DisplayName("should handle single character ISO code")
+         void shouldHandleSingleCharIsoCode() {
+             // Given - Edge case: very short ISO code
+-            Currency currency = new Currency(null, "Test", "X", "$", "X");
++            Currency currency = new Currency(null, "Test", "X", "$", "X", 0);
+ 
+             // When
+             Set<ConstraintViolation<Currency>> violations = validator.validate(currency);
+@@ -380,7 +380,7 @@ class CurrencyServiceUnitTest {
+         @DisplayName("should handle single character sign")
+         void shouldHandleSingleCharSign() {
+             // Given
+-            Currency currency = new Currency(null, "Dollar", "USD", "$", "US");
++            Currency currency = new Currency(null, "Dollar", "USD", "$", "US", 0);
+ 
+             // When
+             Set<ConstraintViolation<Currency>> violations = validator.validate(currency);
+@@ -394,7 +394,7 @@ class CurrencyServiceUnitTest {
+         @DisplayName("should handle exactly 3 character values")
+         void shouldHandleExactlyThreeCharacterValues() {
+             // Given - All max length values
+-            Currency currency = new Currency(null, "Abc", "ABC", "ABC", "ABC");
++            Currency currency = new Currency(null, "Abc", "ABC", "ABC", "ABC", 0);
+ 
+             // When
+             Set<ConstraintViolation<Currency>> violations = validator.validate(currency);

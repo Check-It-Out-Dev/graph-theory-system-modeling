@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 4,
+  "test_quality": 5,
+  "graph_use": 5,
+  "reasons": {
+   "correctness": "Implements the repository derived query, the service method returning the count with a now-minus-days cutoff, and the cron job with enabled/days/cron properties and defaults. The disabled flag skips work; failures are caught and logged. Hidden tests 4/4.",
+   "convention_fit": "StaleTicketCloseCronJob has @SchedulerLock(name=\"support:staleTicketClose\"), @Scheduled cron from a property, @Value enabled:true and @RequiredArgsConstructor. It sits in the support/ticket feature package, and properties were added to application.yml.",
+   "design_fit": "Clean layering: the job delegates to the service and the repository owns the query. Unlike updateTicketStatus, closeStaleResolvedTickets does not set lastUpdateTime. It also calls save per ticket inside @Transactional, which is redundant for managed entities.",
+   "test_quality": "SupportTicketServiceStaleCloseUnitTest covers closing with count, the cutoff via ArgumentCaptor, and the empty case. StaleTicketCloseCronJobUnitTest covers enabled delegation, disabled no-op and swallowed failure. Both use MockitoExtension with no Spring context.",
+   "graph_use": "Before editing, graph queries located the supportticket files, the existing *CronJob.java examples, TESTED_BY tests and dependents. The agent then read InvoiceRetryCronJob and ConsentEnforcementCronJob and followed their structure."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 1002,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 42206
+ },
+ "is_error": false
+}

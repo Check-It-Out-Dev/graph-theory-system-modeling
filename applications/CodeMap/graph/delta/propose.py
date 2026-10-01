@@ -74,16 +74,28 @@ def candidates(pack, delta):
     return out
 
 
+SKILL = os.path.join(os.path.dirname(os.path.dirname(R)), ".agents", "skills", "grothendieck-organizer", "SKILL.md")
+
+
+def manual_text(path=SKILL):
+    """The grothendieck-organizer skill body, frontmatter stripped. It replaces `GrothendieckV5.md[:6000]`,
+    a cut that ended inside the Neo4j write phase, before the delta procedure it told the reviewer to follow."""
+    text = open(path, encoding="utf-8").read().replace("\r\n", "\n")
+    if text.startswith("---\n"):
+        text = text[text.index("\n---\n", 4) + 5:]
+    return text.strip()
+
+
 def review_prompt(delta, cands, pack_dir):
-    manual = open(os.path.join(R, "graph", "prompts", "GrothendieckV5.md"), encoding="utf-8").read()
-    lines = ["You are GrothendieckV5 in MODE delta. The deterministic candidates below were computed from the structural edges "
+    manual = manual_text()
+    lines = ["You are Grothendieck (the grothendieck-organizer skill) placing unassigned entities. The deterministic candidates below were computed from the structural edges "
              "and folders of pack.next; you have read-only tools over that pack (pack_subsystem, pack_entity, pack_folder, pack_cypher). "
              "For each unassigned entity: keep the candidate, move it to an alternative, or propose a new subsystem (only with >= 2 "
              "members and a one-line reason). Use only subsystem ids that exist (pack_subsystem answers) and entity names from the "
              "candidates. Reply ONLY with the JSON object described; every `why` is one sentence.",
              "", "## Delta", json.dumps({k: delta[k] for k in ("repo", "date", "mode", "churn", "counts")}),
              "", "## Candidates", json.dumps(cands, ensure_ascii=False, indent=1),
-             "", "## Your operating manual (delta procedure)", manual[:6000]]
+             "", "## Your operating manual", manual]
     return "\n".join(lines)
 
 
@@ -113,6 +125,17 @@ def review(delta, cands, pack_dir, backend="claude", model="claude-sonnet-5", ru
         return doc
     doc.setdefault("new_subsystems", [])
     doc.setdefault("unresolved", [])
+    # a reviewer that answers for some entities and stays silent on the rest: the silent ones keep their
+    # deterministic candidate (marked as such) or stay unresolved — nothing is silently dropped
+    seen = {a.get("entity") for a in doc["assignments"]} | {m for n in doc["new_subsystems"] for m in (n.get("members") or [])}
+    for c in cands:
+        if c["entity"] in seen:
+            continue
+        if c["subsystem"] is not None:
+            doc["assignments"].append({"entity": c["entity"], "subsystem": c["subsystem"], "confidence": c["confidence"],
+                                       "alternatives": c["alternatives"], "why": "deterministic candidate (the reviewer was silent): " + c["why"]})
+        elif c["entity"] not in doc["unresolved"]:
+            doc["unresolved"].append(c["entity"])
     doc["reviewed_by"] = f"{backend}:{model}"
     doc["usage"] = res.get("usage")
     return doc

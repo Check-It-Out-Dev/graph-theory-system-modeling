@@ -1,0 +1,731 @@
+[
+ {
+  "i": 1,
+  "name": "mcp__graph__graph_query",
+  "input": {
+   "statement": "MATCH (e:Entity) WHERE e.file_path STARTS WITH 'backend/' AND lower(e.file_path) CONTAINS '/support/faq/' RETURN e.file_path, e.layer, e.name ORDER BY e.file_path"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "{\"columns\": [\"e.file_path\", \"e.layer\", \"e.name\"], \"rows\": [[\"backend/src/main/java/com/sm/instagram/platform/support/faq/FaqCategoryController.java\", \"Actor\", \"FaqCategoryController.java\"], [\"backend/"
+ },
+ {
+  "i": 2,
+  "name": "mcp__graph__graph_query",
+  "input": {
+   "statement": "MATCH (d:Entity)-[r:Dep]->(e:Entity) WHERE e.file_path IN ['backend/src/main/java/com/sm/instagram/platform/support/faq/FaqController.java', 'backend/src/main/java/com/sm/instagram/platform/support/faq/services/FaqService.java'] RETURN r.rel, d.file_path, e.file_path ORDER BY e.file_path, r.rel"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "{\"columns\": [\"r.rel\", \"d.file_path\", \"e.file_path\"], \"rows\": [[\"IMPORTS\", \"backend/src/main/java/com/sm/instagram/platform/support/faq/FaqController.java\", \"backend/src/main/java/com/sm/instagram/plat"
+ },
+ {
+  "i": 3,
+  "name": "mcp__graph__graph_query",
+  "input": {
+   "statement": "MATCH (e:Entity)-[r:Dep]->(t:Entity) WHERE r.rel = 'TESTED_BY' AND e.file_path IN ['backend/src/main/java/com/sm/instagram/platform/support/faq/FaqController.java', 'backend/src/main/java/com/sm/instagram/platform/support/faq/services/FaqService.java', 'backend/src/main/java/com/sm/instagram/platform/support/faq/models/Faq.java'] RETURN e.name, t.file_path ORDER BY e.name, t.file_path"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "{\"columns\": [\"e.name\", \"t.file_path\"], \"rows\": [[\"Faq.java\", \"backend/src/test/java/com/sm/instagram/platform/unit/service/FaqUnitTest.java\"]], \"row_count\": 1, \"truncated\": false}"
+ },
+ {
+  "i": 4,
+  "name": "Grep",
+  "input": {
+   "pattern": "Faq",
+   "path": "backend/src/test/java",
+   "glob": "*.java",
+   "output_mode": "files_with_matches"
+  },
+  "after_marker": false,
+  "is_error": true,
+  "result_head": "Path does not exist: backend/src/test/java. Note: your current working directory is C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-faq-reorder.r2."
+ },
+ {
+  "i": 5,
+  "name": "Bash",
+  "input": {
+   "command": "ls",
+   "description": "List working directory contents"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "CONTRIBUTING.md\nChromaticNumbersInSystemModeling.md\nLICENSE\nREADME.md\nansible/\nbuild-backend.bat\ndeployment/\ndocker/\ndocker-compose-dev-redis.yml\ndocs/\nfirebase-storage.rules\nfirebase.json\nlombok.conf"
+ },
+ {
+  "i": 6,
+  "name": "Grep",
+  "input": {
+   "pattern": "Faq",
+   "path": "src/test/java",
+   "glob": "*.java",
+   "output_mode": "files_with_matches"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "Found 6 files\nsrc\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\FaqUnitTest.java\nsrc\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\AuthorizationMoreUnitTest.java\nsrc\\test\\java\\com\\sm\\instagram\\p"
+ },
+ {
+  "i": 7,
+  "name": "Read",
+  "input": {
+   "file_path": "src/main/java/com/sm/instagram/platform/support/faq/services/FaqService.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.support.faq.services;\n2\t\n3\timport com.sm.instagram.platform.common.base.BaseService;\n4\timport com.sm.instagram.platform.common.exceptions.ResourceNotFoundException;"
+ },
+ {
+  "i": 8,
+  "name": "Read",
+  "input": {
+   "file_path": "src/main/java/com/sm/instagram/platform/support/faq/FaqController.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.support.faq;\n2\t\n3\timport com.sm.instagram.platform.common.base.BaseController;\n4\timport com.sm.instagram.platform.common.base.BaseService;\n5\timport com.sm.instagram"
+ },
+ {
+  "i": 9,
+  "name": "Read",
+  "input": {
+   "file_path": "src/main/java/com/sm/instagram/platform/support/faq/FaqCategoryController.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.support.faq;\n2\t\n3\timport com.sm.instagram.platform.common.base.BaseController;\n4\timport com.sm.instagram.platform.common.base.BaseService;\n5\timport com.sm.instagram"
+ },
+ {
+  "i": 10,
+  "name": "Read",
+  "input": {
+   "file_path": "src/main/java/com/sm/instagram/platform/support/faq/dtos/FaqDtoIn.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.support.faq.dtos;\n2\t\n3\timport jakarta.validation.constraints.NotBlank;\n4\timport jakarta.validation.constraints.Size;\n5\timport lombok.AllArgsConstructor;\n6\timport lo"
+ },
+ {
+  "i": 11,
+  "name": "Read",
+  "input": {
+   "file_path": "src/main/java/com/sm/instagram/platform/support/faq/models/Faq.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.support.faq.models;\n2\t\n3\timport com.sm.instagram.platform.common.base.UpdaterTracking;\n4\timport jakarta.persistence.*;\n5\timport jakarta.validation.constraints.NotBl"
+ },
+ {
+  "i": 12,
+  "name": "Grep",
+  "input": {
+   "pattern": "class BusinessRuleTranslatableException",
+   "path": "src/main/java/com/sm/instagram/platform/common/exceptions/BusinessRuleTranslatableException.java",
+   "output_mode": "content"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "15:public class BusinessRuleTranslatableException extends TranslatableException {"
+ },
+ {
+  "i": 13,
+  "name": "Grep",
+  "input": {
+   "pattern": "new BusinessRuleTranslatableException",
+   "path": "src/main/java/com/sm/instagram/platform",
+   "output_mode": "content",
+   "-n": true,
+   "head_limit": 15
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "src\\main\\java\\com\\sm\\instagram\\platform\\admin\\GeoIpAdminController.java:223:            throw new BusinessRuleTranslatableException(\"error.geoip.travel_detection_failed\");\nsrc\\main\\java\\com\\sm\\instagr"
+ },
+ {
+  "i": 14,
+  "name": "Grep",
+  "input": {
+   "pattern": "error.business",
+   "path": "src/main/resources/messages_en.properties",
+   "output_mode": "content",
+   "-n": true
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "40:error.business.item_not_found={0} not found\n54:error.business.insufficient_permissions=You do not have permission to perform this action\n55:error.business.invalid_state=Invalid state for this opera"
+ },
+ {
+  "i": 15,
+  "name": "Read",
+  "input": {
+   "file_path": "src/test/java/com/sm/instagram/platform/unit/service/FaqUnitTest.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.unit.service;\n2\t\n3\timport com.sm.instagram.platform.support.faq.dtos.FaqCategoryDtoIn;\n4\timport com.sm.instagram.platform.support.faq.dtos.FaqCategoryDtoOut;\n5\timpo"
+ },
+ {
+  "i": 16,
+  "name": "Grep",
+  "input": {
+   "pattern": "class FaqCategoryService|@ExtendWith(MockitoExtension.class)",
+   "path": "src/test/java/com/sm/instagram/platform/unit/service",
+   "glob": "*Faq*",
+   "output_mode": "files_with_matches"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "No files found"
+ },
+ {
+  "i": 17,
+  "name": "Read",
+  "input": {
+   "file_path": "src/main/java/com/sm/instagram/platform/support/faq/repositories/FaqRepository.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.support.faq.repositories;\n2\t\n3\timport com.sm.instagram.platform.common.base.BaseRepository;\n4\timport com.sm.instagram.platform.support.faq.models.Faq;\n5\timport com."
+ },
+ {
+  "i": 18,
+  "name": "Read",
+  "input": {
+   "file_path": "src/main/java/com/sm/instagram/platform/support/faq/repositories/FaqCategoryRepository.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.support.faq.repositories;\n2\t\n3\timport com.sm.instagram.platform.common.base.BaseRepository;\n4\timport com.sm.instagram.platform.support.faq.models.FaqCategory;\n5\timp"
+ },
+ {
+  "i": 19,
+  "name": "Grep",
+  "input": {
+   "pattern": "@ExtendWith(MockitoExtension.class)",
+   "path": "src/test/java/com/sm/instagram/platform/unit/service",
+   "output_mode": "files_with_matches"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "No files found"
+ },
+ {
+  "i": 20,
+  "name": "Grep",
+  "input": {
+   "pattern": "@ExtendWith(MockitoExtension.class)",
+   "path": "src/test/java",
+   "output_mode": "files_with_matches",
+   "head_limit": 30
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "No files found"
+ },
+ {
+  "i": 21,
+  "name": "Grep",
+  "input": {
+   "pattern": "MockitoExtension",
+   "path": "src/test/java",
+   "output_mode": "files_with_matches",
+   "head_limit": 30
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "Found 30 files limit: 30\nsrc\\test\\java\\com\\sm\\instagram\\platform\\unit\\util\\RequestContextUtilsUnitTest.java\nsrc\\test\\java\\com\\sm\\instagram\\platform\\unit\\user\\UserDeletionDtosUnitTest.java\nsrc\\test\\jav"
+ },
+ {
+  "i": 22,
+  "name": "Read",
+  "input": {
+   "file_path": "src/test/java/com/sm/instagram/platform/unit/service/SupportTicketServiceUnitTest.java",
+   "limit": 120
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.unit.service;\n2\t\n3\timport com.sm.instagram.platform.common.authorization.PermissionUtils;\n4\timport com.sm.instagram.platform.common.exceptions.BusinessRuleTranslata"
+ },
+ {
+  "i": 23,
+  "name": "Bash",
+  "input": {
+   "command": "grep -n \"protected.*save\\|public.*save\\|findById\\|class BaseService\" src/main/java/com/sm/instagram/platform/common/base/BaseService.java | head -30",
+   "description": "Inspect BaseService save/findById signatures"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "31:public abstract class BaseService<T, I, D> implements ApplicationContextAware {\n85:    public T findById(I id) {\n86:        return repository.findById(id)\n95:    public T save(T entity) {\n111:     "
+ },
+ {
+  "i": 24,
+  "name": "Read",
+  "input": {
+   "file_path": "src/main/java/com/sm/instagram/platform/support/faq/dtos/FaqCategoryDtoIn.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.support.faq.dtos;\n2\t\n3\timport jakarta.validation.constraints.NotBlank;\n4\timport jakarta.validation.constraints.Size;\n5\timport lombok.AllArgsConstructor;\n6\timport lo"
+ },
+ {
+  "i": 25,
+  "name": "Grep",
+  "input": {
+   "pattern": "error.business.faq",
+   "path": "src/main/resources/messages_en.properties",
+   "output_mode": "content"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "No matches found"
+ },
+ {
+  "i": 26,
+  "name": "Write",
+  "input": {
+   "file_path": "src/main/java/com/sm/instagram/platform/support/faq/dtos/FaqReorderDtoIn.java",
+   "content": "<390 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "File created successfully at: src/main/java/com/sm/instagram/platform/support/faq/dtos/FaqReorderDtoIn.java (file state is current in your context — no need to Read it back)"
+ },
+ {
+  "i": 27,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "src/main/java/com/sm/instagram/platform/support/faq/services/FaqService.java",
+   "old_string": "<200 chars>",
+   "new_string": "<286 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file src/main/java/com/sm/instagram/platform/support/faq/services/FaqService.java has been updated successfully. (file state is current in your context — no need to Read it back)"
+ },
+ {
+  "i": 28,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "src/main/java/com/sm/instagram/platform/support/faq/services/FaqService.java",
+   "old_string": "<107 chars>",
+   "new_string": "<1485 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file src/main/java/com/sm/instagram/platform/support/faq/services/FaqService.java has been updated successfully. (file state is current in your context — no need to Read it back)"
+ },
+ {
+  "i": 29,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "src/main/java/com/sm/instagram/platform/support/faq/services/FaqService.java",
+   "old_string": "<108 chars>",
+   "new_string": "<156 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file src/main/java/com/sm/instagram/platform/support/faq/services/FaqService.java has been updated successfully. (file state is current in your context — no need to Read it back)"
+ },
+ {
+  "i": 30,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "src/main/java/com/sm/instagram/platform/support/faq/FaqController.java",
+   "old_string": "<120 chars>",
+   "new_string": "<187 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file src/main/java/com/sm/instagram/platform/support/faq/FaqController.java has been updated successfully. (file state is current in your context — no need to Read it back)"
+ },
+ {
+  "i": 31,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "src/main/java/com/sm/instagram/platform/support/faq/FaqController.java",
+   "old_string": "<187 chars>",
+   "new_string": "<120 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file src/main/java/com/sm/instagram/platform/support/faq/FaqController.java has been updated successfully. (file state is current in your context — no need to Read it back)"
+ },
+ {
+  "i": 32,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "src/main/java/com/sm/instagram/platform/support/faq/FaqCategoryController.java",
+   "old_string": "<275 chars>",
+   "new_string": "<408 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file src/main/java/com/sm/instagram/platform/support/faq/FaqCategoryController.java has been updated successfully. (file state is current in your context — no need to Read it back)"
+ },
+ {
+  "i": 33,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "src/main/java/com/sm/instagram/platform/support/faq/FaqCategoryController.java",
+   "old_string": "<225 chars>",
+   "new_string": "<327 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file src/main/java/com/sm/instagram/platform/support/faq/FaqCategoryController.java has been updated successfully. (file state is current in your context — no need to Read it back)"
+ },
+ {
+  "i": 34,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "src/main/java/com/sm/instagram/platform/support/faq/FaqCategoryController.java",
+   "old_string": "<248 chars>",
+   "new_string": "<1153 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file src/main/java/com/sm/instagram/platform/support/faq/FaqCategoryController.java has been updated successfully. (file state is current in your context — no need to Read it back)"
+ },
+ {
+  "i": 35,
+  "name": "Read",
+  "input": {
+   "file_path": "src/main/resources/messages_en.properties",
+   "offset": 35,
+   "limit": 30
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "35\terror.validation.invalid_parameter=Invalid parameter: {0}\n36\terror.validation.file_not_found=File not found: {0}\n37\terror.validation.invalid_enum_value=Invalid value ''{0}''. Please check the allow"
+ },
+ {
+  "i": 36,
+  "name": "Grep",
+  "input": {
+   "pattern": "error.business.item_not_found|error.business.invalid_state",
+   "path": "src/main/resources/messages_pl.properties",
+   "output_mode": "content",
+   "-n": true
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "40:error.business.item_not_found={0} nie znaleziono\n55:error.business.invalid_state=Nieprawidłowy stan dla tej operacji"
+ },
+ {
+  "i": 37,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "src/main/resources/messages_en.properties",
+   "old_string": "<73 chars>",
+   "new_string": "<178 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file src/main/resources/messages_en.properties has been updated successfully."
+ },
+ {
+  "i": 38,
+  "name": "Read",
+  "input": {
+   "file_path": "src/main/resources/messages_pl.properties",
+   "offset": 60,
+   "limit": 10
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "60\terror.business.rule_violation=Naruszono regułę biznesową\n61\terror.business.data_integrity=Wystąpił błąd integralności danych\n62\terror.business.foreign_key=Nie można wykonać operacji z powodu powiąz"
+ },
+ {
+  "i": 39,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "src/main/resources/messages_pl.properties",
+   "old_string": "<80 chars>",
+   "new_string": "<207 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file src/main/resources/messages_pl.properties has been updated successfully."
+ },
+ {
+  "i": 40,
+  "name": "mcp__graph__graph_query",
+  "input": {
+   "statement": "MATCH (d:Entity)-[r:Dep]->(e:Entity) WHERE e.file_path = 'backend/src/main/java/com/sm/instagram/platform/support/faq/FaqCategoryController.java' RETURN r.rel, d.file_path ORDER BY r.rel, d.file_path"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "{\"columns\": [\"r.rel\", \"d.file_path\"], \"rows\": [], \"row_count\": 0, \"truncated\": false}"
+ },
+ {
+  "i": 41,
+  "name": "Bash",
+  "input": {
+   "command": "grep -rn \"new FaqCategoryController(\" src/test src/main 2>/dev/null",
+   "description": "Search for direct constructions of FaqCategoryController"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "(Bash completed with no output)"
+ },
+ {
+  "i": 42,
+  "name": "Bash",
+  "input": {
+   "command": "grep -n \"faq\" -i src/test/java/com/sm/instagram/platform/e2e/steps/AdminPlatformManagementSteps.java | head -30",
+   "description": "Check FAQ references in e2e admin steps"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "25: * Tests support ticket lifecycle, FAQ management, consent monitoring, and multi-actor scenarios.\n47:    private Long storedFaqCategoryId;\n48:    private Long storedFaqId;\n63:    private final Map<"
+ },
+ {
+  "i": 43,
+  "name": "Read",
+  "input": {
+   "file_path": "src/main/java/com/sm/instagram/platform/support/faq/models/FaqCategory.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.support.faq.models;\n2\t\n3\timport com.sm.instagram.platform.common.base.UpdaterTracking;\n4\timport jakarta.persistence.*;\n5\timport jakarta.validation.constraints.NotBl"
+ },
+ {
+  "i": 44,
+  "name": "Read",
+  "input": {
+   "file_path": "src/main/java/com/sm/instagram/platform/common/base/BaseService.java",
+   "offset": 1,
+   "limit": 110
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.common.base;\n2\t\n3\timport com.sm.instagram.platform.city.City;\n4\timport com.sm.instagram.platform.city.CityRepository;\n5\timport com.sm.instagram.platform.common.exce"
+ },
+ {
+  "i": 45,
+  "name": "Grep",
+  "input": {
+   "pattern": "applicationContext.getBean|ApplicationContext applicationContext|@Mock\\s*\\n\\s*private ApplicationContext",
+   "path": "src/test/java/com/sm/instagram/platform/unit/service",
+   "-l": "true",
+   "output_mode": "files_with_matches"
+  },
+  "after_marker": false,
+  "is_error": true,
+  "result_head": "<tool_use_error>InputValidationError: Grep failed due to the following issue:\nAn unexpected parameter `-l` was provided</tool_use_error>"
+ },
+ {
+  "i": 46,
+  "name": "Grep",
+  "input": {
+   "pattern": "applicationContext.getBean|ApplicationContext applicationContext",
+   "path": "src/test/java/com/sm/instagram/platform/unit/service",
+   "output_mode": "files_with_matches"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "Found 6 files\nsrc\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\UserServiceUnitTest.java\nsrc\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\UserSocialConnectionServiceUnitTest.java\nsrc\\test\\java\\"
+ },
+ {
+  "i": 47,
+  "name": "Bash",
+  "input": {
+   "command": "grep -n \"ApplicationContext\\|getBean\\|@InjectMocks\\|@Mock\\|class AddressServiceUnitTest\\|@ExtendWith\" src/test/java/com/sm/instagram/platform/unit/service/AddressServiceUnitTest.java | head -40",
+   "description": "Inspect AddressServiceUnitTest for ApplicationContext mock pattern"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "24:import org.springframework.context.ApplicationContext;\n46:@ExtendWith(MockitoExtension.class)\n47:@MockitoSettings(strictness = Strictness.LENIENT)\n49:class AddressServiceUnitTest {\n51:    @Mock\n54:"
+ },
+ {
+  "i": 48,
+  "name": "Read",
+  "input": {
+   "file_path": "src/test/java/com/sm/instagram/platform/unit/service/AddressServiceUnitTest.java",
+   "limit": 110
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.unit.service;\n2\t\n3\timport com.sm.instagram.platform.address.*;\n4\timport com.sm.instagram.platform.common.authorization.PermissionUtils;\n5\timport com.sm.instagram.pl"
+ },
+ {
+  "i": 49,
+  "name": "Bash",
+  "input": {
+   "command": "grep -n \"SecurityContextHolder\\|MockedStatic\\|Authentication\" src/test/java/com/sm/instagram/platform/unit/service/AddressServiceUnitTest.java | head -30",
+   "description": "Check how SecurityContextHolder is mocked in AddressServiceUnitTest"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "(Bash completed with no output)"
+ },
+ {
+  "i": 50,
+  "name": "Grep",
+  "input": {
+   "pattern": "verify\\(addressRepository\\)\\.save|repository\\.save|\\.save\\(\" ",
+   "path": "src/test/java/com/sm/instagram/platform/unit/service/AddressServiceUnitTest.java",
+   "output_mode": "content",
+   "-n": true
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "915:            verify(addressRepository).save(older);\n916:            verify(addressRepository).save(middle);\n937:            verify(addressRepository).save(undated);\n956:            verify(addressRe"
+ },
+ {
+  "i": 51,
+  "name": "Read",
+  "input": {
+   "file_path": "src/test/java/com/sm/instagram/platform/unit/service/AddressServiceUnitTest.java",
+   "offset": 870,
+   "limit": 70
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "870\t    @Nested\n871\t    @DisplayName(\"fixOpportunityPrimaryAddresses - more than one primary\")\n872\t    class FixOpportunityPrimaryAddressesTests {\n873\t\n874\t        /**\n875\t         * Package-private c"
+ },
+ {
+  "i": 52,
+  "name": "Grep",
+  "input": {
+   "pattern": "MockedStatic<SecurityContextHolder>|mockStatic\\(SecurityContextHolder",
+   "path": "src/test/java",
+   "output_mode": "files_with_matches",
+   "head_limit": 20
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "Found 2 files\nsrc\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\CustomErrorControllerUnitTest.java\nsrc\\test\\java\\com\\sm\\instagram\\platform\\unit\\controller\\UserControllerUnitTest.java"
+ },
+ {
+  "i": 53,
+  "name": "Grep",
+  "input": {
+   "pattern": "SecurityContextHolder.setContext|SecurityContext securityContext|Authentication authentication",
+   "path": "src/test/java/com/sm/instagram/platform/unit/service/UserServiceUnitTest.java",
+   "output_mode": "content",
+   "-n": true,
+   "head_limit": 30
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "No matches found"
+ },
+ {
+  "i": 54,
+  "name": "Grep",
+  "input": {
+   "pattern": "SecurityContextHolder.setContext\\(",
+   "path": "src/test/java",
+   "output_mode": "files_with_matches",
+   "head_limit": 20
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "Found 17 files\nsrc\\test\\java\\com\\sm\\instagram\\platform\\unit\\util\\RequestContextUtilsUnitTest.java\nsrc\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\ServiceTypeFullUnitTest.java\nsrc\\test\\java\\com\\sm"
+ },
+ {
+  "i": 55,
+  "name": "Grep",
+  "input": {
+   "pattern": "SecurityContextHolder|updateEntityUpdater|\\.save\\(",
+   "path": "src/test/java/com/sm/instagram/platform/unit/service/BaseClassesUnitTest.java",
+   "output_mode": "content",
+   "-n": true
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "36:import org.springframework.security.core.context.SecurityContextHolder;\n321:        SecurityContextHolder.setContext(securityContext);\n514:                when(testRepository.save(any(TestEntity.cl"
+ },
+ {
+  "i": 56,
+  "name": "Read",
+  "input": {
+   "file_path": "src/test/java/com/sm/instagram/platform/unit/service/BaseClassesUnitTest.java",
+   "offset": 290,
+   "limit": 55
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "290\t\n291\t    @Mock\n292\t    private RepositoryResolver repositoryResolver;\n293\t\n294\t    @Mock\n295\t    private CityRepository cityRepository;\n296\t\n297\t    @Mock\n298\t    private SecurityContext securityC"
+ },
+ {
+  "i": 57,
+  "name": "Bash",
+  "input": {
+   "command": "sed -n '1,60p' src/main/java/com/sm/instagram/platform/common/exceptions/TranslatableException.java 2>/dev/null || find src/main -iname \"TranslatableException.java\"",
+   "description": "Find TranslatableException class for message key accessor"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "package com.sm.instagram.platform.common.exceptions;\n\nimport lombok.Getter;\n\nimport java.io.Serial;\nimport java.io.Serializable;\n\n/**\n * Base exception for all translatable exceptions in the applicati"
+ },
+ {
+  "i": 58,
+  "name": "Write",
+  "input": {
+   "file_path": "src/test/java/com/sm/instagram/platform/unit/service/FaqServiceUnitTest.java",
+   "content": "<7462 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "File created successfully at: src/test/java/com/sm/instagram/platform/unit/service/FaqServiceUnitTest.java (file state is current in your context — no need to Read it back)"
+ },
+ {
+  "i": 59,
+  "name": "Bash",
+  "input": {
+   "command": "./mvnw -q test -Ptest -Dtest=FaqServiceUnitTest,FaqUnitTest -Dsurefire.failIfNoSpecifiedTests=false 2>&1 | tail -150",
+   "description": "Run new and existing FAQ unit tests",
+   "timeout": 300000
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's docu"
+ },
+ {
+  "i": 60,
+  "name": "Bash",
+  "input": {
+   "command": "./mvnw -q test-compile -Ptest 2>&1 | tail -150",
+   "description": "Run test-compile check",
+   "timeout": 300000
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "(Bash completed with no output)"
+ },
+ {
+  "i": 61,
+  "name": "Bash",
+  "input": {
+   "command": "echo \"--exendwith--\"; grep -n \"@ExtendWith(MockitoExtension.class)\" src/test/java/com/sm/instagram/platform/unit/service/FaqServiceUnitTest.java\necho \"--lenient--\"; grep -n \"LENIENT\\|lenient(\" src/test/java/com/sm/instagram/platform/unit/service/FaqServiceUnitTest.java\necho \"--faq_reorder_mismatch en--\"; grep -n \"faq_reorder_mismatch\" src/main/resources/messages_en.properties\necho \"--faq_reorder_mismatch pl--\"; grep -n \"faq_reorder_mismatch\" src/main/resources/messages_pl.properties\necho \"--adapter imports--\"; grep -rn \"import .*Adapter;\" src/main/java | grep -v \"/adapter/\" || echo \"none outside adapter package\"\n",
+   "description": "Run rule check greps"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "--exendwith--\n38:@ExtendWith(MockitoExtension.class)\n--lenient--\n--faq_reorder_mismatch en--\n65:error.business.faq_reorder_mismatch=The FAQ ids must match exactly the category's active FAQs, each once"
+ },
+ {
+  "i": 62,
+  "name": "Bash",
+  "input": {
+   "command": "git status --short; echo \"---\"; git diff --stat",
+   "description": "Show git status and diff stat"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": " M src/main/java/com/sm/instagram/platform/support/faq/FaqCategoryController.java\n M src/main/java/com/sm/instagram/platform/support/faq/services/FaqService.java\n M src/main/resources/messages_en.prop"
+ }
+]

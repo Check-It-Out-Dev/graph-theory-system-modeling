@@ -1,0 +1,189 @@
+{
+    "task": "stale-ticket-close",
+    "candidate": "0c3af0cdaacfe166",
+    "score": 0.975,
+    "components": {
+        "hidden_pass": 1.0,
+        "conventions_det": 1.0,
+        "tests_written": 1.0,
+        "process_det": 1.0,
+        "convention_fit": 1.0,
+        "design_fit": 1.0,
+        "correctness": 1.0,
+        "test_quality": 0.75,
+        "graph_use": 0.75
+    },
+    "checks": {
+        "graph_first": {
+            "value": 1.0,
+            "applicable": true,
+            "passed": true,
+            "seen": "2 graph queries before the first edit (2 in all)"
+        },
+        "exemplar_read": {
+            "value": 1.0,
+            "applicable": true,
+            "passed": true,
+            "seen": "read before the first edit: NoConsentAccountCleanupCronJob.java"
+        },
+        "feature_first": {
+            "value": 1.0,
+            "applicable": true,
+            "passed": true,
+            "seen": "1 of 1 new main files under the feature package"
+        },
+        "constructor_injection": {
+            "value": 1.0,
+            "applicable": true,
+            "passed": true,
+            "seen": "0 added @Autowired lines; 0 new beans with final fields and no constructor"
+        },
+        "after_commit_listener": {
+            "value": null,
+            "applicable": false,
+            "passed": null,
+            "seen": "does not apply to this task"
+        },
+        "scheduler_lock": {
+            "value": 1.0,
+            "applicable": true,
+            "passed": true,
+            "seen": "StaleTicketCloseCronJob.closeStaleTickets: lock=True, area:job name=True, cron property=True, enabled flag=True, *CronJob=True"
+        },
+        "ports_adapters": {
+            "value": null,
+            "applicable": false,
+            "passed": null,
+            "seen": "does not apply to this task"
+        },
+        "translatable_errors": {
+            "value": null,
+            "applicable": false,
+            "passed": null,
+            "seen": "does not apply to this task"
+        },
+        "liquibase_changeset": {
+            "value": null,
+            "applicable": false,
+            "passed": null,
+            "seen": "does not apply to this task"
+        },
+        "version_field": {
+            "value": null,
+            "applicable": false,
+            "passed": null,
+            "seen": "does not apply to this task"
+        },
+        "controller_guards": {
+            "value": null,
+            "applicable": false,
+            "passed": null,
+            "seen": "does not apply to this task"
+        },
+        "dto_naming": {
+            "value": null,
+            "applicable": false,
+            "passed": null,
+            "seen": "does not apply to this task"
+        },
+        "tests_written": {
+            "value": 1.0,
+            "applicable": true,
+            "passed": true,
+            "seen": "1 new unit test classes; Mockito without a Spring context=1/1; compiles=True; pass=True"
+        },
+        "build_green": {
+            "value": 1.0,
+            "applicable": true,
+            "passed": true,
+            "seen": "test-compile green"
+        },
+        "scope": {
+            "value": 1.0,
+            "applicable": true,
+            "passed": true,
+            "seen": "5 files changed; 0 outside src/main and src/test; 0 tests deleted"
+        },
+        "marker": {
+            "value": 1.0,
+            "applicable": true,
+            "passed": true,
+            "seen": "marker=present, 0 tool calls after it"
+        },
+        "hidden_pass": {
+            "value": 1.0,
+            "applicable": true,
+            "passed": true,
+            "seen": "hidden 4/4, pass-to-pass 55/55"
+        }
+    },
+    "verdict": {
+        "rules_violated": 0,
+        "files_out_of_scope": 0,
+        "parallel_mechanisms": 0,
+        "correctness": 5,
+        "convention_fit": 5,
+        "design_fit": 5,
+        "test_quality": 4,
+        "graph_use": 4,
+        "reasons": {
+            "correctness": "Repository derived query, @Transactional closeStaleResolvedTickets returning count, and StaleTicketCloseCronJob with the enabled flag, days and cron properties and their defaults all match the interface. It catches and logs service failures. Hidden tests 4/4, build green.",
+            "convention_fit": "The cron job carries @SchedulerLock named support:staleTicketClose, reads cron and enabled from properties, uses the *CronJob name, and gets its service through @RequiredArgsConstructor with a private final field. It sits in support/ticket. No @Autowired added.",
+            "design_fit": "The job only delegates to the service, the service owns the status change, and the repository owns the query. It reuses ShedLock and follows the NoConsentAccountCleanupCronJob structure. Small footprint, no duplicated lookup.",
+            "test_quality": "New StaleTicketCloseCronJobUnitTest covers the enabled, disabled and exception paths. Service tests cover closing tickets and the empty case. The cutoff date is never asserted (any(LocalDateTime)), and LENIENT strictness weakens the mocks.",
+            "graph_use": "Graph queries located the support/ticket package files and existing *CronJob classes before editing, and the agent read NoConsentAccountCleanupCronJob as the template. Test files were found with find rather than the graph."
+        },
+        "rubric": "r5",
+        "model": "claude-opus-5-5"
+    },
+    "tests": {
+        "own_classes": [
+            "StaleTicketCloseCronJobUnitTest",
+            "SupportTicketServiceUnitTest"
+        ],
+        "build_green": true,
+        "compile_seconds": 25.8,
+        "own": [
+            58,
+            58
+        ],
+        "own_reports": {
+            "StaleTicketCloseCronJobUnitTest": {
+                "tests": 3,
+                "failures": 0,
+                "errors": 0,
+                "skipped": 0
+            },
+            "SupportTicketServiceUnitTest": {
+                "tests": 55,
+                "failures": 0,
+                "errors": 0,
+                "skipped": 0
+            }
+        },
+        "hidden": [
+            4,
+            4
+        ],
+        "pass_to_pass": [
+            55,
+            55
+        ],
+        "hidden_after_compile": true,
+        "acceptance_reports": {
+            "StaleTicketCloseAcceptanceTest": {
+                "tests": 4,
+                "failures": 0,
+                "errors": 0,
+                "skipped": 0
+            },
+            "SupportTicketServiceUnitTest": {
+                "tests": 55,
+                "failures": 0,
+                "errors": 0,
+                "skipped": 0
+            }
+        }
+    },
+    "budget_exhausted": false
+}

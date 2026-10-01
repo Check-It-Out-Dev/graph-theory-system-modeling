@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 5,
+  "test_quality": 5,
+  "graph_use": 5,
+  "reasons": {
+   "correctness": "The derived query findByStatusAndResolvedTimeBefore, the @Transactional closeStaleResolvedTickets returning the count, and the cron job's disabled path, catch-and-log and property defaults all match the interface. Build green, hidden tests 4/4.",
+   "convention_fit": "StaleTicketCloseCronJob uses @SchedulerLock \"support:staleTicketClose\", cron and enabled from properties, the *CronJob name, @RequiredArgsConstructor with a private final service, and the support/ticket/services package. Unit tests use MockitoExtension. No violations.",
+   "design_fit": "The job only delegates; the service owns the status change and lastUpdateTime; the repository gets a derived query. It reuses the existing ShedLock and application.yml property layout, adds no parallel mechanism, and has a minimal footprint.",
+   "test_quality": "The service tests cover close-and-save of each ticket, the returned count, the captured now-minus-days cutoff, and the empty case with no save. The cron tests cover delegation with the configured days, the disabled no-op, and a swallowed service exception. No Spring context.",
+   "graph_use": "Before reading, graph queries located the support/ticket package, the existing *CronJob files (NoConsentAccountCleanupCronJob was used as the exemplar), SupportTicketService dependents and TESTED_BY tests. The edits followed those findings."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 959,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 43299
+ },
+ "is_error": false
+}

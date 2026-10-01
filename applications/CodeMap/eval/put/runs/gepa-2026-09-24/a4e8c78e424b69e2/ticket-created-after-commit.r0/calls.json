@@ -1,0 +1,489 @@
+[
+ {
+  "i": 1,
+  "name": "mcp__graph__graph_query",
+  "input": {
+   "statement": "MATCH (e:Entity) WHERE e.file_path STARTS WITH 'backend/' AND lower(e.file_path) CONTAINS 'support' RETURN e.file_path, e.layer, e.line_count ORDER BY e.file_path LIMIT 100"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "{\"columns\": [\"e.file_path\", \"e.layer\", \"e.line_count\"], \"rows\": [[\"backend/src/main/java/com/sm/instagram/platform/support/common/EmailService.java\", \"Process\", 468], [\"backend/src/main/java/com/sm/in"
+ },
+ {
+  "i": 2,
+  "name": "mcp__graph__graph_query",
+  "input": {
+   "statement": "MATCH (e:Entity) WHERE e.file_path STARTS WITH 'backend/src/' AND (e.name ENDS WITH 'EventListener.java' OR e.name = 'SupportTicketService.java' OR e.name ENDS WITH 'EmailService.java') RETURN e.name, e.file_path ORDER BY e.name LIMIT 80"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "{\"columns\": [\"e.name\", \"e.file_path\"], \"rows\": [[\"EmailService.java\", \"backend/src/main/java/com/sm/instagram/platform/support/common/EmailService.java\"], [\"InvoiceCreatedEventListener.java\", \"backend"
+ },
+ {
+  "i": 3,
+  "name": "Bash",
+  "input": {
+   "command": "find backend/src/main/java/com/sm/instagram/platform/subscription/event -type f"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "find: 'backend/src/main/java/com/sm/instagram/platform/subscription/event': No such file or directory"
+ },
+ {
+  "i": 4,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\a4e8c78e424b69e2-ticket-created-after-commit.r0\\backend\\src\\main\\java\\com\\sm\\instagram\\platform\\subscription\\event\\InvoiceCreatedEventListener.java"
+  },
+  "after_marker": false,
+  "is_error": true,
+  "result_head": "File does not exist. Note: your current working directory is C:\\Users\\Norbert\\put-ws\\runs\\a4e8c78e424b69e2-ticket-created-after-commit.r0."
+ },
+ {
+  "i": 5,
+  "name": "Bash",
+  "input": {
+   "command": "pwd; find . -iname \"InvoiceCreatedEvent*\" 2>/dev/null"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "/c/Users/Norbert/put-ws/runs/a4e8c78e424b69e2-ticket-created-after-commit.r0\n./src/main/java/com/sm/instagram/platform/subscription/event/InvoiceCreatedEvent.java\n./src/main/java/com/sm/instagram/plat"
+ },
+ {
+  "i": 6,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\a4e8c78e424b69e2-ticket-created-after-commit.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\subscription\\event\\InvoiceCreatedEvent.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.subscription.event;\n2\t\n3\timport com.sm.instagram.platform.subscription.entity.InvoiceRecord;\n4\timport lombok.Getter;\n5\timport org.springframework.context.Applicatio"
+ },
+ {
+  "i": 7,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\a4e8c78e424b69e2-ticket-created-after-commit.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\subscription\\event\\InvoiceCreatedEventListener.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.subscription.event;\n2\t\n3\timport com.sm.instagram.platform.subscription.invoicing.InvoiceRetryService;\n4\timport lombok.RequiredArgsConstructor;\n5\timport lombok.exter"
+ },
+ {
+  "i": 8,
+  "name": "Bash",
+  "input": {
+   "command": "grep -n \"createTicket\\|EmailService\\|sendTicketCreationConfirmation\\|ApplicationEventPublisher\\|import \" src/main/java/com/sm/instagram/platform/support/ticket/services/SupportTicketService.java | head -80"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "3:import com.sm.instagram.platform.common.authorization.PermissionUtils;\n4:import com.sm.instagram.platform.common.exceptions.AuthenticationTranslatableException;\n5:import com.sm.instagram.platform.co"
+ },
+ {
+  "i": 9,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\a4e8c78e424b69e2-ticket-created-after-commit.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\services\\SupportTicketService.java",
+   "offset": 1,
+   "limit": 175
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.support.ticket.services;\n2\t\n3\timport com.sm.instagram.platform.common.authorization.PermissionUtils;\n4\timport com.sm.instagram.platform.common.exceptions.Authentica"
+ },
+ {
+  "i": 10,
+  "name": "Bash",
+  "input": {
+   "command": "grep -n \"emailService\\.\\|sendTicketCreationConfirmation\" src/main/java/com/sm/instagram/platform/support/ticket/services/SupportTicketService.java src/main/java/com/sm/instagram/platform/support/common/EmailService.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "src/main/java/com/sm/instagram/platform/support/ticket/services/SupportTicketService.java:158:        emailService.sendTicketCreationConfirmation(\nsrc/main/java/com/sm/instagram/platform/support/ticke"
+ },
+ {
+  "i": 11,
+  "name": "mcp__graph__graph_query",
+  "input": {
+   "statement": "MATCH (d:Entity)-[r:Dep]->(e:Entity {file_path: 'backend/src/main/java/com/sm/instagram/platform/support/ticket/services/SupportTicketService.java'}) RETURN r.rel, d.file_path ORDER BY r.rel, d.file_path"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "{\"columns\": [\"r.rel\", \"d.file_path\"], \"rows\": [[\"IMPORTS\", \"backend/src/main/java/com/sm/instagram/platform/support/ticket/SupportTicketController.java\"], [\"IMPORTS\", \"backend/src/test/java/com/sm/ins"
+ },
+ {
+  "i": 12,
+  "name": "Bash",
+  "input": {
+   "command": "find src/test -iname \"InvoiceCreatedEvent*\" 2>/dev/null; find src/test -iname \"*EventListener*UnitTest*\" 2>/dev/null"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "(Bash completed with no output)"
+ },
+ {
+  "i": 13,
+  "name": "Bash",
+  "input": {
+   "command": "grep -n \"emailService\\|createTicket\\|ApplicationEventPublisher\\|eventPublisher\\|import \\|class SupportTicketServiceUnitTest\" src/test/java/com/sm/instagram/platform/unit/service/SupportTicketServiceUnitTest.java | head -60"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "3:import com.sm.instagram.platform.common.authorization.PermissionUtils;\n4:import com.sm.instagram.platform.common.exceptions.BusinessRuleTranslatableException;\n5:import com.sm.instagram.platform.comm"
+ },
+ {
+  "i": 14,
+  "name": "Bash",
+  "input": {
+   "command": "grep -n \"@InjectMocks\\|new SupportTicketService(\\|@Mock\\|class SupportTicketServiceUnitTest\" -A 2 src/test/java/com/sm/instagram/platform/unit/service/SupportTicketServiceUnitTest.java | head -60"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "43:@MockitoSettings(strictness = Strictness.LENIENT)\n44-@DisplayName(\"SupportTicketService Unit Tests\")\n45:class SupportTicketServiceUnitTest {\n46-\n47:    @Mock\n48-    private SupportTicketRepository "
+ },
+ {
+  "i": 15,
+  "name": "Bash",
+  "input": {
+   "command": "grep -n \"class .*CreateTicket\\|void .*[Cc]reateTicket\\|emailService\\|sendTicketCreationConfirmation\" src/test/java/com/sm/instagram/platform/unit/service/SupportTicketServiceUnitTest.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "66:    private EmailService emailService;\n604:            verify(emailService).sendAdminResponseNotification(\n697:        void shouldCreateTicketWithAllRequiredFields() {"
+ },
+ {
+  "i": 16,
+  "name": "Bash",
+  "input": {
+   "command": "grep -n \"createTicket\\|@Nested\\|@DisplayName\" src/test/java/com/sm/instagram/platform/unit/service/SupportTicketServiceUnitTest.java | sed -n '1,80p'"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "44:@DisplayName(\"SupportTicketService Unit Tests\")\n104:    @Nested\n105:    @DisplayName(\"TicketStatus Enum\")\n110:        @DisplayName(\"should have display name for all statuses\")\n121:        @DisplayN"
+ },
+ {
+  "i": 17,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\a4e8c78e424b69e2-ticket-created-after-commit.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\common\\EmailService.java",
+   "offset": 85,
+   "limit": 45
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "85\t     * @param ticketReference Ticket reference code\n86\t     * @param subject         Ticket subject\n87\t     * @param language        User's preferred language (en, pl, etc.)\n88\t     * @param status"
+ },
+ {
+  "i": 18,
+  "name": "Bash",
+  "input": {
+   "command": "mkdir -p src/main/java/com/sm/instagram/platform/support/ticket/event"
+  },
+  "after_marker": false,
+  "is_error": true,
+  "result_head": "Permission to use Bash has been denied because Claude Code is running in don't ask mode. IMPORTANT: You *may* attempt to accomplish this action using other tools that might naturally be used to accomp"
+ },
+ {
+  "i": 19,
+  "name": "Write",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\a4e8c78e424b69e2-ticket-created-after-commit.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\event\\SupportTicketCreatedEvent.java",
+   "content": "<1166 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "File created successfully at: C:\\Users\\Norbert\\put-ws\\runs\\a4e8c78e424b69e2-ticket-created-after-commit.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\event\\SupportTicketCreatedEvent.java ("
+ },
+ {
+  "i": 20,
+  "name": "Write",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\a4e8c78e424b69e2-ticket-created-after-commit.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\event\\SupportTicketCreatedEventListener.java",
+   "content": "<1392 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "File created successfully at: C:\\Users\\Norbert\\put-ws\\runs\\a4e8c78e424b69e2-ticket-created-after-commit.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\event\\SupportTicketCreatedEventListene"
+ },
+ {
+  "i": 21,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\a4e8c78e424b69e2-ticket-created-after-commit.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\services\\SupportTicketService.java",
+   "old_string": "<117 chars>",
+   "new_string": "<198 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\a4e8c78e424b69e2-ticket-created-after-commit.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\services\\SupportTicketService.java has been updated success"
+ },
+ {
+  "i": 22,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\a4e8c78e424b69e2-ticket-created-after-commit.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\services\\SupportTicketService.java",
+   "old_string": "<157 chars>",
+   "new_string": "<219 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\a4e8c78e424b69e2-ticket-created-after-commit.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\services\\SupportTicketService.java has been updated success"
+ },
+ {
+  "i": 23,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\a4e8c78e424b69e2-ticket-created-after-commit.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\services\\SupportTicketService.java",
+   "old_string": "<1099 chars>",
+   "new_string": "<1259 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\a4e8c78e424b69e2-ticket-created-after-commit.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\services\\SupportTicketService.java has been updated success"
+ },
+ {
+  "i": 24,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\a4e8c78e424b69e2-ticket-created-after-commit.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\services\\SupportTicketService.java",
+   "old_string": "<671 chars>",
+   "new_string": "<845 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\a4e8c78e424b69e2-ticket-created-after-commit.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\services\\SupportTicketService.java has been updated success"
+ },
+ {
+  "i": 25,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\a4e8c78e424b69e2-ticket-created-after-commit.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\SupportTicketServiceUnitTest.java",
+   "offset": 1,
+   "limit": 80
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.unit.service;\n2\t\n3\timport com.sm.instagram.platform.common.authorization.PermissionUtils;\n4\timport com.sm.instagram.platform.common.exceptions.BusinessRuleTranslata"
+ },
+ {
+  "i": 26,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\a4e8c78e424b69e2-ticket-created-after-commit.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\SupportTicketServiceUnitTest.java",
+   "old_string": "<205 chars>",
+   "new_string": "<286 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\a4e8c78e424b69e2-ticket-created-after-commit.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\SupportTicketServiceUnitTest.java has been updated successful"
+ },
+ {
+  "i": 27,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\a4e8c78e424b69e2-ticket-created-after-commit.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\SupportTicketServiceUnitTest.java",
+   "old_string": "<196 chars>",
+   "new_string": "<258 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\a4e8c78e424b69e2-ticket-created-after-commit.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\SupportTicketServiceUnitTest.java has been updated successful"
+ },
+ {
+  "i": 28,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\a4e8c78e424b69e2-ticket-created-after-commit.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\SupportTicketServiceUnitTest.java",
+   "old_string": "<126 chars>",
+   "new_string": "<191 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\a4e8c78e424b69e2-ticket-created-after-commit.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\SupportTicketServiceUnitTest.java has been updated successful"
+ },
+ {
+  "i": 29,
+  "name": "Bash",
+  "input": {
+   "command": "grep -n \"new SupportTicketService(\\|SupportTicketService(\" src/test/java/com/sm/instagram/platform/unit/controller/SupportTicketControllerFullUnitTest.java src/test/java/com/sm/instagram/platform/integration/service/supportticket/SupportTicketServiceIntegrationTestBase.java src/main/java/com/sm/instagram/platform/support/ticket/SupportTicketController.java 2>/dev/null"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "(Bash completed with no output)"
+ },
+ {
+  "i": 30,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\a4e8c78e424b69e2-ticket-created-after-commit.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\SupportTicketServiceUnitTest.java",
+   "offset": 690,
+   "limit": 40
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "690\t            assertThat(dto.getAdminName()).isEqualTo(\"Admin User\");\n691\t        }\n692\t    }\n693\t\n694\t    // ==================== Entity Tests ====================\n695\t\n696\t    @Nested\n697\t    @Dis"
+ },
+ {
+  "i": 31,
+  "name": "mcp__graph__graph_query",
+  "input": {
+   "statement": "MATCH (e:Entity {file_path: 'backend/src/main/java/com/sm/instagram/platform/subscription/event/InvoiceCreatedEventListener.java'})-[r:Dep]->(t:Entity) WHERE r.rel = 'TESTED_BY' RETURN t.file_path"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "{\"columns\": [\"t.file_path\"], \"rows\": [], \"row_count\": 0, \"truncated\": false}"
+ },
+ {
+  "i": 32,
+  "name": "mcp__graph__graph_query",
+  "input": {
+   "statement": "MATCH (e:Entity) WHERE lower(e.name) CONTAINS 'eventlistenerunittest' RETURN e.file_path LIMIT 20"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "{\"columns\": [\"e.file_path\"], \"rows\": [], \"row_count\": 0, \"truncated\": false}"
+ },
+ {
+  "i": 33,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\a4e8c78e424b69e2-ticket-created-after-commit.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\support\\ticket\\services\\TicketAccessTokenServiceUnitTest.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.support.ticket.services;\n2\t\n3\timport com.sm.instagram.platform.auth.filter.HmacUtils;\n4\timport org.junit.jupiter.api.BeforeEach;\n5\timport org.junit.jupiter.api.Test"
+ },
+ {
+  "i": 34,
+  "name": "Write",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\a4e8c78e424b69e2-ticket-created-after-commit.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\support\\ticket\\event\\SupportTicketCreatedEventListenerUnitTest.java",
+   "content": "<1899 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "File created successfully at: C:\\Users\\Norbert\\put-ws\\runs\\a4e8c78e424b69e2-ticket-created-after-commit.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\support\\ticket\\event\\SupportTicketCreatedEventListene"
+ },
+ {
+  "i": 35,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\a4e8c78e424b69e2-ticket-created-after-commit.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\support\\ticket\\event\\SupportTicketCreatedEventListenerUnitTest.java",
+   "old_string": "<84 chars>",
+   "new_string": "<186 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\a4e8c78e424b69e2-ticket-created-after-commit.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\support\\ticket\\event\\SupportTicketCreatedEventListenerUnitTest.java has be"
+ },
+ {
+  "i": 36,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\a4e8c78e424b69e2-ticket-created-after-commit.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\support\\ticket\\event\\SupportTicketCreatedEventListenerUnitTest.java",
+   "old_string": "<414 chars>",
+   "new_string": "<234 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\a4e8c78e424b69e2-ticket-created-after-commit.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\support\\ticket\\event\\SupportTicketCreatedEventListenerUnitTest.java has be"
+ },
+ {
+  "i": 37,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\a4e8c78e424b69e2-ticket-created-after-commit.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\SupportTicketServiceUnitTest.java",
+   "offset": 80,
+   "limit": 105
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "80\t    private ApplicationEventPublisher eventPublisher;\n81\t\n82\t    @InjectMocks\n83\t    private SupportTicketService service;\n84\t\n85\t    private User testUser;\n86\t    private SupportTicket testTicket;"
+ },
+ {
+  "i": 38,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\a4e8c78e424b69e2-ticket-created-after-commit.r0\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\ticket\\dtos\\SupportTicketDtoIn.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.support.ticket.dtos;\n2\t\n3\timport com.sm.instagram.platform.support.ticket.models.TicketCategory;\n4\timport jakarta.validation.constraints.Email;\n5\timport jakarta.val"
+ },
+ {
+  "i": 39,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\a4e8c78e424b69e2-ticket-created-after-commit.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\SupportTicketServiceUnitTest.java",
+   "offset": 638,
+   "limit": 10
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "638\t\n639\t            // Then\n640\t            verify(ticketRepository).save(argThat(ticket ->\n641\t                    ticket.getStatus() == TicketStatus.RESOLVED\n642\t            ));\n643\t        }\n644\t "
+ },
+ {
+  "i": 40,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\a4e8c78e424b69e2-ticket-created-after-commit.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\SupportTicketServiceUnitTest.java",
+   "offset": 415,
+   "limit": 40
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "415\t    // ==================== Status Transition Tests ====================\n416\t\n417\t    @Nested\n418\t    @DisplayName(\"Status Transitions\")\n419\t    class StatusTransitionTests {\n420\t\n421\t        @Tes"
+ },
+ {
+  "i": 41,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\a4e8c78e424b69e2-ticket-created-after-commit.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\SupportTicketServiceUnitTest.java",
+   "old_string": "<246 chars>",
+   "new_string": "<2172 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\a4e8c78e424b69e2-ticket-created-after-commit.r0\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\SupportTicketServiceUnitTest.java has been updated successful"
+ },
+ {
+  "i": 42,
+  "name": "Bash",
+  "input": {
+   "command": "cd C:/Users/Norbert/put-ws/runs/a4e8c78e424b69e2-ticket-created-after-commit.r0 && ./mvnw -q -Ptest -Dtest=SupportTicketServiceUnitTest,SupportTicketCreatedEventListenerUnitTest -Dsurefire.failIfNoSpecifiedTests=false test 2>&1 | tail -150"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's docu"
+ },
+ {
+  "i": 43,
+  "name": "Bash",
+  "input": {
+   "command": "cd C:/Users/Norbert/put-ws/runs/a4e8c78e424b69e2-ticket-created-after-commit.r0 && ./mvnw -q -Ptest -Dtest=SupportTicketServiceUnitTest,SupportTicketCreatedEventListenerUnitTest,SupportTicketControllerFullUnitTest,TicketAccessTokenServiceUnitTest -Dsurefire.failIfNoSpecifiedTests=false test 2>&1 | tail -60"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "10:47:49.862 [main] INFO  c.s.i.p.s.t.SupportTicketController - GDPR: Operation=createSupportTicket_SUCCESS, TicketRef=CIO-20241201-1234, DataStored=support.request\r\n10:47:49.862 [main] INFO  c.s.i.p."
+ },
+ {
+  "i": 44,
+  "name": "Bash",
+  "input": {
+   "command": "cd C:/Users/Norbert/put-ws/runs/a4e8c78e424b69e2-ticket-created-after-commit.r0 && ./mvnw -Ptest -Dtest=SupportTicketServiceUnitTest,SupportTicketCreatedEventListenerUnitTest,SupportTicketControllerFullUnitTest,TicketAccessTokenServiceUnitTest -Dsurefire.failIfNoSpecifiedTests=false test 2>&1 | grep -E \"BUILD|Tests run|ERROR\""
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 8.971 s -- in com.sm.instagram.platform.support.ticket.event.SupportTicketCreatedEventListenerUnitTest\n[INFO] Tests run: 6, Failu"
+ }
+]

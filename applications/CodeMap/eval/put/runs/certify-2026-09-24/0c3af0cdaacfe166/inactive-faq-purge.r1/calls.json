@@ -1,0 +1,464 @@
+[
+ {
+  "i": 1,
+  "name": "mcp__graph__graph_query",
+  "input": {
+   "statement": "MATCH (e:Entity) WHERE e.file_path STARTS WITH 'backend/' AND lower(e.file_path) CONTAINS 'faq' RETURN e.file_path, e.layer, e.name ORDER BY e.file_path LIMIT 50"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "{\"columns\": [\"e.file_path\", \"e.layer\", \"e.name\"], \"rows\": [[\"backend/src/main/java/com/sm/instagram/platform/support/faq/FaqCategoryController.java\", \"Actor\", \"FaqCategoryController.java\"], [\"backend/"
+ },
+ {
+  "i": 2,
+  "name": "mcp__graph__graph_query",
+  "input": {
+   "statement": "MATCH (e:Entity) WHERE e.file_path STARTS WITH 'backend/src/main/' AND e.name ENDS WITH 'CronJob.java' RETURN e.name, e.file_path ORDER BY e.name"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "{\"columns\": [\"e.name\", \"e.file_path\"], \"rows\": [[\"AnonymousConsentCleanupCronJob.java\", \"backend/src/main/java/com/sm/instagram/platform/legal/AnonymousConsentCleanupCronJob.java\"], [\"ConsentEnforceme"
+ },
+ {
+  "i": 3,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r1\\src\\main\\java\\com\\sm\\instagram\\platform\\legal\\AnonymousConsentCleanupCronJob.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.legal;\n2\t\n3\timport lombok.RequiredArgsConstructor;\n4\timport lombok.extern.slf4j.Slf4j;\n5\timport net.javacrumbs.shedlock.spring.annotation.SchedulerLock;\n6\timport or"
+ },
+ {
+  "i": 4,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r1\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\faq\\services\\FaqService.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.support.faq.services;\n2\t\n3\timport com.sm.instagram.platform.common.base.BaseService;\n4\timport com.sm.instagram.platform.common.exceptions.ResourceNotFoundException;"
+ },
+ {
+  "i": 5,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r1\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\faq\\repositories\\FaqRepository.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.support.faq.repositories;\n2\t\n3\timport com.sm.instagram.platform.common.base.BaseRepository;\n4\timport com.sm.instagram.platform.support.faq.models.Faq;\n5\timport com."
+ },
+ {
+  "i": 6,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r1\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\faq\\models\\Faq.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.support.faq.models;\n2\t\n3\timport com.sm.instagram.platform.common.base.UpdaterTracking;\n4\timport jakarta.persistence.*;\n5\timport jakarta.validation.constraints.NotBl"
+ },
+ {
+  "i": 7,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r1\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\FaqUnitTest.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.unit.service;\n2\t\n3\timport com.sm.instagram.platform.support.faq.dtos.FaqCategoryDtoIn;\n4\timport com.sm.instagram.platform.support.faq.dtos.FaqCategoryDtoOut;\n5\timpo"
+ },
+ {
+  "i": 8,
+  "name": "Grep",
+  "input": {
+   "pattern": "consent.cleanup",
+   "path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r1\\src\\main\\resources",
+   "output_mode": "content",
+   "-n": true
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "src\\main\\resources\\db\\changelog\\2026\\03\\09-03-2026-consent-module-tables.sql:53:-- Partial index for weekly anonymous consent cleanup cron"
+ },
+ {
+  "i": 9,
+  "name": "Bash",
+  "input": {
+   "command": "find src/test -iname \"*CronJob*Test*\" -o -iname \"*CronJobUnitTest*\" | head -30",
+   "description": "Find existing cron job unit tests"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "src/test/java/com/sm/instagram/platform/unit/service/AnonymousConsentCleanupCronJobUnitTest.java\nsrc/test/java/com/sm/instagram/platform/unit/service/ConsentEnforcementCronJobUnitTest.java\nsrc/test/ja"
+ },
+ {
+  "i": 10,
+  "name": "Grep",
+  "input": {
+   "pattern": "support\\.|faq\\.",
+   "path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r1\\src\\main\\resources\\application.yml",
+   "output_mode": "content",
+   "-n": true
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "No matches found"
+ },
+ {
+  "i": 11,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r1\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\AnonymousConsentCleanupCronJobUnitTest.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.unit.service;\n2\t\n3\timport com.sm.instagram.platform.legal.AnonymousConsentCleanupCronJob;\n4\timport com.sm.instagram.platform.legal.LegalConsentService;\n5\timport org"
+ },
+ {
+  "i": 12,
+  "name": "Bash",
+  "input": {
+   "command": "grep -n \"cron\\|shedlock\\|SchedulerLock\\|@EnableScheduling\" src/main/resources/application.yml | head -30",
+   "description": "Look for scheduling related config keys in application.yml"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "205:    cron: \"0 0/15 * * * *\"\n206:    # Maximum emails to process per cron run\n465:    cron: \"0 0 2 * * *\"       # Daily at 2 AM\n468:    cron: \"0 0 3 * * SUN\"     # Weekly on Sunday at 3 AM\n511:    c"
+ },
+ {
+  "i": 13,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r1\\src\\main\\resources\\application.yml",
+   "offset": 455,
+   "limit": 30
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "455\t\n456\t# Note: SameSite policy is hardcoded in Java:\n457\t# - Session cookies (FirebaseIdToken, partialSession, session): SameSite=Strict\n458\t# - OAuth cookies (Meta/Instagram): SameSite=Lax\n459\t# - "
+ },
+ {
+  "i": 14,
+  "name": "Bash",
+  "input": {
+   "command": "find src/test -iname \"FaqService*Test*.java\"",
+   "description": "Find FaqService unit test"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "src/test/java/com/sm/instagram/platform/integration/service/faq/FaqServiceIntegrationTestBase.java\nsrc/test/java/com/sm/instagram/platform/integration/service/faq/FaqService_IntegrationTest.java"
+ },
+ {
+  "i": 15,
+  "name": "Bash",
+  "input": {
+   "command": "grep -rl \"new FaqCategoryService\\|extends BaseService\" src/test/java/com/sm/instagram/platform/unit/service | head -20",
+   "description": "Find unit tests constructing BaseService-derived services"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "src/test/java/com/sm/instagram/platform/unit/service/BaseClassesUnitTest.java"
+ },
+ {
+  "i": 16,
+  "name": "Bash",
+  "input": {
+   "command": "grep -rl \"extends BaseService\" src/main/java/com/sm/instagram/platform/support | head; echo ---; find src/test/java/com/sm/instagram/platform/unit/service -iname \"*Service*.java\" | xargs grep -l \"SpecificationBuilder\\|RepositoryResolver\" 2>/dev/null | head",
+   "description": "Find similar service unit tests using constructor mocks"
+  },
+  "after_marker": false,
+  "is_error": true,
+  "result_head": "Permission to use Bash has been denied because Claude Code is running in don't ask mode. IMPORTANT: You *may* attempt to accomplish this action using other tools that might naturally be used to accomp"
+ },
+ {
+  "i": 17,
+  "name": "Grep",
+  "input": {
+   "pattern": "SpecificationBuilder",
+   "path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r1\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service",
+   "output_mode": "files_with_matches"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "Found 6 files\nsrc\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\UserSocialConnectionServiceUnitTest.java\nsrc\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\UserServiceUnitTest.java\nsrc\\test\\java\\"
+ },
+ {
+  "i": 18,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r1\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\AddressServiceUnitTest.java",
+   "limit": 70
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.unit.service;\n2\t\n3\timport com.sm.instagram.platform.address.*;\n4\timport com.sm.instagram.platform.common.authorization.PermissionUtils;\n5\timport com.sm.instagram.pl"
+ },
+ {
+  "i": 19,
+  "name": "Bash",
+  "input": {
+   "command": "grep -n \"^support:\\|^faq:\" src/main/resources/application.yml",
+   "description": "Search for existing support or faq config sections"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "(Bash completed with no output)"
+ },
+ {
+  "i": 20,
+  "name": "Grep",
+  "input": {
+   "pattern": "support",
+   "path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r1\\src\\main\\resources\\application.yml",
+   "output_mode": "content",
+   "-n": true
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "No matches found"
+ },
+ {
+  "i": 21,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r1\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\faq\\repositories\\FaqRepository.java",
+   "old_string": "<183 chars>",
+   "new_string": "<215 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r1\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\faq\\repositories\\FaqRepository.java has been updated successfully. (file st"
+ },
+ {
+  "i": 22,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r1\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\faq\\repositories\\FaqRepository.java",
+   "old_string": "<166 chars>",
+   "new_string": "<437 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r1\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\faq\\repositories\\FaqRepository.java has been updated successfully. (file st"
+ },
+ {
+  "i": 23,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r1\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\faq\\services\\FaqService.java",
+   "old_string": "<108 chars>",
+   "new_string": "<140 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r1\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\faq\\services\\FaqService.java has been updated successfully. (file state is "
+ },
+ {
+  "i": 24,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r1\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\faq\\services\\FaqService.java",
+   "old_string": "<40 chars>",
+   "new_string": "<599 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r1\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\faq\\services\\FaqService.java has been updated successfully. (file state is "
+ },
+ {
+  "i": 25,
+  "name": "Write",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r1\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\faq\\services\\InactiveFaqPurgeCronJob.java",
+   "content": "<1519 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "File created successfully at: C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r1\\src\\main\\java\\com\\sm\\instagram\\platform\\support\\faq\\services\\InactiveFaqPurgeCronJob.java (file state "
+ },
+ {
+  "i": 26,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r1\\src\\main\\resources\\application.yml",
+   "old_string": "<350 chars>",
+   "new_string": "<546 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r1\\src\\main\\resources\\application.yml has been updated successfully."
+ },
+ {
+  "i": 27,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r1\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\AddressServiceUnitTest.java",
+   "offset": 70,
+   "limit": 40
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "70\t    private PermissionUtils permissionUtils;\n71\t\n72\t    @Mock\n73\t    private ApplicationContext applicationContext;\n74\t\n75\t    private AddressService service;\n76\t\n77\t    @BeforeEach\n78\t    void set"
+ },
+ {
+  "i": 28,
+  "name": "Write",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r1\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\FaqServiceUnitTest.java",
+   "content": "<3920 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "File created successfully at: C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r1\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\FaqServiceUnitTest.java (file state is current in"
+ },
+ {
+  "i": 29,
+  "name": "Write",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r1\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\InactiveFaqPurgeCronJobUnitTest.java",
+   "content": "<2313 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "File created successfully at: C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r1\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\InactiveFaqPurgeCronJobUnitTest.java (file state "
+ },
+ {
+  "i": 30,
+  "name": "Bash",
+  "input": {
+   "command": "cd \"C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r1\" && ./mvnw -q test -Ptest -Dtest=FaqServiceUnitTest,InactiveFaqPurgeCronJobUnitTest,FaqUnitTest -Dsurefire.failIfNoSpecifiedTests=false 2>&1 | tail -150",
+   "description": "Run new and existing FAQ-related unit tests",
+   "timeout": 300000
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's docu"
+ },
+ {
+  "i": 31,
+  "name": "Bash",
+  "input": {
+   "command": "cd \"C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r1\" && ./mvnw -q test -Ptest -Dtest=FaqServiceUnitTest,InactiveFaqPurgeCronJobUnitTest,FaqUnitTest -Dsurefire.failIfNoSpecifiedTests=false 2>&1 | grep -E \"Tests run|BUILD|ERROR.*Fail|FAIL\" | head -40",
+   "description": "Check test run summary",
+   "timeout": 300000
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "(Bash completed with no output)"
+ },
+ {
+  "i": 32,
+  "name": "Bash",
+  "input": {
+   "command": "cd \"C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r1\" && ./mvnw -q test -Ptest -Dtest=FaqServiceUnitTest,InactiveFaqPurgeCronJobUnitTest,FaqUnitTest -Dsurefire.failIfNoSpecifiedTests=false > /tmp/test_out.log 2>&1; echo \"EXIT_CODE=$?\"; tail -5 /tmp/test_out.log",
+   "description": "Re-run tests and check exit code",
+   "timeout": 300000
+  },
+  "after_marker": false,
+  "is_error": true,
+  "result_head": "Permission to use Bash has been denied because Claude Code is running in don't ask mode. IMPORTANT: You *may* attempt to accomplish this action using other tools that might naturally be used to accomp"
+ },
+ {
+  "i": 33,
+  "name": "Bash",
+  "input": {
+   "command": "cd \"C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r1\" && ./mvnw -q test -Ptest -Dtest=FaqServiceUnitTest,InactiveFaqPurgeCronJobUnitTest,FaqUnitTest -Dsurefire.failIfNoSpecifiedTests=false; echo \"EXIT_CODE=$?\"",
+   "description": "Run FAQ-related unit tests and report exit code",
+   "timeout": 300000
+  },
+  "after_marker": false,
+  "is_error": true,
+  "result_head": "Permission to use Bash has been denied because Claude Code is running in don't ask mode. IMPORTANT: You *may* attempt to accomplish this action using other tools that might naturally be used to accomp"
+ },
+ {
+  "i": 34,
+  "name": "Bash",
+  "input": {
+   "command": "cd \"C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r1\" && ./mvnw -q test -Ptest -Dtest=FaqServiceUnitTest,InactiveFaqPurgeCronJobUnitTest,FaqUnitTest -Dsurefire.failIfNoSpecifiedTests=false",
+   "description": "Run FAQ-related unit tests",
+   "timeout": 300000
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's docu"
+ },
+ {
+  "i": 35,
+  "name": "Bash",
+  "input": {
+   "command": "cd \"C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r1\" && for f in target/surefire-reports/com.sm.instagram.platform.unit.service.FaqServiceUnitTest.txt target/surefire-reports/com.sm.instagram.platform.unit.service.InactiveFaqPurgeCronJobUnitTest.txt target/surefire-reports/com.sm.instagram.platform.unit.service.FaqUnitTest.txt; do echo \"== $f ==\"; cat \"$f\"; done",
+   "description": "Show surefire test summaries for the FAQ-related unit tests"
+  },
+  "after_marker": false,
+  "is_error": true,
+  "result_head": "Permission to use Bash has been denied because Claude Code is running in don't ask mode. IMPORTANT: You *may* attempt to accomplish this action using other tools that might naturally be used to accomp"
+ },
+ {
+  "i": 36,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r1\\target\\surefire-reports\\com.sm.instagram.platform.unit.service.FaqServiceUnitTest.txt"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\t-------------------------------------------------------------------------------\n2\tTest set: com.sm.instagram.platform.unit.service.FaqServiceUnitTest\n3\t----------------------------------------------"
+ },
+ {
+  "i": 37,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r1\\target\\surefire-reports\\com.sm.instagram.platform.unit.service.InactiveFaqPurgeCronJobUnitTest.txt"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\t-------------------------------------------------------------------------------\n2\tTest set: com.sm.instagram.platform.unit.service.InactiveFaqPurgeCronJobUnitTest\n3\t---------------------------------"
+ },
+ {
+  "i": 38,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r1\\target\\surefire-reports\\com.sm.instagram.platform.unit.service.FaqUnitTest.txt"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\t-------------------------------------------------------------------------------\n2\tTest set: com.sm.instagram.platform.unit.service.FaqUnitTest\n3\t-----------------------------------------------------"
+ },
+ {
+  "i": 39,
+  "name": "Bash",
+  "input": {
+   "command": "ls \"C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r1\\target\\surefire-reports\" | grep -i faq",
+   "description": "List surefire report files related to FAQ tests"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "TEST-com.sm.instagram.platform.unit.service.FaqServiceUnitTest$PurgeInactiveOlderThan.xml\nTEST-com.sm.instagram.platform.unit.service.FaqServiceUnitTest.xml\nTEST-com.sm.instagram.platform.unit.service"
+ },
+ {
+  "i": 40,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r1\\target\\surefire-reports\\com.sm.instagram.platform.unit.service.FaqServiceUnitTest$PurgeInactiveOlderThan.txt"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\t-------------------------------------------------------------------------------\n2\tTest set: com.sm.instagram.platform.unit.service.FaqServiceUnitTest$PurgeInactiveOlderThan\n3\t-----------------------"
+ },
+ {
+  "i": 41,
+  "name": "Read",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\0c3af0cdaacfe166-inactive-faq-purge.r1\\target\\surefire-reports\\com.sm.instagram.platform.unit.service.InactiveFaqPurgeCronJobUnitTest$PurgeInactiveFaqs.txt"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\t-------------------------------------------------------------------------------\n2\tTest set: com.sm.instagram.platform.unit.service.InactiveFaqPurgeCronJobUnitTest$PurgeInactiveFaqs\n3\t---------------"
+ }
+]

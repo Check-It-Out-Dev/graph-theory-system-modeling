@@ -1,0 +1,189 @@
+{
+    "task": "exchange-rate-port",
+    "candidate": "0c3af0cdaacfe166",
+    "score": 1.0,
+    "components": {
+        "hidden_pass": 1.0,
+        "conventions_det": 1.0,
+        "tests_written": 1.0,
+        "process_det": 1.0,
+        "convention_fit": 1.0,
+        "design_fit": 1.0,
+        "correctness": 1.0,
+        "test_quality": 1.0,
+        "graph_use": 1.0
+    },
+    "checks": {
+        "graph_first": {
+            "value": 1.0,
+            "applicable": true,
+            "passed": true,
+            "seen": "3 graph queries before the first edit (3 in all)"
+        },
+        "exemplar_read": {
+            "value": 1.0,
+            "applicable": true,
+            "passed": true,
+            "seen": "read before the first edit: BusinessRuleTranslatableException.java, VatRegistryPort.java"
+        },
+        "feature_first": {
+            "value": 1.0,
+            "applicable": true,
+            "passed": true,
+            "seen": "4 of 4 new main files under the feature package"
+        },
+        "constructor_injection": {
+            "value": 1.0,
+            "applicable": true,
+            "passed": true,
+            "seen": "0 added @Autowired lines; 0 new beans with final fields and no constructor"
+        },
+        "after_commit_listener": {
+            "value": null,
+            "applicable": false,
+            "passed": null,
+            "seen": "does not apply to this task"
+        },
+        "scheduler_lock": {
+            "value": null,
+            "applicable": false,
+            "passed": null,
+            "seen": "does not apply to this task"
+        },
+        "ports_adapters": {
+            "value": 1.0,
+            "applicable": true,
+            "passed": true,
+            "seen": "port interface=True, adapter implementing it=True, adapter imports outside the adapter package=0"
+        },
+        "translatable_errors": {
+            "value": 1.0,
+            "applicable": true,
+            "passed": true,
+            "seen": "1 of 1 added throws are translatable; 1 of 1 message keys in both bundles"
+        },
+        "liquibase_changeset": {
+            "value": null,
+            "applicable": false,
+            "passed": null,
+            "seen": "does not apply to this task"
+        },
+        "version_field": {
+            "value": null,
+            "applicable": false,
+            "passed": null,
+            "seen": "does not apply to this task"
+        },
+        "controller_guards": {
+            "value": null,
+            "applicable": false,
+            "passed": null,
+            "seen": "does not apply to this task"
+        },
+        "dto_naming": {
+            "value": null,
+            "applicable": false,
+            "passed": null,
+            "seen": "does not apply to this task"
+        },
+        "tests_written": {
+            "value": 1.0,
+            "applicable": true,
+            "passed": true,
+            "seen": "2 new unit test classes; Mockito without a Spring context=2/2; compiles=True; pass=True"
+        },
+        "build_green": {
+            "value": 1.0,
+            "applicable": true,
+            "passed": true,
+            "seen": "test-compile green"
+        },
+        "scope": {
+            "value": 1.0,
+            "applicable": true,
+            "passed": true,
+            "seen": "9 files changed; 0 outside src/main and src/test; 0 tests deleted"
+        },
+        "marker": {
+            "value": 1.0,
+            "applicable": true,
+            "passed": true,
+            "seen": "marker=present, 0 tool calls after it"
+        },
+        "hidden_pass": {
+            "value": 1.0,
+            "applicable": true,
+            "passed": true,
+            "seen": "hidden 5/5, pass-to-pass 41/41"
+        }
+    },
+    "verdict": {
+        "rules_violated": 0,
+        "files_out_of_scope": 0,
+        "parallel_mechanisms": 0,
+        "correctness": 5,
+        "convention_fit": 5,
+        "design_fit": 5,
+        "test_quality": 5,
+        "graph_use": 5,
+        "reasons": {
+            "correctness": "The port, properties bound to currency.fixed-rates, and the adapter match the interface. The adapter matches case-insensitively and always returns 1 for PLN. toPln multiplies and rounds HALF_UP to 2 decimals and throws the stated key with the ISO code. Hidden tests 5/5.",
+            "convention_fit": "ExchangeRatePort sits in currency/port and FixedExchangeRateAdapter in currency/adapter. Both classes use explicit constructor injection. BusinessRuleTranslatableException carries a key added to messages_en and messages_pl. The unit tests use MockitoExtension.",
+            "design_fit": "CurrencyConversionService depends only on ExchangeRatePort, so swapping the provider needs no change there. Rates come from the existing @ConfigurationProperties pattern. The footprint is small and the classes are cohesive. The properties class uses @Configuration, which is a minor style choice.",
+            "test_quality": "The adapter tests cover PLN in either case, case-insensitive lookup and a missing code. The service tests cover multiplication, the HALF_UP boundary, and the exception's key and args. All run without a Spring context. A null ISO code is not tested.",
+            "graph_use": "Before editing, graph queries found the existing *Port/*Adapter files, the currency entities and the TranslatableException subclasses. The agent then read VatRegistryPort and BialaListaVatAdapter as examples, and the new classes follow their structure."
+        },
+        "rubric": "r5",
+        "model": "claude-opus-5-5"
+    },
+    "tests": {
+        "own_classes": [
+            "CurrencyConversionServiceUnitTest",
+            "FixedExchangeRateAdapterUnitTest"
+        ],
+        "build_green": true,
+        "compile_seconds": 20.5,
+        "own": [
+            6,
+            6
+        ],
+        "own_reports": {
+            "CurrencyConversionServiceUnitTest": {
+                "tests": 3,
+                "failures": 0,
+                "errors": 0,
+                "skipped": 0
+            },
+            "FixedExchangeRateAdapterUnitTest": {
+                "tests": 3,
+                "failures": 0,
+                "errors": 0,
+                "skipped": 0
+            }
+        },
+        "hidden": [
+            5,
+            5
+        ],
+        "pass_to_pass": [
+            41,
+            41
+        ],
+        "hidden_after_compile": true,
+        "acceptance_reports": {
+            "ExchangeRateAcceptanceTest": {
+                "tests": 5,
+                "failures": 0,
+                "errors": 0,
+                "skipped": 0
+            },
+            "CurrencyServiceUnitTest": {
+                "tests": 41,
+                "failures": 0,
+                "errors": 0,
+                "skipped": 0
+            }
+        }
+    },
+    "budget_exhausted": false
+}

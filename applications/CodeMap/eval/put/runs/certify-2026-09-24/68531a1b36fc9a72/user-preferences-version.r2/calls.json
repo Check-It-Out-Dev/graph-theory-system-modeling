@@ -1,0 +1,485 @@
+[
+ {
+  "i": 1,
+  "name": "mcp__graph__graph_query",
+  "input": {
+   "statement": "MATCH (e:Entity) WHERE e.file_path STARTS WITH 'backend/' AND lower(e.file_path) CONTAINS 'userpreferences' RETURN e.file_path, e.layer, e.curated, e.line_count ORDER BY e.file_path LIMIT 50"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "{\"columns\": [\"e.file_path\", \"e.layer\", \"e.curated\", \"e.line_count\"], \"rows\": [[\"backend/src/main/java/com/sm/instagram/platform/userpreferences/UserPreferences.java\", \"Resource\", 0, 116], [\"backend/sr"
+ },
+ {
+  "i": 2,
+  "name": "mcp__graph__graph_query",
+  "input": {
+   "statement": "MATCH (d:Entity)-[r:Dep]->(e:Entity {file_path: 'backend/src/main/java/com/sm/instagram/platform/userpreferences/UserPreferences.java'}) RETURN r.rel, d.file_path ORDER BY r.rel, d.file_path"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "{\"columns\": [\"r.rel\", \"d.file_path\"], \"rows\": [[\"IMPORTS\", \"backend/src/main/java/com/sm/instagram/platform/appliedopportunities/AppliedOpportunityService.java\"], [\"IMPORTS\", \"backend/src/main/java/co"
+ },
+ {
+  "i": 3,
+  "name": "mcp__graph__graph_query",
+  "input": {
+   "statement": "MATCH (e:Entity)-[r:Dep]->(t:Entity) WHERE r.rel = 'TESTED_BY' AND e.file_path IN ['backend/src/main/java/com/sm/instagram/platform/userpreferences/UserPreferences.java', 'backend/src/main/java/com/sm/instagram/platform/userpreferences/UserPreferencesService.java', 'backend/src/main/java/com/sm/instagram/platform/userpreferences/UserPreferencesMapping.java', 'backend/src/main/java/com/sm/instagram/platform/userpreferences/UserPreferencesRepository.java'] RETURN e.name, t.file_path ORDER BY e.name, t.file_path"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "{\"columns\": [\"e.name\", \"t.file_path\"], \"rows\": [[\"UserPreferencesService.java\", \"backend/src/test/java/com/sm/instagram/platform/unit/service/UserPreferencesServiceUnitTest.java\"]], \"row_count\": 1, \"t"
+ },
+ {
+  "i": 4,
+  "name": "mcp__graph__graph_query",
+  "input": {
+   "statement": "MATCH (e:Entity) WHERE e.file_path STARTS WITH 'backend/src/main/' RETURN e.file_path FROM e WHERE false"
+  },
+  "after_marker": false,
+  "is_error": true,
+  "result_head": "{\"error\": \"Parser exception: Invalid input < FROM>: expected rule iC_Statements (line: 1, offset: 123)\"}"
+ },
+ {
+  "i": 5,
+  "name": "Bash",
+  "input": {
+   "command": "grep -rl \"@Version\" \"backend/src/main/java\" 2>/dev/null; echo \"---\"; grep -rln \"@Version\" \"C:/Users/Norbert/put-ws/runs/68531a1b36fc9a72-user-preferences-version.r2/backend/src/main/java\" 2>/dev/null",
+   "description": "Search for existing @Version usage in entities"
+  },
+  "after_marker": false,
+  "is_error": true,
+  "result_head": "Exit code 2\n---"
+ },
+ {
+  "i": 6,
+  "name": "Bash",
+  "input": {
+   "command": "pwd && ls",
+   "description": "Show current directory and contents"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "/c/Users/Norbert/put-ws/runs/68531a1b36fc9a72-user-preferences-version.r2\nCONTRIBUTING.md\nChromaticNumbersInSystemModeling.md\nLICENSE\nREADME.md\nansible/\nbuild-backend.bat\ndeployment/\ndocker/\ndocker-co"
+ },
+ {
+  "i": 7,
+  "name": "Grep",
+  "input": {
+   "pattern": "@Version",
+   "path": "src/main/java",
+   "output_mode": "files_with_matches"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "Found 9 files\nsrc\\main\\java\\com\\sm\\instagram\\platform\\user\\User.java\nsrc\\main\\java\\com\\sm\\instagram\\platform\\subscription\\stripe\\StripeWebhookHandler.java\nsrc\\main\\java\\com\\sm\\instagram\\platform\\subsc"
+ },
+ {
+  "i": 8,
+  "name": "Glob",
+  "input": {
+   "pattern": "src/main/resources/db/changelog/**"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "src\\main\\resources\\db\\changelog\\2025\\01\\15-01-2025-cio-395-content-type-translations.sql\nsrc\\main\\resources\\db\\changelog\\2025\\01\\27-01-2025-fix-jewelry-store-translation.sql\nsrc\\main\\resources\\db\\chan"
+ },
+ {
+  "i": 9,
+  "name": "Bash",
+  "input": {
+   "command": "cat \"src/main/resources/db/changelog/2025/12/20-12-2025-add-version-to-applied-opportunity.sql\"",
+   "description": "Read exemplar changeset for adding version column"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "-- Liquibase formatted SQL\r\n-- changeset norbert:add-version-to-applied-opportunity-table\r\n\r\n-- Add JPA @Version column to applied_opportunity table for optimistic locking protection\r\n-- Prevents data"
+ },
+ {
+  "i": 10,
+  "name": "Grep",
+  "input": {
+   "pattern": "version",
+   "path": "src/main/java/com/sm/instagram/platform/appliedopportunities/AppliedOpportunity.java",
+   "-n": true,
+   "-i": true
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "Found 1 file\nsrc\\main\\java\\com\\sm\\instagram\\platform\\appliedopportunities\\AppliedOpportunity.java"
+ },
+ {
+  "i": 11,
+  "name": "Bash",
+  "input": {
+   "command": "echo \"=== user ===\" && cat \"src/main/resources/db/changelog/2025/12/20-12-2025-add-version-to-user.sql\"\necho \"=== partnership-opportunity ===\" && cat \"src/main/resources/db/changelog/2025/12/20-12-2025-add-version-to-partnership-opportunity.sql\"\necho \"=== content ===\" && cat \"src/main/resources/db/changelog/2026/03/01-03-2026-add-version-to-content.sql\"",
+   "description": "Read other version-column changeset exemplars"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "=== user ===\n-- Liquibase formatted SQL\r\n-- changeset norbert:add-version-to-user-table\r\n\r\n-- Add JPA @Version column to user table for optimistic locking protection\r\n-- Prevents data loss from concur"
+ },
+ {
+  "i": 12,
+  "name": "Bash",
+  "input": {
+   "command": "grep -rn \"rollback\" \"src/main/resources/db/changelog/2026/03/01-03-2026-add-version-to-content.sql\" \"src/main/resources/db/changelog/2025/12/20-12-2025-add-version-to-user.sql\"",
+   "description": "Check rollback line format in exemplars"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "src/main/resources/db/changelog/2025/12/20-12-2025-add-version-to-user.sql:10:--rollback ALTER TABLE \"user\" DROP COLUMN version;"
+ },
+ {
+  "i": 13,
+  "name": "Read",
+  "input": {
+   "file_path": "src/main/java/com/sm/instagram/platform/userpreferences/UserPreferences.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.userpreferences;\n2\t\n3\timport com.sm.instagram.platform.notification.EmailFrequency;\n4\timport com.sm.instagram.platform.user.User;\n5\timport jakarta.persistence.*;\n6\t"
+ },
+ {
+  "i": 14,
+  "name": "Grep",
+  "input": {
+   "pattern": "version|Version",
+   "path": "src/main/java/com/sm/instagram/platform/appliedopportunities/AppliedOpportunity.java",
+   "-n": true,
+   "-C": 3
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "Found 1 file\nsrc\\main\\java\\com\\sm\\instagram\\platform\\appliedopportunities\\AppliedOpportunity.java"
+ },
+ {
+  "i": 15,
+  "name": "Grep",
+  "input": {
+   "pattern": "version",
+   "path": "src/main/java/com/sm/instagram/platform/appliedopportunities/AppliedOpportunity.java",
+   "-i": true,
+   "-n": true,
+   "-C": 2,
+   "output_mode": "content"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "20-import jakarta.persistence.Table;\n21-import jakarta.persistence.UniqueConstraint;\n22:import jakarta.persistence.Version;\n23-import jakarta.validation.constraints.NotNull;\n24-import jakarta.validati"
+ },
+ {
+  "i": 16,
+  "name": "Grep",
+  "input": {
+   "pattern": "Version",
+   "path": "src/test/java/com/sm/instagram/platform/unit/service/AppliedOpportunityServiceUnitTest.java",
+   "-n": true,
+   "-C": 3,
+   "output_mode": "content"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "No matches found"
+ },
+ {
+  "i": 17,
+  "name": "Read",
+  "input": {
+   "file_path": "src/main/java/com/sm/instagram/platform/userpreferences/UserPreferencesMapping.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.userpreferences;\n2\t\n3\timport com.sm.instagram.platform.common.util.mappers.EnumTranslationService;\n4\timport com.sm.instagram.platform.common.util.mappers.MappingCon"
+ },
+ {
+  "i": 18,
+  "name": "Grep",
+  "input": {
+   "pattern": "OptimisticLock",
+   "path": "src",
+   "output_mode": "files_with_matches"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "Found 11 files\nsrc\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\subscription\\StripeWebhookControllerUnitTest.java\nsrc\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\PasswordResetServiceUnitTest."
+ },
+ {
+  "i": 19,
+  "name": "Read",
+  "input": {
+   "file_path": "src/main/java/com/sm/instagram/platform/userpreferences/UserPreferencesDtoIn.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.userpreferences;\n2\t\n3\timport io.swagger.v3.oas.annotations.media.Schema;\n4\timport jakarta.validation.constraints.Size;\n5\timport lombok.Getter;\n6\timport lombok.Sette"
+ },
+ {
+  "i": 20,
+  "name": "Read",
+  "input": {
+   "file_path": "src/main/java/com/sm/instagram/platform/userpreferences/UserPreferencesDtoOut.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.userpreferences;\n2\t\n3\timport com.fasterxml.jackson.annotation.JsonInclude;\n4\timport io.swagger.v3.oas.annotations.media.Schema;\n5\timport lombok.Getter;\n6\timport lom"
+ },
+ {
+  "i": 21,
+  "name": "Bash",
+  "input": {
+   "command": "grep -n -i -B3 -A10 \"OptimisticLock\" \"src/main/java/com/sm/instagram/platform/common/exceptions/handlers/BusinessExceptionHandler.java\"",
+   "description": "Show OptimisticLock handling in global exception handler"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "8-import org.springframework.context.MessageSource;\n9-import org.springframework.core.annotation.Order;\n10-import org.springframework.dao.DataIntegrityViolationException;\n11:import org.springframework"
+ },
+ {
+  "i": 22,
+  "name": "Bash",
+  "input": {
+   "command": "grep -rn \"version\" src/test/java/com/sm/instagram/platform/unit/service/*.java -i | grep -i \"version\" | grep -iv \"app.*Version\\|apiVersion\" | head -50",
+   "description": "Search unit tests for version reflection assertions"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "src/test/java/com/sm/instagram/platform/unit/service/AuthorizationMoreUnitTest.java:129:                .claim(\"tokenVersion\", 1L)\nsrc/test/java/com/sm/instagram/platform/unit/service/AuthorizationMor"
+ },
+ {
+  "i": 23,
+  "name": "Grep",
+  "input": {
+   "pattern": "Version.class\\)|getDeclaredField\\(\"version\"\\)",
+   "path": "src/test",
+   "output_mode": "content",
+   "-n": true
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\ConsentServiceUnitTest.java:188:            when(consentVersionRepository.save(any(ConsentVersion.class))).thenReturn(savedVersion);\nsrc\\test\\java\\"
+ },
+ {
+  "i": 24,
+  "name": "Read",
+  "input": {
+   "file_path": "src/main/java/com/sm/instagram/platform/userpreferences/UserPreferencesService.java"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.userpreferences;\n2\t\n3\timport com.sm.instagram.platform.common.authorization.PermissionUtils;\n4\timport com.sm.instagram.platform.common.base.BaseService;\n5\timport co"
+ },
+ {
+  "i": 25,
+  "name": "Bash",
+  "input": {
+   "command": "find src/main/java/com/sm/instagram/platform/appliedopportunities -iname \"*Mapping*\"",
+   "description": "Find AppliedOpportunity mapping configurer file"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "src/main/java/com/sm/instagram/platform/appliedopportunities/AppliedOpportunityContentMapping.java\nsrc/main/java/com/sm/instagram/platform/appliedopportunities/AppliedOpportunityMapping.java"
+ },
+ {
+  "i": 26,
+  "name": "Bash",
+  "input": {
+   "command": "grep -n -i \"version\" src/main/java/com/sm/instagram/platform/appliedopportunities/AppliedOpportunityMapping.java",
+   "description": "Check for version mapping/skip in AppliedOpportunityMapping"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "(Bash completed with no output)"
+ },
+ {
+  "i": 27,
+  "name": "Grep",
+  "input": {
+   "pattern": "isAnnotationPresent",
+   "path": "src/test",
+   "output_mode": "content",
+   "-n": true
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "src\\test\\java\\com\\sm\\instagram\\platform\\unit\\config\\ErrorControllerNotPublishedUnitTest.java:35:        assertThat(CustomErrorController.class.isAnnotationPresent(Hidden.class))"
+ },
+ {
+  "i": 28,
+  "name": "Read",
+  "input": {
+   "file_path": "src/test/java/com/sm/instagram/platform/unit/service/UserPreferencesServiceUnitTest.java",
+   "limit": 100
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "1\tpackage com.sm.instagram.platform.unit.service;\n2\t\n3\timport com.sm.instagram.platform.common.authorization.PermissionUtils;\n4\timport com.sm.instagram.platform.notification.EmailFrequency;\n5\timport c"
+ },
+ {
+  "i": 29,
+  "name": "Grep",
+  "input": {
+   "pattern": "@Nested|@DisplayName\\(\"",
+   "path": "src/test/java/com/sm/instagram/platform/unit/service/UserPreferencesServiceUnitTest.java",
+   "-n": true,
+   "output_mode": "content"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "36:@DisplayName(\"UserPreferencesService Unit Tests\")\n73:    @Nested\n74:    @DisplayName(\"UserPreferences Entity Tests\")\n78:        @DisplayName(\"should create preferences with default values\")\n101:   "
+ },
+ {
+  "i": 30,
+  "name": "Read",
+  "input": {
+   "file_path": "src/test/java/com/sm/instagram/platform/unit/service/UserPreferencesServiceUnitTest.java",
+   "offset": 140,
+   "limit": 35
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "140\t            assertThat(preferences.getGdprMarketingConsent()).isTrue();\n141\t        }\n142\t\n143\t        @Test\n144\t        @DisplayName(\"should handle 2FA setting\")\n145\t        void shouldHandle2FAS"
+ },
+ {
+  "i": 31,
+  "name": "Bash",
+  "input": {
+   "command": "grep -n \"class EnumTranslationService\\|public EnumTranslationService\\|class UpdaterIdConverter\\|public UpdaterIdConverter\" -A5 src/main/java/com/sm/instagram/platform/common/util/mappers/EnumTranslationService.java src/main/java/com/sm/instagram/platform/common/util/mappers/UpdaterIdConverter.java 2>/dev/null",
+   "description": "Inspect mapper helper classes constructors"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "src/main/java/com/sm/instagram/platform/common/util/mappers/EnumTranslationService.java:11:public class EnumTranslationService {\nsrc/main/java/com/sm/instagram/platform/common/util/mappers/EnumTransla"
+ },
+ {
+  "i": 32,
+  "name": "Bash",
+  "input": {
+   "command": "tail -n 30 src/main/resources/db/changelog/changelog.xml",
+   "description": "Show tail of changelog.xml for include convention"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "    <!-- March 2026: Subscription module — plans, billing periods, invoice tracking, terms versioning -->\r\n    <include file=\"2026/03/22-03-2026-subscription-tables.sql\" relativeToChangelogFile=\"true\""
+ },
+ {
+  "i": 33,
+  "name": "Bash",
+  "input": {
+   "command": "ls src/main/resources/db/changelog/2026/09/ 2>/dev/null; date",
+   "description": "Check existing September 2026 changeset directory"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "02-09-2026-widen-ticket-reference-column.sql\nThu Sep 24 15:10:06 CEDT 2026"
+ },
+ {
+  "i": 34,
+  "name": "Write",
+  "input": {
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-user-preferences-version.r2\\src\\main\\resources\\db\\changelog\\2026\\09\\24-09-2026-add-version-to-user-preferences.sql",
+   "content": "<405 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "File created successfully at: C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-user-preferences-version.r2\\src\\main\\resources\\db\\changelog\\2026\\09\\24-09-2026-add-version-to-user-preferences.sql (file sta"
+ },
+ {
+  "i": 35,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-user-preferences-version.r2\\src\\main\\resources\\db\\changelog\\changelog.xml",
+   "old_string": "<235 chars>",
+   "new_string": "<457 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-user-preferences-version.r2\\src\\main\\resources\\db\\changelog\\changelog.xml has been updated successfully."
+ },
+ {
+  "i": 36,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-user-preferences-version.r2\\src\\main\\java\\com\\sm\\instagram\\platform\\userpreferences\\UserPreferences.java",
+   "old_string": "<176 chars>",
+   "new_string": "<285 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-user-preferences-version.r2\\src\\main\\java\\com\\sm\\instagram\\platform\\userpreferences\\UserPreferences.java has been updated successfully. (file sta"
+ },
+ {
+  "i": 37,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-user-preferences-version.r2\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\UserPreferencesServiceUnitTest.java",
+   "old_string": "<477 chars>",
+   "new_string": "<2123 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-user-preferences-version.r2\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\UserPreferencesServiceUnitTest.java has been updated successfull"
+ },
+ {
+  "i": 38,
+  "name": "Edit",
+  "input": {
+   "replace_all": false,
+   "file_path": "C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-user-preferences-version.r2\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\UserPreferencesServiceUnitTest.java",
+   "old_string": "<959 chars>",
+   "new_string": "<1286 chars>"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "The file C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-user-preferences-version.r2\\src\\test\\java\\com\\sm\\instagram\\platform\\unit\\service\\UserPreferencesServiceUnitTest.java has been updated successfull"
+ },
+ {
+  "i": 39,
+  "name": "Bash",
+  "input": {
+   "command": "cd \"C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-user-preferences-version.r2\" && ./mvnw -q test -Ptest -Dtest=UserPreferencesServiceUnitTest -Dsurefire.failIfNoSpecifiedTests=false 2>&1 | tail -150",
+   "description": "Run UserPreferencesServiceUnitTest",
+   "timeout": 300000
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's docu"
+ },
+ {
+  "i": 40,
+  "name": "Bash",
+  "input": {
+   "command": "cd \"C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-user-preferences-version.r2\" && ./mvnw -q test-compile -Ptest 2>&1 | tail -150",
+   "description": "Run test-compile for whole project",
+   "timeout": 300000
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "(Bash completed with no output)"
+ },
+ {
+  "i": 41,
+  "name": "Bash",
+  "input": {
+   "command": "cd \"C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-user-preferences-version.r2\" && ./mvnw -q test -Ptest -Dtest=UserPreferencesControllerUnitTest -Dsurefire.failIfNoSpecifiedTests=false 2>&1 | tail -150",
+   "description": "Run UserPreferencesControllerUnitTest",
+   "timeout": 300000
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's docu"
+ },
+ {
+  "i": 42,
+  "name": "Bash",
+  "input": {
+   "command": "cd \"C:\\Users\\Norbert\\put-ws\\runs\\68531a1b36fc9a72-user-preferences-version.r2\" && echo \"--- header ---\" && head -1 \"src/main/resources/db/changelog/2026/09/24-09-2026-add-version-to-user-preferences.sql\" | cat -A | head -1\necho \"--- lenient check ---\" && grep -n \"LENIENT\\|lenient(\" src/test/java/com/sm/instagram/platform/unit/service/UserPreferencesServiceUnitTest.java\necho \"--- extendwith ---\" && grep -n \"@ExtendWith(MockitoExtension.class)\" src/test/java/com/sm/instagram/platform/unit/service/UserPreferencesServiceUnitTest.java\necho \"--- git status ---\" && git status --short",
+   "description": "Verify changeset header literal and test annotations"
+  },
+  "after_marker": false,
+  "is_error": false,
+  "result_head": "--- header ---\n--liquibase formatted sql$\n--- lenient check ---\n--- extendwith ---\n41:@ExtendWith(MockitoExtension.class)\n--- git status ---\n M src/main/java/com/sm/instagram/platform/userpreferences/"
+ }
+]

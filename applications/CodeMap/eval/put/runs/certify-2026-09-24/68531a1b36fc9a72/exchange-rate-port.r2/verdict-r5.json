@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 5,
+  "test_quality": 5,
+  "graph_use": 5,
+  "reasons": {
+   "correctness": "Port, properties, adapter and service match the interface exactly. Case-insensitive lookup and PLN=1 are handled. HALF_UP to 2 decimals. The missing-rate error carries the key and ISO code. Build green, 5/5 hidden tests.",
+   "convention_fit": "ExchangeRatePort sits in currency/port and FixedExchangeRateAdapter in currency/adapter. The service depends only on the port and uses an explicit constructor. It throws BusinessRuleTranslatableException, and the key is in both messages_en and messages_pl.",
+   "design_fit": "Cohesive split: the adapter normalises keys once, the service only multiplies and rounds, and the rates are bound through a properties class like RegistryProperties. One small risk: Collectors.toMap throws on case-duplicate keys.",
+   "test_quality": "Two MockitoExtension unit tests, no Spring context. They cover exact and case-insensitive lookup, PLN not configured, unknown currency, rounding including the 0.005 boundary, and the exception key and args. 7/7 pass.",
+   "graph_use": "Graph queries found Port/Adapter/Properties exemplars, the TranslatableException classes, TESTED_BY edges and the currency package before any edit. The agent then read VatRegistryPort, BialaListaVatAdapter and their test and mirrored them."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 1045,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 27847
+ },
+ "is_error": false
+}

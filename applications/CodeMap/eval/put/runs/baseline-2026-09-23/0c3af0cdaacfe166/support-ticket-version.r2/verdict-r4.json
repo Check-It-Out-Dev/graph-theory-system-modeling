@@ -1,0 +1,29 @@
+{
+ "rubric": "r4",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 5,
+  "test_quality": 2,
+  "graph_use": 4,
+  "reasons": {
+   "correctness": "SupportTicket gains `@Version private Long version` and the changeset adds `version BIGINT DEFAULT 0 NOT NULL` to support_ticket, both as the interface specifies. Build is green and the hidden tests pass 2/2.",
+   "convention_fit": "The changeset lives under 2026/09/ with a DD-MM-YYYY kebab name, a liquibase header, a changeset id and a rollback line. It is included last in changelog.xml under a `<!-- September 2026 -->` comment. No existing changeset was edited.",
+   "design_fit": "Minimal footprint: one field on the entity, one changeset, one include. It reuses JPA @Version, the same mechanism as 20-12-2025-add-version-to-applied-opportunity.sql. There is no new class or parallel locking mechanism.",
+   "test_quality": "VersionTests in SupportTicketEntityUnitTest only asserts null-before-persist and a getter/setter round trip. Nothing checks the @Version annotation or that a stale update is rejected.",
+   "graph_use": "The first step was a graph query that located the support/ticket files, and SupportTicket.java was read next. The existing @Version example and the changeset pattern were found by grep, not by the graph."
+  },
+  "rubric": "r4",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 1076,
+  "cache_read_input_tokens": 1278,
+  "cache_creation_input_tokens": 18918
+ },
+ "is_error": false
+}

@@ -1,0 +1,29 @@
+{
+ "rubric": "r4",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 4,
+  "test_quality": 4,
+  "graph_use": 5,
+  "reasons": {
+   "correctness": "The repository finder, closeStaleResolvedTickets(int) and StaleTicketCloseCronJob match the interface. The enabled/days/cron properties and defaults are correct. Failures are caught and logged. Build is green and hidden tests pass 4/4.",
+   "convention_fit": "The job has @SchedulerLock 'support:staleTicketClose', cron and enabled flag from @Value properties, and a *CronJob name. It uses @RequiredArgsConstructor final injection, lives in the support/ticket feature package, and has MockitoExtension unit tests that were run.",
+   "design_fit": "Clean layering: the job calls the service, the service owns the logic, and a derived query sits in the repository. The service sets status directly instead of going through the existing status-update path, which may skip shared status-change handling. One save per ticket in a loop.",
+   "test_quality": "Cron tests cover enabled, disabled and exception paths. Service tests cover close-and-count and the empty case. The cutoff is matched with any(LocalDateTime), so the days arithmetic is never pinned. Lenient strictness hides unused stubs.",
+   "graph_use": "Graph queries listed the support/ticket package and found existing *CronJob files before any read. The agent then read AnonymousConsentCleanupCronJob as the example and modelled the new job on it."
+  },
+  "rubric": "r4",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 849,
+  "cache_read_input_tokens": 0,
+  "cache_creation_input_tokens": 24512
+ },
+ "is_error": false
+}

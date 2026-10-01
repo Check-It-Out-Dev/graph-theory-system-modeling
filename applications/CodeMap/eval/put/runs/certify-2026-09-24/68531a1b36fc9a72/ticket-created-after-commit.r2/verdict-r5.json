@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 0,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 5,
+  "design_fit": 5,
+  "test_quality": 5,
+  "graph_use": 5,
+  "reasons": {
+   "correctness": "createTicket now publishes SupportTicketCreatedEvent with all six fields. The listener sends the mail AFTER_COMMIT, and the interface names match exactly. Build green, hidden tests 3/3, existing 54/54.",
+   "convention_fit": "Event and listener sit in support/ticket/event. The listener uses @TransactionalEventListener(AFTER_COMMIT) and catches and logs failures. Injection is by constructor via @RequiredArgsConstructor or the explicit constructor. A new MockitoExtension *UnitTest was added and run.",
+   "design_fit": "Reuses Spring's ApplicationEventPublisher and follows the InvoiceCreatedEventListener structure. No new mechanism, minimal footprint. EmailService stays in the service only because addAdminResponse still uses it.",
+   "test_quality": "SupportTicketCreatedEventListenerUnitTest covers the send with exact arguments and the swallowed SMTP failure. The service test captures the published event, asserts its fields and verifyNoInteractions(emailService). Language is only checked notNull.",
+   "graph_use": "Graph queries found the support files, existing Event/EventListener classes, the dependents of SupportTicketService and its TESTED_BY tests before any edit. The agent then read InvoiceCreatedEventListener as its exemplar."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 825,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 41405
+ },
+ "is_error": false
+}

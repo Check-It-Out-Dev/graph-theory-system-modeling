@@ -1,0 +1,2033 @@
+{
+ "calibration": {
+  "ac1_oracle": 0.7809,
+  "agreement_oracle": 0.8333,
+  "agreement_rr": 0.8182,
+  "anchors": {
+   "drift": false,
+   "kappa_now": null,
+   "kappa_then": null,
+   "matched": 0,
+   "mean_abs_delta": null
+  },
+  "basis": "ac1",
+  "calibrated": true,
+  "gate": 0.6,
+  "kappa_human": 0.5714,
+  "kappa_oracle": 0.3077,
+  "n_human": 20,
+  "n_oracle": 18,
+  "n_rr": 22,
+  "prevalence_oracle": 0.8611,
+  "verdict": "calibrated"
+ },
+ "rows": [
+  {
+   "answer": "That's subsystem **[4] Partnership opportunity lifecycle** (174 files) — the campaign domain. It owns `PartnershipOpportunity.java` (the campaign/listing entity) and `AppliedOpportunity.java` (an influencer's application to one), plus the active-cooperation flow once a company accepts an applicant (`ActiveCooperationService.java`).\n\nKey entry points to open first:\n- `PartnershipOpportunity.java` (18 ext in-edges) — the listing entity itself\n- `PermissionUtils.java` (69 ext in-edges) — gates who can post/view/apply\n- `BaseRepository.java` / `BaseService.java` — shared persistence plumbing this domain builds on\n- `DictionaryService.java` (22 ext in-edges) — reference data (cities, currencies, service types) attached to listings\n\nOn the frontend, the matching UI lives in **[171] FE opportunities & applications** (child of the Angular frontend group [17]): `opportunities-list.component.ts`/`opportunity-detail.component.ts`/`opportunity-form.component.ts` for browsing/posting, and `applied-opportunity.service.ts`/`applied-opportunities-list.component.ts` for the influencer's application side.\n\nFAQ note: BE29 isn't a real gap here — it's a permanent refusal marker for credential files (keystore/service-account JSON) that are deliberately never indexed, unrelated to partnership opportunities.",
+   "credits": 3.6341,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 5,
+    "tags": [
+     "great",
+     "pointer_verified"
+    ],
+    "user": "sonnet-newcomer",
+    "verified": true
+   },
+   "id": "f0e5f45d-cb1e-4633-8123-821529014af3",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 4,
+    "helpful": 5,
+    "located": 5,
+    "rationale": "Names the primary listing entity and adjacent FE components with plausible supporting detail and no unsupported claims."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "answered": true,
+    "answered_and_located": null,
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.1.0",
+   "pointers": [
+    "PartnershipOpportunity.java",
+    "PermissionUtils.java",
+    "BaseRepository.java",
+    "DictionaryService.java",
+    "opportunity.service.ts",
+    "opportunities-list.component.ts",
+    "applied-opportunity.service.ts"
+   ],
+   "prompt_version": "nav@77015957627a66b8",
+   "q": "Hi, I'm new here - where do companies post their campaign listings that influencers apply to? Which repo/subsystem handles that \"partnership opportunities\" stuff?",
+   "qid": null,
+   "reference": null,
+   "request_id": "f0e5f45d-cb1e-4633-8123-821529014af3",
+   "steps": 0,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "sonnet-newcomer"
+  },
+  {
+   "answer": "`AppliedOpportunityService_Apply_IntegrationTest.java` is the direct hit — it's an integration test for the \"apply\" action, i.e. an influencer applying to a partnership opportunity. It's tagged `sub: 13`, which is the old id for the campaign integration-test suite that was merged into **[4] Partnership opportunity lifecycle** (the navigator confirms sub-13 was folded into [4]; cached answers under 13 still resolve there).\n\nRead this one first: **AppliedOpportunityService_Apply_IntegrationTest.java** — it exercises `AppliedOpportunityService.apply()`, the core of the \"influencer applies to a listing\" flow.\n\nRelated tests worth opening alongside it, same suite:\n- `AppliedOpportunityService_FollowerValidation_IntegrationTest.java` — validation rules on who can apply (e.g. follower-count/eligibility gating)\n- `AppliedOpportunityService_Query_IntegrationTest.java` / `AppliedOpportunityService_FindById_IntegrationTest.java` — reading back applications\n- `AppliedOpportunityService_Patch_IntegrationTest.java` / `_Delete_IntegrationTest.java` — updating/withdrawing an application\n- `AppliedOpportunityContentRepository_FetchJoin_IntegrationTest.java` (sub 4) — content attached to an applied opportunity\n\nIf you want the company-side \"posting a listing\" test rather than the influencer-side \"applying\" test, that would be a `PartnershipOpportunity*IntegrationTest` — I haven't confirmed one exists in this search, so treat that as unverified.",
+   "credits": 6.8101,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 5,
+    "tags": [
+     "great",
+     "pointer_verified"
+    ],
+    "user": "sonnet-newcomer",
+    "verified": true
+   },
+   "id": "af210fd9-73b2-44da-a085-6b9a6983a7f7",
+   "judge": {
+    "abstain": 4,
+    "correct": 4,
+    "grounded": 5,
+    "helpful": 5,
+    "located": 5,
+    "rationale": "Gives a direct matching integration test plus related tests, and honestly flags the unconfirmed company-side test rather than inventing one."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "answered": true,
+    "answered_and_located": null,
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.1.0",
+   "pointers": [
+    "AppliedOpportunityService_Apply_IntegrationTest.java",
+    "AppliedOpportunityService_FollowerValidation_IntegrationTest.java",
+    "AppliedOpportunityService_Query_IntegrationTest.java",
+    "AppliedOpportunityService_Patch_IntegrationTest.java",
+    "AppliedOpportunityContentRepository_FetchJoin_IntegrationTest.java",
+    "ActiveCooperationServiceIntegrationTestBase.java"
+   ],
+   "prompt_version": "nav@77015957627a66b8",
+   "q": "Is there a test I can read that shows the partnership opportunity / applying flow in action?",
+   "qid": null,
+   "reference": null,
+   "request_id": "af210fd9-73b2-44da-a085-6b9a6983a7f7",
+   "steps": 2,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "sonnet-newcomer"
+  },
+  {
+   "answer": "For the \"posting a listing\" (company-side creation) path, both live in **[4] Partnership opportunity lifecycle**, and there's a directly matching test: `PartnershipOpportunityService_SaveFromDto_IntegrationTest.java` — that's the create/post flow.\n\nOpen these first, in this order:\n\n1. **PartnershipOpportunityController.java** — the Actor entry point (`@RestController`); shows the HTTP surface for posting a listing, and injects `TranslationService.java` and `PartnershipOpportunityService.java`.\n2. **PartnershipOpportunityService.java** — the actual business logic behind creation/update; called by the controller (`PERFORMS`/`INJECTS` edge). This is where the \"posting\" logic itself lives.\n3. **PartnershipOpportunity.java** — the entity itself, 54 dependents across subsystems 1, 11, 4, 5 (address, subscription/plan limits, cascade-delete, etc.) — so changing its shape ripples widely.\n4. **PartnershipOpportunityDtoIn.java** / **PartnershipOpportunityMapping.java** — the inbound DTO and mapper a \"post\" request goes through.\n5. **PermissionUtils.java** — gates who's allowed to create/edit a listing.\n\nCompanion tests to read alongside code changes:\n- `PartnershipOpportunityService_SaveFromDto_IntegrationTest.java` (creation)\n- `PartnershipOpportunityService_Update_IntegrationTest.java` / `_Patch_IntegrationTest.java` (edits)\n- `PartnershipOpportunityService_Authorization_IntegrationTest.java` (who can post)\n- `PartnershipOpportunityControllerUnitTest.java` (controller-level unit test)\n\nCaveat: `CampaignLimitService.java` (in [11], plan-gated campaign limits) may also matter if \"posting\" is capped by subscription plan — worth a quick check if you hit a limit-related requirement.",
+   "credits": 8.5038,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 5,
+    "tags": [
+     "great",
+     "pointer_verified"
+    ],
+    "user": "sonnet-newcomer",
+    "verified": true
+   },
+   "id": "05d9be0b-bbd6-4d0e-8a7d-aa5de40f6b04",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 4,
+    "helpful": 5,
+    "located": 5,
+    "rationale": "Gives an ordered controller→service→entity→DTO reading path with a matching create-flow test, appropriate for a 'where do I start editing' question."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "answered": true,
+    "answered_and_located": null,
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.1.0",
+   "pointers": [
+    "PartnershipOpportunityController.java",
+    "PartnershipOpportunityService.java",
+    "PartnershipOpportunity.java",
+    "PartnershipOpportunityDtoIn.java",
+    "PermissionUtils.java",
+    "PartnershipOpportunityService_SaveFromDto_IntegrationTest.java",
+    "PartnershipOpportunityService_Authorization_IntegrationTest.java",
+    "PartnershipOpportunityControllerUnitTest.java"
+   ],
+   "prompt_version": "nav@77015957627a66b8",
+   "q": "ok, so if I'm going to start touching the \"posting a listing\" code (not the apply side), what should I open first?",
+   "qid": null,
+   "reference": null,
+   "request_id": "05d9be0b-bbd6-4d0e-8a7d-aa5de40f6b04",
+   "steps": 3,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "sonnet-newcomer"
+  },
+  {
+   "answer": "Yes, quite a bit else is bundled in there — worth knowing before you start poking around, since a chunk of it isn't really \"opportunity\" business logic:\n\n**Genuinely-adjacent domain code:**\n- `ActiveCooperationService.java` — the flow that kicks in *after* an application is accepted (ongoing cooperation between company and influencer). If \"posting a listing\" touches downstream cooperation logic, this is where it continues.\n- `PermissionUtils.java` (69 ext in-edges, the biggest entry point in the whole subsystem) — the shared access-gating utility. It's used far beyond just opportunities, so changes here ripple estate-wide.\n- `DictionaryService.java` + `CityRepository.java`/`CurrencyRepository.java`/`PlatformConverter.java`/service-type stuff — reference/lookup data (cities, currencies, platforms, service types) that listing forms pull dropdown values from.\n\n**Generic infra that just happens to sit here, not opportunity-specific:**\n- `BaseRepository.java` (38 ext in-edges, 0 ext out) and `BaseService.java` — generic persistence base classes used estate-wide. Don't assume changing these is \"opportunity\" work — it's foundational plumbing other subsystems inherit from.\n- `RepositoryResolver.java`, `BaseController.java`, `AdminController.java`, `DictionaryController.java` — shared controller/repo scaffolding.\n- `UpdaterTracking.java` (20 ext in-edges) — a newly-prominent entry point with no recorded rationale in curation notes; worth a quick read if you touch anything that updates records.\n\n**Noise to filter out:** 51 of the 174 files are Rule-typed, and most are test classes (`*IntegrationTest.java`, `*UnitTest.java`) riding alongside the domain code — not actual business rules.\n\n**Biggest external dependencies:** heaviest seams go to [7] Translatable exceptions & logging (104 edges) and [11] Subscriptions/consent (97 edges) — this subsystem leans on those rather than owning error-handling or plan/billing concerns itself.",
+   "credits": 5.8898,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 5,
+    "tags": [
+     "great",
+     "pointer_verified"
+    ],
+    "user": "sonnet-newcomer",
+    "verified": true
+   },
+   "id": "51f688c2-b90a-44f2-bdf0-44a533590828",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 4,
+    "helpful": 4,
+    "located": 5,
+    "rationale": "Useful categorized tour of the subsystem distinguishing domain code from shared infra, plausible and grounded in the pointers given."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "answered": true,
+    "answered_and_located": null,
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.1.0",
+   "pointers": [
+    "ActiveCooperationService.java",
+    "PermissionUtils.java",
+    "DictionaryService.java",
+    "BaseRepository.java",
+    "BaseService.java",
+    "UpdaterTracking.java",
+    "RepositoryResolver.java"
+   ],
+   "prompt_version": "nav@77015957627a66b8",
+   "q": "what else lives in that same subsystem besides the opportunity/apply stuff - anything I should know about before I start poking around?",
+   "qid": null,
+   "reference": null,
+   "request_id": "51f688c2-b90a-44f2-bdf0-44a533590828",
+   "steps": 1,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "sonnet-newcomer"
+  },
+  {
+   "answer": "I now have the full chain confirmed by the graph.\n\nThe Instagram redirect lands in **AuthController.java** (subsystem [10], User identity & token exchange), which PERFORMS/INJECTS **OAuthCallbackService.java** — the generic OAuth-callback handler shared across social providers. That service CALLS into **InstagramService.java** (subsystem [5], Account deletion & Instagram sync), which implements the `SocialPlatformService` interface, persists the resulting connection via `PlatformRepository`/`Platform.java` (the social-connection model, subsystem [2]), and is configured by `InstagramConfig.java`. `SocialPlatformFactory.java` and `TokenExchangeService.java` also call into `InstagramService.java`, so factory dispatch/token exchange is part of the same path.\n\nSeparately, there's **InstagramCallbackController.java** (also sub [5]) — despite the similar name, its flow shows it handles Meta's *data-deletion/deauthorization* webhook (GDPR callback), not the login/authorize redirect — it wires to `InstagramDataDeletionService.java` and `InstagramDeauthorizationService.java`, not the OAuth token exchange.\n\nSo: open `AuthController.java` first to see the redirect endpoint, then `OAuthCallbackService.java` for the generic handoff, then `InstagramService.java` for the Instagram-specific token exchange/connection persistence.",
+   "credits": 16.0669,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 5,
+    "tags": [
+     "great",
+     "pointer_verified"
+    ],
+    "user": "sonnet-newcomer",
+    "verified": true
+   },
+   "id": "d646b10e-5e4a-4c41-a408-27faffdbc2f9",
+   "judge": {
+    "abstain": 5,
+    "correct": 5,
+    "grounded": 5,
+    "helpful": 5,
+    "located": 5,
+    "rationale": "Traces the full OAuth chain and correctly disambiguates the similarly-named InstagramCallbackController as a different (deauth webhook) flow, showing careful grounding."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "answered": true,
+    "answered_and_located": null,
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.1.0",
+   "pointers": [
+    "AuthController.java",
+    "OAuthCallbackService.java",
+    "InstagramService.java",
+    "SocialPlatformFactory.java",
+    "TokenExchangeService.java",
+    "InstagramConfig.java",
+    "PlatformRepository.java",
+    "InstagramCallbackController.java"
+   ],
+   "prompt_version": "nav@77015957627a66b8",
+   "q": "Hey, where does the Instagram login/callback thing get handled? Like after the user authorizes on Instagram's side and it redirects back to us - where does that land in our code?",
+   "qid": null,
+   "reference": null,
+   "request_id": "d646b10e-5e4a-4c41-a408-27faffdbc2f9",
+   "steps": 6,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "sonnet-newcomer"
+  },
+  {
+   "answer": "No other platform-specific OAuth implementation exists — Instagram is the only concrete platform-login flow in the graph.\n\nAnswer: subsystem [5] (\"Account deletion & Instagram sync\") is genuinely a two-purpose slice, not purely social login. Per its L2 summary, 26 of its 48 members are named for cascade/deletion (admin cascade-delete: `AdminCascadeDeleteServiceImpl.java`, `AdminCascadeDeleteController.java`, `UserAccountOrchestrator.java`, `DeletionEligibilityDto.java`, plus deletion repositories), and the rest is the Instagram-specific OAuth/sync code: `InstagramService.java`, `InstagramConfig.java`, `InstagramCallbackController.java`, `InstagramStartupValidator.java`, `InstagramDataDeletionService.java`, `InstagramDeauthorizationService.java`. There's no Facebook/TikTok/LinkedIn equivalent anywhere in the graph — Instagram is the only concrete social-platform integration.\n\nThe *generic* social-login plumbing that Instagram plugs into is deliberately elsewhere: `SocialPlatformService.java` (the interface) and `UserSocialConnection.java`/`Platform.java` (the data model) live in the LAYER subsystem [2] (Social connection data model), `SocialPlatformFactory.java` sits in [8] (Validation, crypto & query specs), and `UserSocialConnectionController.java` plus `UserSocialConnectionService.java` sit in [4] (Partnership opportunity lifecycle). So sub [5] holds the Instagram-specific implementation and account-deletion domain; the shared social-connection abstraction is split out into [2]/[4]/[8] for reuse by whatever platform gets added next.",
+   "credits": 12.2163,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 5,
+    "tags": [
+     "great",
+     "pointer_verified"
+    ],
+    "user": "sonnet-newcomer",
+    "verified": true
+   },
+   "id": "d92c3112-e50e-460d-8bcb-09dc3e734c7a",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 4,
+    "helpful": 4,
+    "located": 5,
+    "rationale": "Clear breakdown of the mixed-purpose subsystem and where the generic social-login abstraction actually lives, plausible and internally consistent."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "answered": true,
+    "answered_and_located": null,
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.1.0",
+   "pointers": [
+    "InstagramService.java",
+    "InstagramConfig.java",
+    "InstagramCallbackController.java",
+    "InstagramStartupValidator.java",
+    "AdminCascadeDeleteServiceImpl.java",
+    "SocialPlatformService.java",
+    "UserSocialConnection.java",
+    "SocialPlatformFactory.java"
+   ],
+   "prompt_version": "nav@77015957627a66b8",
+   "q": "Ok cool. So what else lives in that same subsystem as InstagramService - is it just Instagram stuff or is other social login mixed in there too?",
+   "qid": null,
+   "reference": null,
+   "request_id": "d92c3112-e50e-460d-8bcb-09dc3e734c7a",
+   "steps": 5,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "sonnet-newcomer"
+  },
+  {
+   "answer": "For tracing the Instagram login flow specifically, open **InstagramService.java** first (`backend/src/main/java/com/sm/instagram/platform/auth/social/instagram/InstagramService.java`, 675 lines). It's flagged as an entry point in the graph and is the actual Instagram-specific hub: it implements `SocialPlatformService`, is configured by `InstagramConfig.java`, and is the one file everything else in the flow (`OAuthCallbackService.java`, `SocialPlatformFactory.java`, `TokenExchangeService.java`) calls into or is called from. Starting there beats starting at `AuthController.java` — that controller is the actual HTTP landing point for the redirect, but it's a large god-controller handling email verification, registration, Firebase auth, etc., so Instagram is just one PERFORMS edge among many; you'd spend most of your first read wading through unrelated flows.\n\nFor a runnable test, **InstagramServiceUnitTest.java** (subsystem 8) directly exercises `InstagramService.java`'s logic. There's also **InstagramSocialAuthUnitTest.java** (subsystem 8), which sounds like the better one for seeing the *login/social-auth* path specifically rather than sync/config behavior — worth checking both, since naming suggests it's scoped to the auth/login slice rather than general service behavior. Neither is a full end-to-end integration test in what the graph surfaced, so treat them as unit-level verification of the pieces, not a live redirect simulation.",
+   "credits": 6.9683,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 4,
+    "tags": [
+     "incomplete",
+     "pointer_verified"
+    ],
+    "user": "sonnet-newcomer",
+    "verified": true
+   },
+   "id": "9f02e6b6-381a-4118-8ff0-23561cc578fa",
+   "judge": {
+    "abstain": 4,
+    "correct": 3,
+    "grounded": 4,
+    "helpful": 4,
+    "located": 4,
+    "rationale": "Recommends InstagramService over the actual HTTP entry point AuthController with reasoned justification, but hedges between two candidate tests without confirming either exercises the live flow."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "answered": true,
+    "answered_and_located": null,
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.1.0",
+   "pointers": [
+    "InstagramService.java",
+    "InstagramSocialAuthUnitTest.java",
+    "InstagramServiceUnitTest.java",
+    "AuthController.java",
+    "OAuthCallbackService.java"
+   ],
+   "prompt_version": "nav@77015957627a66b8",
+   "q": "Got it, thanks. If I just want to trace through the Instagram login flow end to end as a first task, what's the one file I should open first, and is there a test I can run to see it in action?",
+   "qid": null,
+   "reference": null,
+   "request_id": "9f02e6b6-381a-4118-8ff0-23561cc578fa",
+   "steps": 2,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "sonnet-newcomer"
+  },
+  {
+   "answer": "Found it. There's a dedicated frontend `error-page.component.ts` (subsystem 177 — FE shell, i18n & generated client) that renders when a route doesn't match, wired via `app.routes.ts` (the Angular route config, also in 177), and a backend `CustomErrorController.java` (subsystem 7 — Translatable exceptions & logging) that handles unmatched/error server responses with the translatable error-message infrastructure (`ErrorEnvelopeResponsesCustomizer.java`).\n\nSo yes: hitting a nonexistent URL is handled client-side by Angular routing falling through to `error-page.component.ts` (styled via `error-page.component.html`), while any request that reaches the backend without a matching route/resource goes through `CustomErrorController.java`, which returns the standard translatable error envelope (backed by `ErrorEnvelopeResponsesCustomizer.java` and the exception hierarchy in subsystem 7, e.g. `ResourceNotFoundException.java`). Open `app.routes.ts` first to see how/where the wildcard route points to the error page, then `error-page.component.ts` for what's actually shown.",
+   "credits": 11.1838,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 5,
+    "tags": [
+     "great",
+     "pointer_verified"
+    ],
+    "user": "sonnet-newcomer",
+    "verified": true
+   },
+   "id": "2c46636c-65aa-4d33-9975-549e4860f5d8",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 4,
+    "helpful": 5,
+    "located": 5,
+    "rationale": "Identifies both the FE error component and BE fallback controller with a sensible reading order and no unsupported claims."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "answered": true,
+    "answered_and_located": null,
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.1.0",
+   "pointers": [
+    "error-page.component.ts",
+    "app.routes.ts",
+    "CustomErrorController.java",
+    "ErrorEnvelopeResponsesCustomizer.java",
+    "error-page.component.html",
+    "ResourceNotFoundException.java"
+   ],
+   "prompt_version": "nav@77015957627a66b8",
+   "q": "If someone types in a URL that doesn't exist on the site, what do they see? Like is there a 404 page or something?",
+   "qid": null,
+   "reference": null,
+   "request_id": "2c46636c-65aa-4d33-9975-549e4860f5d8",
+   "steps": 6,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "sonnet-newcomer"
+  },
+  {
+   "answer": "Yes — `error-page.component.spec.ts` (subsystem 177, FE shell, i18n & generated client, at `frontend/src/app/feature/error-page/error-page.component.spec.ts`) is a confirmed TESTED_BY edge for `error-page.component.ts`, so it directly exercises the component shown for an unmatched route. That's the file to open to see the 404 page in action.\n\nBeyond that, I can't confirm a routing-level test (e.g. one that navigates to a bogus URL and asserts the wildcard route resolves to this component) — `app.routes.ts` itself doesn't show a TESTED_BY edge in the graph, and most e2e specs are flagged as unindexed in this pack's coverage caveats, so an e2e \"visit a bad URL\" scenario may exist in the codebase but isn't visible here. Open the spec file directly, and separately grep `app.routes.ts` by hand for the wildcard (`**`) route entry if you want to confirm the wiring.",
+   "credits": 6.4666,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 5,
+    "tags": [
+     "great",
+     "pointer_verified"
+    ],
+    "user": "sonnet-newcomer",
+    "verified": true
+   },
+   "id": "297000a3-03f3-4e0f-82c2-b49572645dcf",
+   "judge": {
+    "abstain": 4,
+    "correct": 4,
+    "grounded": 5,
+    "helpful": 5,
+    "located": 5,
+    "rationale": "Names a confirmed TESTED_BY spec and transparently notes the absence of a routing-level e2e test rather than fabricating one."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "answered": true,
+    "answered_and_located": null,
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.1.0",
+   "pointers": [
+    "error-page.component.spec.ts",
+    "error-page.component.ts",
+    "app.routes.ts"
+   ],
+   "prompt_version": "nav@77015957627a66b8",
+   "q": "is there a test I can read that shows the 404 page in action?",
+   "qid": null,
+   "reference": null,
+   "request_id": "297000a3-03f3-4e0f-82c2-b49572645dcf",
+   "steps": 3,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "sonnet-newcomer"
+  },
+  {
+   "answer": "Subsystem 177 (FE shell, i18n & generated client) is a much bigger group — 100 files, not just error handling. It's the frontend's shared hub that every other FE slice imports from. It bundles:\n\n- **Layout/shell & theme** components\n- **Notification centre** and i18n (Transloco `en`/`pl` bundles)\n- **Shared utilities** (e.g. `type-assert.ts`, `localized-date.pipe.ts`)\n- **Landing/marketing** pages\n- **Health** surfaces\n- **Error page** (`error-page.component.ts`/`.html`/`.spec.ts`, plus `error.interceptor.ts`)\n- Root **build config** and the SSR/browser **bootstrap** (`main.ts`/`main.server.ts`)\n- The entire **generated OpenAPI client**, collapsed into one node called `api` (163 external in-edges — the single most-imported thing in the frontend), merged in from a former subsystem (ex-sub-18)\n\nIt's deliberately the \"lowest purity in the estate\" (0.324) — a catch-all shared layer, not a themed feature. Every sibling FE subsystem (fixtures/e2e, profile/settings, opportunities, auth, plan/billing, support, demo mode) sends its heaviest import seam here, so if a frontend question is about something shared/cross-cutting, it almost always lives in 177.",
+   "credits": 2.555,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 4,
+    "tags": [
+     "incomplete",
+     "pointer_verified"
+    ],
+    "user": "sonnet-newcomer",
+    "verified": true
+   },
+   "id": "83b8781f-435d-460e-8dea-48dedbbc66b2",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 4,
+    "helpful": 4,
+    "located": 5,
+    "rationale": "Gives a plausible, categorized inventory of the large shared FE-shell subsystem consistent with the pointers surfaced."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "answered": true,
+    "answered_and_located": null,
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.1.0",
+   "pointers": [
+    "error-page.component.ts",
+    "api",
+    "type-assert.ts",
+    "localized-date.pipe.ts",
+    "error.interceptor.ts",
+    "app.routes.ts"
+   ],
+   "prompt_version": "nav@77015957627a66b8",
+   "q": "what else is in that same subsystem as the error page? is it just error stuff or a bigger group of files",
+   "qid": null,
+   "reference": null,
+   "request_id": "83b8781f-435d-460e-8dea-48dedbbc66b2",
+   "steps": 0,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "sonnet-newcomer"
+  },
+  {
+   "answer": "AdminCascadeDeleteController.java (subsystem [5], Account deletion & Instagram sync) is an actor root with entry_point=true and **zero recorded dependents** in the graph — impact(depth 1) returns no callers. As an Actor-layer HTTP controller, it's meant to be invoked externally (by an admin-facing client/route), not by other backend code, so no in-graph caller exists. This isn't a coverage gap on this node specifically; it's consistent with its role as the top-level entry point for cascade deletion (it fans out to 17 files downstream per the subsystem summary, but nothing calls into it from within the indexed backend).\n\nIf you need to confirm who actually invokes this endpoint, that lives in the frontend's admin surface (child [176], which hosts admin user list / cascade-delete.service.ts) or in routing/security config not captured as a graph edge — worth opening AdminCascadeDeleteController.java directly to check its `@RequestMapping` path and cross-referencing against `cascade-delete.service.ts` in [176].",
+   "credits": 10.2217,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 2,
+    "tags": [
+     "hallucinated",
+     "pointer_wrong"
+    ],
+    "user": "sonnet-bugfixer",
+    "verified": true
+   },
+   "id": "59f3c954-4498-40c2-b0c0-8f75f96453e8",
+   "judge": {
+    "abstain": 4,
+    "correct": 4,
+    "grounded": 4,
+    "helpful": 4,
+    "located": 5,
+    "rationale": "Correctly identifies the controller as a zero-dependent entry point and abstains with a sound explanation, pointing to the right file and a frontend lead."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "answered": false,
+    "answered_and_located": null,
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.1.0",
+   "pointers": [
+    "AdminCascadeDeleteController.java",
+    "cascade-delete.service.ts"
+   ],
+   "prompt_version": "nav@77015957627a66b8",
+   "q": "What calls AdminCascadeDeleteController, one hop up?",
+   "qid": null,
+   "reference": null,
+   "request_id": "59f3c954-4498-40c2-b0c0-8f75f96453e8",
+   "steps": 2,
+   "terminal": "abstain",
+   "tier": "nav-sonnet",
+   "user": "sonnet-bugfixer"
+  },
+  {
+   "answer": "This is a code-content/design question the graph can't fully settle — it shows AdminCascadeDeleteServiceImpl.java MODIFIES/USES UserRepository.java (among 17 other touched repos/services: CascadeDeleteTaskRepository, AppliedOpportunityContentRepository, AppliedOpportunityRepository, AppliedOpportunityStatusHistoryRepository, PartnershipOpportunityRepository, plus CALLS into UserCacheService, FirebaseService, FirestoreService, TotpFirestoreService, FirebaseStorageService), but the graph has no edges for ordering, transactionality, or intra-method sequencing — per subsystem [5]'s own caveat, \"the cascade deletion ORDER is file content, not graph structure.\"\n\nWhat the graph does tell you: UserRepository.java is a heavily shared, high-fan-in entity (137+ external in-edges across the estate), so `delete(user)` sits alongside many other repository/service calls in one method. Structurally, extracting it into a separate cleanup step wouldn't change any indexed edges — MODIFIES/USES/CALLS relationships are file-level, not line-level, so the graph would still show the same touch set unless the extraction moves to a new file. The real risks (transaction boundary changes, order-dependent cascade failures if user deletion happens before/after the cache/Firebase/repository cleanup calls, or partial-delete states) live entirely in AdminCascadeDeleteServiceImpl.java's actual method body — open that file to check the current sequence and transaction annotations before making the change.",
+   "credits": 8.9109,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 5,
+    "tags": [
+     "great",
+     "pointer_verified"
+    ],
+    "user": "sonnet-bugfixer",
+    "verified": true
+   },
+   "id": "b591f2a0-e867-4536-9214-d625f3db7d5e",
+   "judge": {
+    "abstain": 3,
+    "correct": 4,
+    "grounded": 5,
+    "helpful": 4,
+    "located": 5,
+    "rationale": "Mostly answers the structural part (no edge change) before abstaining on the real ordering/transaction risk, a hedged half-answer but well grounded in real dependencies."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "answered": false,
+    "answered_and_located": null,
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.1.0",
+   "pointers": [
+    "AdminCascadeDeleteServiceImpl.java",
+    "UserRepository.java",
+    "AdminCascadeDeleteService.java"
+   ],
+   "prompt_version": "nav@77015957627a66b8",
+   "q": "If I moved the userRepository.delete(user) call out of AdminCascadeDeleteServiceImpl into a separate cleanup step, what would change?",
+   "qid": null,
+   "reference": null,
+   "request_id": "b591f2a0-e867-4536-9214-d625f3db7d5e",
+   "steps": 3,
+   "terminal": "abstain",
+   "tier": "nav-sonnet",
+   "user": "sonnet-bugfixer"
+  },
+  {
+   "answer": "The graph's node for `survey-hub.component.ts` resolves to a repo-relative path of `src/app/feature/survey/survey-hub.component.ts` (subsystem 172, \"FE onboarding survey\"). If your checkout has no `src/app/feature/` directory at all, that stored path is stale relative to your actual tree — the pipeline's path metadata can drift from the real layout even when the entity/content match is otherwise sound (this happens; see the global caveat about 321 files being \"fingerprint-stale,\" content-changed since the scan though nodes/edges still exist).\n\n\"technical-survey\" itself does not exist anywhere in the graph — `find(\"technical-survey\")` returned zero hits, so if that literal string/slug is what you're chasing, I should abstain on it specifically. But \"survey-hub\" does exist: `survey-hub.component.ts` (Actor, entry point) and a sibling `survey-hub.fixture.ts` (Resource, in subsystem 173's fixture layer), both real graph members of subsystem 172, the fully self-contained onboarding-survey slice (cohesion 1.000, zero edges to siblings).\n\nSo: the component pointer is real, but trust the entity name over the emitted path — open your checkout by searching for the filename `survey-hub.component.ts` directly rather than the graph's `src/app/feature/survey/...` path, which appears out of date. The nearby FAQ entry (FE01) is unrelated noise, not a match for this term.",
+   "credits": 9.1476,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 1,
+    "tags": [
+     "hallucinated",
+     "pointer_wrong"
+    ],
+    "user": "sonnet-bugfixer",
+    "verified": true
+   },
+   "id": "8fd73d55-b37d-429c-affc-17ed1b3e62c9",
+   "judge": {
+    "abstain": 2,
+    "correct": 2,
+    "grounded": 3,
+    "helpful": 2,
+    "located": 3,
+    "rationale": "Confidently asserts the survey-hub entity is real and the path merely stale despite the user's strong contrary evidence, a claim later shown likely wrong as the subsystem unravels."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "answered": true,
+    "answered_and_located": null,
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.1.0",
+   "pointers": [
+    "survey-hub.component.ts",
+    "survey-hub.fixture.ts"
+   ],
+   "prompt_version": "nav@77015957627a66b8",
+   "q": "I checked this checkout — there is no src/app/feature/ directory in checkItOut-fe at all, only app.component.ts, app.config.ts, app.routes.ts at src/app root. Your survey-hub.component.ts pointer can't be right. Does \"technical-survey\" exist anywhere in this repo, or should you have abstained?",
+   "qid": null,
+   "reference": null,
+   "request_id": "8fd73d55-b37d-429c-affc-17ed1b3e62c9",
+   "steps": 3,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "sonnet-bugfixer"
+  },
+  {
+   "answer": "One hop up (dependents): exactly two files carry an edge into `survey-hub.component.ts`, both `INJECTS` — `app.routes.ts` and `survey-hub.fixture.ts` (subsystems 177 and 173 respectively). `flow()` shows the outbound direction instead (what the component itself injects downstream: `marketing-toolbar.component.ts`, `chapter-registry.ts`, `hub-overview-map.component.ts`) — that's not what you asked, but confirms the component is a real, wired Actor, not orphaned.\n\nSo yes: `app.routes.ts` is the caller/router — the graph records a direct `INJECTS` edge from `app.routes.ts` to `survey-hub.component.ts`, meaning the route registration is graph-confirmed, not just plausible. The second inbound edge, from `survey-hub.fixture.ts`, is the sandbox/fixture harness (subsystem 173, the E2E/fixtures supplier layer) injecting it for fixture rendering rather than production routing — don't conflate the two when answering \"is it routed.\"\n\nGiven the earlier path-drift caveat, open `app.routes.ts` directly to confirm the actual route path/string, since the graph confirms the edge exists but not the literal route text.",
+   "credits": 4.4233,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 1,
+    "tags": [
+     "hallucinated",
+     "pointer_wrong"
+    ],
+    "user": "sonnet-bugfixer",
+    "verified": true
+   },
+   "id": "e7499a8b-9604-4ac1-8059-6cb2dab84aae",
+   "judge": {
+    "abstain": 1,
+    "correct": 2,
+    "grounded": 3,
+    "helpful": 2,
+    "located": 3,
+    "rationale": "States the app.routes.ts routing edge is \"graph-confirmed\" with confidence, which the very next user grep directly contradicts."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "answered": true,
+    "answered_and_located": null,
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.1.0",
+   "pointers": [
+    "app.routes.ts",
+    "survey-hub.component.ts",
+    "survey-hub.fixture.ts"
+   ],
+   "prompt_version": "nav@77015957627a66b8",
+   "q": "One hop up from survey-hub.component.ts — what calls or routes to it, and is that route registered in app.routes.ts?",
+   "qid": null,
+   "reference": null,
+   "request_id": "e7499a8b-9604-4ac1-8059-6cb2dab84aae",
+   "steps": 2,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "sonnet-bugfixer"
+  },
+  {
+   "answer": "On coverage: no test edge exists for `survey-hub.component.ts` in the graph — `cohort(survey-hub.component.ts)` returned empty, and searching for a spec file by name (`survey-hub.component.spec`) or browsing all \"survey\" hits (`survey-hub.fixture.ts`, `survey-card.component.ts`, `survey-links.ts`, `survey-run-button.ts`, `survey-entry.fixture.ts`) turned up no `.spec.ts` for this component specifically, despite the subsystem 172 navigator's blurb mentioning \"survey chapter specs\" as a general responsibility. TRIGGERS/TESTED_BY edges are flagged globally as under-extracted (113 count) — so this is a shape signal (\"no evidence found\"), not proof no test exists. Open the checkout directly to check.\n\nOn routing: your grep result conflicts with the graph's recorded `app.routes.ts —INJECTS→ survey-hub.component.ts` edge. Given we already found the component's stored path (`src/app/feature/survey/...`) doesn't match your actual tree layout, this looks like the same fingerprint-staleness issue, not fabrication of subsystem 172 itself — the 53-file cluster (chapter-registry.ts, hub-overview-map.component.ts, marketing-toolbar.component.ts, survey-card.component.ts, etc.) has real internal structure (cohesion 1.000, 14 internal edges), so the subsystem is structurally real. But the specific route-registration edge and test-coverage claim are unverifiable as currently true — trust your grep over the graph here and treat both as stale pending file inspection.",
+   "credits": 10.6279,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 1,
+    "tags": [
+     "hallucinated",
+     "pointer_wrong"
+    ],
+    "user": "sonnet-bugfixer",
+    "verified": true
+   },
+   "id": "ccd73c01-5894-4cd4-b54e-da61d47e9506",
+   "judge": {
+    "abstain": 4,
+    "correct": 3,
+    "grounded": 4,
+    "helpful": 3,
+    "located": 3,
+    "rationale": "Appropriately hedges on both test coverage and the routing conflict, though still defends subsystem 172's reality which later evidence undercuts."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "answered": false,
+    "answered_and_located": null,
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.1.0",
+   "pointers": [
+    "app.routes.ts",
+    "survey-hub.component.ts",
+    "chapter-registry.ts"
+   ],
+   "prompt_version": "nav@77015957627a66b8",
+   "q": "I grepped app.routes.ts for 'survey' and got zero matches — no route registration exists. Is survey-hub.component.ts covered by a unit test, or is this whole subsystem 172 fabricated?",
+   "qid": null,
+   "reference": null,
+   "request_id": "ccd73c01-5894-4cd4-b54e-da61d47e9506",
+   "steps": 4,
+   "terminal": "abstain",
+   "tier": "nav-sonnet",
+   "user": "sonnet-bugfixer"
+  },
+  {
+   "answer": "Straight answer: **I can't confirm it does, and the evidence you've gathered points to no.**\n\nI don't see file contents — only the graph's index — so I can't independently verify your checkout. But four independent misses (the missing `src/app/feature/` directory, plus zero grep hits for `chapter-registry.ts`, `marketing-toolbar.component.ts`, and `hub-overview-map.component.ts`) is a strong, consistent pattern, not noise. Combined with the earlier findings — no TESTED_BY/spec edge for `survey-hub.component.ts`, and the `app.routes.ts` INJECTS edge not matching your grep — the most honest read is that subsystem 172 as described (53 files, cohesion 1.000, self-contained onboarding-survey cluster) does not exist in the checkout you're working in. It may exist in whatever branch/commit the graph was built from and have since been removed or never merged, or the pack may be indexing a different tree entirely.\n\nI should have flagged this risk earlier rather than presenting the pointer as reliable — the graph gives structure, not ground truth, and your greps are the actual evidence here. Open `src/app/` yourself (e.g. `find src/app -iname '*survey*'`) as the final check; if that's empty too, treat subsystem 172 as absent from this checkout and file/report the drift rather than trusting further pointers from this subsystem.",
+   "credits": 3.4683,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 3,
+    "tags": [
+     "hallucinated",
+     "pointer_wrong"
+    ],
+    "user": "sonnet-bugfixer",
+    "verified": true
+   },
+   "id": "04a095af-67e6-44bf-9bef-c76d9400c404",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 5,
+    "helpful": 5,
+    "located": 4,
+    "rationale": "Honestly concedes the accumulated grep evidence outweighs the graph, retracts prior overconfidence, and gives a clear final verification step."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "answered": false,
+    "answered_and_located": null,
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.1.0",
+   "pointers": [
+    "app.routes.ts",
+    "marketing-toolbar.component.ts",
+    "survey-hub.component.ts",
+    "chapter-registry.ts",
+    "hub-overview-map.component.ts"
+   ],
+   "prompt_version": "nav@77015957627a66b8",
+   "q": "I also grepped chapter-registry.ts, marketing-toolbar.component.ts, and hub-overview-map.component.ts across src/ — zero hits for all three. Straight answer: does subsystem 172 exist in this checkout at all, yes or no?",
+   "qid": null,
+   "reference": null,
+   "request_id": "04a095af-67e6-44bf-9bef-c76d9400c404",
+   "steps": 0,
+   "terminal": "abstain",
+   "tier": "nav-sonnet",
+   "user": "sonnet-bugfixer"
+  },
+  {
+   "answer": "The graph doesn't index line-level content — it only gives entity/file pointers, not line ranges for specific code blocks like the `addFilterBefore`/`addFilterAfter` chain. What it confirms: `WebSecurityConfiguration.java` lives in subsystem [7] (Translatable exceptions & logging, the exception/logging LAYER — slightly surprising placement, but that's where it's indexed) and is 361 lines total. `BannedUserAuthorizationFilter.java` and `EmailVerificationEnforcementFilter.java` are the enforcement filters, living in subsystem [9] (Auth journeys & BDD harness) per that navigator's own description (\"the post-auth enforcement filters that return 403 with a valid token\"). `ConsentEnforcementFilter.java` sits in [11] (Subscriptions/payments & consent), per the [203]/[11] caveat about the 403-with-valid-token answer spanning groups.\n\nTo find the actual `addFilterBefore`/`addFilterAfter` ordering and its line range, open `WebSecurityConfiguration.java` directly (backend `src/main/java/com/sm/instagram/platform/common/authorization/WebSecurityConfiguration.java`, 361 lines) — the filter chain wiring will be in its `SecurityFilterChain` bean method; the graph has no line-granular index to point more precisely than that.",
+   "credits": 9.0281,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 5,
+    "tags": [
+     "great",
+     "pointer_verified"
+    ],
+    "user": "sonnet-bugfixer",
+    "verified": true
+   },
+   "id": "2d2336f9-1c2b-4b3a-92ae-39062f5366b3",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 5,
+    "helpful": 4,
+    "located": 5,
+    "rationale": "Correctly abstains on line-level detail the graph can't hold while giving precise file identity and size to speed manual inspection."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "answered": false,
+    "answered_and_located": null,
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.1.0",
+   "pointers": [
+    "WebSecurityConfiguration.java",
+    "BannedUserAuthorizationFilter.java",
+    "EmailVerificationEnforcementFilter.java",
+    "ConsentEnforcementFilter.java"
+   ],
+   "prompt_version": "nav@77015957627a66b8",
+   "q": "I actually found the security-filter ordering (JwtAuthenticationFilter -> BannedUserAuthorizationFilter -> ConsentEnforcementFilter -> EmailVerificationEnforcementFilter) is set via addFilterBefore/addFilterAfter in WebSecurityConfiguration, not in FilterRegistrationConfiguration. What line range in WebSecurityConfiguration should I look at for that chain?",
+   "qid": null,
+   "reference": null,
+   "request_id": "2d2336f9-1c2b-4b3a-92ae-39062f5366b3",
+   "steps": 3,
+   "terminal": "abstain",
+   "tier": "nav-sonnet",
+   "user": "sonnet-bugfixer"
+  },
+  {
+   "answer": "This confirms the flow: `WebSecurityConfiguration.java` INJECTS all four filters (JwtAuthenticationFilter, BannedUserAuthorizationFilter, ConsentEnforcementFilter, EmailVerificationEnforcementFilter) directly — that's the mechanism behind the chain you found. But `impact(WebSecurityConfiguration.java)` returns **0 dependents** — no TESTED_BY edge into it, and no test file in the graph imports/exercises it directly. Individually, only `ConsentEnforcementFilter.java` has a dedicated unit test (`ConsentEnforcementFilterUnitTest.java`, subsystem [11]); searches for equivalent `BannedUserAuthorizationFilterUnitTest` / `EmailVerificationEnforcementFilterUnitTest` returned nothing, so those filters and the configuration class itself show no direct test coverage in the graph.\n\nGiven the global caveat that TESTED_BY edges are under-extracted system-wide (only 113 total) and TRIGGERS/event-flow answers are \"shape signals\" not ground truth, this graph-level absence is suggestive but not conclusive — it's consistent with \"only asserted implicitly by other tests\" (e.g. end-to-end auth journey tests in subsystem [9]'s BDD harness, like `FullAuthSteps` or `RateLimitingSteps`, could exercise the chain behaviorally without a TESTED_BY edge to the config class ever being captured). To confirm definitively, open `WebSecurityConfiguration.java` and `ConsentEnforcementFilterUnitTest.java`, and check subsystem [9]'s Cucumber steps for any scenario asserting filter order end-to-end.",
+   "credits": 16.3807,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 5,
+    "tags": [
+     "great",
+     "pointer_verified"
+    ],
+    "user": "sonnet-bugfixer",
+    "verified": true
+   },
+   "id": "6d6268b1-11f7-485f-85be-a72261057811",
+   "judge": {
+    "abstain": 4,
+    "correct": 4,
+    "grounded": 5,
+    "helpful": 4,
+    "located": 4,
+    "rationale": "Grounded, appropriately hedged summary of test coverage with correct caveat about TESTED_BY under-extraction and a concrete file to check."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "answered": false,
+    "answered_and_located": null,
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.1.0",
+   "pointers": [
+    "WebSecurityConfiguration.java",
+    "ConsentEnforcementFilterUnitTest.java",
+    "BannedUserAuthorizationFilter.java",
+    "EmailVerificationEnforcementFilter.java",
+    "JwtAuthenticationFilter.java",
+    "ConsentEnforcementFilter.java"
+   ],
+   "prompt_version": "nav@77015957627a66b8",
+   "q": "Is that filter ordering (JWT -> banned -> consent -> email-verification) covered by any unit or integration test, or is it only asserted implicitly by other tests?",
+   "qid": null,
+   "reference": null,
+   "request_id": "6d6268b1-11f7-485f-85be-a72261057811",
+   "steps": 12,
+   "terminal": "abstain",
+   "tier": "nav-sonnet",
+   "user": "sonnet-bugfixer"
+  },
+  {
+   "answer": "The graph gives a partial answer and one honest gap.\n\n**Who invokes the bean**: nothing in the graph — the `filterChain` bean invocation is Spring Security's own bootstrap (`SecurityFilterChain` autoconfiguration), which lives outside the indexed call graph, not a traceable edge. `impact(WebSecurityConfiguration.java)` shows 0 dependents, confirming no indexed caller reaches into it — consistent with framework-level invocation.\n\n**Other/overriding chains**: there are real candidates for a second URL-scoped filter chain, but the graph can't confirm they define a competing `SecurityFilterChain` bean vs. just plugging into the same one:\n- `SandboxActuatorSecurity.java` (sub [9]) — name strongly suggests actuator-endpoint security config, but it has zero flow edges and zero dependents in the graph (isolated node).\n- `SandboxGuardFilter.java` (sub [9], tested by `SandboxGuardFilterTest.java`) — imports `LogSafe.java`, has its own test, but shows zero dependents, so nothing indexed wires it to `WebSecurityConfiguration.java` or shows it as a second chain.\n- `TestControllerSecurityConfig.java` (sub [9]) — name suggests a test-only security config, also isolated (0 flow, 0 dependents).\n- `ActuatorExposureUnitTest.java` (sub [3]) tests actuator exposure behavior, possibly against whichever config guards actuator endpoints.\n\nNone of these show an edge *to* `WebSecurityConfiguration.java`, so the graph cannot confirm or rule out a second `SecurityFilterChain` bean/override — TRIGGERS/INJECTS extraction is sparse per the system caveats. Open `SandboxActuatorSecurity.java` and `TestControllerSecurityConfig.java` directly to check for `@Bean SecurityFilterChain` and an `@Order`/`securityMatcher` that would explain precedence.",
+   "credits": 10.5664,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 4,
+    "tags": [
+     "incomplete",
+     "pointer_verified"
+    ],
+    "user": "sonnet-bugfixer",
+    "verified": true
+   },
+   "id": "6a3584f8-4725-4e8e-853f-d04cdd543e3b",
+   "judge": {
+    "abstain": 4,
+    "correct": 4,
+    "grounded": 4,
+    "helpful": 4,
+    "located": 4,
+    "rationale": "Honestly notes framework-level invocation isn't graph-traceable while flagging plausible override candidates with clear caveats."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "answered": false,
+    "answered_and_located": null,
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.1.0",
+   "pointers": [
+    "WebSecurityConfiguration.java",
+    "SandboxActuatorSecurity.java",
+    "SandboxGuardFilter.java",
+    "TestControllerSecurityConfig.java",
+    "SandboxGuardFilterTest.java",
+    "ActuatorExposureUnitTest.java"
+   ],
+   "prompt_version": "nav@77015957627a66b8",
+   "q": "One hop up: what actually invokes WebSecurityConfiguration's filterChain bean, and does anything else configure or override it (e.g. a second SecurityFilterChain bean for a different URL pattern, like actuator or sandbox)?",
+   "qid": null,
+   "reference": null,
+   "request_id": "6a3584f8-4725-4e8e-853f-d04cdd543e3b",
+   "steps": 9,
+   "terminal": "abstain",
+   "tier": "nav-sonnet",
+   "user": "sonnet-bugfixer"
+  },
+  {
+   "answer": "Graph findings on this refactor:\n\n**Current wiring**: only `WebSecurityConfiguration.java` (sub [7]) `INJECTS` all four filters (`JwtAuthenticationFilter.java`, `BannedUserAuthorizationFilter.java`, `ConsentEnforcementFilter.java`, `EmailVerificationEnforcementFilter.java`) — each has exactly that one dependent edge, so structurally nothing else references them for wiring purposes; moving the registration is graph-locally contained to that one file plus the four filter classes.\n\n**`FilterRegistrationConfiguration.java`** (sub [7], type Context) is nearly inert in the graph: it only imports `CorsProperties.java`, has 0 recorded dependents, and shows no existing filter registrations to collide with by name/order — so the graph can't confirm or rule out an ordering conflict with whatever it already registers (this may just be sparse INJECTS extraction, per the system caveat, not proof it's empty).\n\n**Tests to update**: `JwtAuthenticationFilter.java` has three dedicated unit tests (`JwtAuthenticationFilterBrokenSessionPublicUnitTest.java`, `JwtAuthenticationFilterStaleTokenUnitTest.java`, `JwtAuthenticationFilterDevLitePublicUnitTest.java`) that `IMPORTS` the filter directly — if they instantiate/mock the filter chain via `WebSecurityConfiguration`, moving registration could affect their setup. `ConsentEnforcementFilter.java` has `ConsentEnforcementFilterUnitTest.java` similarly.\n\n**What the graph can't tell you**: `addFilterBefore`/`addFilterAfter` ordering semantics differ meaningfully from `FilterRegistrationBean.setOrder()` (the former is relative-to-Spring-Security-chain position; the latter is a global integer in the servlet container's filter chain, applied *before* Spring Security's own chain unless carefully ordered) — that correctness risk is pure file-content reasoning, not graph-visible. Open `WebSecurityConfiguration.java` and `FilterRegistrationConfiguration.java` to check for that gotcha directly.",
+   "credits": 8.9723,
+   "disputed": false,
+   "expect": "answer",
+   "human": {
+    "rating": 5,
+    "tags": [
+     "great",
+     "pointer_verified"
+    ],
+    "user": "sonnet-bugfixer",
+    "verified": true
+   },
+   "id": "15dc287b-5eaa-4fea-9b8c-33c1a204b411",
+   "judge": {
+    "abstain": 4,
+    "correct": 4,
+    "grounded": 4,
+    "helpful": 4,
+    "located": 4,
+    "rationale": "Correctly scopes the refactor's structural impact and tests while flagging the addFilterBefore vs setOrder semantic gap as file-content-only knowledge."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": null,
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "answered": false,
+    "answered_and_located": null,
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.1.0",
+   "pointers": [
+    "WebSecurityConfiguration.java",
+    "FilterRegistrationConfiguration.java",
+    "JwtAuthenticationFilter.java",
+    "BannedUserAuthorizationFilter.java",
+    "ConsentEnforcementFilter.java",
+    "EmailVerificationEnforcementFilter.java",
+    "ConsentEnforcementFilterUnitTest.java",
+    "JwtAuthenticationFilterStaleTokenUnitTest.java"
+   ],
+   "prompt_version": "nav@77015957627a66b8",
+   "q": "If I moved the addFilterBefore/addFilterAfter chain (JWT, banned, consent, email-verification) out of WebSecurityConfiguration and into FilterRegistrationConfiguration as separate FilterRegistrationBeans with explicit setOrder() values instead, what would break or need updating?",
+   "qid": null,
+   "reference": null,
+   "request_id": "15dc287b-5eaa-4fea-9b8c-33c1a204b411",
+   "steps": 7,
+   "terminal": "abstain",
+   "tier": "nav-sonnet",
+   "user": "sonnet-bugfixer"
+  },
+  {
+   "answer": "Subsystem 13 was merged into [4] Partnership opportunity lifecycle during the 2026-07-27 curation (\"sub-13 merged into [4] … 60.3% of that suite's coupling pointed here\"). It's the ex-49-file integration-test suite that now sits inside subsystem 4, retained only as a MERGED navigator with a [:SUPERSEDED_BY] edge to [4] so old references still resolve. So the production subsystem it validates is [4] Partnership opportunity lifecycle — the campaign domain (PartnershipOpportunity/AppliedOpportunity entities, ActiveCooperationService, PermissionUtils, DictionaryService, BaseRepository/BaseService persistence infra). To confirm/explore, open subsystem 4's entry points (PermissionUtils.java, BaseRepository.java, DictionaryService.java) and its integration-test members (e.g. ActiveCooperationServiceIntegrationTestBase.java).",
+   "credits": 2.0416,
+   "disputed": false,
+   "expect": "answer",
+   "human": null,
+   "id": "2049d77b-f3c8-4ed5-9f4a-19192829b652",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 3,
+    "helpful": 4,
+    "located": 4,
+    "rationale": "Correctly identifies sub-13 as validating sub-4 and points at real sub-4 hub files, but the specific merge-date/percentage claims aren't backed by the reference's cited seam evidence."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": "bank",
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "answered": true,
+    "answered_and_located": true,
+    "has": true,
+    "success": true
+   },
+   "pack_version": "1.1.0",
+   "pointers": [
+    "PermissionUtils.java",
+    "BaseRepository.java",
+    "ActiveCooperationServiceIntegrationTestBase.java",
+    "DictionaryService.java",
+    "PartnershipOpportunity.java"
+   ],
+   "prompt_version": "nav@77015957627a66b8",
+   "q": "Which production subsystem does the test-only subsystem 13 validate?",
+   "qid": "GR12",
+   "reference": "Seam sub-13 <-> sub-4: 209 edges (IMPORTS 189, INJECTS 14, EXTENDS 4, TESTED_BY 2). Beyond imports: AppliedOpportunityContentService.java TESTED_BY AppliedOpportunityContentServiceUnitTest.java; RepositoryResolver.java INJECTS PartnershipOpportunityPhotoRepository.java; PartnershipOpportunityPhotoRepository.java EXTENDS BaseRepository.java; PartnershipOpportunityPhotoRepository.java EXTENDS PartnershipOpportunityPhoto.java; PartnershipOpportunityService.java TESTED_BY PartnershipOpportunityServiceUnitTest.java.",
+   "request_id": "2049d77b-f3c8-4ed5-9f4a-19192829b652",
+   "rr_equiv": 0.98095703125,
+   "steps": 0,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "judge"
+  },
+  {
+   "answer": "I have enough to answer; the header-attach mechanism/timing is file content, which the graph confirms structurally but doesn't expose verbatim.\n\n**step-up.interceptor.ts** (subsystem 170, `src/app/core/interceptors/step-up.interceptor.ts`) is the HTTP interceptor responsible for the `X-Step-Up-Token` header. It's registered in `app.config.ts` (which INJECTS it into Angular's HTTP interceptor chain, per the impact graph) alongside the auth vertical's other interceptors (error, language, rate-limit-cache, shell-headers, ssr-cookie-forward). It INJECTS `step-up-context.ts` — a small Resource (19 lines) that holds the current step-up state/token — reading from it to attach the header onto outgoing requests. Firing time (which requests get the header, and under what step-up-pending condition) is implementation detail inside the interceptor body and `step-up-context.ts`, not something the graph encodes structurally — open those two files to see the exact predicate. `step-up.service.ts` (the Process hub, arity 6 spine in [170]) is the higher-level service that likely drives the step-up flow/state that the context stores, but no direct edge from the service to the interceptor was found in the graph — only interceptor → context.\n\nTo confirm exact trigger logic, open `step-up.interceptor.ts` and `step-up-context.ts` directly.",
+   "credits": 10.9836,
+   "disputed": true,
+   "expect": "answer",
+   "human": null,
+   "id": "8d4e129e-a4a6-4974-8fbb-430fbc718799",
+   "judge": {
+    "abstain": 3,
+    "correct": 3,
+    "grounded": 4,
+    "helpful": 3,
+    "located": 3,
+    "rationale": "Names step-up.interceptor.ts and step-up-context.ts (overlapping with gold) but misses the feature/dialog files the reference shows actually document firing conditions, and abstains on exactly that answerable part."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": "bank",
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "answered": true,
+    "answered_and_located": true,
+    "has": true,
+    "success": true
+   },
+   "pack_version": "1.1.0",
+   "pointers": [
+    "step-up.interceptor.ts",
+    "step-up-context.ts",
+    "step-up.service.ts",
+    "app.config.ts",
+    "step-up.interceptor.spec.ts"
+   ],
+   "prompt_version": "nav@77015957627a66b8",
+   "q": "Which interceptor attaches the X-Step-Up-Token header and when does it fire?",
+   "qid": "FE07",
+   "reference": "Located: step-up-auth.feature (Rule, sub-9); step-up-context.spec.ts (Rule, sub-17); step-up-context.ts (Resource, sub-17); step-up-dialog.component.html (Actor, sub-17); step-up-dialog.component.spec.ts (Rule, sub-17); step-up-dialog.component.ts (Actor, sub-17) (+5 more). Paths in gold rows.",
+   "request_id": "8d4e129e-a4a6-4974-8fbb-430fbc718799",
+   "rr_equiv": 0.0753173828125,
+   "steps": 5,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "judge"
+  },
+  {
+   "answer": "This is a case where the graph can tell you *what* the interceptors are and where they live, but not the actual registration order or the reasoning behind it — that's determined by the array order passed to `withInterceptors()` in the HTTP client provider, which is file content, not graph structure.\n\nThe interceptor chain lives in subsystem [170] FE auth, 2FA & interceptors: `error.interceptor.ts`, `language.interceptor.ts`, `rate-limit-cache.interceptor.ts`, `shell-headers.interceptor.ts`, `ssr-cookie-forward.interceptor.ts`, `step-up.interceptor.ts`, and `set-to-array.interceptor.ts` (this last one sits in [177]'s member list per curation notes, though functionally part of the chain). Registration/ordering is wired in `app.config.ts` (and `app.config.server.ts` for SSR) in subsystem [177] FE shell, i18n & generated client — that's the file to open to see the actual `withInterceptors([...])` array and any comments explaining why one runs before another (e.g., cookie-forwarding needing to happen before headers are read, or error handling needing to wrap everything so it can catch failures from interceptors below it, or step-up/rate-limit-cache needing the response shape already normalized by error handling).\n\nI can't verify the exact order or rationale from the graph alone — open `app.config.ts` and `app.config.server.ts` directly to read the interceptor array and any inline comments.",
+   "credits": 14.6266,
+   "disputed": false,
+   "expect": "answer",
+   "human": null,
+   "id": "7b811197-1883-4572-8415-dd9fe09cb613",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 5,
+    "helpful": 5,
+    "located": 5,
+    "rationale": "Abstains correctly on order-is-file-content per reference, correctly points to app.config.ts, and even surfaces the two interceptors the reference flags as a known graph gap."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": "bank",
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "answered": false,
+    "answered_and_located": null,
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.1.0",
+   "pointers": [
+    "app.config.ts",
+    "app.config.server.ts",
+    "error.interceptor.ts",
+    "language.interceptor.ts",
+    "rate-limit-cache.interceptor.ts",
+    "shell-headers.interceptor.ts",
+    "ssr-cookie-forward.interceptor.ts",
+    "step-up.interceptor.ts"
+   ],
+   "prompt_version": "nav@77015957627a66b8",
+   "q": "In what order do the HTTP interceptors run and why does the order matter?",
+   "qid": "FE08",
+   "reference": "The graph holds six interceptors — demo, error, language, rate-limit-cache, shell-headers, step-up — plus the registration point app.config.ts, where the chain order and its rationale comment live. Order is file content, not structure: the recipe returns the interceptor set and app.config.ts as the read pointer. Known gap: the repo has 8 interceptors (set-to-array and ssr-cookie-forward are missing from the graph — delta-scan backlog).",
+   "request_id": "7b811197-1883-4572-8415-dd9fe09cb613",
+   "rr_equiv": 0.99951171875,
+   "steps": 5,
+   "terminal": "abstain",
+   "tier": "nav-sonnet",
+   "user": "judge"
+  },
+  {
+   "answer": "I have enough to answer. StorageUrlValidator doesn't show direct edges to SignedUrlService in the graph (TRIGGERS/call edges are sparse per the caveats), but the pointer path and subsystem [15] caveat directly name it as the attachment-URL host validator.\n\nAttachment URLs get rejected based on their **host**, not the file content, because of `StorageUrlValidator.java` (subsystem [3], `Rate limits & runtime config` — file: `backend/src/main/java/com/sm/instagram/platform/storage/service/StorageUrlValidator.java`). It's a Rule-type validator that checks whether an attachment's URL points to an allow-listed storage host (e.g. the app's own GCP/Firebase storage domain) before the URL is accepted; a rejection means the host isn't on that allow-list, independent of whether the referenced file itself is valid. It throws through `ValidationTranslatableException.java` (subsystem [7], the shared translatable-exception layer), which is why the failure surfaces as a validation error rather than a storage/file error.\n\nThis sits structurally alongside `SignedUrlService.java` (subsystem [3]), the service that generates/validates signed storage URLs for uploads and is injected by `SupportTicketService.java` (subsystem [15]) — the attachment flow that would call into URL validation when tickets/responses carry attachment links. `FileUploadController.java` and `SupportTicketService.java` are the practical entry points to look at for where the validator is actually invoked, since the sparse TRIGGERS/call-edge extraction in this graph doesn't pin the exact call site — open `StorageUrlValidator.java` directly to see the allow-listed host set.",
+   "credits": 14.867,
+   "disputed": false,
+   "expect": "answer",
+   "human": null,
+   "id": "8cdee195-b0de-4680-a0c7-a8958152803e",
+   "judge": {
+    "abstain": 5,
+    "correct": 5,
+    "grounded": 4,
+    "helpful": 5,
+    "located": 5,
+    "rationale": "Correctly identifies StorageUrlValidator.java as the host-allowlist rule matching the reference exactly, with some hedged speculative extras beyond it."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": "bank",
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "answered": true,
+    "answered_and_located": true,
+    "has": true,
+    "success": true
+   },
+   "pack_version": "1.1.0",
+   "pointers": [
+    "StorageUrlValidator.java",
+    "SignedUrlService.java",
+    "SupportTicketService.java",
+    "ValidationTranslatableException.java",
+    "FileUploadController.java"
+   ],
+   "prompt_version": "nav@77015957627a66b8",
+   "q": "Why are attachment URLs from some hosts rejected even when the file itself is fine?",
+   "qid": "BE37",
+   "reference": "StorageUrlValidator (the pentest 3.1 SSRF fix, 2026-09-02) post-dates the scan — delta-scan item. Behaviour: attachment URLs validate against a storage-host allowlist; other hosts are rejected regardless of the file. Located: StorageUrlValidator.java (Rule, sub-3). Paths in gold rows.",
+   "request_id": "8cdee195-b0de-4680-a0c7-a8958152803e",
+   "rr_equiv": 0.9990234375,
+   "steps": 8,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "judge"
+  },
+  {
+   "answer": "Authentication is not one subsystem but a cluster spanning backend and frontend:\n\n**Backend core:**\n- **[9] Auth journeys & BDD harness** — the actual login/registration flows (EmailVerificationService, FirebaseAuthProxyService, EmailChangeService, StepUpAuthService, PasswordResetService, MultiUserAuthService), entered via FirebaseAuthProxyController/AuthController, plus post-auth enforcement filters (BannedUserAuthorizationFilter, EmailVerificationEnforcementFilter) that can 403 a validly-tokened request.\n- **[6] Two-factor auth & user cache** — TOTP/step-up second factor (TwoFactorAuthService, TotpValidationService, TotpFirestoreService) and the Firestore/Redis user cache (UserCacheService, 51 ext in-edges) that [9] calls into for identity lookups during auth.\n- **[10] User identity & token exchange** — owns User.java (the estate's most-imported entity) and TokenExchangeService/FirebaseService; both [9] and [6] call through here for Firebase auth, email dispatch and token exchange (TokenExchangeService calls UserCacheService, FirestoreService, TotpFirestoreService, TwoFactorAuthService directly).\n- **[8] Validation, crypto & query specs** — supplies HMAC/TOTP crypto (HmacUtils, TotpCodeGenerator) and recaptcha gating consumed by the above.\n- **[11]'s ConsentEnforcementFilter** also participates in the \"403 with valid token\" story, though it's a billing-subsystem file, not an auth one.\n\n**Talk paths:** 9↔6 (50 edges, mostly CALLS/INJECTS into UserCacheService/TotpFirestoreService), 9↔10 (63 edges, e.g. EmailVerificationService→EmailService, FirebaseAuthProxyService→FirebaseService), 6↔10 (72 edges, TokenExchangeService is the hub calling UserCacheService/FirestoreService/TwoFactorAuthService). **[10]'s User.java is the load-bearing articulation point** all three route through.\n\n**Frontend:** **[170] FE auth, 2FA & interceptors** (session-state.service.ts, auth-api.service.ts, step-up/two-factor services, interceptor chain) mirrors this, wiring 76 edges (mostly INJECTS) into shell subsystem **[177]**.",
+   "credits": 9.2042,
+   "disputed": false,
+   "expect": "answer",
+   "human": null,
+   "id": "ff76f9e1-e764-425a-a6dc-af14be5fa5c6",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 4,
+    "helpful": 4,
+    "located": 5,
+    "rationale": "Correctly centers on sub-9/sub-6 with matching edge counts and mentions sub-8, but broadens scope with sub-10/sub-11 beyond the reference's tighter three-subsystem framing."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": "bank",
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "answered": true,
+    "answered_and_located": true,
+    "has": true,
+    "success": true
+   },
+   "pack_version": "1.1.0",
+   "pointers": [
+    "FirebaseAuthProxyService.java",
+    "TokenExchangeService.java",
+    "UserCacheService.java",
+    "TwoFactorAuthService.java",
+    "User.java",
+    "BannedUserAuthorizationFilter.java",
+    "ConsentEnforcementFilter.java",
+    "session-state.service.ts"
+   ],
+   "prompt_version": "nav@77015957627a66b8",
+   "q": "Which subsystems implement authentication and how do they talk to each other?",
+   "qid": "GR18",
+   "reference": "The auth estate is three subsystems: sub-9 (auth/feature rules), sub-6 (TOTP/step-up + user cache), sub-8 (recaptcha/specification rules). The 9<->6 seam is the working coupling; sub-8 attaches through validation rules. Seam sub-9 <-> sub-6: 51 edges (IMPORTS 25, INJECTS 15, CALLS 7, PERFORMS 2, CONSTRAINS 2). Beyond imports: TestAuthController.java INJECTS UserCacheService.java; TestAuthController.java PERFORMS UserCacheService.java; TestAuthController.java INJECTS FirestoreService.java; TestAuthController.java PERFORMS FirestoreService.java; AdminIntegrityChecker.java INJECTS TotpFirestoreService.java.",
+   "request_id": "ff76f9e1-e764-425a-a6dc-af14be5fa5c6",
+   "rr_equiv": 0.9990234375,
+   "steps": 4,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "judge"
+  },
+  {
+   "answer": "Correlating log lines to one failing user action is a logging-config question in [7] Translatable exceptions & logging (the LAYER the whole backend imports for errors and logging). The mechanism is `RequestCorrelationFilter.java` (`backend/src/main/java/com/sm/instagram/platform/common/logging/RequestCorrelationFilter.java`), which is what stamps each incoming request with a correlation/request id (likely via MDC) so every log line emitted while handling that request can be tied back together. It sits alongside `RequestLoggingFilter.java` (logs request start/end) and `EarlyRequestLoggingFilter.java` (early-phase logging), with `LoggingConfiguration.java` wiring the logging setup, and `CorsLoggingFilter.java` covering CORS-specific logging. `RequestLoggingFiltersUnitTest.java` is the only graph consumer of the correlation filter and is a good place to see how the id is expected to appear in log output/tests.\n\nPractically: open `RequestCorrelationFilter.java` to see the exact key name it injects (e.g. a correlation/request-id header or MDC key), then grep application logs for that id value corresponding to the failing action's request — that pulls every line the backend emitted for that one call. This is graph-shape/pointer guidance; the exact MDC key and log pattern are file content, not something the graph encodes.",
+   "credits": 9.3388,
+   "disputed": false,
+   "expect": "answer",
+   "human": null,
+   "id": "992ce2ee-ab2f-440a-8a6e-ffa4d663c6e7",
+   "judge": {
+    "abstain": 5,
+    "correct": 5,
+    "grounded": 5,
+    "helpful": 5,
+    "located": 5,
+    "rationale": "Matches the reference exactly: RequestCorrelationFilter.java, MDC-based correlation id, sub-7."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": "bank",
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "answered": true,
+    "answered_and_located": true,
+    "has": true,
+    "success": true
+   },
+   "pack_version": "1.1.0",
+   "pointers": [
+    "RequestCorrelationFilter.java",
+    "RequestLoggingFilter.java",
+    "EarlyRequestLoggingFilter.java",
+    "LoggingConfiguration.java",
+    "RequestLoggingFiltersUnitTest.java",
+    "CorsLoggingFilter.java"
+   ],
+   "prompt_version": "nav@77015957627a66b8",
+   "q": "How do I find every log line belonging to one failing user action?",
+   "qid": "BE36",
+   "reference": "RequestCorrelationFilter stamps a correlation id per request and propagates it via MDC — one user action, one id, across every log line; search logs by that id. Located: RequestCorrelationFilter.java (Rule, sub-7). Paths in gold rows.",
+   "request_id": "992ce2ee-ab2f-440a-8a6e-ffa4d663c6e7",
+   "rr_equiv": 1.0,
+   "steps": 4,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "judge"
+  },
+  {
+   "answer": "Based on the graph, GeoIP data lives entirely in subsystem [3] (Rate limits & runtime config), and there is no structural edge connecting it to the consent subsystem [11] — GDPR compliance for geo data is handled *internally*, not by gating through ConsentService/ConsentEnforcementFilter.\n\n**Consumers of GeoIP data:**\n- `GeoIpAdminController.java` — admin surface that PERFORMS/INJECTS `GeoLocationService.java` and `TravelPatternService.java` to serve geo analytics (backs `admin-geoip-analysis.feature`, tested via `AdminGeoIpSteps.java` in subsystem 9).\n- `TravelPatternService.java` — uses geolocation for impossible-travel/anomaly detection (an A_P_A spine hub of subsystem 3).\n- `SessionSecurityService.java` (subsystem 9, auth journeys) — CALLS `GeoLocationService.java` directly for session/device security checks, the one cross-subsystem consumer found.\n- `GeoLocationFacade.java` PERFORMS/wraps `GeoIpStorageService.java`, with `MaxMindStartupValidator.java` constraining `GeoLocationService.java` at startup (validates the MaxMind DB).\n\n**GDPR interaction:**\nRather than routing through the consent subsystem, GDPR compliance is built into the geo/rate-limit pipeline itself: `GdprCompliantRateLimiterService.java` (extends `RateLimiterService.java`, injects `StorageModeConfiguration.java` and `HashingUtil.java`) anonymizes/hashes identifying data (e.g. IP) before storage, and `GeoIpStorageService.java`/`StorageModeConfiguration.java` govern how/whether geo data persists. No edge in the graph ties this to `ConsentService.java` or `ConsentEnforcementFilter.java` (subsystem 11) — that link, if intended, exists only in file content (open `GdprCompliantRateLimiterService.java` and `StorageModeConfiguration.java` to confirm), so treat the consent tie-in as a partial abstention.",
+   "credits": 21.88,
+   "disputed": false,
+   "expect": "answer",
+   "human": null,
+   "id": "dd0193cc-8bf4-461b-9ae1-c433f2ef4735",
+   "judge": {
+    "abstain": 4,
+    "correct": 4,
+    "grounded": 4,
+    "helpful": 4,
+    "located": 5,
+    "rationale": "Overlaps reference's gold sub-3 GeoIP entities and appropriately hedges the unconfirmed consent linkage rather than asserting it."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": "bank",
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "answered": true,
+    "answered_and_located": true,
+    "has": true,
+    "success": true
+   },
+   "pack_version": "1.1.0",
+   "pointers": [
+    "GeoLocationService.java",
+    "GeoIpAdminController.java",
+    "TravelPatternService.java",
+    "SessionSecurityService.java",
+    "GdprCompliantRateLimiterService.java",
+    "StorageModeConfiguration.java",
+    "GeoIpStorageService.java",
+    "GeoLocationFacade.java"
+   ],
+   "prompt_version": "nav@77015957627a66b8",
+   "q": "Who consumes GeoIP data and how does it interact with GDPR consent?",
+   "qid": "BE26",
+   "reference": "Located: AdminGeoIpSteps.java (Resource, sub-3); GeoIpAdminController.java (Actor, sub-3); GeoIpConfiguration.java (Context, sub-3); GeoIpServiceUnitTest.java (Rule, sub-3); GeoIpStorageService.java (Process, sub-3); GeoLocation.java (Resource, sub-3) (+10 more). Paths in gold rows.",
+   "request_id": "dd0193cc-8bf4-461b-9ae1-c433f2ef4735",
+   "rr_equiv": 0.9755859375,
+   "steps": 13,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "judge"
+  },
+  {
+   "answer": "This is a graph-derived shape answer, not an exhaustive runtime audit — the actual fallback behavior (in-memory vs. no-op) is implemented in file content.\n\nRedis backs several independently-degradable features in subsystem [3] Rate limits & runtime config and [6] Two-factor auth & user cache:\n\n- **User/session cache** — `UserCacheService.java` (53 ext in-edges, the dominant entry point in [6]) fronts both `RedisUserCache.java` and `InMemoryUserCache.java`, implying a pluggable cache with an in-memory fallback when Redis is down; user/session lookups used across auth, preferences and deletion flows would fall back or slow down.\n- **Rate limiting** — `RedisRateLimiterService.java` and the broader `GdprCompliantRateLimiterService.java`/`RateLimit.java` family in [3] use Redis as the counter store; an `application-no-redis.yml` profile exists specifically for running without Redis, and `NoOpRedisHealthIndicator.java` suggests health reporting degrades gracefully rather than failing hard.\n- **Geo-IP lookups** — `RedisGeoLocationCache.java` caches geo-IP data for the GDPR geo features in [3]; loss of Redis likely means uncached, slower geo lookups.\n- **Validation caching** — `RedisValidationService.java` in [3].\n\nOpen `application-no-redis.yml`, `RedisConfiguration.java`, `UserCacheService.java`, and `NoOpRedisHealthIndicator.java` to see the exact fallback logic, since the graph only shows structural placement, not the failover code path.",
+   "credits": 8.9333,
+   "disputed": false,
+   "expect": "answer",
+   "human": null,
+   "id": "598a640b-88b3-42ab-a93f-3e7a86b0d9a0",
+   "judge": {
+    "abstain": 5,
+    "correct": 5,
+    "grounded": 4,
+    "helpful": 5,
+    "located": 5,
+    "rationale": "Matches reference's Postgres-fallback and rate-limit degradation story with the same key files (NoOpRedisHealthIndicator, application-no-redis.yml)."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": "bank",
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "answered": true,
+    "answered_and_located": true,
+    "has": true,
+    "success": true
+   },
+   "pack_version": "1.1.0",
+   "pointers": [
+    "UserCacheService.java",
+    "RedisUserCache.java",
+    "InMemoryUserCache.java",
+    "RedisRateLimiterService.java",
+    "RedisGeoLocationCache.java",
+    "RedisValidationService.java",
+    "NoOpRedisHealthIndicator.java",
+    "application-no-redis.yml"
+   ],
+   "prompt_version": "nav@77015957627a66b8",
+   "q": "Which features degrade if Redis is unavailable?",
+   "qid": "BE22",
+   "reference": "The application-no-redis.yml profile exists precisely for this: cache lookups (UserCacheService) fall back to Postgres with higher latency, and rate limiting loses cross-instance state. Located: NoOpRedisHealthIndicator.java (Resource, sub-3); RedisConfiguration.java (Context, sub-3); RedisGeoLocationCache.java (Resource, sub-3); RedisRateLimiterService.java (Process, sub-3); RedisServiceUnitTest.java (Rule, sub-3); RedisStartupConnectivityTest.java (Rule, sub-3) (+6 more). Paths in gold rows.",
+   "request_id": "598a640b-88b3-42ab-a93f-3e7a86b0d9a0",
+   "rr_equiv": 0.98876953125,
+   "steps": 6,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "judge"
+  },
+  {
+   "answer": "address.service.ts (subsystem [176], FE profile/settings/admin) participates in one hyperedge: an A_P_A (Actor-Process-Actor) metapath where it is the hub, co-participating with addresses.component.ts and layout.component.ts. This means those two Actor-typed components both route through address.service.ts as their shared process hub — addresses.component.ts is the address-management screen in [176], and layout.component.ts is the shell/layout component (subsystem [177], FE shell & i18n), consistent with [177] being the hub every sibling imports. No A_P_R hyperedge exists (frontend has no repository-typed Resources in this walk, per the FE spine caveat). To see the underlying calls, open address.service.ts, addresses.component.ts, and layout.component.ts directly.",
+   "credits": 8.2933,
+   "disputed": true,
+   "expect": "answer",
+   "human": null,
+   "id": "5b5aa84a-5d49-4bfc-bab6-3ca8d0151fdd",
+   "judge": {
+    "abstain": 5,
+    "correct": 5,
+    "grounded": 5,
+    "helpful": 5,
+    "located": 5,
+    "rationale": "Exactly reproduces the reference's single A_P_A hyperedge (address.service.ts hub with addresses.component.ts and layout.component.ts)."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": "bank",
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "answered": true,
+    "answered_and_located": false,
+    "has": true,
+    "success": false
+   },
+   "pack_version": "1.1.0",
+   "pointers": [
+    "address.service.ts",
+    "addresses.component.ts",
+    "layout.component.ts"
+   ],
+   "prompt_version": "nav@77015957627a66b8",
+   "q": "Which files co-participate in hyperedges with address.service.ts?",
+   "qid": "GR14",
+   "reference": "One hyperedge: the A_P_A cohort hubbed on address.service.ts with addresses.component.ts and layout.component.ts (idf 2.862) — the two components sharing the service. Change the service's contract and that pair is the co-change set; the high IDF says this hub is distinctive, not a generic utility every file touches.",
+   "request_id": "5b5aa84a-5d49-4bfc-bab6-3ca8d0151fdd",
+   "rr_equiv": 1.0,
+   "steps": 2,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "judge"
+  },
+  {
+   "answer": "The graph's system-wide in-degree ranking (via `health(hubs)`) is topped by:\n\n1. **UserRepository.java** (180 in-edges) — subsystem [11] Subscriptions, payments & consent; the JPA repository for the User entity, imported across billing, auth, and deletion flows.\n2. **api** (177 in-edges) — subsystem [177] FE shell, i18n & generated client; the collapsed generated OpenAPI client node standing in for 271 generated frontend files.\n3. **User.java** (155) — subsystem [10] User identity & token exchange; the core identity entity, the single most-imported domain object.\n4. **ResourceNotFoundException.java** (102) — subsystem [7] Translatable exceptions & logging (LAYER); thrown estate-wide on missing-resource errors.\n5. **ValidationTranslatableException.java** (99) — subsystem [7]; the translatable validation-error base type.\n6. **PermissionUtils.java** (97) — subsystem [4] Partnership opportunity lifecycle; the permission-gating entry point.\n7. **BaseRepository.java** (68) — subsystem [4]; shared persistence base class used estate-wide.\n8. **sandbox-registry.ts** (63) — subsystem [173] FE fixtures & E2E harness (LAYER); registers sandbox fixtures consumed by every FE feature child.\n9. **UserCacheService.java** (60) — subsystem [6] Two-factor auth & user cache; Firestore/Redis-backed cache.\n10. **InsufficientPermissionsException.java** (60) — subsystem [7].\n\nOpen `UserRepository.java`, `User.java`, and `ResourceNotFoundException.java` first — they anchor the backend's identity and error layers, the two most structurally central concerns.",
+   "credits": 12.8201,
+   "disputed": false,
+   "expect": "answer",
+   "human": null,
+   "id": "c41fba36-d2bd-4cf1-8b3b-f27d327c204e",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 4,
+    "helpful": 5,
+    "located": 5,
+    "rationale": "Top files and order closely match the reference ranking with near-identical counts, though it substitutes some lower entries and gives a divergent subsystem number for the generated-client node."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": "bank",
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "answered": true,
+    "answered_and_located": null,
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.1.0",
+   "pointers": [
+    "UserRepository.java",
+    "api",
+    "User.java",
+    "ResourceNotFoundException.java",
+    "ValidationTranslatableException.java",
+    "PermissionUtils.java",
+    "BaseRepository.java",
+    "UserCacheService.java"
+   ],
+   "prompt_version": "nav@77015957627a66b8",
+   "q": "Which files have the highest in-degree system-wide?",
+   "qid": "GR29",
+   "reference": "Most load-bearing files by dependency in-degree: UserRepository.java (184, sub-11), User.java (161, sub-10), api (156, sub-18), ResourceNotFoundException.java (101, sub-7), ValidationTranslatableException.java (96, sub-7), PermissionUtils.java (95, sub-4), BaseRepository.java (70, sub-4), PartnershipOpportunity.java (60, sub-4).",
+   "request_id": "c41fba36-d2bd-4cf1-8b3b-f27d327c204e",
+   "rr_equiv": 0.99853515625,
+   "steps": 2,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "judge"
+  },
+  {
+   "answer": "The engine's Cypher tool is throwing a backend error (`FileNotFoundError: /app/training/master_prompt_v1.txt`) on every query, including a trivial distinct-relation-type listing, so I can't run the raw edge query needed to confirm this. More importantly, \"ALGEBRA_VIOLATION\" does not appear anywhere in the 17 typed relations documented for this graph, nor in any subsystem navigator, caveat, or the global caveats section — the only \"algebra\"-adjacent concept in this corpus is the LAYER fan-in criterion (≥85% in-share, ≥8 consumers, no partner >40%) used to promote subsystems 2, 7, and 16 to LAYER status, which is a membership/typing rule, not an edge type.\n\nI can't confirm this relation exists in the pack at all, and the Cypher tool needed to check directly is currently erroring out. Rather than speculate about which subsystem pairs \"break\" something I can't verify exists, I'm abstaining.",
+   "credits": 15.5113,
+   "disputed": false,
+   "expect": "answer",
+   "human": null,
+   "id": "5ea9c787-7e32-418f-bec3-fafe64825368",
+   "judge": {
+    "abstain": 1,
+    "correct": 1,
+    "grounded": 2,
+    "helpful": 1,
+    "located": 1,
+    "rationale": "Abstained and claimed the relation doesn't exist, but the reference shows 198 ALGEBRA_VIOLATION edges with concrete hotspots, so this was a plainly answerable question wrongly declined."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": "bank",
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "answered": false,
+    "answered_and_located": null,
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.1.0",
+   "pointers": [],
+   "prompt_version": "nav@77015957627a66b8",
+   "q": "Where do the ALGEBRA_VIOLATION edges cluster - which subsystem pairs break the layer algebra?",
+   "qid": "GR06",
+   "reference": "198 ALGEBRA_VIOLATION edges across 59 subsystem pairs. Hotspots: sub-4->sub-4 (29), sub-9->sub-9 (21), sub-11->sub-11 (17), sub-13->sub-4 (13), sub-3->sub-3 (10). These are typed-layer rule breaks — curation reviews the top pairs first.",
+   "request_id": "5ea9c787-7e32-418f-bec3-fafe64825368",
+   "rr_equiv": 0.9912109375,
+   "steps": 2,
+   "terminal": "abstain",
+   "tier": "nav-sonnet",
+   "user": "judge"
+  },
+  {
+   "answer": "A scheduled job, `TrialExpiryNotifierCronJob.java` (subsystem 11, Subscriptions/payments), is a lifecycle cron that periodically checks trials nearing expiry. It calls into `SubscriptionService.java` (via PERFORMS/INJECTS) which owns the subscription/trial state and is the shared hub also injected by `SubscriptionNotificationEventListener.java`. The domain-event path runs through subsystem 12 (Notifications & domain events): `SubscriptionNotificationEvent.java` is a Spring event affecting `User.java`/`NotificationType.java`, published by subscription logic and picked up via the `@TransactionalEventListener` pattern — `SubscriptionNotificationEventListener.java` (living structurally in subsystem 11 but consuming the subsystem-12 event) injects `NotificationService.java` and builds a `NotificationRequest.java` to actually persist/dispatch the user-visible notification.\n\nSo the causal chain is: cron detects near-expiry trials → SubscriptionService updates/evaluates subscription state → a SubscriptionNotificationEvent is raised → SubscriptionNotificationEventListener (decoupled via @TransactionalEventListener) reacts after the transaction commits → NotificationService creates the NotificationRequest that becomes the visible notification.\n\nCaveat: TRIGGERS edges are globally under-extracted (only 6 in the whole graph) and a direct cypher query for them errored, so the exact \"cron publishes event X\" link is inferred from shared SubscriptionService coupling plus the L2 description of subsystem 12's `@TransactionalEventListener` pattern, not a confirmed TRIGGERS edge — worth confirming by opening the two files directly.",
+   "credits": 14.2976,
+   "disputed": false,
+   "expect": "answer",
+   "human": null,
+   "id": "6d9c1a19-8436-43b8-9e02-599dd88a6659",
+   "judge": {
+    "abstain": 5,
+    "correct": 5,
+    "grounded": 5,
+    "helpful": 5,
+    "located": 5,
+    "rationale": "Traces the correct cron→service→event→listener→notification chain matching the reference's hop-ordered flow, with an honest caveat about the unconfirmed TRIGGERS edge."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": "bank",
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "answered": true,
+    "answered_and_located": true,
+    "has": true,
+    "success": true
+   },
+   "pack_version": "1.1.0",
+   "pointers": [
+    "TrialExpiryNotifierCronJob.java",
+    "SubscriptionService.java",
+    "SubscriptionNotificationEventListener.java",
+    "NotificationService.java",
+    "SubscriptionNotificationEvent.java",
+    "NotificationRequest.java",
+    "NotificationType.java",
+    "User.java"
+   ],
+   "prompt_version": "nav@77015957627a66b8",
+   "q": "How does a trial nearing expiry turn into a user-visible notification?",
+   "qid": "BE19",
+   "reference": "Flow from TrialExpiryNotifierCronJob.java: 31 typed steps within 2 hops touching 13 downstream files (IMPORTS 8, INJECTS 8, USES 7, MODIFIES 6). Walk the gold rows in hop order.",
+   "request_id": "6d9c1a19-8436-43b8-9e02-599dd88a6659",
+   "rr_equiv": 0.99609375,
+   "steps": 6,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "judge"
+  },
+  {
+   "answer": "This gives a complete picture: `shell-banners.component.ts` in subsystem 177 consumes the rate-limit state to render the UI banner.\n\n\n\n**Backend (produces the 429):** [3] Rate limits & runtime config owns the enforcement — `RateLimitConfiguration.java`, `StorageRateLimitService.java`/`InMemoryStorageRateLimitService.java`, and `GdprCompliantRateLimiterService.java` apply the limits, with `RateLimitExceptionHandler.java` translating a breach into the 429 response (it pairs with `RateLimitTranslatableException.java` in the exceptions layer [7]).\n\n**Frontend (consumes the 429):** in [170] FE auth, 2FA & interceptors, `rate-limit-cache.interceptor.ts` is the HTTP interceptor that catches the 429 response (wired into `app.config.ts`). It INJECTS into `rate-limit-state.service.ts` (subsystem 177, the shared FE hub), which holds the rate-limit UI state. That state is in turn consumed by `shell-banners.component.ts` (also in 177) — the shell-level banner component that surfaces the rate-limit warning/notice to the user.\n\nSo the flow is: backend rate-limiter → `RateLimitExceptionHandler.java` returns 429 → FE `rate-limit-cache.interceptor.ts` catches it → writes into `rate-limit-state.service.ts` → `shell-banners.component.ts` renders the resulting banner UI state. Open `rate-limit-cache.interceptor.ts` and `shell-banners.component.ts` first to see the exact state shape and banner trigger condition.",
+   "credits": 14.4211,
+   "disputed": false,
+   "expect": "answer",
+   "human": null,
+   "id": "d4cde7b5-e704-4847-8902-b11e21de6f2c",
+   "judge": {
+    "abstain": 5,
+    "correct": 3,
+    "grounded": 3,
+    "helpful": 4,
+    "located": 4,
+    "rationale": "Correctly names rate-limit-cache.interceptor.ts and rate-limit-state.service.ts from the gold set but omits the spec/feature files and adds an unverified shell-banners.component.ts claim with mismatched subsystem numbers."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": "bank",
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "answered": true,
+    "answered_and_located": true,
+    "has": true,
+    "success": true
+   },
+   "pack_version": "1.1.0",
+   "pointers": [
+    "rate-limit-cache.interceptor.ts",
+    "rate-limit-state.service.ts",
+    "shell-banners.component.ts",
+    "RateLimitExceptionHandler.java",
+    "RateLimitConfiguration.java",
+    "StorageRateLimitService.java",
+    "GdprCompliantRateLimiterService.java"
+   ],
+   "prompt_version": "nav@77015957627a66b8",
+   "q": "Where is 429 rate-limit handling implemented and which UI state does it feed?",
+   "qid": "FE29",
+   "reference": "Located: rate-limit-cache.interceptor.spec.ts (Rule, sub-17); rate-limit-cache.interceptor.ts (Rule, sub-17); rate-limit-state.service.ts (Process, sub-17); rate-limiting.feature (Rule, sub-3). Paths in gold rows.",
+   "request_id": "d4cde7b5-e704-4847-8902-b11e21de6f2c",
+   "rr_equiv": 0.92822265625,
+   "steps": 9,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "judge"
+  },
+  {
+   "answer": "I have enough to piece together the flow, though the exact retry count/backoff schedule is in file content.\n\nInvoice creation failure and retry lives entirely in subsystem [11] (Subscriptions, payments & consent). The chain: `InvoiceCreatedEvent.java` fires on invoice creation and is picked up by `InvoiceCreatedEventListener.java` (a `@TransactionalEventListener`-style consumer), which imports/injects `InvoiceRetryService.java` — the actual Process doing the work. `InvoiceRetryService.java` records attempts via `InvoiceRecordRepository.java`/`InvoiceRecord.java` (state tracked through `InvoiceStatus.java`), and talks to the external invoicing provider through `InvoicingPort.java`, pulling company billing data via `CompanyDataRepository.java`/`CompanyData.java`. On failure, the record is presumably persisted with a retryable status rather than thrown away.\n\nRetries are then swept up on a schedule by `InvoiceRetryCronJob.java` (an Actor/cron entry point in subsystem 11), which re-invokes `InvoiceRetryService.java` for outstanding failed `InvoiceRecord`s. The exact retry count, backoff interval, and give-up condition (e.g., a max-attempts field or terminal `InvoiceStatus` value) are logic inside `InvoiceRetryService.java` and `InvoiceStatus.java` — the graph confirms the wiring (event → listener → retry service → cron re-drive → repository/port) but not the numeric thresholds, so open those two files plus `InvoiceRetryServiceUnitTest.java` (which exercises the retry/give-up paths) to get the concrete numbers.",
+   "credits": 14.0583,
+   "disputed": false,
+   "expect": "answer",
+   "human": null,
+   "id": "96d3a611-78f1-4ace-ac71-158a1abe602c",
+   "judge": {
+    "abstain": 5,
+    "correct": 5,
+    "grounded": 5,
+    "helpful": 5,
+    "located": 5,
+    "rationale": "All three reference-named files (InvoiceRetryCronJob, InvoiceRetryService, InvoiceRetryServiceUnitTest) are present with an accurate high-level flow and honest caveat on numeric thresholds."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": "bank",
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "answered": true,
+    "answered_and_located": true,
+    "has": true,
+    "success": true
+   },
+   "pack_version": "1.1.0",
+   "pointers": [
+    "InvoiceRetryService.java",
+    "InvoiceRetryCronJob.java",
+    "InvoiceCreatedEventListener.java",
+    "InvoiceCreatedEvent.java",
+    "InvoiceStatus.java",
+    "InvoiceRecord.java",
+    "InvoicingPort.java",
+    "InvoiceRetryServiceUnitTest.java"
+   ],
+   "prompt_version": "nav@77015957627a66b8",
+   "q": "When invoice creation fails, how is it retried and when does it give up?",
+   "qid": "BE17",
+   "reference": "Invoice failure -> InvoiceRetryService marks the record -> InvoiceRetryCronJob replays pending invoices on schedule until success or terminal give-up; InvoiceStatus tracks the lag. Flow from InvoiceRetryCronJob.java, InvoiceRetryService.java, InvoiceRetryServiceUnitTest.java: 23 typed steps within 1 hops touching 7 downstream files (IMPORTS 12, INJECTS 4, USES 3, MODIFIES 2). Walk the gold rows in hop order.",
+   "request_id": "96d3a611-78f1-4ace-ac71-158a1abe602c",
+   "rr_equiv": 1.0,
+   "steps": 9,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "judge"
+  },
+  {
+   "answer": "This confirms enforcement lives in subsystem [3], with `RateLimitConfiguration.java` as the Actor wiring it up and `GdprCompliantRateLimiterService.java` / `InMemoryStorageRateLimitService.java` / `StorageRateLimitService.java` as the Process-layer enforcement services, backed by `RateLimit.java`, `RateLimitProfile.java`, and `RateLimitKeyType.java` as the annotation/config/key-type model. Violations surface via `RateLimitExceptionHandler.java` and `RateLimitTranslatableException.java` (subsystem [7], the shared exception layer).\n\n**Where it lives:** [3] Rate limits & runtime config (group [202]). `RateLimitConfiguration.java` (Actor) wires the rate-limit machinery; `GdprCompliantRateLimiterService.java` and `StorageRateLimitService.java`/`InMemoryStorageRateLimitService.java` do the actual enforcement (general API and storage/upload paths respectively). `RateLimit.java` (annotation, 30 ext in-edges), `RateLimitProfile.java` (31 ext in-edges) and `RateLimitKeyType.java` (26 ext in-edges) define the rate-limit rules/profiles and key strategy that other subsystems' controllers reference to opt in. `RateLimitingHooks.java` supplies integration hooks. When a limit is exceeded, `RateLimitExceptionHandler.java` catches it and throws/handles `RateLimitTranslatableException.java`, which lives in the shared exception layer [7] used estate-wide. BDD coverage sits in `RateLimitingSteps.java` (subsystem [9]).\n\nStart by opening `RateLimitConfiguration.java` for wiring, then `RateLimit.java`/`RateLimitProfile.java` for the annotation/config model, and `GdprCompliantRateLimiterService.java` for the enforcement logic itself.",
+   "credits": 9.8277,
+   "disputed": false,
+   "expect": "answer",
+   "human": null,
+   "id": "bec089ae-a3bb-4ef0-b512-991aac481066",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 4,
+    "helpful": 4,
+    "located": 4,
+    "rationale": "Places enforcement correctly in the rate-limit subsystem and matches GdprCompliantRateLimiterService.java from the gold list, though several named files aren't confirmed in the visible reference excerpt."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": "bank",
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "answered": true,
+    "answered_and_located": true,
+    "has": true,
+    "success": true
+   },
+   "pack_version": "1.1.0",
+   "pointers": [
+    "RateLimitConfiguration.java",
+    "GdprCompliantRateLimiterService.java",
+    "StorageRateLimitService.java",
+    "InMemoryStorageRateLimitService.java",
+    "RateLimit.java",
+    "RateLimitProfile.java",
+    "RateLimitKeyType.java",
+    "RateLimitExceptionHandler.java"
+   ],
+   "prompt_version": "nav@77015957627a66b8",
+   "q": "Where are API rate limits enforced and configured?",
+   "qid": "BE07",
+   "reference": "Located: DynamicRateLimit.java (Rule, sub-3); FirebaseRateLimitConfiguration.java (Context, sub-3); GdprCompliantRateLimiterService.java (Process, sub-3); GdprRateLimitProperties.java (Resource, sub-3); GdprRateLimiterUnitTest.java (Rule, sub-0); InMemoryRateLimiterService.java (Process, sub-3) (+25 more). Paths in gold rows.",
+   "request_id": "bec089ae-a3bb-4ef0-b512-991aac481066",
+   "rr_equiv": 0.99462890625,
+   "steps": 2,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "judge"
+  },
+  {
+   "answer": "UserSocialConnectionRepository.java is owned by subsystem [2] — Social connection data model, a LAYER in group 202 (Platform runtime & shared layers). It's a pure supplier layer: 86.2% fan-in across 8 distinct consumers, no dominant partner (merge into [4] or [5] was measured and refuted). It sits alongside UserSocialConnection.java, Platform entities, DTOs and a mapper.\n\nWhat actually depends on it (16 dependents across 6 subsystems — 0, 10, 4, 5, 6, 9):\n- **UserSocialConnectionService.java** (subsystem 2 itself) — the primary domain service, INJECTS/USES/MODIFIES it directly.\n- **AppliedOpportunityService.java** (subsystem 4, partnership lifecycle) — uses it for campaign-side social data.\n- **InstagramDataDeletionService.java** and **InstagramDeauthorizationService.java** (subsystem 5, account deletion & Instagram sync) — clean up social-connection rows during OAuth deauth/deletion flows.\n- **OAuthCallbackService.java** (subsystem 5) — writes connection rows on OAuth callback.\n- **RegistrationService.java** and **AuthService.java** (subsystem 6, two-factor/user cache & auth) — touch it during registration/auth.\n- **TestAuthController.java** (subsystem 9, auth harness) — test-side access.\n- **RepositoryResolver.java** (subsystem 4) — generic repository lookup wiring.\n\nOpen UserSocialConnectionRepository.java and UserSocialConnectionService.java first; for callers, AppliedOpportunityService.java and OAuthCallbackService.java are the two heaviest real consumers.",
+   "credits": 8.116,
+   "disputed": false,
+   "expect": "answer",
+   "human": null,
+   "id": "30d46204-e9a1-4b79-8aca-05b08e2ba4fc",
+   "judge": {
+    "abstain": 5,
+    "correct": 5,
+    "grounded": 5,
+    "helpful": 5,
+    "located": 5,
+    "rationale": "Names all five heaviest dependents listed in the reference plus plausible ownership context."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": "bank",
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "answered": true,
+    "answered_and_located": true,
+    "has": true,
+    "success": true
+   },
+   "pack_version": "1.1.0",
+   "pointers": [
+    "UserSocialConnectionRepository.java",
+    "UserSocialConnectionService.java",
+    "AppliedOpportunityService.java",
+    "OAuthCallbackService.java",
+    "InstagramDataDeletionService.java",
+    "InstagramDeauthorizationService.java",
+    "RegistrationService.java",
+    "AuthService.java"
+   ],
+   "prompt_version": "nav@77015957627a66b8",
+   "q": "What depends on UserSocialConnectionRepository and who owns that area?",
+   "qid": "GR27",
+   "reference": "40 dependency edges from 16 files across 7 subsystems point at UserSocialConnectionRepository.java. Heaviest dependents: AppliedOpportunityService.java, AuthService.java, InstagramDataDeletionService.java, InstagramDeauthorizationService.java, OAuthCallbackService.java. Full sorted set in gold rows.",
+   "request_id": "30d46204-e9a1-4b79-8aca-05b08e2ba4fc",
+   "rr_equiv": 1.0,
+   "steps": 1,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "judge"
+  },
+  {
+   "answer": "Based on the L1/L2 data, the dependency direction is one-way: [11] Subscriptions, payments & consent depends on [7] Translatable exceptions & logging, not the reverse.\n\n[7] is explicitly a LAYER — a \"SUPPLIER LAYER\" with 91.1% fan-in across 15 consumers and no consumer above 13.4%. It is pure supply: everything fails through it. Its top entities (ResourceNotFoundException.java, ValidationTranslatableException.java, InsufficientPermissionsException.java, AuthenticationTranslatableException.java, BusinessRuleTranslatableException.java) are exception/translatable-message infrastructure that the whole backend imports, including [11].\n\n[11]'s own dossier confirms this from the other side: its external_ratio is 0.509, with subsystem 4 called out as its largest cross-subsystem seam, and its caveats/summary describe it as building Stripe billing, consent and legal-document logic using translatable exceptions (BusinessRuleTranslatableException.java is even one of its listed entry-point-adjacent Rule members) — i.e. [11] consumes [7]'s exception hierarchy for its own error handling, rather than [7] depending on billing logic.\n\nConsistent with LAYER semantics generally: \"the three LAYERs have no actor roots and never start a flow; a caller->callee walk will only ever arrive at them\" — so [7] is only ever a destination, never an originator, of calls from [11].\n\nFirst files to open: ResourceNotFoundException.java and ValidationTranslatableException.java in [7] (the supply side), and StripeService.java / ConsentService.java / BusinessRuleTranslatableException.java in [11] (the consuming side) to see the throw sites.",
+   "credits": 3.7616,
+   "disputed": false,
+   "expect": "answer",
+   "human": null,
+   "id": "cb0bb9d5-1131-4ecd-abb2-6d2da3b31144",
+   "judge": {
+    "abstain": 5,
+    "correct": 3,
+    "grounded": 3,
+    "helpful": 3,
+    "located": 2,
+    "rationale": "The one-way LAYER-direction conclusion is plausible but none of the reference's concrete seam-evidence files (WebSecurityConfiguration, ConsentEnforcementFilter, CorsProperties, CorsLoggingFilter) appear among the pointers."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": "bank",
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "answered": true,
+    "answered_and_located": false,
+    "has": true,
+    "success": false
+   },
+   "pack_version": "1.1.0",
+   "pointers": [
+    "ResourceNotFoundException.java",
+    "ValidationTranslatableException.java",
+    "InsufficientPermissionsException.java",
+    "BusinessRuleTranslatableException.java",
+    "StripeService.java",
+    "ConsentService.java",
+    "UserRepository.java"
+   ],
+   "prompt_version": "nav@77015957627a66b8",
+   "q": "What is the dependency direction between subscriptions (11) and logging/exceptions (7)?",
+   "qid": "GR17",
+   "reference": "Seam sub-11 <-> sub-7: 61 edges (IMPORTS 51, INJECTS 4, VALIDATES 3, EXTENDS 3). Beyond imports: WebSecurityConfiguration.java INJECTS ConsentEnforcementFilter.java; WebSecurityConfiguration.java INJECTS CorsProperties.java; WebSecurityConfiguration.java VALIDATES CorsProperties.java; CorsLoggingFilter.java INJECTS CorsProperties.java; CorsLoggingFilter.java VALIDATES CorsProperties.java.",
+   "request_id": "cb0bb9d5-1131-4ecd-abb2-6d2da3b31144",
+   "rr_equiv": 0.307373046875,
+   "steps": 0,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "judge"
+  },
+  {
+   "answer": "This is enough to answer — the graph shows structural placement; the tab-link list itself is file content inside settings-layout.component.ts.\n\nThe settings tabs live in **`settings-layout.component.ts`** (frontend, `src/app/feature/settings/settings-layout.component.ts`, subsystem [176] FE profile, settings & admin) — a 78-line Actor component that is an entry point, routed to via `app.routes.ts` (an INJECTS edge from the router into this component). It acts as the settings shell/tab container that the individual settings screens (profile view/upload, security-settings, social-connections-settings, preferences, team, company-setup, addresses, etc. — all siblings in subsystem 176) plug into.\n\nThe graph doesn't expose the literal tab-definition array (that's file content, not structure), but the pattern in this subsystem is consistent: each tab corresponds to one routed child component/service pair (e.g. `security-settings.component.ts`, `social-connections-settings.component.ts`) living in `feature/settings/...`. To add a new tab you'd:\n1. Open `settings-layout.component.ts` to see how existing tabs are declared/rendered (likely a tab-config array or router-outlet children) and its `.html` template for the tab strip.\n2. Add your new tab entry there, following the same shape as the existing settings components.\n3. Register the new child route in `app.routes.ts`, which is what wires into `settings-layout.component.ts` today.\n4. Create the new screen component alongside the others in subsystem 176 (e.g. next to `security-settings.component.ts`).\n\nCheck `settings-layout.component.spec.ts` too — it's the only other file directly coupled to the layout and will show the expected tab behavior/test pattern.",
+   "credits": 11.6714,
+   "disputed": false,
+   "expect": "answer",
+   "human": null,
+   "id": "e5d0e12c-e169-40de-b2d5-9efc1a612ac3",
+   "judge": {
+    "abstain": 5,
+    "correct": 4,
+    "grounded": 4,
+    "helpful": 4,
+    "located": 5,
+    "rationale": "Correctly anchors on settings-layout.component.ts and security-settings.component.ts from the gold set, with reasonable add-a-tab guidance though the .html/.fixture.ts gold files are missing."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": "bank",
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "answered": true,
+    "answered_and_located": true,
+    "has": true,
+    "success": true
+   },
+   "pack_version": "1.1.0",
+   "pointers": [
+    "settings-layout.component.ts",
+    "app.routes.ts",
+    "security-settings.component.ts",
+    "social-connections-settings.component.ts",
+    "settings-layout.component.spec.ts"
+   ],
+   "prompt_version": "nav@77015957627a66b8",
+   "q": "Where are the user settings tabs defined and how would I add a new one?",
+   "qid": "FE17",
+   "reference": "Located: security-settings.component.html (Actor, sub-17); security-settings.component.spec.ts (Rule, sub-17); security-settings.component.ts (Actor, sub-17); security-settings.fixture.ts (Resource, sub-17); settings-layout.component.spec.ts (Rule, sub-17); settings-layout.component.ts (Actor, sub-17) (+1 more). Paths in gold rows.",
+   "request_id": "e5d0e12c-e169-40de-b2d5-9efc1a612ac3",
+   "rr_equiv": 0.67919921875,
+   "steps": 5,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "judge"
+  },
+  {
+   "answer": "Found it: `AppLanguageFilter.java` in [7] is the resolver, backed by `MessageSourceConfig.java` and the two bundles `messages_en.properties`/`messages_pl.properties` in [16]. That gives two supported languages: English and Polish.\n\nThe backend supports two languages for translatable messages and emails: **English (en)** and **Polish (pl)**. The mechanism lives in subsystem [7] Translatable exceptions & logging: `AppLanguageFilter.java` resolves the request/user language, and `MessageSourceConfig.java` configures the Spring `MessageSource` that loads the resource bundles. The actual translations live in subsystem [16] Status enums & OpenAPI contract: `messages_en.properties` and `messages_pl.properties`. These bundles are the i18n resource that backs the translatable-exception hierarchy (`ValidationTranslatableException.java`, `AuthenticationTranslatableException.java`, `BusinessRuleTranslatableException.java`, etc.) used across the whole backend, so both error messages and outbound email content resolve through the same en/pl bundle pair. Open `AppLanguageFilter.java` first to see how the language is selected per request, then `MessageSourceConfig.java` for bundle wiring, and the two `.properties` files for the actual translated strings.",
+   "credits": 7.6977,
+   "disputed": false,
+   "expect": "answer",
+   "human": null,
+   "id": "929aa688-c587-41cc-baec-7c82f093c3dc",
+   "judge": {
+    "abstain": 5,
+    "correct": 5,
+    "grounded": 5,
+    "helpful": 5,
+    "located": 5,
+    "rationale": "Matches the reference exactly: AppLanguageFilter.java plus the en/pl properties bundles."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": "bank",
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "answered": true,
+    "answered_and_located": true,
+    "has": true,
+    "success": true
+   },
+   "pack_version": "1.1.0",
+   "pointers": [
+    "AppLanguageFilter.java",
+    "MessageSourceConfig.java",
+    "messages_en.properties",
+    "messages_pl.properties"
+   ],
+   "prompt_version": "nav@77015957627a66b8",
+   "q": "Which languages does the backend support for messages and emails?",
+   "qid": "BE12",
+   "reference": "Backend messages and transactional emails localize via messages_en/pl.properties; AppLanguageFilter resolves and stores the request language. Located: AppLanguageFilter.java (Rule, sub-7). Paths in gold rows.",
+   "request_id": "929aa688-c587-41cc-baec-7c82f093c3dc",
+   "rr_equiv": 0.99951171875,
+   "steps": 4,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "judge"
+  },
+  {
+   "answer": "Seven Event nodes exist in the graph, spread across three subsystems:\n\n- **AccountActivatedEvent.java** (sub 12, Notifications & domain events): produced (TRIGGERS) by `EmailVerificationService.java`, `RegistryLookupService.java`, `UserService.java` (subs 9/11/10); consumed by `SubscriptionNotificationEventListener.java` (sub 11); affects `User.java`/`AccountStatus.java`.\n- **NewUserRegisteredEvent.java** (sub 12): no producer/consumer edges recorded (0 dependents) — affects `User.java`/`UserType.java`; likely fired from registration flow but not captured (TRIGGERS edges are globally sparse per graph caveats).\n- **SubscriptionNotificationEvent.java** (sub 12): produced by `SubscriptionService.java` (sub 11); consumed by `SubscriptionNotificationEventListener.java`; affects `NotificationType.java`/`User.java`.\n- **SubscriptionEvent.java** (sub 11): persisted via `SubscriptionEventRepository.java`; no TRIGGERS producer captured.\n- **InvoiceCreatedEvent.java** (sub 11): consumed by `InvoiceCreatedEventListener.java`; affects `InvoiceRecord.java`; no TRIGGERS producer captured.\n- **OpportunityStatusChangedEvent.java** (sub 4, Partnership opportunity lifecycle): produced by `AppliedOpportunityContentService.java` and `AppliedOpportunityService.java`; affects `AppliedOpportunity.java`/`OpportunityStatus.java`/`User.java`; no listener node found in this graph slice.\n- A generic **NotificationEventListener.java** (sub 12) also exists as a catch-all consumer.\n\nPer the global caveat, TRIGGERS edges are under-extracted (only 6 in the whole graph), so absent producer/consumer links (NewUserRegisteredEvent, SubscriptionEvent, InvoiceCreatedEvent, OpportunityStatusChangedEvent's listener) are shape signals, not proof of absence — open the listed listener/service files to confirm wiring.",
+   "credits": 19.2779,
+   "disputed": false,
+   "expect": "answer",
+   "human": null,
+   "id": "c9193321-acd8-4f19-a684-c350f7295399",
+   "judge": {
+    "abstain": 5,
+    "correct": 3,
+    "grounded": 4,
+    "helpful": 4,
+    "located": 4,
+    "rationale": "Correctly describes producers/consumers for six of the eight Event nodes but undercounts the total (seven vs. eight) and misses TestEnvironmentGuard.java/TotpValidationService.java entirely."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": "bank",
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "answered": true,
+    "answered_and_located": null,
+    "has": false,
+    "success": null
+   },
+   "pack_version": "1.1.0",
+   "pointers": [
+    "AccountActivatedEvent.java",
+    "SubscriptionNotificationEvent.java",
+    "OpportunityStatusChangedEvent.java",
+    "UserService.java",
+    "SubscriptionService.java",
+    "SubscriptionNotificationEventListener.java",
+    "InvoiceCreatedEventListener.java",
+    "NewUserRegisteredEvent.java"
+   ],
+   "prompt_version": "nav@77015957627a66b8",
+   "q": "Which Event nodes exist and who produces/consumes each?",
+   "qid": "GR22",
+   "reference": "8 Event nodes exist. AccountActivatedEvent.java (sub-12; triggered by EmailVerificationService.java|RegistryLookupService.java|UserService.java); InvoiceCreatedEvent.java (sub-11; triggered by -); NewUserRegisteredEvent.java (sub-12; triggered by -); OpportunityStatusChangedEvent.java (sub-4; triggered by AppliedOpportunityContentService.java|AppliedOpportunityService.java); SubscriptionEvent.java (sub-11; triggered by -); SubscriptionNotificationEvent.java (sub-12; triggered by SubscriptionService.java); TestEnvironmentGuard.java (sub-3; triggered by -); TotpValidationService.java (sub-6; triggered by -). Caveat: TRIGGERS edges are sparse (6 system-wide) — consumers are under-modelled until delta enrichment.",
+   "request_id": "c9193321-acd8-4f19-a684-c350f7295399",
+   "rr_equiv": 1.0,
+   "steps": 13,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "judge"
+  },
+  {
+   "answer": "`app.routes.ts` is the root Angular route table, living in subsystem [177] (FE shell, i18n & generated client) — the group's shared hub that every sibling imports from. It's injected via `app.config.ts` (the app bootstrap config that wires the router), which is the file to open first if you want to see how the route table gets registered. `sandbox.routes.ts` (also in [177]/[173] territory) is a separate, smaller route table specifically for the sandbox/demo fixture host, not the main app's URL surface — open `app.routes.ts` for the actual full list of URLs the app serves.",
+   "credits": 8.1283,
+   "disputed": false,
+   "expect": "answer",
+   "human": null,
+   "id": "cbdb0bf1-6f54-4ceb-bf48-a1b51ed228ea",
+   "judge": {
+    "abstain": 5,
+    "correct": 5,
+    "grounded": 5,
+    "helpful": 5,
+    "located": 5,
+    "rationale": "Correctly identifies app.routes.ts as the primary route table and grounds the distinction from app.config.ts and sandbox.routes.ts, matching the reference exactly."
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": "bank",
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "answered": true,
+    "answered_and_located": true,
+    "has": true,
+    "success": true
+   },
+   "pack_version": "1.1.0",
+   "pointers": [
+    "app.routes.ts",
+    "app.config.ts",
+    "sandbox.routes.ts"
+   ],
+   "prompt_version": "nav@77015957627a66b8",
+   "q": "Which file defines the full route table and every URL the app serves?",
+   "qid": "FE01",
+   "reference": "Located: app.routes.ts (Resource, sub-17). Paths in gold rows.",
+   "request_id": "cbdb0bf1-6f54-4ceb-bf48-a1b51ed228ea",
+   "rr_equiv": 0.98046875,
+   "steps": 2,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "judge"
+  },
+  {
+   "answer": "Based on the code graph, several service-layer hubs bridge many subsystems (as opposed to the passive data/exception \"shelf\" hubs like `ResourceNotFoundException.java` or `User.java`):\n\n- **PermissionUtils.java** (subsystem [4], Partnership opportunity lifecycle) — the broadest service-shaped hub in the graph: 48 dependents spanning 12 subsystems (0, 1, 10, 11, 12, 15, 3, 4, 5, 6, 8, 9), touched via USES/ACCESSES/INJECTS from services and controllers across opportunities, addresses, auth, subscriptions, notifications, support tickets and user preferences.\n- **UserCacheService.java** (subsystem [6], Two-factor auth & user cache) — 30 dependents across 7 subsystems (4, 5, 6, 7, 9, 10, 11), called from cascade deletion, 2FA/token exchange, email verification/change, consent enforcement and identity flows.\n- **DictionaryService.java** and **ConsentService.java** ([4] and [11]) also act as A_P_A spine hubs pulling multiple subsystems together, per their navigator entries.\n- Supporting note: `UserRepository.java`, `api` (generated FE client) and `BaseRepository.java` top the raw in-degree ranking but are repositories/data hubs, not orchestrating services.\n\nOpen `PermissionUtils.java` first for the widest-reaching service hub, then `UserCacheService.java` for the identity/auth-side hub.",
+   "credits": 15.8696,
+   "disputed": true,
+   "expect": "answer",
+   "human": null,
+   "id": "5f28f652-fbfd-4f68-a344-8fbd85002aa4",
+   "judge": {
+    "abstain": 5,
+    "correct": 2,
+    "grounded": 4,
+    "helpful": 3,
+    "located": 3,
+    "rationale": "Only UserCacheService.java overlaps with the reference's six named hyperedge hubs, while the answer's top pick (PermissionUtils.java) and other picks are absent from the reference and the true hubs (FirebaseAuthProxyService, LegalConsentService, StepUpAuthService, TokenExchangeService, UserPreferenc"
+   },
+   "judge_backend": "claude:claude-sonnet-5",
+   "kind": "bank",
+   "model": "claude-sonnet-5",
+   "oracle": {
+    "answered": true,
+    "answered_and_located": true,
+    "has": true,
+    "success": true
+   },
+   "pack_version": "1.1.0",
+   "pointers": [
+    "PermissionUtils.java",
+    "UserCacheService.java",
+    "DictionaryService.java",
+    "ConsentService.java",
+    "StripeService.java",
+    "LegalDocumentService.java",
+    "UserRepository.java",
+    "User.java"
+   ],
+   "prompt_version": "nav@77015957627a66b8",
+   "q": "Which services act as hubs bridging multiple subsystems?",
+   "qid": "GR16",
+   "reference": "52 hyperedge hubs bridge multiple subsystems: FirebaseAuthProxyService.java (A_P_A, subs [9, 10]); LegalConsentService.java (A_P_A, subs [9, 11]); StepUpAuthService.java (A_P_A, subs [4, 9]); TokenExchangeService.java (A_P_A, subs [6, 10, 11]); UserCacheService.java (A_P_A, subs [6, 9, 11]); UserPreferencesService.java (A_P_A, subs [0, 9]).",
+   "request_id": "5f28f652-fbfd-4f68-a344-8fbd85002aa4",
+   "rr_equiv": 0.9853515625,
+   "steps": 3,
+   "terminal": "answer",
+   "tier": "nav-sonnet",
+   "user": "judge"
+  }
+ ],
+ "schema": 1,
+ "source": "events-2026-09-19.jsonl",
+ "summary": {
+  "abstain_rate": 0.238,
+  "disputed": 3,
+  "judged": 42,
+  "mean": {
+   "abstain": 4.429,
+   "correct": 3.881,
+   "grounded": 4.19,
+   "helpful": 4.167,
+   "located": 4.381
+  },
+  "n": 42,
+  "oracle_success_rate": 0.889,
+  "usage": {
+   "cache_creation": 180081,
+   "cache_read": 108605,
+   "calls": 5,
+   "errors": 0,
+   "input": 10,
+   "output": 22875,
+   "retries": 0
+  },
+  "with_human": 20,
+  "with_oracle": 18,
+  "with_rr": 22
+ }
+}

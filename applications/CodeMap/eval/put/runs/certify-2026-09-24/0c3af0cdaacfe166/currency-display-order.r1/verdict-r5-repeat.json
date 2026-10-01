@@ -1,0 +1,29 @@
+{
+ "rubric": "r5",
+ "verdict": {
+  "rules_violated": 1,
+  "files_out_of_scope": 0,
+  "parallel_mechanisms": 0,
+  "correctness": 5,
+  "convention_fit": 4,
+  "design_fit": 4,
+  "test_quality": 2,
+  "graph_use": 2,
+  "reasons": {
+   "correctness": "Currency.displayOrder is mapped to display_order INT NOT NULL DEFAULT 0. CurrencyDtoOut.displayOrder is filled by toDto (ModelMapper, by name) and by getDataPagedAndFilteredAsDtos. The controller builders pass it to clients. PLN is seeded first. Acceptance tests pass 4/4.",
+   "convention_fit": "The changeset 2026/09/23-09-2026-add-display-order-to-currency.sql follows the rules: formatted header, changeset id, rollback, and an include with a month comment at the end of changelog.xml. The only break is that no new *UnitTest class was added; existing test classes were extended instead.",
+   "design_fit": "The change adds one entity field, one DTO field and one mapping line in each existing mapping path. CurrencyController repeats the service's DTO mapping; that duplication already existed and was extended, not introduced. The footprint is minimal.",
+   "test_quality": "Only getter/setter and constructor assertions were added to CurrencyServiceUnitTest and AddressAndCurrencyUnitTest. No test checks that getDataPagedAndFilteredAsDtos or toDto copies displayOrder into CurrencyDtoOut. No new MockitoExtension unit test class was written.",
+   "graph_use": "One graph query listed the currency files. The reads that followed failed on wrong paths, and navigation then relied on find, repeated greps and ls of the changelog directories to locate the files and an example changeset."
+  },
+  "rubric": "r5",
+  "model": "claude-opus-5-5"
+ },
+ "usage": {
+  "input_tokens": 2,
+  "output_tokens": 1058,
+  "cache_read_input_tokens": 1542,
+  "cache_creation_input_tokens": 31827
+ },
+ "is_error": false
+}

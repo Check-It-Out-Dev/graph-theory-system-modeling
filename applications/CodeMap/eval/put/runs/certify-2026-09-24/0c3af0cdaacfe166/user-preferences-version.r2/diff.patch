@@ -1,0 +1,78 @@
+diff --git a/src/main/java/com/sm/instagram/platform/userpreferences/UserPreferences.java b/src/main/java/com/sm/instagram/platform/userpreferences/UserPreferences.java
+index 9084061dcc8..995349ff742 100644
+--- a/src/main/java/com/sm/instagram/platform/userpreferences/UserPreferences.java
++++ b/src/main/java/com/sm/instagram/platform/userpreferences/UserPreferences.java
+@@ -113,4 +113,10 @@ public class UserPreferences {
+      */
+     @Column(name = "notification_email_support_enabled")
+     private Boolean notificationEmailSupportEnabled = true;
++
++    // ----- optimistic locking -----
++
++    @Version
++    @Column(name = "version")
++    private Long version;
+ }
+\ No newline at end of file
+diff --git a/src/main/resources/db/changelog/2026/09/24-09-2026-add-version-to-user-preferences.sql b/src/main/resources/db/changelog/2026/09/24-09-2026-add-version-to-user-preferences.sql
+new file mode 100644
+index 00000000000..b9cdc99dbdc
+--- /dev/null
++++ b/src/main/resources/db/changelog/2026/09/24-09-2026-add-version-to-user-preferences.sql
+@@ -0,0 +1,10 @@
++-- Liquibase formatted SQL
++-- changeset norbert:add-version-to-user-preferences-table
++
++-- Add JPA @Version column to user_preferences table for optimistic locking protection
++-- Prevents data loss when web and mobile clients concurrently update the same preferences
++ALTER TABLE user_preferences
++ADD COLUMN version BIGINT DEFAULT 0 NOT NULL;
++
++-- Rollback
++--rollback ALTER TABLE user_preferences DROP COLUMN version;
+diff --git a/src/main/resources/db/changelog/changelog.xml b/src/main/resources/db/changelog/changelog.xml
+index 77f52d5e094..310836dddbf 100644
+--- a/src/main/resources/db/changelog/changelog.xml
++++ b/src/main/resources/db/changelog/changelog.xml
+@@ -184,4 +184,7 @@
+     <!-- June 2026: Widen ticket_reference to VARCHAR(32) — pentest 3.3 SecureRandom format is 21 chars -->
+     <include file="2026/09/02-09-2026-widen-ticket-reference-column.sql" relativeToChangelogFile="true"/>
+ 
++    <!-- September 2026: Add version column to user_preferences — optimistic locking guards against lost updates from concurrent web/mobile edits -->
++    <include file="2026/09/24-09-2026-add-version-to-user-preferences.sql" relativeToChangelogFile="true"/>
++
+ </databaseChangeLog>
+diff --git a/src/test/java/com/sm/instagram/platform/unit/service/UserPreferencesServiceUnitTest.java b/src/test/java/com/sm/instagram/platform/unit/service/UserPreferencesServiceUnitTest.java
+index 7e5175d6055..33b86ff5587 100644
+--- a/src/test/java/com/sm/instagram/platform/unit/service/UserPreferencesServiceUnitTest.java
++++ b/src/test/java/com/sm/instagram/platform/unit/service/UserPreferencesServiceUnitTest.java
+@@ -165,6 +165,29 @@ class UserPreferencesServiceUnitTest {
+             // Then
+             assertThat(preferences.getSharePhoneForPayments()).isFalse();
+         }
++
++        @Test
++        @DisplayName("should have no version until persisted, for optimistic locking")
++        void shouldHaveNoVersionUntilPersisted() {
++            // Given
++            UserPreferences preferences = new UserPreferences();
++
++            // Then
++            assertThat(preferences.getVersion()).isNull();
++        }
++
++        @Test
++        @DisplayName("should expose the version stamped at load time for optimistic locking")
++        void shouldExposeLoadedVersion() {
++            // Given
++            UserPreferences preferences = new UserPreferences();
++
++            // When
++            preferences.setVersion(5L);
++
++            // Then
++            assertThat(preferences.getVersion()).isEqualTo(5L);
++        }
+     }
+ 
+     @Nested
