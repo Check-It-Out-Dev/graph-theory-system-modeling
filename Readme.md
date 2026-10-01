@@ -81,7 +81,11 @@ sequenceDiagram
 ```
 
 Four graph steps, five pointers — each a path, a role, a subsystem and a line count — and no file
-content. The same run, step by step, with the part of the graph it touched:
+content. This run used `codemap_ask`: a hosted model inside the server (Claude Sonnet) walked the
+graph and wrote the answer, at about 190,000 tokens of mostly cached context. That convenience is
+the mode that [lost to grep on cost](docs/EVIDENCE.md#what-went-against-it); the cheap paths are
+`codemap_step`, where the agent runs the verbs itself with no model in between, and the local 4B
+navigator. The same run, step by step, with the part of the graph it touched:
 **[One question, four hops](https://claude.ai/artifact/GwUEay3qmwnqrANh7yY7pm)** (its source is
 [`docs/walkthrough/`](docs/walkthrough/one-question-four-hops.html)). Asked about something the graph does not hold ("the Kubernetes operator that scales the
 recommendation engine"), the same server answered that it has no pointer to offer.
@@ -114,7 +118,8 @@ Yes for finding things, not yet proven for cost.
 
 - A trained 4B model reaches 0.975 execution accuracy on held-out questions and abstains on
   questions the graph cannot answer.
-- A typed edge between two equally similar files makes them 14 times likelier to change together.
+- At equal content similarity, two files joined by a typed edge are 4 to 9 times likelier to change
+  together (14 times pooled over all pairs).
 - On 35 paired tasks, agents with the served graph used 1.6 times the tokens of agents with grep.
   They asked a navigator for prose instead of walking the graph, and the comparison that matters
   has not been run yet.
@@ -161,7 +166,7 @@ prompt stayed. The pipeline, the statistics, the judge's calibration and every f
 | Documentation on demand | [Paper 4](GraphTheoryInSystemModeling/04_Living_Documentation_On_Demand_Real_Example.md), [screenshots and the generated document](Real_Example_Documentation_On_Demands_Screenshots_And_Generated_Documentation/) | Real output from the 2025 graph |
 | Designing a feature (seat licensing) | [Paper 5](GraphTheoryInSystemModeling/05_Living_Documentation_How_To_Add_Seat_Model_Real_Example.md), [screenshots](Real_Example_New_Feature_Seat_Model_Screenshots/) | One recorded design session |
 | A debugging agent's memory of bugs | [`GPT5_ClineDebugger.xml`](Promts/GPT5_ClineDebugger.xml), [`Sonnet4_1M_ErdosDebugger.xml`](Promts/Sonnet4_1M_ErdosDebugger.xml) | Prompt contracts over the MCP memory server |
-| An Angular frontend beside the backend | one group of 406 files in the same pack | Served, with recorded answers |
+| An Angular frontend beside the backend | one group of 503 files in the same pack | Served, with recorded answers |
 | Curation decisions as data | [ledger](applications/CodeMap/graph/ledger/README.md), [curation report](applications/CodeMap/graph/CURATION_REPORT.md) | Real decisions, kept with their history |
 | A team's coding conventions | [`eval/put`](applications/CodeMap/eval/put) | Run on the real backend; not certified |
 | Dependency conflicts as graph colouring | [paper](GraphTheoryInSystemModeling/ChromaticNumbersInSystemModeling.md) | Paper only, with a corrected theorem |

@@ -170,9 +170,9 @@ footer { border-top: 1px solid var(--line); padding-top: 1.25rem; display: flex;
       <span class="counter" id="counter"></span>
     </div>
     <div class="facts" aria-label="The run in numbers">
-      <span><b>4</b> graph steps</span><span><b>5</b> pointers</span><span><b>0</b> file contents sent</span><span><b>13.9 s</b></span><span>pack <b>1.0.0</b></span>
+      <span><b>4</b> graph steps</span><span><b>5</b> pointers</span><span><b>0</b> file contents sent</span><span><b>13.9 s</b></span><span><b>~190k</b> tokens, mostly cached</span><span>pack <b>1.0.0</b></span>
     </div>
-    <p class="note">The recorded event keeps the four expressions, the answer and the pointers. It does not keep what each step returned, so the panel describes what the verb returns by contract and does not invent a payload.</p>
+    <p class="note">The recorded event keeps the four expressions, the answer and the pointers. It does not keep what each step returned, so the panel describes what the verb returns by contract and does not invent a payload. The navigator in this run is a hosted model inside the server, reached through <code>codemap_ask</code>; an agent can also run the same verbs itself through <code>codemap_step</code>, with no model in between.</p>
   </section>
 
   <section aria-labelledby="h-ptr">
@@ -237,7 +237,7 @@ footer { border-top: 1px solid var(--line); padding-top: 1.25rem; display: flex;
       <div class="for">
         <span class="eyebrow">For</span>
         <p>A hop on the graph is small. Three questions answered by hand: 1.1 KB of tool output against 26.9 KB of grep, 2.2 KB once the grep was refined.</p>
-        <p>Two equally similar files with a typed edge between them change together 14 times as often as two without.</p>
+        <p>At equal content similarity, two files joined by a typed edge change together 4 to 9 times as often as two without one.</p>
       </div>
       <div class="against">
         <span class="eyebrow">Against</span>

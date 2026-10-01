@@ -99,9 +99,9 @@ $\mathcal{Q}$ and its path algebra with relations,
 
 six vertices, seventeen arrows and the 43 two-step paths that are allowed to exist. Eleven
 **selection rules** forbid whole blocks of edges: nothing points at an Actor, a Resource points at
-nothing, an Event does not point at an Event. Forty of the 43 compositions do not commute, which is
-the algebra's way of saying that "A uses what B modifies" and "B modifies what A uses" are different
-facts.
+nothing, an Event does not point at an Event. Order matters almost everywhere: for 38 of the 43
+compositions the reverse path does not exist at all, two pairs exist both ways and land in
+different places, and three commute.
 
 What that buys in practice: the indexing agent may only write edges the algebra allows, and edges
 that break a rule are recorded instead of dropped — the shipped graph carries 198 of them, all
@@ -127,7 +127,8 @@ serve as evidence inside the partition and as the `cohort` verb an agent can cal
 ### 1.4 Which way is down: trophic height
 
 A navigation clue should say what a file stands on. Ecologists have the tool: a food web's trophic
-level. For the call graph $A$ with in- and out-degrees $d_{\text{in}}, d_{\text{out}}$, solve
+level. Take the directed graph $A$ of all dependency edges inside one subsystem (the seventeen kinds,
+imports and injections included), with in- and out-degrees $d_{\text{in}}, d_{\text{out}}$, and solve
 
 ```math
 \big(\mathrm{diag}(d_{\text{in}} + d_{\text{out}}) - A - A^{\top}\big)\, h = d_{\text{in}} - d_{\text{out}}
@@ -137,7 +138,7 @@ on each connected component and shift so the lowest file has height zero
 ([`c1_dossiers.py`](../applications/CodeMap/graph/scripts/c1_dossiers.py)). Edges point from caller
 to callee and each call adds a level, so entry points sit at the bottom and the things everyone
 depends on at the top. A controller that comes out *above* its services is reported as an inversion
-worth a look.
+worth a look ([`c3_organisation.py`](../applications/CodeMap/graph/scripts/c3_organisation.py)).
 
 ### 1.5 The judge of every partition: held-out co-change
 
@@ -166,9 +167,9 @@ Does the graph know anything the text does not? Predicting co-change over 20 spl
 | Graph, one hop | 0.5320 |
 
 Reading the files beats walking the graph, clearly. The graph's contribution is elsewhere. Hold
-content similarity fixed and compare pairs with and without a typed edge: the pairs with an edge
-co-change 14 times as often (0.286 against 0.020 pooled, and 3.6 to 8.8 times in every similarity
-decile). The edges are a strong signal that covers 0.57 % of pairs. That is the honest summary of
+content similarity fixed and compare pairs with and without a typed edge: within each of the five
+similarity deciles where edges occur, the pairs with an edge co-change 3.6 to 8.8 times as often
+(pooled over all pairs: 0.286 against 0.020, a factor of 14). The edges are a strong signal that covers 0.57 % of pairs. That is the honest summary of
 the whole programme: **content finds the neighbourhood; typed structure says something content
 cannot, on the few pairs where it speaks.**
 
@@ -238,7 +239,7 @@ be reproduced.
 | A composite embedding in $\mathbb{R}^{136}$ | AUC 0.603 against 0.844 for the content embedding it was built from |
 | Fusing three embedding "lenses" | 0 wins of 20 under two fusion rules |
 | A 42-invariant structural lens, PageRank and betweenness included | AUC 0.565; any weight on it hurts |
-| Consensus clustering of two strong partitions | Unstable in resolution: 13 parts become 190 within a step of 0.03 |
+| Consensus clustering of two strong partitions | Unstable in resolution: 13 parts at resolution 2.531, 190 at 2.750; 4 wins of 20 |
 
 The lessons that outlasted the constructions are in the
 [topical map](../GraphTheoryInSystemModeling/V3/V3_MathematicalFoundations.md) at the top of the

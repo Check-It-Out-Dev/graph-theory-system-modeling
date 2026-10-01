@@ -7,7 +7,7 @@ in the documents each step links to.
 ```mermaid
 timeline
     title One year, six steps
-    2025 Aug–Sep : A production code base and a 200k-token window : Notes for the agent kept as a graph (MCP memory server) : Neo4j, one hub, six roles — six papers (16 Sep)
+    2025 Aug–Sep : A production code base and a 200k-token window : Notes for the agent kept as a graph (MCP memory server, by the author's account) : Neo4j, one hub, six roles — six papers (16 Sep)
     2025 Nov : Embeddings and reranking as MCP servers : Three agents with written contracts
     2026 Mar : V3 — typed edges as an algebra
     2026 Sep : The audit and the experiments : Subsystems found by mathematics : CodeMap — a small model trained to navigate : A served MCP, synthetic users, a judge : Prompts optimised with GEPA
@@ -30,11 +30,12 @@ reading costs more with every file, on every question.
 
 ## 2. A memory graph first
 
-The first map was the simplest one available. The Model Context Protocol had shipped with a
-reference *memory* server: a small knowledge graph of entities, relations and observations that an
-agent can write to and read from. I used it as the agent's notebook about the code base. What the
-repository still holds from that period are two debugging agents from September 2025 that keep bug
-patterns, fix templates and a code graph in MCP memory
+By my own account — the repository does not record this period — the first map was the simplest
+one available. The Model Context Protocol had shipped with a reference *memory* server: a small
+knowledge graph of entities, relations and observations that an agent can write to and read from. I
+used it as the agent's notebook about the code base. What the repository holds is the two living
+side by side: two debugging agents, committed on 30 September 2025, two weeks after the Neo4j
+papers, that keep bug patterns, fix templates and a code graph in MCP memory
 ([`GPT5_ClineDebugger.xml`](../Promts/GPT5_ClineDebugger.xml),
 [`Sonnet4_1M_ErdosDebugger.xml`](../Promts/Sonnet4_1M_ErdosDebugger.xml)).
 
