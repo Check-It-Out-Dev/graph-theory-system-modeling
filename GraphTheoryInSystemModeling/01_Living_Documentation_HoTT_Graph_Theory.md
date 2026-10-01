@@ -1,5 +1,7 @@
 # Mathematical Foundations for Living Documentation
 
+> **Status (2026-10) — an early paper, kept as written.** Its figures for hallucination, accuracy and productivity come from one informal pilot (fifty tasks, one system, one rater, no control), as the repository's own [audit](V3/V3_ResearchAudit_2026-09.md) records in §1.6. What has been measured since is in [the evidence](../docs/EVIDENCE.md); which of the mathematics runs is in [the mathematics](../docs/MATHEMATICS.md).
+
 ## Repository Indexing Through Graph Theory and Homotopy Type Theory
 
 **Abstract**

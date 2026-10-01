@@ -1,5 +1,7 @@
 # Chromatic Numbers in Maven Dependency Conflict Resolution
 
+> **Status (2026-10) — a paper with a corrected theorem; no implementation in this repository.** The [audit](V3/V3_ResearchAudit_2026-09.md) (§1.3) shows Theorem 2.2 and Corollary 2.3 are false in general: the minimum number of exclusions is n − α(G), not χ(G) − 1. They hold when every conflict component is a clique, which is the case for classes provided twice. Theorems 5.1 and A.2 do not hold as stated. See [the mathematics](../docs/MATHEMATICS.md).
+
 ## From NP-Complete Theory to O(V+E) Practice
 
 **Abstract**

@@ -1,5 +1,8 @@
 # Maximizing AI Agent ROI with Neo4j Community Edition: Persistent Context Through Graph-Based Documentation
 
+> **Status (2026-10) — an early paper, kept as written.** Its figures for hallucination, accuracy and productivity come from one informal pilot (fifty tasks, one system, one rater, no control), as the repository's own [audit](V3/V3_ResearchAudit_2026-09.md) records in §1.6. What has been measured since is in [the evidence](../docs/EVIDENCE.md); which of the mathematics runs is in [the mathematics](../docs/MATHEMATICS.md).
+> The setup it describes is the 2025 route on Neo4j with the models of that time; the current from-scratch path is the [regeneration runbook](../applications/CodeMap/docs/05-regen-runbook.md).
+
 **Authors:** Norbert Marchewka  
 **Date:** September 16, 2025  
 **Keywords:** Neo4j Community Edition, AI Agent ROI, Persistent Context, Living Documentation, Embedding Generation, Graph Context, Refactoring Plans, Deep Reasoning Models

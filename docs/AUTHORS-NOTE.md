@@ -1,5 +1,7 @@
 # Author's note on the mathematical foundations
 
+> **Status (2026-10) — the author's position in 2025, kept as written.** A later [audit](../GraphTheoryInSystemModeling/V3/V3_ResearchAudit_2026-09.md) found three theorems wrong as stated and several that restate definitions; there has been no external expert review. What runs, what is only described and what was withdrawn: [the mathematics](MATHEMATICS.md).
+
 _Moved here from the README on 2026-09-08, unchanged. The README now leads with what the
 repository does and how to run it; this is the author's position on why it works._
 

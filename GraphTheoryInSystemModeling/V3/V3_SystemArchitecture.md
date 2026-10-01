@@ -1,5 +1,7 @@
 # V3 System Architecture: From Algebra to Code Understanding
 
+> **Status (2026-10) — the March 2026 design, partly superseded.** Read it with [`V3_MathematicalFoundations.md`](V3_MathematicalFoundations.md) §0. Retired by measurement since: the −0.311 anti-correlation, Berry phase and holonomy, the ℝ¹³⁶ composite, the parameter budget of the restriction maps, and Leiden over fused lenses as the partition (the promoted method is the meet-quotient partition). The physics vocabulary is an interpretation, not a claim about software ([audit](V3_ResearchAudit_2026-09.md) §4). Summary: [the mathematics](../../docs/MATHEMATICS.md).
+
 ## Applying Quantum Field Theory to Software System Modeling
 
 **Version**: 2.0.0 | **Date**: 2026-03-25 | **Authors**: Norbert Marchewka (architecture), Claude Opus 4.6 (synthesis)

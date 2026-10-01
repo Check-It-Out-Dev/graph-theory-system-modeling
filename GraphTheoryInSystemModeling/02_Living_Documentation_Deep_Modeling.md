@@ -1,5 +1,9 @@
 # Deep Behavioral Modeling for AI-Driven Documentation
 
+> **Status (2026-10) — an early paper, kept as written.** Its figures for hallucination, accuracy and productivity come from one informal pilot (fifty tasks, one system, one rater, no control), as the repository's own [audit](V3/V3_ResearchAudit_2026-09.md) records in §1.6. What has been measured since is in [the evidence](../docs/EVIDENCE.md); which of the mathematics runs is in [the mathematics](../docs/MATHEMATICS.md).
+>
+> **§7 reads as a case study; treat it as an illustrative scenario.** It is not the checkItOut system, and no artifact in this repository backs its figures or its quotations. The worked examples with real output are Papers 4 and 5. **Theorem 2.2** (six roles are complete) is an observation on particular systems, not a proof (audit §1.2); the shipped graph uses a different six roles.
+
 ## The 6-Entity Pattern and NavigationMaster Architecture
 
 **Abstract**

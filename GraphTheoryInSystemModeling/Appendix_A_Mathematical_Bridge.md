@@ -1,5 +1,7 @@
 # The Attention Scaffolding Hypothesis: Why Transformers Require Algebraic Structure
 
+> **Status (2026-10) — a hypothesis, kept as written.** The repository's [audit](V3/V3_ResearchAudit_2026-09.md) (§1.2) finds that Theorems 2.1 and 3.1 and Corollary 2.3 describe masked sparse attention, which a graph placed in a prompt does not provide. What survives is the retrieval claim: with a graph, fewer tokens need to be sent. The figures quoted here come from one informal pilot (audit §1.6). See [the mathematics](../docs/MATHEMATICS.md).
+
 ## A Differential Geometric Foundation for Graph-Enhanced Language Models
 
 **Abstract**

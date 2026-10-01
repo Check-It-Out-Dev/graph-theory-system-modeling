@@ -1,5 +1,7 @@
 # The Hypatia Basis: An Algebraic Foundation for Software Graph Construction
 
+> **Status (2026-10) — the algebra stands.** The [audit](V3_ResearchAudit_2026-09.md) (§1.1) confirms the path algebra, its non-commutativity and the Hermitian operator. Two things are qualified there: the parameter budget describes maps the pipeline never builds (§1.5), and the novelty claim should be narrowed (§2.4). The selection rules are enforced through the indexing agent's instructions, not by a checker in this repository. Summary: [the mathematics](../../docs/MATHEMATICS.md).
+
 ## Non-Abelian Path Algebra with Hermitian Magnetic Laplacian over Typed Quivers
 
 **Abstract**

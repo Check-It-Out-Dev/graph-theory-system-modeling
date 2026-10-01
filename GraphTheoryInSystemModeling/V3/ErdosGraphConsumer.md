@@ -1,5 +1,7 @@
 # Erdős V3: The Graph Consumer — O(1) Codebase Understanding via Algebraic Structure
 
+> **Status (2026-10) — the March 2026 design, partly superseded.** Read it with [`V3_MathematicalFoundations.md`](V3_MathematicalFoundations.md) §0: the anti-correlations it cites as proof do not reproduce, and "O(1)" in the title means a fixed number of hops through the hierarchy, not a complexity result. The navigator that shipped is described in [`applications/CodeMap/docs/03-dsl-interface.md`](../../applications/CodeMap/docs/03-dsl-interface.md).
+
 **Version**: 1.0.0
 **Date**: 2026-03-25
 **Authors**: Norbert Marchewka (architecture), Claude Opus 4.6 (synthesis)

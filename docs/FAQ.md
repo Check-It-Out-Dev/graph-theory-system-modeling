@@ -1,5 +1,7 @@
 # Frequently asked questions
 
+> **Status (2026-10) — answers written in 2025 for the Neo4j route.** The homotopy-type-theory and Ramsey explanations are the vocabulary of that period, not results ([the mathematics](MATHEMATICS.md)); the models and versions named here are those of 2025. The current way to run it is in the [README](../Readme.md#run-it).
+
 _Moved here from the README on 2026-09-08._
 
 ## What is Homotopy Type Theory (HoTT) in this context?
