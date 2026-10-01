@@ -4,6 +4,10 @@ Aligned with the model-card practice of Mitchell et al. (2019) and the NIST AI R
 profile (2024); "aligned with", never "certified". Every number here has one home in a committed
 artifact named beside it. Last revised 2026-09-16.
 
+> **Since this revision:** navigator prompt v2 was promoted (`prompts/navigator/PROMPT_LOG.md`) and packs
+> 1.1.0 and 1.1.1 were released (`CHANGELOG.md` at the repository root). The figures below are those of
+> packs 1.0.0 and 1.0.1.
+
 ## Model details
 
 | | |
