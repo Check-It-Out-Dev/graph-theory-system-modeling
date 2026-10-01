@@ -2,8 +2,8 @@
 
 A method for turning a code base into a typed graph that developers and coding agents **query
 instead of reading** — context engineering for code. An agent asks where something lives, gets back
-a handful of pointers, and opens only those files. Built on a production system, measured in the
-open, and honest about what did not work.
+a handful of pointers, and opens only those files. Built on a production system and measured in the
+open: the results that went against it are on the [evidence page](docs/EVIDENCE.md).
 
 [**🗺 The graph of a real system**](https://checkitout.app/technical-survey/engineering#graph-topology) ·
 [**🎬 90-second film**](https://checkitout.app/codemap) ·
@@ -26,8 +26,9 @@ open, and honest about what did not work.
   to keep a debugging agent's knowledge of past bugs, and to index an Angular frontend beside a
   Spring Boot backend ([more examples](#the-method-beyond-the-main-example)).
 - **Queryable context instead of a full window** — the agent holds a map and asks for pointers; it
-  never receives file contents from the graph. A graph answer costs a few hops however large the
-  system is; reading costs more with every file, on every question.
+  never receives file contents from the graph. A query touches a few nodes however large the system
+  is; reading grows with every file, on every question. What an agent pays end to end is a separate
+  question, and it is [measured](docs/EVIDENCE.md).
 - **Subsystems found by mathematics, accepted by a test declared in advance** — two independent
   partitions, one from what files say and one from how they change, combined on the partition
   lattice. Accepted because it beat both inputs on unseen history in 18 of 20 splits
@@ -54,7 +55,8 @@ and six behavioural roles, gained embeddings and reranking as MCP servers, and t
 for its edges. The early papers explained it with more mathematics than it had earned. A later audit
 and a set of experiments withdrew most of that and kept what survived a test: an unsupervised way to
 find subsystems, shipped as an application, served over MCP, and measured — including the night it
-lost to grep. The window is five times larger now. The map is still what keeps the agent's head clear.
+lost to grep. The window is five times larger now. The reasons for a map have not gone away: a
+model still attends worse to a long context, and every token is paid for on every question.
 
 The whole account, step by step with dates: **[docs/STORY.md](docs/STORY.md)**.
 
@@ -132,8 +134,8 @@ perfect, and the open questions are listed there too.
 
 This was not first. aider built a repository map in 2023; GraphRAG, Graphiti, LangGraph and the
 Model Context Protocol all appeared in 2024; one code graph over MCP was published a month before
-this repository's first commit on 2025-09-16. What this repository adds to that line is narrower and
-deeper: subsystems found by mathematics, a navigator that abstains, and an evaluation gate.
+this repository's first commit on 2025-09-16. What this repository adds to that line: subsystems
+found by mathematics, a navigator that abstains, and an evaluation gate.
 LangGraph is the closest famous name and a different thing — a graph of the *agent's* steps, where
 this is a graph of the *system* the agent works on.
 

@@ -27,7 +27,7 @@ timeline
 | 2024-11-25 | [Model Context Protocol](https://www.anthropic.com/news/model-context-protocol), with a reference [knowledge-graph memory server](https://github.com/modelcontextprotocol/servers/tree/main/src/memory); [Neo4j's MCP servers](https://github.com/neo4j-contrib/mcp-neo4j) from 2024-12 | The transport. The first graph an agent queried in this work was that memory server, before Neo4j replaced it ([the story](STORY.md)) | — |
 | 2025-07 | [GEPA](https://arxiv.org/abs/2507.19457) (Agrawal et al.; [code](https://github.com/gepa-ai/gepa)) | The optimiser used here on three prompts | Used as published, with a stricter objective around it: deterministic checks, a blind judge, a noise floor, a hold-out verdict ([report](PROMPT-UNDER-TEST.md)) |
 | 2025-08-12 | [1M-token context](https://www.anthropic.com/news/1m-context) | Removes the hard limit this work started from | It does not remove the reason: attention still degrades with length and every token is paid for on every question. The window became a reservoir, not a budget |
-| 2025-08-16 | [CodeGraphContext](https://github.com/CodeGraphContext/CodeGraphContext) | The closest neighbour: code indexed into a graph database and served to assistants over MCP | A general indexer for many languages. This repository goes narrower and deeper: one stack, subsystems found by mathematics, a trained navigator that abstains, and an evaluation gate |
+| 2025-08-16 | [CodeGraphContext](https://github.com/CodeGraphContext/CodeGraphContext) | The closest neighbour: code indexed into a graph database and served to assistants over MCP | A general indexer for many languages. This repository covers one stack and adds subsystems found by mathematics, a trained navigator that abstains, and an evaluation gate |
 | **2025-09-16** | **This repository's first commit** | Its README already said: queryable knowledge graphs for developers and AI agents | — |
 | 2025-09-29 | [Effective context engineering for AI agents](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents) (Anthropic) | Names the discipline: curate what enters the window, retrieve just in time, keep state outside | The term arrived thirteen days after the first commit; the practice here predates the name, not the idea |
 | 2026-02 → | [codebase-memory-mcp](https://github.com/DeusData/codebase-memory-mcp), [code-graph-mcp](https://github.com/sdsrss/code-graph-mcp) and [others](https://github.com/topics/code-knowledge-graph) | Code knowledge graphs over MCP became a category | Broader language coverage and far more users than this repository has |
@@ -38,7 +38,7 @@ timeline
 graph memory (2024) and MCP (2024) all came before the first commit here, and one open-source
 code-graph MCP server came a month before it.
 
-**They do support "early, and carried further in one direction".** In September 2025 this repository
+**They do support "early, and carried further in three directions".** In September 2025 this repository
 already treated a code base as a typed graph that an agent queries through MCP instead of reading
 files. What it then added, which the neighbours above mostly do not have:
 

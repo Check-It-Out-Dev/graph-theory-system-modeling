@@ -151,7 +151,7 @@ so not a win) and a team's coding conventions (better on held-out tasks, not by 
 The window that started this is five times larger now. It did not make the map unnecessary: a model
 still attends worse to the middle of a long context, every token is paid for on every question, and
 a team's code base grows faster than any window. What changed is the job. In 2025 the graph was the
-only way to fit the system into the agent's head. Today it is what keeps the agent's head clear.
+only way to fit the system into the agent's head. Today it is a way to send less.
 
 It is not finished. The graph beats reading at telling an agent *where to look*; it has not yet been
 shown to make an agent *cheaper end to end*, and the page that says so is [the evidence](EVIDENCE.md).
