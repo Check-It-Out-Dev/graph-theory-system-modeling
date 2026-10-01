@@ -229,4 +229,4 @@ Result: structural, semantic, and behavioral embeddings
 
 ---
 
-Made with ❤️ by [Norbert Marchewka](https://github.com/NorbertMarchewka)
+Made with ❤️ by [Norbert Marchewka](https://www.linkedin.com/in/norbert-marchewka-292377129/)
