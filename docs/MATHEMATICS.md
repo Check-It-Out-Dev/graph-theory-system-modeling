@@ -18,17 +18,13 @@ subsystem a file lives in reads ten files instead of two hundred.
 
 ```mermaid
 flowchart TB
-    FILES["Every file<br/>embedded as a 4096-dimensional vector"] --> KNN["Content graph<br/>each file linked to its 12 nearest files"]
-    KNN --> A["Partition A<br/>Louvain on the content graph"]
-    GIT["Git history, training half<br/>each commit of 2 to 30 files is a group"] --> FIB["Fibers<br/>commit groups + 92 typed hyperedges"]
-    FIB --> B["Partition B<br/>Louvain on the fiber graph"]
+    FILES["Every file, embedded<br/>and linked to its 12 nearest files"] --> A["Partition A — what files say<br/>Louvain on the content graph"]
+    GIT["Git history, training half<br/>commits of 2 to 30 files + 92 typed hyperedges"] --> B["Partition B — how files change<br/>Louvain on the graph of those groups"]
     A --> MEET["The meet A ∧ B<br/>cells that both partitions keep together"]
     B --> MEET
-    MEET --> Q["Quotient graph of cells<br/>edge = co-change + content similarity"]
-    Q --> L["Louvain on the cells<br/>resolution bisected until k = |A|"]
-    L --> TEST{"Held-out half of history:<br/>better than both parents in 18 of 20 splits?"}
-    TEST -->|"yes"| SUB["19 subsystem candidates"]
-    SUB --> CUR["Curated by a person<br/>split · merge · rename, decisions kept in a ledger"]
+    MEET --> Q["Louvain on the quotient graph of cells<br/>edges carry co-change + content similarity"]
+    Q --> TEST{"Held-out half of history:<br/>better than both parents in 18 of 20 splits?"}
+    TEST -->|"yes"| SUB["19 subsystem candidates<br/>then curated by a person, decisions kept in a ledger"]
 ```
 
 ## 1. What runs
@@ -48,13 +44,17 @@ read off the typed graph, and those groups are clustered.
 Partitions of a set form a lattice, and the **meet** $A \wedge B$ is the coarsest partition that
 refines both. Its cells are the sets of files that both views keep together:
 
-$$\mathrm{cell}(i) = \big(A(i),\, B(i)\big)$$
+```math
+\mathrm{cell}(i) = \big(A(i),\, B(i)\big)
+```
 
 Every agreement between the two views survives in a cell; every disagreement is now a question
 about which cells to join. That question is answered on the **quotient graph**, whose vertices are
 the cells and whose edges carry both kinds of evidence, each scaled to its maximum:
 
-$$w(c_1, c_2) = \frac{T(c_1, c_2)}{\max T} + \alpha \, \frac{C(c_1, c_2)}{\max C}, \qquad \alpha = 1$$
+```math
+w(c_1, c_2) = \frac{T(c_1, c_2)}{\max T} + \alpha \, \frac{C(c_1, c_2)}{\max C}, \qquad \alpha = 1
+```
 
 where $T$ counts training-half co-changes between two cells and $C$ sums content-graph weight between
 them. Louvain runs on the cells, and its resolution is bisected until the number of parts equals
@@ -93,7 +93,9 @@ and so on — beside five structural ones (imports, inheritance, injection, test
 [`HypatiaBasis.md`](../GraphTheoryInSystemModeling/V3/HypatiaBasis.md) writes this down as a quiver
 $\mathcal{Q}$ and its path algebra with relations,
 
-$$\mathcal{H} = k\mathcal{Q} \,/\, (\mathcal{I}_{\text{select}} + \mathcal{J}^3), \qquad \dim \mathcal{H} = 6 + 17 + 43 = 66$$
+```math
+\mathcal{H} = k\mathcal{Q} \,/\, (\mathcal{I}_{\text{select}} + \mathcal{J}^3), \qquad \dim \mathcal{H} = 6 + 17 + 43 = 66
+```
 
 six vertices, seventeen arrows and the 43 two-step paths that are allowed to exist. Eleven
 **selection rules** forbid whole blocks of edges: nothing points at an Actor, a Resource points at
@@ -114,7 +116,9 @@ hyperedges ([`emit_hyperedges.py`](../embeddings-service/emit_hyperedges.py)): t
 use or modify one Resource, the Actors that perform one Process, and Actors that reach one Resource
 through a Process. Each is weighted by how unusual its hub is,
 
-$$\mathrm{idf} = \max\big(0,\ \ln(N_{\text{hubs}} / k_{\text{satellites}})\big)$$
+```math
+\mathrm{idf} = \max\big(0,\ \ln(N_{\text{hubs}} / k_{\text{satellites}})\big)
+```
 
 There are 92 in the shipped graph. Files inside one hyperedge change together 68.4 % of the time,
 against a base rate of 3.15 % — a factor of 21.7. They are precise and sparse, which is why they
@@ -125,7 +129,9 @@ serve as evidence inside the partition and as the `cohort` verb an agent can cal
 A navigation clue should say what a file stands on. Ecologists have the tool: a food web's trophic
 level. For the call graph $A$ with in- and out-degrees $d_{\text{in}}, d_{\text{out}}$, solve
 
-$$\big(\mathrm{diag}(d_{\text{in}} + d_{\text{out}}) - A - A^{\top}\big)\, h = d_{\text{in}} - d_{\text{out}}$$
+```math
+\big(\mathrm{diag}(d_{\text{in}} + d_{\text{out}}) - A - A^{\top}\big)\, h = d_{\text{in}} - d_{\text{out}}
+```
 
 on each connected component and shift so the lowest file has height zero
 ([`c1_dossiers.py`](../applications/CodeMap/graph/scripts/c1_dossiers.py)). Edges point from caller
@@ -189,7 +195,7 @@ The evaluation side has its own mathematics ([`METRICS.md`](../applications/Code
 - **Wilson intervals** for pass rates. A rule counts as reliably followed only when the lower bound
   of the 95 % interval reaches 0.90 — which takes 35 runs without a failure.
 - **A noise floor** below which no difference is called a gain:
-  $\delta = \max\big(\delta_{\text{judge}},\ 1.96 \cdot s \cdot \sqrt{2/(T k)}\big)$, with $s$ the pooled
+  $`\delta = \max\big(\delta_{\text{judge}},\ 1.96 \cdot s \cdot \sqrt{2/(T k)}\big)`$, with $s$ the pooled
   standard deviation over $k$ replicates on $T$ tasks and $\delta_{\text{judge}}$ the judge's own
   test-retest difference.
 - **A paired bootstrap** over tasks and replicates (10,000 resamples) for the certification interval,
