@@ -7,6 +7,7 @@ open, and honest about what did not work.
 
 [**🗺 The graph of a real system**](https://checkitout.app/technical-survey/engineering#graph-topology) ·
 [**🎬 90-second film**](https://checkitout.app/codemap) ·
+[**🧭 Interactive walkthrough**](https://claude.ai/artifact/GwUEay3qmwnqrANh7yY7pm) ·
 [**📊 Quality page**](https://check-it-out-dev.github.io/graph-theory-system-modeling/quality/) ·
 [**📖 The story**](docs/STORY.md)
 
@@ -80,7 +81,9 @@ sequenceDiagram
 ```
 
 Four graph steps, five pointers — each a path, a role, a subsystem and a line count — and no file
-content. Asked about something the graph does not hold ("the Kubernetes operator that scales the
+content. The same run, step by step, with the part of the graph it touched:
+**[One question, four hops](https://claude.ai/artifact/GwUEay3qmwnqrANh7yY7pm)** (its source is
+[`docs/walkthrough/`](docs/walkthrough/one-question-four-hops.html)). Asked about something the graph does not hold ("the Kubernetes operator that scales the
 recommendation engine"), the same server answered that it has no pointer to offer.
 
 | | |

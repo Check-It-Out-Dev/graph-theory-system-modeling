@@ -13,6 +13,7 @@ the governance cards.
 | Whether it helps — results for and against, and what is next | [The evidence](EVIDENCE.md) |
 | What is similar, and when each appeared | [Related work](RELATED-WORK.md) |
 | What GEPA did to a team's conventions prompt | [A conventions prompt under test](PROMPT-UNDER-TEST.md) |
+| What one question to the graph looks like, step by step | [One question, four hops](https://claude.ai/artifact/GwUEay3qmwnqrANh7yY7pm) — an interactive page; source in [`walkthrough/`](walkthrough/one-question-four-hops.html) |
 
 ## The application: CodeMap
 
