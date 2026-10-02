@@ -38,9 +38,9 @@ def build(out, source=SOURCE):
         content = f.read()
     if content.lstrip().lower().startswith(("<!doctype", "<html")):
         raise ValueError(f"{source} is already a whole document; publish it as it is instead of wrapping it")
-    os.makedirs(out, exist_ok=True)
+    os.makedirs(out, exist_ok=True)  # NOSONAR - operator's own path; see sonar-project.properties
     path = os.path.join(out, "index.html")
-    with open(path, "w", encoding="utf-8", newline="\n") as f:
+    with open(path, "w", encoding="utf-8", newline="\n") as f:  # NOSONAR - operator's own path; see sonar-project.properties
         f.write(HEAD + content + TAIL)
     return path
 
