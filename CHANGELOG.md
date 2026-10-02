@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] — 1.2.0, CodeMap Remote
 
+### Changed
+- The root README is short and written for developers; its depth moved to `docs/`: the story with dates (`STORY.md`), the mathematics as runs / described / withdrawn (`MATHEMATICS.md`), the evidence for and against (`EVIDENCE.md`), related work with dates (`RELATED-WORK.md`) and the prompt experiment in full (`PROMPT-UNDER-TEST.md`). The gated sentences moved with their claims; the gate still counts 198 checks. Early papers and 2025 setup documents carry a status line. The code-base census in the prompt report is corrected to 7 of 38 entities
+
 ### Added
 - Two-part root README (Part 1 the graph; Part 2 how to make sure AI won't turn your codebase into spaghetti); the `put` claims section gating its 22 campaign figures (198 checks); EVAL_CARD prompt-under-test section (D-R29n)
 - Prompt under test, S10–S11: certification on all ten tasks (Actions run 35995327027): hold-out gain 0.063 (delta 0.030) with a 95 % CI of −0.007 to 0.135, so the pre-declared verdict is no and the promotion gate stays closed; `tests_written` 18/30 → 37/40 (D-R29m)
@@ -128,7 +131,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Multiple embedding models evaluated
 - Different graph topologies analyzed
 
-## Future Roadmap
+## The 2025 roadmap (not followed)
+
+Kept as written in September 2025. The project took a different route: the entries at the top of this file.
 
 ### [1.1.0] - Planned Q4 2025
 - [ ] Language-specific analyzers (Python, JavaScript, Go)
@@ -147,4 +152,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-For more details on each release, see the [GitHub Releases](https://github.com/yourusername/graph-theory-system-modeling/releases) page.
+For more details on each release, see the [GitHub Releases](https://github.com/Check-It-Out-Dev/graph-theory-system-modeling/releases) page.

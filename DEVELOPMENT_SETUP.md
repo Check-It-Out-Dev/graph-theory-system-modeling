@@ -1,5 +1,7 @@
 # Development Setup Guide
 
+> **Status (2026-10) — the 2025 setup on Neo4j, kept for the record.** Its compose file, passwords and Cypher are examples from that time and are not maintained; some of the syntax was removed in Neo4j 5. The current from-scratch route runs on an embedded MIT-licensed engine and is the [regeneration runbook](applications/CodeMap/docs/05-regen-runbook.md); to try the result, see the [README](Readme.md#run-it).
+
 ## Overview
 
 This guide explains how to set up the graph-theory system modeling environment for your team, transitioning from individual research to team-wide adoption using fully compliant open-source tools.

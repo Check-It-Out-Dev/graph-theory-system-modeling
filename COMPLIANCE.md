@@ -1,5 +1,7 @@
 # Legal Compliance and Tool Usage
 
+> **Status (2026-10) — written in September 2025.** It covers the Neo4j phase of the research. Since 2026 the CodeMap authoring stack runs on LadybugDB (MIT) with Qwen3 embeddings, and nothing in the shipped application depends on Neo4j.
+
 ## 🎁 Free Educational Content Notice
 
 **This entire project is provided as FREE educational content under the MIT License.** The author, Norbert Marchewka, shares this research and methodology as a public contribution to the developer community.

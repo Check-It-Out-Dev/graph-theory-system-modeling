@@ -1,5 +1,7 @@
 # Triple-Lens Embedded Hypergraph Pipeline
 
+> **Status (2026-10) — a working note from November 2025, superseded.** Fusing three embedding lenses was built and then retired by measurement (0 wins of 20 for ranking); the pipeline that runs is described in [the mathematics](../docs/MATHEMATICS.md) and in the [regeneration runbook](../applications/CodeMap/docs/05-regen-runbook.md).
+
 **Version:** 7.0.0-PARALLEL-HYPATHIA  
 **Author:** Norbert Marchewka  
 **Date:** 2025-11-29  
@@ -15,12 +17,12 @@
 2. [MCP Embedding Server Architecture](#mcp-embedding-server-architecture)
 3. [XML Invocation Patterns](#xml-invocation-patterns)
 4. [**NEW: Parallel Indexing with Hypathia Agents**](#parallel-indexing-with-hypathia-agents)
-5. [Stage 1: File Indexing with Semantic and Behavioral Embeddings](#stage-1-file-indexing)
-6. [Stage 2: Directed Heterogeneous Hypergraph Construction](#stage-2-hypergraph-construction)
-7. [Stage 3: Global Synthesis with Structural Embeddings](#stage-3-global-synthesis)
-8. [Stage 4: Incremental Reindexing Algorithm](#stage-4-incremental-reindexing)
-9. [Stage 5: The Erdős Agent Navigation](#stage-5-erdos-agent)
-10. [Neo4j Schema and Queries](#neo4j-schema)
+5. [Stage 1: File Indexing with Semantic and Behavioral Embeddings](#stage-1-file-indexing-with-semantic-and-behavioral-embeddings)
+6. [Stage 2: Directed Heterogeneous Hypergraph Construction](#stage-2-directed-heterogeneous-hypergraph-construction)
+7. [Stage 3: Global Synthesis with Structural Embeddings](#stage-3-global-synthesis-with-structural-embeddings)
+8. [Stage 4: Incremental Reindexing Algorithm](#stage-4-incremental-reindexing-algorithm)
+9. [Stage 5: The Erdős Agent Navigation](#stage-5-the-erdős-agent-navigation)
+10. [Neo4j Schema and Queries](#neo4j-schema-and-queries)
 11. [Implementation Code](#implementation-code)
 
 ---

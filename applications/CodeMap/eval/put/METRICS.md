@@ -16,7 +16,7 @@ its usage.
 ## 2. Per-rule compliance (`put_checks.py`, `put_score.rule_rates`, `put_stats.wilson`)
 
 Each rule of the prompt (`<rule id>`) has one deterministic check in `contract.json`, scoped to the agent's diff: the
-repository follows its own rules only in part (7 of 40 entities with `@Version`, 9 of 23 `@Scheduled` methods with a
+repository follows its own rules only in part (7 of 38 entities with `@Version`, 9 of 23 `@Scheduled` methods with a
 lock, 69 fields injected with `@Autowired` at the base), so a check of the whole tree would score the neighbours. A
 check returns a value in [0, 1] and says what it counted. A rule that does not apply to a task (tags) leaves that
 task's denominators.

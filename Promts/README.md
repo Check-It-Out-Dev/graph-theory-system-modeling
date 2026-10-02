@@ -15,6 +15,10 @@ F1–F107 and `GraphTheoryInSystemModeling/V3/experiments/`.
 | `SystemModelingPromptsV2/*` | — | historical; the triple-lens product space it specified was built and refuted for ranking (F90); its hyperedge taxonomy survives as commit-cohort fibers (F102) |
 | `Opus4.1_GlobalSynthesis.xml` | — | superseded (its `mathematical_score` double-counts entity coverage, F45) |
 
+**The live set since September 2026** is outside this folder: the agent skills in
+[`.agents/skills/`](../.agents/README.md) and the V5 manuals in
+[`applications/CodeMap/graph/prompts/`](../applications/CodeMap/graph/prompts/). What follows is the record.
+
 **Papers**: start at `V3_MathematicalFoundations.md` **§0 (map of results)**; the audit is
 `V3_ResearchAudit_2026-09.md`; `GrothendieckAlgebraicTopologies.md` carries a banner listing
 exactly which of its claims fell. **Part 2 is designed**: see
@@ -274,5 +278,4 @@ Optional:
 - **Graph Theory Implementations** are based on academic research papers and require more extensive Neo4j setup
 - All prompts follow the NavigationMaster pattern for consistent cognitive architecture
 
-## GPT-5 model integration
-npm install -g @dannyboy2042/gpt5-mcp-server
+

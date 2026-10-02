@@ -1,5 +1,7 @@
 # Mathematical Equivalence of Erdős Numbers and Lagrangian Action Principles
 
+> **Status (2026-10) — kept as written; not a result.** The [audit](V3/V3_ResearchAudit_2026-09.md) (§1.2) finds that Theorem 3.1 restates the definition for a constant Lagrangian, and that the reported correlation of 0.9995 follows from a rescaling by two. See [the mathematics](../docs/MATHEMATICS.md).
+
 ## A Unified Framework for Graph Distances and Variational Optimization
 
 **Abstract**

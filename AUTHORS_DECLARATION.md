@@ -1,5 +1,7 @@
 # Author's Declaration on Tool Usage
 
+> **Status (2026-10) — written in September 2025.** It covers the Neo4j phase of the research. Since 2026 the CodeMap authoring stack runs on LadybugDB (MIT) with Qwen3 embeddings, and nothing in the shipped application depends on Neo4j.
+
 **Author**: Norbert Marchewka  
 **Role**: Software Architect, CheckItOut Platform  
 **Date**: September 16, 2025
@@ -58,7 +60,7 @@ This approach ensures complete legal compliance while transitioning from individ
 ## Contact
 
 For any questions regarding this declaration or the migration process:
-- **Email**: [norbert.marchewka@email]
+- **Email**: norbert_marchewka@checkitout.app
 - **Role**: Software Architect, CheckItOut
 
 ---

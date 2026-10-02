@@ -126,7 +126,7 @@ You can customize `QWEN3_RERANKER_CUSTOM_INSTRUCTION` for your specific codebase
 
 ## Requirements
 
-- Python 3.11+
+- Python 3.10+
 - ~32GB RAM for CPU inference (bfloat16)
 - ~20GB VRAM for GPU inference
 

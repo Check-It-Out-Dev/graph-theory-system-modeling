@@ -38,7 +38,7 @@ Both run on a plain CPU; neither sends a byte anywhere.
 ## Quickstart
 
 **Windows, no git, no Python:** download ONE file —
-[`codemap-setup-1.1.0.exe`](https://storage.waw.cloud.ovh.net/v1/AUTH_62ce8c0b4d874faa89fb3e086832f1a6/downloads/codemap/codemap-setup-1.1.0.exe)
+[`codemap-setup-1.2.0.exe`](https://storage.waw.cloud.ovh.net/v1/AUTH_62ce8c0b4d874faa89fb3e086832f1a6/downloads/codemap/codemap-setup-1.2.0.exe)
 (22 MB) — and run it. It carries the app, the graph pack, embedded Python and
 llama.cpp; the 2.5 GB navigator model it downloads itself, SHA-256 verified.
 One Start-menu entry later you're asking questions. Offline install: put a
@@ -48,7 +48,7 @@ it yourself anytime: `installer\build_installer.ps1` — see `installer/RELEASE.
 **Any OS, from source:**
 
 ```bash
-git clone <this repo> && cd codemap
+git clone https://github.com/Check-It-Out-Dev/graph-theory-system-modeling && cd graph-theory-system-modeling/applications/CodeMap
 python codemap.py up          # checks runtime, fetches llama.cpp, boots, opens browser
 ```
 
@@ -84,8 +84,8 @@ understanding is served from precomputed structure instead of re-derived per que
 | `app/` | engine (13 verbs) · DSL parser + GBNF · server · browser UI · model client · big local tier (graph-native Cypher) · API tier · autonomous-loop evaluator · prompt-transfer + graph-native benches · 34-check suite |
 | `graph/` | the pack (entities/edges/hierarchy/clues/golds) · vocabulary grammar (regenerates with every export) · the agent operating manuals (HypatiaV5, GrothendieckV5, ErdosNavigator, Conductor) with append-only learnings ledgers |
 | `training/` | full pipeline: open-book corpus generator (invariant-gated) · Modal SFT/DPO/GGUF · eval harness with embedding + reranker judges · `FREEZE-v1.md` |
-| `eval/` | 104 gold questions with execution fingerprints, PL/EN aliases |
-| `docs/` | design docs 00–06 (project, stage 0, runtime, DSL, training story, regeneration runbook, prompt-transfer findings) |
+| `eval/` | 104 gold questions with execution fingerprints, PL/EN aliases (`q/`) · the claims gate (`ci/`) · the served system's judge, synthetic users and nightly quality (`judge/`, `humans/`, `quality/`) · prompt optimisation (`optimize/`, `erdos/`) · the conventions prompt under test (`put/`) |
+| `docs/` | design docs 00–09 (project, stage 0, runtime, DSL, training story, regeneration runbook, prompt-transfer findings, quality governance, prompt under test) and `history/` |
 
 Model file: `bin/models/codemap-lora-r22-q4_k_m.gguf` (sha16 `9c454526d7d0d1b0`) —
 distributed separately from git (2.5 GB); the wizard verifies and instructs.
@@ -99,16 +99,15 @@ The same engine, served: `https://codemap.checkitout.app/mcp` answers with Claud
 - **Windows installer** (one 22 MB file — app + pack + Python + llama.cpp;
   the model is fetched by the wizard, SHA-256 verified; hosted on OVH Object
   Storage):
-  <https://storage.waw.cloud.ovh.net/v1/AUTH_62ce8c0b4d874faa89fb3e086832f1a6/downloads/codemap/codemap-setup-1.1.0.exe>
+  <https://storage.waw.cloud.ovh.net/v1/AUTH_62ce8c0b4d874faa89fb3e086832f1a6/downloads/codemap/codemap-setup-1.2.0.exe>
   — `SHA256SUMS.txt` sits at the same path (`installer/RELEASE.md` is the runbook)
 - **92-second demo film** (re-shot 2026-09-03 with the graph-native 80B scene):
-  `[VIMEO_DEMO_URL]` *(placeholder — hosted on Vimeo, embedded
-  in the live checkItOut demo page)*
+  <https://checkitout.app/codemap>
 - **Live demo page ("AI and CodeMap")**: <https://checkitout.app/> *(the hosted
   checkItOut frontend, the convergence point of the triad)*
-- **Research foundation**: **graph-theory-system-modeling** — the NavigationMaster
-  pattern, v4 partition, tri-lens embeddings, hyperedges; the mathematics this app
-  embodies. This repo ships inside it at `applications/CodeMap/`.
+- **Research foundation**: the rest of this repository — the NavigationMaster pattern, the
+  meet-quotient partition, hyperedges; what runs and what was withdrawn is in
+  [`docs/MATHEMATICS.md`](../../docs/MATHEMATICS.md).
 
 Authoring database: **LadybugDB (MIT)** end to end — `graph/authoring/` holds the store,
 the one-time Neo4j migrator (provenance), and the four dialect laws; the runtime pack is

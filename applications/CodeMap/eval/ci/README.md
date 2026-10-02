@@ -65,7 +65,7 @@ quietly re-classified would leave every published rate intact and every publishe
 So every run is checked question for question against the bank. Then `claims.json` ties each
 figure in the prose to the artifact behind it: the literal text must still be in the document,
 and the artifact re-scored today must still round to it at the claim's own precision. The
-prompt-under-test figures (the root README's Part 2) are the `put` section: each names a committed
+prompt-under-test figures (`docs/PROMPT-UNDER-TEST.md`) are the `put` section: each names a committed
 campaign summary or calibration under `eval/put/`, a dotted path inside it and the decimals it is
 written with, so the certification verdict, the GEPA scores and the judge's agreement cannot drift
 from the runs that produced them.

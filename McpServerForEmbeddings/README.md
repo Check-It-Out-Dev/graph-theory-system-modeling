@@ -20,7 +20,12 @@ Information Lensing applies three "gravitational lenses" that focus embeddings o
 | **semantic** | Business logic, domain concepts, code meaning | Finding code by functionality |
 | **behavioral** | Runtime patterns, state machines, side effects | Finding code by execution behavior |
 
-Reference: Marchewka (2025), "Information Lensing: A Gravitational Approach to Domain-Specific Embedding Transformation"
+Reference: Marchewka (2025), [Information Lensing: A Metric Learning Approach to Domain-Specific Embedding Transformation](../GraphTheoryInSystemModeling/Appendix_C_Information_Lensing.md).
+
+> **Status (2026-10).** The server registers three tools: `embed`, `batch_embed` and `model_info`. The
+> `embed_triple` and `similarity` tools described below belong to an earlier design and are not in the
+> current server: call `embed` once per lens, and use the [reranking server](../McpServerForReranking/) to
+> compare a query with documents.
 
 ## Features
 
@@ -43,8 +48,8 @@ Reference: Marchewka (2025), "Information Lensing: A Gravitational Approach to D
 
 ```bash
 # Clone and setup
-git clone https://github.com/NorbertMarchewka/qwen3-embedding-mcp.git
-cd qwen3-embedding-mcp
+git clone https://github.com/Check-It-Out-Dev/graph-theory-system-modeling.git
+cd graph-theory-system-modeling/McpServerForEmbeddings
 python -m venv .venv
 .venv\Scripts\activate  # Windows
 pip install -e .
@@ -218,10 +223,10 @@ Result: structural, semantic, and behavioral embeddings
 
 ## Related Work
 
-- [Information Lensing Appendix](../GraphTheoryInSystemModeling/appendix_information_lensing.md)
-- [Triple 4096D Pipeline](../WorkingNotes/enhanced_graph_pipeline.md)
+- [Information Lensing Appendix](../GraphTheoryInSystemModeling/Appendix_C_Information_Lensing.md)
+- [Triple-lens pipeline (working note, superseded)](../WorkingNotes/triple_lens_graph_pipeline.md)
 - [Qwen3-Embedding Paper](https://arxiv.org/abs/2506.05176)
 
 ---
 
-Made with ❤️ by [Norbert Marchewka](https://github.com/NorbertMarchewka)
+Made with ❤️ by [Norbert Marchewka](https://www.linkedin.com/in/norbert-marchewka-292377129/)

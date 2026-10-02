@@ -62,10 +62,10 @@ The same discipline applied to a prompt that writes code rather than one that an
 | Judge | Claude Opus, rubric r5, blind to the prompt; sees the unchanged text of the modified files. Calibrated on 12 anchors (8 baseline runs, 4 degraded variants) against blind reference grades: pooled exact 0.83, AC1 0.85, Spearman 0.92; design fit exact 0.92 (r4: 0.58). Test-retest MAD of score 0.009 |
 | Noise floor | δ = 0.030 (agent replicate variance dominates) |
 | Verdict rule | hold-out gain > δ, paired-bootstrap 95 % CI excluding 0, no obligatory rule lost — declared before the first run |
-| Result | GEPA 0.917 → 0.979 in-sample; certification hold-out 0.902 → 0.965, gain 0.063, CI −0.007 to 0.135: **not certified**, promotion gate closed |
+| Result | GEPA 0.917 → 0.979 in-sample; certification hold-out 0.902 → 0.965, gain 0.063, CI −0.007 to 0.135: **the candidate did not pass**, promotion gate closed |
 | Evidence | Actions runs on the self-hosted runner, artifacts committed under `eval/put/runs/`, listed in `eval/put/RUNS.md`; README figures in the `put` section of `eval/ci/claims.json` |
 
-Not gated: the code-base census that motivates the diff scope (7 of 40 `@Version`, 9 of 23 locks,
+Not gated: the code-base census that motivates the diff scope (7 of 38 `@Version`, 9 of 23 locks,
 69 `@Autowired`) is a property of the repository under test, not of an evaluation artifact. The
 calibration reviewer is the same model family as the judge; the owner graded the first contested
 cell and delegated the rest, and `eval/put/judge/reference-scores.json` records who graded each.

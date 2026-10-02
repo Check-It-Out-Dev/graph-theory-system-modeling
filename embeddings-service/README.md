@@ -28,6 +28,9 @@ The `PYTHONUTF8=1` prefix is required on Windows or Modal's rich output crashes 
   self-healing index. Idempotent — re-run to top up. `--limit N`, `--dry`.
 - `v3_retrieve.py` — two-stage semantic search (the instrument for the "what is wrong" hunt).
 - `embed_server.py` — local CPU fallback embedder (jina-code-v2, 768-dim). Not used when Modal is up.
+- `embed_sockets.py` — builds the three text views of a file and embeds them; the indexer's socket spec.
+- `emit_hyperedges.py` — emits the IDF-weighted meta-path hyperedges.
+- `delta_extract.py` — extracts what changed between two indexed commits.
 
 ## Two-stage retrieval (Erdos's hunt tool)
 
