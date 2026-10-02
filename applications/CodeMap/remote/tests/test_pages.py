@@ -69,5 +69,31 @@ class PagesTests(unittest.TestCase):
         self.assertEqual(build_quality.pct(0.9143), "91 %")
 
 
+class WalkthroughTests(unittest.TestCase):
+    """The walkthrough is committed as page content only; Pages needs a whole document."""
+
+    def test_build_wraps_the_committed_page_into_a_document(self):
+        import build_walkthrough
+        out = tempfile.mkdtemp(prefix="codemap-walkthrough-")
+        path = build_walkthrough.build(out)
+        self.assertEqual(path, os.path.join(out, "index.html"))
+        page = open(path, encoding="utf-8").read()
+        source = open(build_walkthrough.SOURCE, encoding="utf-8").read()
+        self.assertTrue(page.startswith("<!doctype html>"))
+        self.assertIn('<meta charset="utf-8">', page)
+        self.assertIn('name="viewport"', page)
+        self.assertIn("<title>One Question, Four Hops</title>", page)
+        self.assertIn(source, page)  # the committed page, unchanged
+        self.assertLess(page.index('<meta charset="utf-8">'), page.index("<title>"))  # the charset comes first
+
+    def test_build_refuses_a_source_that_is_already_a_document(self):
+        import build_walkthrough
+        src = os.path.join(tempfile.mkdtemp(prefix="codemap-walkthrough-src-"), "page.html")
+        with open(src, "w", encoding="utf-8") as f:
+            f.write("<!DOCTYPE html><html><body>x</body></html>")
+        with self.assertRaises(ValueError):
+            build_walkthrough.build(tempfile.mkdtemp(prefix="codemap-walkthrough-"), source=src)
+
+
 if __name__ == "__main__":
     unittest.main()

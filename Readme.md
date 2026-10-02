@@ -7,7 +7,7 @@ open: the results that went against it are on the [evidence page](docs/EVIDENCE.
 
 [**🗺 The graph of a real system**](https://checkitout.app/technical-survey/engineering#graph-topology) ·
 [**🎬 90-second film**](https://checkitout.app/codemap) ·
-[**🧭 Interactive walkthrough**](https://claude.ai/artifact/GwUEay3qmwnqrANh7yY7pm) ·
+[**🧭 Interactive walkthrough**](https://check-it-out-dev.github.io/graph-theory-system-modeling/walkthrough/) ·
 [**📊 Quality page**](https://check-it-out-dev.github.io/graph-theory-system-modeling/quality/) ·
 [**📖 The story**](docs/STORY.md)
 
@@ -88,7 +88,7 @@ graph and wrote the answer, at about 190,000 tokens of mostly cached context. Th
 the mode that [lost to grep on cost](docs/EVIDENCE.md#what-went-against-it); the cheap paths are
 `codemap_step`, where the agent runs the verbs itself with no model in between, and the local 4B
 navigator. The same run, step by step, with the part of the graph it touched:
-**[One question, four hops](https://claude.ai/artifact/GwUEay3qmwnqrANh7yY7pm)** (its source is
+**[One question, four hops](https://check-it-out-dev.github.io/graph-theory-system-modeling/walkthrough/)** (its source is
 [`docs/walkthrough/`](docs/walkthrough/one-question-four-hops.html)). Asked about something the graph does not hold ("the Kubernetes operator that scales the
 recommendation engine"), the same server answered that it has no pointer to offer.
 

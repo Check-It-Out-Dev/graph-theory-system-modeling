@@ -119,7 +119,7 @@ pack; a small local model (4 billion parameters, running on a CPU) was trained t
 through a language of thirteen verbs — `map`, `enter`, `find`, `impact`, `flow`, `seam`, `cohort`,
 `spine`, `health`, `read`, `cache`, and the two endings `answer` and `pass`. It returns pointers,
 never file contents, and when the answer is not in the graph it says so instead of inventing one.
-([One recorded question, replayed step by step](https://claude.ai/artifact/GwUEay3qmwnqrANh7yY7pm).)
+([One recorded question, replayed step by step](https://check-it-out-dev.github.io/graph-theory-system-modeling/walkthrough/).)
 Training took it from zero to 0.975 execution accuracy on a held-out test set, half of it about
 entities it had never seen ([training story](../applications/CodeMap/docs/04-training-story.md)). The shipped stack no
 longer needs Neo4j: the graph runs on an embedded engine, with gold answers identical across the two.

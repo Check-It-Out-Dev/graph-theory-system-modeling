@@ -1,4 +1,5 @@
 # The public quality page: committed artifacts → GitHub Pages /quality/. No model, no secret.
+# The same job publishes the interactive walkthrough the README links to, under /walkthrough/.
 # Runs nightly after the box's persona night has committed its artifacts, and on every push that
 # touches an artifact, and by hand.
 name: nightly
@@ -17,6 +18,7 @@ on:
       - "applications/CodeMap/graph/ledger/**"
       - "applications/CodeMap/docs/proofs/**"
       - "applications/CodeMap/tools/pages/**"
+      - "docs/walkthrough/**"
       - ".github/workflows/nightly.yml"
 
 concurrency:
@@ -48,6 +50,8 @@ jobs:
         run: |
           rm -rf site/.git
           python applications/CodeMap/tools/pages/build_quality.py --out site/quality | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Build /walkthrough/ from the committed page
+        run: python applications/CodeMap/tools/pages/build_walkthrough.py --out site/walkthrough | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Publish
         uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453  # v4.0.0
         with:
