@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+:root { color-scheme: light; }
+body { margin: 0; font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+img { max-width: 100%; }
+[hidden] { display: none !important; }
+</style>
+<title>One Question, Four Hops</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: one reading column; the walkthrough is a two-pane instrument (trace left, map right) that stacks on a phone. */
+:root {
+  --bg: #f2f5f7;
+  --surface: #ffffff;
+  --ink: #17222d;
+  --muted: #566573;
+  --line: #d3dbe2;
+  --accent: #0b6e6a;        /* the path the agent took */
+  --accent-soft: #d9efed;
+  --amber: #a8650f;         /* roles */
+  --amber-soft: #f6e9d2;
+  --stop: #9a2f3a;          /* abstention */
+  --stop-soft: #f6e0e2;
+  --node: #e7ecf0;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f151b; --surface: #17202a; --ink: #e5ecf2; --muted: #9aaab8; --line: #2b3a48;
+    --accent: #45c4bb; --accent-soft: #123a38; --amber: #e2ab57; --amber-soft: #3b2c12;
+    --stop: #f08a94; --stop-soft: #3f1c21; --node: #223040; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f151b; --surface: #17202a; --ink: #e5ecf2; --muted: #9aaab8; --line: #2b3a48;
+  --accent: #45c4bb; --accent-soft: #123a38; --amber: #e2ab57; --amber-soft: #3b2c12;
+  --stop: #f08a94; --stop-soft: #3f1c21; --node: #223040; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.55; }
+.page { max-width: 62rem; margin: 0 auto; padding-inline: 1.25rem; padding-block: 2.5rem 4rem; display: flex; flex-direction: column; gap: 3.25rem; }
+h1, h2, h3 { font-family: var(--display); line-height: 1.12; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(2rem, 5vw, 3.1rem); font-weight: 700; letter-spacing: -0.02em; }
+h2 { font-size: clamp(1.35rem, 3vw, 1.75rem); font-weight: 700; }
+h3 { font-size: 1.05rem; font-weight: 500; }
+p { margin: 0; max-width: 66ch; }
+.lede { font-size: 1.12rem; color: var(--ink); }
+.muted { color: var(--muted); }
+.eyebrow { font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+code, .mono { font-family: var(--mono); font-size: 0.9em; }
+a { color: var(--accent); text-underline-offset: 0.18em; }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+section { display: flex; flex-direction: column; gap: 1.1rem; }
+header { display: flex; flex-direction: column; gap: 1rem; }
+
+/* the instrument */
+.stage { display: grid; grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr); gap: 1.25rem; align-items: start; }
+@media (max-width: 760px) { .stage { grid-template-columns: minmax(0, 1fr); } }
+.trace { display: flex; flex-direction: column; gap: 0.5rem; min-width: 0; }
+.step { display: grid; grid-template-columns: 1.9rem minmax(0, 1fr); gap: 0.7rem; align-items: start; width: 100%; text-align: left; background: transparent; color: inherit; border: 1px solid transparent; border-radius: 6px; padding: 0.55rem 0.65rem; font: inherit; cursor: pointer; }
+.step:hover { border-color: var(--line); }
+.step[aria-current="step"] { background: var(--surface); border-color: var(--accent); }
+.step .n { font-family: var(--mono); font-size: 0.8rem; color: var(--muted); padding-top: 0.15rem; }
+.step[aria-current="step"] .n { color: var(--accent); }
+.step .who { font-size: 0.78rem; color: var(--muted); display: block; }
+.step .what { font-family: var(--mono); font-size: 0.92rem; overflow-wrap: anywhere; }
+.step.done .what { color: var(--muted); }
+.controls { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; padding-top: 0.4rem; }
+.btn { font: inherit; font-weight: 500; padding: 0.5rem 0.95rem; border-radius: 6px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--surface); }
+.btn:disabled { opacity: 0.45; cursor: default; }
+.counter { font-family: var(--mono); font-size: 0.82rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.pane { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 1rem; display: flex; flex-direction: column; gap: 0.9rem; min-width: 0; }
+.map { width: 100%; height: auto; display: block; }
+.map text { font-family: var(--mono); font-size: 11px; fill: var(--ink); }
+.map .lbl { fill: var(--muted); font-size: 10px; }
+.map .box { fill: var(--node); stroke: var(--line); stroke-width: 1; }
+.map .edge { stroke: var(--line); stroke-width: 1.5; fill: none; }
+.map .tree, .map .frame { stroke: var(--line); stroke-width: 1; stroke-dasharray: 3 4; fill: none; }
+.map .hot .box { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 2; }
+.map .edge.hot { stroke: var(--accent); stroke-width: 2.5; }
+.map .arrowhead { fill: var(--line); }
+.map .arrowhead.hot { fill: var(--accent); }
+.map .role { fill: var(--amber); font-size: 9.5px; }
+@media (prefers-reduced-motion: no-preference) {
+  .map .box, .map .edge { transition: fill 0.25s, stroke 0.25s, stroke-width 0.25s; }
+}
+.explain { display: flex; flex-direction: column; gap: 0.45rem; min-height: 8.5rem; }
+.explain .sig { font-family: var(--mono); font-size: 0.86rem; color: var(--accent); overflow-wrap: anywhere; }
+.note { font-size: 0.86rem; color: var(--muted); }
+
+.pointers { display: flex; flex-direction: column; gap: 0.4rem; }
+.ptr { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.2rem 0.8rem; padding: 0.5rem 0.65rem; border: 1px solid var(--line); border-radius: 6px; }
+.ptr .name { font-family: var(--mono); font-size: 0.9rem; overflow-wrap: anywhere; }
+.ptr .meta { font-family: var(--mono); font-size: 0.78rem; color: var(--amber); white-space: nowrap; }
+.ptr .path { grid-column: 1 / -1; font-family: var(--mono); font-size: 0.74rem; color: var(--muted); overflow-wrap: anywhere; }
+
+.facts { display: flex; flex-wrap: wrap; gap: 0.5rem 1.75rem; font-family: var(--mono); font-size: 0.86rem; color: var(--muted); }
+.facts b { color: var(--ink); font-weight: 500; }
+
+.refusal { border: 1px solid var(--stop); background: var(--stop-soft); border-radius: 8px; padding: 1rem 1.1rem; display: flex; flex-direction: column; gap: 0.6rem; }
+.refusal .q { font-family: var(--mono); font-size: 0.95rem; }
+.refusal .tag { font-family: var(--mono); font-size: 0.78rem; color: var(--stop); letter-spacing: 0.06em; text-transform: uppercase; }
+
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: 1.25rem 2rem; }
+.cols > div { display: flex; flex-direction: column; gap: 0.6rem; min-width: 0; }
+.levels { display: flex; flex-direction: column; gap: 0.35rem; }
+.level { display: grid; grid-template-columns: 5.2rem minmax(0, 1fr); gap: 0.75rem; align-items: baseline; }
+.level .count { font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; color: var(--accent); }
+.bars { display: flex; flex-direction: column; gap: 0.3rem; }
+.bar { display: grid; grid-template-columns: 7.2rem minmax(0, 1fr) 3.2rem; gap: 0.6rem; align-items: center; font-family: var(--mono); font-size: 0.8rem; }
+.bar .track { height: 0.6rem; background: var(--node); border-radius: 2px; overflow: hidden; }
+.bar .fill { height: 100%; background: var(--amber); }
+.bar.edge .fill { background: var(--accent); }
+.bar .v { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+dl { display: grid; grid-template-columns: 6.2rem minmax(0, 1fr); gap: 0.3rem 0.9rem; margin: 0; font-size: 0.92rem; }
+dt { font-family: var(--mono); font-size: 0.86rem; color: var(--accent); }
+dd { margin: 0; }
+dl.wide { grid-template-columns: 10.5rem minmax(0, 1fr); }
+@media (max-width: 480px) { dl.wide { grid-template-columns: minmax(0, 1fr); } dl.wide dd { padding-bottom: 0.45rem; } }
+.ledger { display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: 1rem; }
+.ledger > div { border-top: 2px solid var(--line); padding-top: 0.8rem; display: flex; flex-direction: column; gap: 0.45rem; }
+.ledger .for { border-top-color: var(--accent); }
+.ledger .against { border-top-color: var(--stop); }
+footer { border-top: 1px solid var(--line); padding-top: 1.25rem; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.92rem; color: var(--muted); }
+</style>
+
+<div class="page">
+  <header>
+    <span class="eyebrow">Graph Theory System Modeling · a recorded run</span>
+    <h1>One question, four hops</h1>
+    <p class="lede">A coding agent asked a typed graph of a real code base where the Stripe webhook is handled. The graph answered with five pointers and no file contents. This page replays that run step by step, exactly as it was recorded on 16 September 2026.</p>
+  </header>
+
+  <section aria-labelledby="h-run">
+    <h2 id="h-run">The run</h2>
+    <div class="stage">
+      <div class="trace" id="trace" role="list"></div>
+      <div class="pane">
+        <svg class="map" viewBox="0 0 520 384" role="img" aria-label="The part of the graph this question touched: the hub, subsystem 11 and five files">
+          <defs>
+            <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrowhead" d="M0 0L10 5L0 10z"/></marker>
+            <marker id="ahh" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrowhead hot" d="M0 0L10 5L0 10z"/></marker>
+          </defs>
+          <path class="tree" d="M260 44V66"/>
+          <path class="tree" d="M260 104V128"/>
+          <g id="n-master"><rect class="box" x="170" y="12" width="180" height="32" rx="4"/><text x="260" y="32" text-anchor="middle">NavigationMaster</text></g>
+          <g id="n-sub"><rect class="box" x="118" y="66" width="284" height="38" rx="4"/><text x="260" y="83" text-anchor="middle">[11] Subscriptions,</text><text x="260" y="97" text-anchor="middle">payments &amp; consent</text></g>
+          <rect class="frame" x="10" y="128" width="500" height="246" rx="6"/>
+          <text class="lbl" x="20" y="144">files in subsystem 11</text>
+
+          <path id="e-ctl-h" class="edge" d="M150 199H206" marker-end="url(#ah)"/>
+          <text class="lbl" x="178" y="166" text-anchor="middle">injects, calls</text>
+          <path id="e-h-svc" class="edge" d="M352 199H378" marker-end="url(#ah)"/>
+          <text class="lbl" x="366" y="166" text-anchor="middle">calls</text>
+          <path id="e-h-repo" class="edge" d="M280 224V276" marker-end="url(#ah)"/>
+          <text class="lbl" x="288" y="254">injects</text>
+          <path id="e-ctl-prop" class="edge" d="M83 224V276" marker-end="url(#ah)"/>
+          <text class="lbl" x="91" y="254">config</text>
+
+          <g id="n-ctl"><rect class="box" x="16" y="174" width="134" height="50" rx="4"/><text x="83" y="194" text-anchor="middle">StripeWebhook</text><text x="83" y="207" text-anchor="middle">Controller</text><text class="role" x="83" y="219" text-anchor="middle">Actor · entry point</text></g>
+          <g id="n-h"><rect class="box" x="208" y="174" width="144" height="50" rx="4"/><text x="280" y="194" text-anchor="middle">StripeWebhook</text><text x="280" y="207" text-anchor="middle">Handler</text><text class="role" x="280" y="219" text-anchor="middle">Resource</text></g>
+          <g id="n-svc"><rect class="box" x="380" y="174" width="124" height="50" rx="4"/><text x="442" y="194" text-anchor="middle">Subscription</text><text x="442" y="207" text-anchor="middle">Service</text><text class="role" x="442" y="219" text-anchor="middle">Process</text></g>
+          <g id="n-repo"><rect class="box" x="200" y="278" width="160" height="50" rx="4"/><text x="280" y="298" text-anchor="middle">SubscriptionEvent</text><text x="280" y="311" text-anchor="middle">Repository</text><text class="role" x="280" y="323" text-anchor="middle">Resource</text></g>
+          <g id="n-prop"><rect class="box" x="16" y="278" width="134" height="50" rx="4"/><text x="83" y="298" text-anchor="middle">StripeProperties</text><text class="role" x="83" y="317" text-anchor="middle">Resource</text></g>
+          <text class="lbl" x="20" y="362">Edges as the answer describes them. Roles as the graph stores them.</text>
+        </svg>
+        <div class="explain" id="explain" aria-live="polite"></div>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="btn" id="prev" type="button">Back</button>
+      <button class="btn primary" id="next" type="button">Next step</button>
+      <span class="counter" id="counter"></span>
+    </div>
+    <div class="facts" aria-label="The run in numbers">
+      <span><b>4</b> graph steps</span><span><b>5</b> pointers</span><span><b>0</b> file contents sent</span><span><b>13.9 s</b></span><span><b>~190k</b> tokens, mostly cached</span><span>pack <b>1.0.0</b></span>
+    </div>
+    <p class="note">The recorded event keeps the four expressions, the answer and the pointers. It does not keep what each step returned, so the panel describes what the verb returns by contract and does not invent a payload. The navigator in this run is a hosted model inside the server, reached through <code>codemap_ask</code>; an agent can also run the same verbs itself through <code>codemap_step</code>, with no model in between.</p>
+  </section>
+
+  <section aria-labelledby="h-ptr">
+    <h2 id="h-ptr">What came back</h2>
+    <p>The answer, in the navigator's words: <em>“So the call chain is: StripeWebhookController → StripeWebhookHandler → SubscriptionService (+ SubscriptionEventRepository for event persistence).”</em> And five pointers. A pointer is a name, a role, a subsystem, a size and a path. The agent opens these files and no others.</p>
+    <div class="pointers" id="pointers"></div>
+  </section>
+
+  <section aria-labelledby="h-no">
+    <h2 id="h-no">When the graph does not know</h2>
+    <p>The same server, the same night, a question about something this code base does not contain.</p>
+    <div class="refusal">
+      <span class="tag">0 steps · no pointers · terminal: abstain</span>
+      <span class="q">Where is the Kubernetes operator that scales the recommendation engine?</span>
+      <p>“This question falls outside what this graph indexes. … there is no ‘recommendation engine’ subsystem in the L1 index … this graph has no pointer to offer.”</p>
+    </div>
+    <p class="muted">An answer that can say “not here” is one you can test. The locally trained navigator abstains on every out-of-graph question in its shipped build.</p>
+  </section>
+
+  <section aria-labelledby="h-shape">
+    <h2 id="h-shape">The shape of the graph</h2>
+    <div class="cols">
+      <div>
+        <h3>Three levels</h3>
+        <div class="levels">
+          <div class="level"><span class="count">1</span><span>hub, where every session starts</span></div>
+          <div class="level"><span class="count">34</span><span>navigators, one per subsystem or group</span></div>
+          <div class="level"><span class="count">1,594</span><span>files, one node each</span></div>
+          <div class="level"><span class="count">92</span><span>hyperedges: groups of files that move together</span></div>
+        </div>
+        <p class="note">Counts from graph pack 1.1.1: a Spring Boot backend and an Angular frontend.</p>
+      </div>
+      <div>
+        <h3>Six roles a file can have</h3>
+        <div class="bars" id="roles"></div>
+      </div>
+      <div>
+        <h3>Seventeen kinds of edge</h3>
+        <div class="bars" id="edges"></div>
+        <p class="note">The five most common. The rare ones carry the most meaning: 6 TRIGGERS, 11 VALIDATES, 13 CONSTRAINS.</p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-verbs">
+    <h2 id="h-verbs">Thirteen verbs, seven tools</h2>
+    <div class="cols">
+      <div>
+        <h3>The navigation language</h3>
+        <dl id="verbs"></dl>
+      </div>
+      <div>
+        <h3>What an agent sees over MCP</h3>
+        <dl class="wide" id="tools"></dl>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-cost">
+    <h2 id="h-cost">What it costs, both ways</h2>
+    <div class="ledger">
+      <div class="for">
+        <span class="eyebrow">For</span>
+        <p>A hop on the graph is small. Three questions answered by hand: 1.1 KB of tool output against 26.9 KB of grep, 2.2 KB once the grep was refined.</p>
+        <p>At equal content similarity, two files joined by a typed edge change together 4 to 9 times as often as two without one.</p>
+      </div>
+      <div class="against">
+        <span class="eyebrow">Against</span>
+        <p>Over 35 paired tasks, agents with the served graph used 1.6 times the tokens of agents with grep, 3.5 more turns and 88.5 seconds longer.</p>
+        <p>That night's log holds 166 requests for a prose answer and none that walk the graph step by step. The comparison that matters has not been run yet.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>Every figure has a source in <a href="https://github.com/Check-It-Out-Dev/graph-theory-system-modeling">graph-theory-system-modeling</a>: <code>docs/EVIDENCE.md</code>, <code>docs/MATHEMATICS.md</code>, <code>docs/STORY.md</code>.</span>
+    <span>The recorded run: <code>applications/CodeMap/eval/judge/runs/events-2026-09-16.jsonl</code>.</span>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var steps = [
+    { who: 'Coding agent → CodeMap', what: 'Where is the Stripe webhook handled, and which service does it call?', plain: true,
+      sig: 'codemap_ask(q)', text: 'The agent does not open a file. It asks the served graph one question in plain words. Inside the server a navigator turns it into steps on the graph.', hot: ['n-master'], edges: [] },
+    { who: 'Navigator → graph', what: 'find("webhook")',
+      sig: 'find(term) → up to 12 hits { name, type, subsystem }', text: 'Look up entities by name. Every result also carries suggested next expressions, so the navigator never has to guess what it may call.', hot: ['n-sub'], edges: [] },
+    { who: 'Navigator → graph', what: 'flow(StripeWebhookController.java)',
+      sig: 'flow(entity) → rows { file, relation, from, hop }', text: 'Walk forward from the entry point: what does this file call, inject or use, and in which order.', hot: ['n-ctl', 'n-h', 'n-prop'], edges: ['e-ctl-h', 'e-ctl-prop'] },
+    { who: 'Navigator → graph', what: 'impact(StripeWebhookController.java)',
+      sig: 'impact(entity) → dependents, relation types, subsystems', text: 'Walk backwards: who depends on this file. It tells the agent how far a change here would reach before it makes one.', hot: ['n-ctl'], edges: [] },
+    { who: 'Navigator → graph', what: 'flow(StripeWebhookHandler.java)',
+      sig: 'flow(entity) → rows { file, relation, from, hop }', text: 'Forward again, one level down: the handler calls the subscription service and writes the event record.', hot: ['n-h', 'n-svc', 'n-repo'], edges: ['e-h-svc', 'e-h-repo'] },
+    { who: 'CodeMap → coding agent', what: 'answer + 5 pointers', plain: true,
+      sig: 'answer(text) — the run ends', text: 'Prose for the person, pointers for the agent: Controller → Handler → SubscriptionService, with the repository and the configuration beside them. The agent now reads five files instead of searching the code base.', hot: ['n-ctl', 'n-h', 'n-svc', 'n-repo', 'n-prop'], edges: ['e-ctl-h', 'e-h-svc', 'e-h-repo', 'e-ctl-prop'] }
+  ];
+  var pointers = [
+    ['StripeWebhookController.java', 'Actor · entry point · 57 lines', 'src/main/java/com/sm/instagram/platform/subscription/stripe/StripeWebhookController.java'],
+    ['StripeWebhookHandler.java', 'Resource · 193 lines', 'src/main/java/com/sm/instagram/platform/subscription/stripe/StripeWebhookHandler.java'],
+    ['SubscriptionService.java', 'Process · 944 lines', 'src/main/java/com/sm/instagram/platform/subscription/SubscriptionService.java'],
+    ['SubscriptionEventRepository.java', 'Resource · 9 lines', 'src/main/java/com/sm/instagram/platform/subscription/repository/SubscriptionEventRepository.java'],
+    ['StripeProperties.java', 'Resource · 23 lines', 'src/main/java/com/sm/instagram/platform/subscription/stripe/StripeProperties.java']
+  ];
+  var roles = [['Resource', 604], ['Rule', 530], ['Actor', 248], ['Process', 119], ['Context', 85], ['Event', 8]];
+  var edges = [['IMPORTS', 2982], ['INJECTS', 1486], ['TESTED_BY', 219], ['EXTENDS', 212], ['PERFORMS', 171]];
+  var verbs = [
+    ['map()', 'the whole system in one screen: subsystems and caveats'],
+    ['enter(sub)', 'one subsystem’s report: what it does, its contracts'],
+    ['find(term)', 'look an entity up by name'],
+    ['impact(e)', 'who depends on this'],
+    ['flow(e)', 'what this calls, in order'],
+    ['seam(a, b)', 'the edges between two subsystems'],
+    ['cohort(e)', 'files that change together with this one'],
+    ['spine(sub)', 'entry points and a reading order'],
+    ['health(kind)', 'coupling and hubs'],
+    ['read(e)', 'a pointer to the file, never its content'],
+    ['cache(q)', 'a curated answer, if the question is a known one'],
+    ['answer(text)', 'end the run with an answer'],
+    ['pass(reason)', 'end the run without one']
+  ];
+  var tools = [
+    ['codemap_ask', 'a question in plain words; prose and pointers back'],
+    ['codemap_step', 'one verb, no model in between'],
+    ['codemap_open', 'an exact name to a pointer'],
+    ['codemap_search', 'semantic search over the files, reranked'],
+    ['codemap_feedback', 'rate an answer; a high rating needs a verified pointer'],
+    ['codemap_miss', 'report a file the graph did not lead to'],
+    ['codemap_status', 'versions, budget, queue']
+  ];
+
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+
+  var trace = document.getElementById('trace');
+  steps.forEach(function (s, i) {
+    var b = el('button', 'step'); b.type = 'button'; b.setAttribute('role', 'listitem'); b.id = 'step-' + i;
+    b.appendChild(el('span', 'n', String(i).padStart(2, '0')));
+    var body = el('span');
+    body.appendChild(el('span', 'who', s.who));
+    var w = el('span', 'what', s.what); if (s.plain) w.style.fontFamily = 'var(--body)';
+    body.appendChild(w); b.appendChild(body);
+    b.addEventListener('click', function () { show(i); });
+    trace.appendChild(b);
+  });
+
+  var hotIds = ['n-master', 'n-sub', 'n-ctl', 'n-h', 'n-svc', 'n-repo', 'n-prop'];
+  var edgeIds = ['e-ctl-h', 'e-h-svc', 'e-h-repo', 'e-ctl-prop'];
+  var current = 0;
+  function show(i) {
+    current = Math.max(0, Math.min(steps.length - 1, i));
+    var s = steps[current];
+    steps.forEach(function (_, k) {
+      var b = document.getElementById('step-' + k);
+      if (k === current) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current');
+      b.classList.toggle('done', k < current);
+    });
+    hotIds.forEach(function (id) { document.getElementById(id).classList.toggle('hot', s.hot.indexOf(id) >= 0); });
+    edgeIds.forEach(function (id) {
+      var on = s.edges.indexOf(id) >= 0, e = document.getElementById(id);
+      e.classList.toggle('hot', on); e.setAttribute('marker-end', on ? 'url(#ahh)' : 'url(#ah)');
+    });
+    var ex = document.getElementById('explain'); ex.textContent = '';
+    ex.appendChild(el('span', 'eyebrow', s.who));
+    ex.appendChild(el('span', 'sig', s.sig));
+    ex.appendChild(el('p', null, s.text));
+    document.getElementById('counter').textContent = 'step ' + current + ' of ' + (steps.length - 1);
+    document.getElementById('prev').disabled = current === 0;
+    var next = document.getElementById('next');
+    next.textContent = current === steps.length - 1 ? 'Start again' : 'Next step';
+  }
+  document.getElementById('prev').addEventListener('click', function () { show(current - 1); });
+  document.getElementById('next').addEventListener('click', function () { show(current === steps.length - 1 ? 0 : current + 1); });
+  document.addEventListener('keydown', function (e) {
+    if (e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+    if (e.key === 'ArrowRight') show(current + 1);
+    if (e.key === 'ArrowLeft') show(current - 1);
+  });
+
+  var pbox = document.getElementById('pointers');
+  pointers.forEach(function (p) {
+    var d = el('div', 'ptr'); d.appendChild(el('span', 'name', p[0])); d.appendChild(el('span', 'meta', p[1])); d.appendChild(el('span', 'path', p[2])); pbox.appendChild(d);
+  });
+  function bars(id, rows, cls) {
+    var box = document.getElementById(id), max = rows[0][1];
+    rows.forEach(function (r) {
+      var row = el('div', 'bar' + (cls ? ' ' + cls : ''));
+      row.appendChild(el('span', null, r[0]));
+      var t = el('span', 'track'), f = el('span', 'fill'); f.style.width = Math.max(1.5, (r[1] / max) * 100) + '%'; f.style.display = 'block'; t.appendChild(f); row.appendChild(t);
+      row.appendChild(el('span', 'v', r[1].toLocaleString('en-US')));
+      box.appendChild(row);
+    });
+  }
+  bars('roles', roles); bars('edges', edges, 'edge');
+  function dl(id, rows) { var d = document.getElementById(id); rows.forEach(function (r) { d.appendChild(el('dt', null, r[0])); d.appendChild(el('dd', null, r[1])); }); }
+  dl('verbs', verbs); dl('tools', tools);
+
+  // the page is complete at rest: the last step shows the whole path that was found
+  show(steps.length - 1);
+})();
+</script>
+
+</html>
