@@ -33,7 +33,7 @@ Both halves of that platform are public, MIT, and are the case study for everyth
 | Repository | What it is, and what it shows about the method |
 | :-- | :-- |
 | **[checkitout-backend](https://github.com/Check-It-Out-Dev/checkitout-backend)** | Spring Boot on Java 21: 40 entities, 50 controllers, a 34-file Cucumber corpus, and an OpenAPI contract generated from a server that actually boots. Modelled here with the 3-level NavigationMaster topology and the six-entity lens. |
-| **[checkitout-frontend](https://github.com/Check-It-Out-Dev/checkitout-frontend)** | Angular 22, a greenfield rewrite of the legacy client, with 1,816 tests across nine tiers and a client generated from the backend's contract. |
+| **[checkitout-frontend](https://github.com/Check-It-Out-Dev/checkitout-frontend)** | Angular 22, a greenfield rewrite of the legacy client, with 1,820 tests across nine tiers and a client generated from the backend's contract. |
 | **[checkitout.app](https://checkitout.app)** | The running product, and a five-chapter technical survey of how it was built — including the chapter on graph-assisted development. |
 
 The screenshots in
@@ -52,7 +52,8 @@ This repository is not only theory. It contains the day-to-day machinery that ma
 above workable, and most of it is directly relevant to anyone whose job is now to **test AI
 systems** rather than only systems written by people:
 
-- **[`Promts/`](./Promts/)** — 15 documents: system prompts as XML contracts
+- **[`Promts/`](./Promts/)** — 24 documents across five generations (V2 through V5):
+  system prompts as XML contracts
   (`ClaudeCode_ErdosOrchestrator_SystemPrompt.xml`, `Opus4.1_DeepModeling.xml`,
   `GPT5_ClineDebugger.xml`) and full prompt-engineering guides for the Claude and GPT-5
   families. A prompt written as a structured contract is a prompt you can evaluate against,
