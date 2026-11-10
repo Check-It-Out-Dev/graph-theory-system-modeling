@@ -15,6 +15,16 @@ open: the results that went against it are on the [evidence page](docs/EVIDENCE.
 [![CI](https://github.com/Check-It-Out-Dev/graph-theory-system-modeling/actions/workflows/ci.yml/badge.svg)](https://github.com/Check-It-Out-Dev/graph-theory-system-modeling/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-1f6feb.svg)](./LICENSE)
 
+> [!NOTE]
+> **Automation paused on 10 November 2026.** This project is finished and no further changes are
+> planned, so the automation in this repository was switched off: the CI, nightly and graph-delta
+> pipelines, the CodeMap deployment, Dependabot security updates and CodeQL scanning. They exist to
+> check changes, and there are no changes left to check — another night would only run the same
+> code again. The workflow files are still in [`.github/workflows/`](.github/workflows) and the run
+> history is under [Actions](https://github.com/Check-It-Out-Dev/graph-theory-system-modeling/actions);
+> the badges above and the quality page show the last runs. Dependency versions are frozen as of
+> that date: check them against current advisories before reusing the code.
+
 ---
 
 ## Highlights
